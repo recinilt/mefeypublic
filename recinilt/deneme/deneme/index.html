@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Altyazı İndirici</title>
+</head>
+<body>
+    <!-- Kullanıcının oturum açmasını ve izin vermesini isteyen bir buton -->
+    <button onclick="authenticate()">Google ile Oturum Aç ve İzin Ver</button>
+
+    <!-- YouTube video linkini girmek için bir input -->
+    <input type="text" id="videoLink" placeholder="YouTube Video Linki">
+    <button onclick="fetchSubtitles()">Altyazıları Getir</button>
+
+    <!-- Altyazıları listelemek için bir dropdown -->
+    <select id="subtitleList"></select>
+    <button onclick="initiateSubtitleDownload()">Altyazıyı İndir</button>
+
+    <script>
+        const CLIENT_ID = '612480395471-2jeqqrak8s461t2hl6tvuntp257p1nbg.apps.googleusercontent.com';
+        const REDIRECT_URI = 'http://127.0.0.1:5500/kodlamalar/public/recinilt/deneme/deneme/index.html';
+        let accessToken;
+
+        function authenticate() {
+            const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=https://www.googleapis.com/auth/youtube.force-ssl`;
+            window.location.href = authUrl;
+        }
+
+        function getVideoIdFromUrl(url) {
+            const regex = /(?:v=)([^&]+)/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+
+        function fetchSubtitles() {
+            const videoLink = document.getElementById('videoLink').value;
+            const videoId = getVideoIdFromUrl(videoLink);
+            if (videoId) {
+                listSubtitles(accessToken, videoId);
+            } else {
+                console.error("Geçerli bir YouTube video linki girin.");
+            }
+        }
+
+        function listSubtitles(accessToken, videoId) {
+            fetch(`https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId=${videoId}`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.items) {
+                    const subtitles = data.items;
+                    const subtitleList = document.getElementById('subtitleList');
+                    subtitleList.innerHTML = ''; // Mevcut altyazıları temizle
+                    subtitles.forEach(subtitle => {
+                        const option = document.createElement('option');
+                        option.value = subtitle.id;
+                        option.textContent = subtitle.snippet.language;
+                        subtitleList.appendChild(option);
+                    });
+                } else {
+                    console.error("Altyazılar alınamadı. API yanıtını kontrol edin.");
+                }
+            });
+        }
+
+        function initiateSubtitleDownload() {
+            const selectedSubtitleId = document.getElementById('subtitleList').value;
+            if (selectedSubtitleId) {
+                downloadSubtitle(accessToken, selectedSubtitleId);
+            } else {
+                console.error("Bir altyazı seçin.");
+            }
+        }
+
+        function downloadSubtitle(accessToken, subtitleId) {
+            fetch(`https://www.googleapis.com/youtube/v3/captions/${subtitleId}?tfmt=srt`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                const blob = new Blob([data], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'subtitle.srt';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+        }
+
+        // Sayfa yüklendiğinde URL'den erişim kodunu al
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            fetch(`https://oauth2.googleapis.com/token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `code=${code}&client_id=${CLIENT_ID}&client_secret=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&redirect_uri=${REDIRECT_URI}&grant_type=authorization_code`
+            })
+            .then(response => response.json())
+            .then(data => {
+                accessToken = data.access_token;
+            });
+        }
+
+    </script>
+</body>
+</html>

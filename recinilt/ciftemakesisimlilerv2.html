@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures EMA Analizi</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <label for="shortEma">Kısa EMA Periyodu:</label>
+    <input type="number" id="shortEma" value="12">
+    <label for="longEma">Uzun EMA Periyodu:</label>
+    <input type="number" id="longEma" value="50">
+    <label for="interval">Zaman Dilimi:</label>
+    <select id="interval">
+        <option value="5m">5 Dakika</option>
+        <option value="15m">15 Dakika</option>
+        <option value="1h">1 Saat</option>
+        <option value="4h">4 Saat</option>
+        <option value="12h">12 Saat</option>
+        <option value="1d">1 Gün</option>
+    </select><br>
+    <span>Hacim oranı, 5 dakikalık periyotta, %0.05'in üzerinde olanları değerlendirebilirsiniz. Grafiğe bakın, yataydan burnunu yukarı çevirmişse ve piyasa, hafif yukarı yönlü ise long açabilirsiniz. Bunu da, sayfanın en altında yazan "Piyasa hafif YUKARI yönlü" yazısından anlayabilirsiniz. Sorumluluk kendinize aittir.</span>
+    <br><span>(Veri yüklenmesi yaklaşık 2 dakika alır.)</span><br>
+    <button onclick="loadData()">Verileri Yükle</button>
+    <div id="result"></div>
+
+    <script>
+        async function loadData() {
+            document.getElementById('result').innerText = 'Yükleniyor...';
+            try {
+                const shortEmaPeriod = parseInt(document.getElementById('shortEma').value);
+                const longEmaPeriod = parseInt(document.getElementById('longEma').value);
+                const interval = document.getElementById('interval').value;
+                const symbols = await getSymbols();
+                console.log('Symbols:', symbols);
+                const data = await getHistoricalData(symbols, interval, longEmaPeriod);
+                console.log('Historical Data:', data);
+                const emaCrosses = calculateEMACrosses(data, shortEmaPeriod, longEmaPeriod);
+                console.log('EMA Crosses:', emaCrosses);
+                const totalPrices = calculateTotalPrices(data);
+                console.log('Total Prices:', totalPrices);
+                const emaResults = calculateEMATotalPrices(totalPrices);
+                console.log('EMA Results:', emaResults);
+                displayResults(emaCrosses, data, emaResults);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('result').innerText = 'Veri yüklenirken bir hata oluştu.';
+            }
+        }
+
+        async function getSymbols() {
+            try {
+                const response = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+                return response.data.symbols
+                    .filter(symbol => symbol.quoteAsset === 'USDT' && symbol.contractType === 'PERPETUAL')
+                    .map(symbol => symbol.symbol);
+            } catch (error) {
+                console.error('Error fetching symbols:', error);
+                return [];
+            }
+        }
+
+        async function getHistoricalData(symbols, interval, longEmaPeriod) {
+            const data = {};
+            for (const symbol of symbols) {
+                try {
+                    const response = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${longEmaPeriod+3}`);
+                    data[symbol] = response.data.map(candle => ({
+                        time: candle[0],
+                        close: parseFloat(candle[4]),
+                        volume: parseFloat(candle[5])
+                    }));
+                } catch (error) {
+                    console.error(`Error fetching data for ${symbol}:`, error);
+                }
+            }
+            return data;
+        }
+
+        function calculateEMACrosses(data, shortEmaPeriod, longEmaPeriod) {
+            const emaCrosses = [];
+            for (const symbol in data) {
+                const closes = data[symbol].map(candle => candle.close);
+                const shortEma = calculateEMA(closes, shortEmaPeriod);
+                const longEma = calculateEMA(closes, longEmaPeriod);
+                if ((shortEma[shortEma.length - 1] > longEma[longEma.length - 1] && shortEma[shortEma.length - 2] <= longEma[longEma.length - 2]) ||
+                    (shortEma[shortEma.length - 2] > longEma[longEma.length - 2] && shortEma[shortEma.length - 3] <= longEma[longEma.length - 3]) ||
+                    (shortEma[shortEma.length - 3] > longEma[longEma.length - 3] && shortEma[shortEma.length - 4] <= longEma[longEma.length - 4])) {
+                    emaCrosses.push(symbol);
+                }
+            }
+            return emaCrosses;
+        }
+
+        function calculateEMA(data, period) {
+            const k = 2 / (period + 1);
+            const emaArray = [data[0]];
+            for (let i = 1; i < data.length; i++) {
+                emaArray.push(data[i] * k + emaArray[i - 1] * (1 - k));
+            }
+            return emaArray;
+        }
+
+        function calculateTotalPrices(data) {
+            const totalPrices = [];
+            const timestamps = Object.values(data)[0].map(candle => candle.time);
+            for (const time of timestamps) {
+                let totalPrice = 0;
+                for (const symbol in data) {
+                    const candle = data[symbol].find(c => c.time === time);
+                    if (candle) {
+                        totalPrice += candle.close;
+                    }
+                }
+                totalPrices.push(totalPrice);
+            }
+            return totalPrices;
+        }
+
+        function calculateEMATotalPrices(totalPrices) {
+            const shortEma = calculateEMA(totalPrices, 9); //toplam piyasa tutarı kısa ema
+            const longEma = calculateEMA(totalPrices, 26); //toplam piyasa tutarı uzun ema
+            return { shortEma, longEma };
+        }
+
+        function displayResults(emaCrosses, data, emaResults) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<h3>EMA Kesişim Noktaları:</h3>';
+            if (emaCrosses.length === 0) {
+                resultDiv.innerHTML += '<p>Yukarı kıran coin bulunamadı.</p>';
+                return;
+            }
+            const totalVolume = Object.values(data).reduce((sum, candles) => sum + candles[candles.length - 1].volume, 0);
+            const results = emaCrosses.map(symbol => {
+                const volume = data[symbol][data[symbol].length - 1].volume;
+                const volumeRatio = (volume / totalVolume * 100).toFixed(2);
+                return { symbol, volume, volumeRatio };
+            });
+
+            results.sort((a, b) => b.volumeRatio - a.volumeRatio);
+
+            results.forEach(result => {
+                resultDiv.innerHTML += `<p>${result.symbol} - Hacim: ${result.volume} - Oran: ${result.volumeRatio}%</p>`;
+            });
+
+            const lastShortEma = emaResults.shortEma[emaResults.shortEma.length - 1];
+            const lastLongEma = emaResults.longEma[emaResults.longEma.length - 1];
+            if (lastShortEma > lastLongEma) {
+                resultDiv.innerHTML += '<h3>Piyasa hafif YUKARI yönlü</h3>';
+            } else {
+                resultDiv.innerHTML += '<h3>Piyasa hafif AŞAĞI yönlü</h3>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+ her coinde işe yarar 1 dakikalık  verilerle çalışan şöyle güzel bir strateji söyle de yolumuzu bulalım. otomatik buy, buy close, sell, sell close yapsın. bir pozisyon açacaksa, mevcut pozisyonu önce kapatsın, sonra yenisini açsın. başlangıç bakiyesi 1000 usdt olsun ve de her işlem, bakiyenin yüzde 10'u ile açılsın. ve de her işlemde binde 1 komisyon kesilsin. yaratıcı olsun. internetten bak ve çoğu kişi tarafından işe yaradığı söylenen, bol bol işlem yapan bir şey olsun. özellikle aynı strateji ve aynı parametre, bu 4 dosyadaki coinler (movr, ldo, eth, blz) için çalışsın. internette bol bol araştır, en çok beğenilen ve kazandıran stratejiyi getir.  
+
+onun da bu dosyalardaki veriler ile backtestini yap. %5 kar yaptıran bir strateji bulana kadar da devam et. her strateji denemenin kar oranını da söyle. bir stratejiyi çeşitli sebeplerden ötürü sen yapamıyorsan, onu atla,
+ve de, backtestini yapamadığın stratejiyi önerme, tradingviewde dene deme bana, kendin yapabileceklerine odaklan.
+işe yaramıyorsa bir strateji, bana sormadan diğerini denemeye geç.
+

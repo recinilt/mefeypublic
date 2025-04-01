@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR & Barkod Okuyucu</title>
+  <script src="zxing-js.js"></script>
+</head>
+<body>
+  <h1>QR & Barkod Okuyucu</h1>
+  <label for="barcodeInput">Tarama Sonucu:</label>
+  <input type="text" id="barcodeInput" readonly>
+  <button id="scanButton">QR/Barkod Oku</button>
+  <video id="videoPreview" style="display:none; width:100%; max-width:400px; margin-top:10px;" autoplay></video>
+
+  <script>
+    const { BrowserMultiFormatReader } = ZXing;
+    const codeReader = new BrowserMultiFormatReader();
+    let scanning = false;
+
+    document.getElementById("scanButton").addEventListener("click", async () => {
+      const videoPreview = document.getElementById("videoPreview");
+      const barcodeInput = document.getElementById("barcodeInput");
+
+      if (scanning) {
+        // Tarama işlemini durdur
+        codeReader.reset();
+        videoPreview.style.display = "none";
+        scanning = false;
+        return;
+      }
+
+      try {
+        scanning = true;
+        videoPreview.style.display = "block";
+
+        // Kamerayı aç ve taramayı başlat
+        const devices = await codeReader.listVideoInputDevices();
+        const selectedDeviceId = devices[0]?.deviceId;
+
+        if (!selectedDeviceId) {
+          alert("Kamera bulunamadı!");
+          return;
+        }
+
+        codeReader.decodeFromVideoDevice(
+          selectedDeviceId,
+          videoPreview,
+          (result, error) => {
+            if (result) {
+              // Barkod/QR kod tarandı, sonucu inputa yaz ve kamerayı kapat
+              barcodeInput.value = result.getText();
+              codeReader.reset();
+              videoPreview.style.display = "none";
+              scanning = false;
+            }
+
+            if (error) {
+              console.warn(error); // Hata mesajlarını konsola yaz
+            }
+          }
+        );
+      } catch (err) {
+        console.error("Tarayıcı başlatılamadı: ", err);
+      }
+    });
+  </script>
+</body>
+</html>

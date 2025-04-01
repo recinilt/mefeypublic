@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Long/Short Ratio</title>
+</head>
+<body>
+    <h1>Binance Long/Short Ratio</h1>
+    <form id="tradingForm">
+        <label for="pair">Coin Çifti (örn: LDOUSDT):</label>
+        <input type="text" id="pair" name="pair" required>
+
+        <label for="interval">Period Seçin:</label>
+        <select id="interval" name="interval" required>
+            <option value="5m">5 Dakika</option>
+            <option value="15m">15 Dakika</option>
+            <option value="30m">30 Dakika</option>
+            <option value="1h">1 Saat</option>
+            <option value="4h">4 Saat</option>
+            <option value="1d">1 Gün</option>
+        </select>
+
+        <button type="submit">Gönder</button>
+    </form>
+
+    <h2>Sonuç:</h2>
+    <p id="result">Henüz bir veri yok.</p>
+
+    <script>
+        document.getElementById('tradingForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const pair = document.getElementById('pair').value.trim();
+            const interval = document.getElementById('interval').value;
+            const resultElement = document.getElementById('result');
+
+            if (!pair || !interval) {
+                resultElement.textContent = "Lütfen tüm alanları doldurun.";
+                return;
+            }
+
+            try {
+                const accountResponse = await fetch(`https://fapi.binance.com/futures/data/topLongShortAccountRatio?symbol=${pair}&period=${interval}`);
+                const accountData = await accountResponse.json();
+
+                const positionResponse = await fetch(`https://fapi.binance.com/futures/data/topLongShortPositionRatio?symbol=${pair}&period=${interval}`);
+                const positionData = await positionResponse.json();
+
+                if (accountData && positionData) {
+                    const accountRatio = accountData.length ? accountData[0].longShortRatio : null;
+                    const positionRatio = positionData.length ? positionData[0].longShortRatio : null;
+
+                    let accountResult = "";
+                    let positionResult = "";
+
+                    if (accountRatio) {
+                        accountResult = accountRatio > 1.1 ? "Long" : accountRatio < 0.9 ? "Short" : "Arafta";
+                    } else {
+                        accountResult = "Veri Yok";
+                    }
+
+                    if (positionRatio) {
+                        positionResult = positionRatio > 1.1 ? "Long" : positionRatio < 0.9 ? "Short" : "Arafta";
+                    } else {
+                        positionResult = "Veri Yok";
+                    }
+
+                    resultElement.innerHTML = `
+                        <p><strong>Account Ratio:</strong> ${accountRatio} - ${accountResult}</p>
+                        <p><strong>Position Ratio:</strong> ${positionRatio} - ${positionResult}</p>
+                    `;
+                } else {
+                    resultElement.textContent = "Veri alınamadı.";
+                }
+            } catch (error) {
+                console.error(error);
+                resultElement.textContent = "Bir hata oluştu. Lütfen tekrar deneyin.";
+            }
+        });
+    </script>
+</body>
+</html>

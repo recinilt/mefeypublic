@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Ev Temizlik Takvimi</title>
+<style>
+body { font-family: sans-serif; }
+table { width: 100%; border-collapse: collapse; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+.done { color: green; }
+.not-done { color: red; }
+.disabled { opacity: 0.5; cursor: default; }
+</style>
+</head>
+<body>
+
+<h1>Ev Temizlik Takvimi</h1>
+
+<div id="calendar"></div>
+
+<script>
+const calendarDiv = document.getElementById('calendar');
+const tasks = {
+    daily: [
+        "Yatakları toplamak", "Kirli kıyafetleri çamaşır sepetine koymak", "Bulaşıkları yıkamak",
+        "Tezgâhları silmek", "Çöpleri toplamak", "Eşyaları yerlerine koymak", "Zemini süpürmek"
+    ],
+    weekly: [
+        "Evi süpürmek", "Yerleri silmek", "Toz almak", "Lavaboları temizlemek",
+        "Duş ve banyo küvetini temizlemek", "Çarşafları değiştirmek", "Çamaşır yıkamak",
+        "Fırın, mikrodalga ve buzdolabını silmek", "Dolapları düzenlemek"
+    ],
+    monthly: [
+        "Buzdolabını temizlemek", "Perdeleri temizlemek", "Halıları yıkamak",
+        "Klima filtrelerini temizlemek", "Fırını temizlemek", "Pencereleri silmek",
+        "Dolapların üstlerini temizlemek"
+    ],
+    yearly: [
+      "Gardırop temizliği", "Evdeki eşyaları gözden geçirmek", "Mobilyaları taşımak ve altlarını temizlemek",
+      "Bahçeyle ilgilenmek", "Balkon/teras temizliği", "Duvarları silmek/boyamak", "Tavan vantilatörlerini temizlemek"
+    ]
+};
+
+let currentDate = new Date();
+
+function generateCalendar(date) {
+    calendarDiv.innerHTML = '';
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+    const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    const numDays = lastDay.getDate();
+
+    let table = '<table><tr><th>Görev</th>';
+    for (let i = 1; i <= numDays; i++) {
+        table += `<th>${i}</th>`;
+    }
+    table += '</tr>';
+
+    for (const taskType in tasks) {
+        tasks[taskType].forEach(task => {
+            table += `<tr><td>${task}</td>`;
+            for (let i = 1; i <= numDays; i++) {
+                const cellDate = new Date(date.getFullYear(), date.getMonth(), i);
+                const dateString = cellDate.toISOString().slice(0, 10);
+                const savedData = JSON.parse(localStorage.getItem('tasks')) || {};
+                const isDone = savedData[dateString] && savedData[dateString].includes(task);
+
+                let cellClass = '';
+                if (cellDate < new Date().setHours(0, 0, 0, 0)) {
+                    cellClass = isDone ? 'done' : 'not-done';
+                } else if (cellDate > new Date().setHours(0, 0, 0, 0)) {
+                    cellClass = 'disabled';
+                }
+
+                table += `<td class="${cellClass}" data-date="${dateString}" data-task="${task}">`;
+                if(cellClass == "done"){
+                    table += "&#10004;"
+                } else if(cellClass == "not-done"){
+                    table += "&#10006;"
+                } else {
+                    table += "&#10003;"
+                }
+
+                table += '</td>';
+            }
+            table += '</tr>';
+        });
+    }
+
+    table += '</table>';
+    calendarDiv.innerHTML = table;
+
+    // Event listeners after table is created
+    const cells = document.querySelectorAll('td:not(.disabled)');
+    cells.forEach(cell => {
+      cell.addEventListener('click', toggleStatus);
+    });
+}
+
+function toggleStatus(event) {
+    const cell = event.target;
+    if(cell.classList.contains("disabled")){
+        return;
+    }
+    const date = cell.dataset.date;
+    const task = cell.dataset.task;
+    const savedData = JSON.parse(localStorage.getItem('tasks')) || {};
+
+    if (!savedData[date]) {
+        savedData[date] = [];
+    }
+
+    if (cell.classList.contains('done')) {
+        cell.classList.remove('done');
+        cell.classList.add('not-done');
+        cell.innerHTML = "&#10006;";
+        savedData[date] = savedData[date].filter(t => t !== task);
+    } else if (cell.classList.contains('not-done')){
+      cell.classList.remove('not-done');
+      cell.innerHTML = "&#10003;";
+    } else {
+        cell.classList.add('done');
+        cell.innerHTML = "&#10004;";
+        if (!savedData[date].includes(task)) {
+            savedData[date].push(task);
+        }
+    }
+
+    localStorage.setItem('tasks', JSON.stringify(savedData));
+}
+
+generateCalendar(currentDate);
+
+</script>
+
+</body>
+</html>

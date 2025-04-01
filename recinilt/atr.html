@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14-Day ATR of BTCUSDT</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>14-Day ATR of BTCUSDT</h1>
+    <div id="atrValue">Loading...</div>
+    <script>
+        const getATR = async () => {
+            try {
+                const response = await axios.get('https://api.binance.com/api/v3/klines', {
+                    params: {
+                        symbol: 'BTCUSDT',
+                        interval: '1d',
+                        limit: 14
+                    }
+                });
+                const closes = response.data.map(k => parseFloat(k[4]));
+                const highs = response.data.map(k => parseFloat(k[2]));
+                const lows = response.data.map(k => parseFloat(k[3]));
+                const trs = highs.map((high, idx) => Math.max(high - lows[idx], Math.abs(high - closes[idx - 1] || 0), Math.abs(lows[idx] - (closes[idx - 1] || 0))));
+                const atr = trs.reduce((a, b) => a + b, 0) / trs.length;
+                document.getElementById('atrValue').innerText = atr.toFixed(2);
+            } catch (error) {
+                document.getElementById('atrValue').innerText = 'Error loading data';
+            }
+        };
+        getATR();
+    </script>
+</body>
+</html>

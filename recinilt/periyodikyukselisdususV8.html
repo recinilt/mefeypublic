@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Trend Analyzer</title>
+    <style>
+        #loader {
+            border: 16px solid #f3f3f3;
+            border-top: 16px solid #3498db;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            display: none;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Crypto Trend Analyzer</h1>
+    <p>(Veri çekimi ve işlenmesi, yaklaşık 1 dakika sürer. Her 3 dakikada bir otomatik yenilenir.)</p>
+    <div id="loader"></div>
+    <form id="form">
+        <label for="direction">Direction:</label>
+        <select id="direction" name="direction">
+            <option value="up">Yükseliş</option>
+            <option value="down" selected>Düşüş</option>
+        </select>
+        <br>
+        <label for="interval">Zaman Dilimi:</label>
+        <select id="interval" name="interval">
+            <option value="1m">1m</option>
+            <option value="5m" selected>5m</option>
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="12h">12h</option>
+            <option value="1d">1d</option>
+        </select>
+        <br>
+        <label for="periods">Periyot Sayısı:</label>
+        <input type="number" id="periods" name="periods" value="2">
+        <br>
+        <label for="percentChange">Minimum Yüzde Değişimi:</label>
+        <input type="number" id="percentChange" name="percentChange" value="2">
+        <br>
+        <button type="button" onclick="fetchData()">Analyze Trends</button>
+    </form>
+    <div id="results"></div>
+    <script>
+        let timeoutHandle; // Zamanlayıcı tutucu
+        
+        async function fetchData() {
+            clearTimeout(timeoutHandle); // Mevcut zamanlayıcıyı iptal et
+            const loader = document.getElementById('loader');
+            const resultsDiv = document.getElementById('results');
+            loader.style.display = 'block';
+            resultsDiv.innerHTML = '';
+        
+            const direction = document.getElementById('direction').value;
+            const interval = document.getElementById('interval').value;
+            const periods = parseInt(document.getElementById('periods').value);
+            const percentChange = parseFloat(document.getElementById('percentChange').value);
+        
+            try {
+                const spotResponse = await axios.get('https://api.binance.com/api/v3/exchangeInfo');
+                let spotSymbols = spotResponse.data.symbols.filter(s => s.symbol.endsWith('USDT') && s.status === 'TRADING').map(s => s.symbol);
+        
+                const futuresResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+                let futuresSymbols = futuresResponse.data.symbols.filter(s => s.symbol.endsWith('USDT')).map(s => s.symbol);
+        
+                let validSymbols = spotSymbols.filter(symbol => futuresSymbols.includes(symbol));
+        
+                let validPairs = [];
+                for (let i = 0; i < validSymbols.length; i += 5) {
+                    const batch = validSymbols.slice(i, i + 5);
+                    const requests = batch.map(symbol => axios.get(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${periods}`));
+                    const responses = await Promise.all(requests.map(p => p.catch(e => e)));
+        
+                    responses.forEach((response, index) => {
+                        if (response instanceof Error) return;
+                        const closes = response.data.map(k => parseFloat(k[4]));
+        
+                        if (closes.length < periods) return;
+        
+                        let consistentTrend = true;
+                        for (let j = 1; j < closes.length; j++) {
+                            if ((direction === 'up' && closes[j] <= closes[j - 1]) ||
+                                (direction === 'down' && closes[j] >= closes[j - 1])) {
+                                consistentTrend = false;
+                                break;
+                            }
+                        }
+        
+                        if (consistentTrend) {
+                            const firstClose = closes[0];
+                            const lastClose = closes[closes.length - 1];
+                            const change = ((lastClose - firstClose) / firstClose) * 100;
+        
+                            if ((direction === 'up' && change >= percentChange) || (direction === 'down' && change <= -percentChange)) {
+                                const symbol = batch[index];
+                                const myInterval = interval === "1m" ? 1 : interval === "5m" ? 5 : interval === "15m" ? 15 : interval === "1h" ? 60 : interval === "4h" ? 240 : interval === "12h" ? 720 : 1440;
+                                const link = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}&interval=${myInterval}`;
+                                validPairs.push(`${symbol}: %${change.toFixed(2)} consistent ${direction} <a href="${link}" target="_blank">View Chart</a>`);
+                            }
+                        }
+                    });
+        
+                    await new Promise(resolve => setTimeout(resolve, 1100));
+                }
+        
+                if (validPairs.length > 0) {
+                    resultsDiv.innerHTML = validPairs.join('<br>');
+                    audio = new Audio('alarm.wav');
+                    audio.play();
+                } else {
+                    resultsDiv.innerHTML = 'Kriterlere uygun sonuç bulunamadı.';
+                    audio = new Audio('asagi.wav');
+                    audio.play();
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                resultsDiv.innerHTML = 'API error. Please try again later.';
+            }
+            loader.style.display = 'none';
+        
+            // İşlemler bittikten bir dakika sonra tekrar başlat
+            timeoutHandle = setTimeout(fetchData, 15000);
+        }
+    </script>
+</body>
+</html>

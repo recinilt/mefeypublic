@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .input-group {
+            margin: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            margin-top: 30px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomodoro Zaman Yönetimi Aracı</h1>
+    <div class="container">
+        <div class="input-group">
+            <label for="work-duration">Spor Süresi (dakika):</label>
+            <input type="number" id="work-duration" min="1" required>
+        </div>
+
+        <div class="input-group">
+            <label for="short-break">Kısa Ara Süresi (dakika):</label>
+            <input type="number" id="short-break" min="1" required>
+        </div>
+
+        <div class="input-group">
+            <label for="long-break">Uzun Ara Süresi (dakika):</label>
+            <input type="number" id="long-break" min="1" required>
+        </div>
+
+        <div class="input-group">
+            <label for="cycles">Döngü Sayısı:</label>
+            <input type="number" id="cycles" min="1" required>
+        </div>
+
+        <div class="input-group">
+            <label for="repeats">Tekrar Sayısı:</label>
+            <input type="number" id="repeats" min="1" required>
+        </div>
+
+        <button onclick="startPomodoro()">Başlat</button>
+
+        <div class="timer-display" id="timer-display">Hazır</div>
+    </div>
+
+    <audio id="alarm-sound" src="yukari.wav"></audio>
+
+    <script>
+        let timerInterval;
+
+        function startPomodoro() {
+            const workDuration = parseInt(document.getElementById('work-duration').value) * 60;
+            const shortBreak = parseInt(document.getElementById('short-break').value) * 60;
+            const longBreak = parseInt(document.getElementById('long-break').value) * 60;
+            const cycles = parseInt(document.getElementById('cycles').value);
+            const repeats = parseInt(document.getElementById('repeats').value);
+
+            if (isNaN(workDuration) || isNaN(shortBreak) || isNaN(longBreak) || isNaN(cycles) || isNaN(repeats)) {
+                alert('Lütfen tüm alanları doğru bir şekilde doldurun!');
+                return;
+            }
+
+            let currentRepeat = 0;
+
+            function countdown(duration, label) {
+                return new Promise((resolve) => {
+                    clearInterval(timerInterval);
+                    let timeLeft = duration;
+
+                    function updateDisplay() {
+                        const mins = Math.floor(timeLeft / 60);
+                        const secs = timeLeft % 60;
+                        document.getElementById('timer-display').textContent = `${label}: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            document.getElementById('alarm-sound').play();
+                            resolve();
+                        }
+                        timeLeft--;
+                    }
+
+                    updateDisplay();
+                    timerInterval = setInterval(updateDisplay, 1000);
+                });
+            }
+
+            async function runPomodoro() {
+                for (let repeat = 0; repeat < repeats; repeat++) {
+                    currentRepeat = repeat + 1;
+                    for (let cycle = 0; cycle < cycles; cycle++) {
+                        await countdown(workDuration, 'Spor Süresi');
+                        if (cycle < cycles - 1) {
+                            await countdown(shortBreak, 'Kısa Ara');
+                        }
+                    }
+                    if (repeat < repeats - 1) {
+                        await countdown(longBreak, 'Uzun Ara');
+                    }
+                }
+                document.getElementById('timer-display').textContent = 'Pomodoro Tamamlandı!';
+            }
+
+            runPomodoro();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+2. Google API Entegrasyonu:
+
+Google Cloud Platform'da proje oluşturun:
+Google Cloud Console adresine gidin.
+Yeni bir proje oluşturun.
+OAuth 2.0 İstemci Kimliği Oluşturun:
+API'ler ve Hizmetler > Kimlik Bilgileri'ne gidin.
+OAuth 2.0 İstemci Kimliği oluşturun.
+Uygulama türü olarak "Web uygulaması" seçin.
+Yetkili JavaScript kaynakları olarak web sitenizin URL'sini ekleyin.
+Oluşturulan istemci kimliğini (GOOGLE_CLIENT_ID) HTML kodundaki data-client_id alanına yapıştırın.
+3. Token Doğrulama ve E-posta Çıkarımı:
+
+handleCredentialResponse fonksiyonu içinde Google tarafından sağlanan ID token'ını doğrulamanız gerekir. Bu işlem için Google'ın API'lerini kullanabilirsiniz.
+Doğrulama başarılı olursa, token'dan kullanıcının e-posta adresini çıkarabilirsiniz.
+Önemli Notlar:
+
+Bu kod, basitlik amacıyla e-postanın ilk bölümünü isim olarak kullanmaktadır. Daha güvenilir bir çözüm için, kullanıcı bilgilerini Google API'lerinden veya kendi backend sisteminizden almanız gerekebilir.
+Token doğrulama ve e-posta çıkarımı işlemleri için Google'ın API belgelerini ve örnek kodlarını inceleyebilirsiniz.
+Güvenlik açısından, token doğrulama ve diğer hassas işlemleri backend tarafında yapmanız önerilir.
+Bu adımları izleyerek, Google ile giriş yapıldığında e-posta adresine göre farklı fonksiyonları çağıran basit bir HTML sayfası oluşturabilirsiniz. Daha detaylı bilgi ve gelişmiş özellikler için Google'ın API belgelerini inceleyebilirsiniz.
+
+SONRA da, https://obfuscator.io/#code adresinden kullanıcılar myk.js i güncelleyebilirsin.

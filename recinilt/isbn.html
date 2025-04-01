@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISBN Tarama (QuaggaJS)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        #camera {
+            width: 100%;
+            max-width: 400px;
+            margin: 10px auto;
+            border: 2px solid #ddd;
+        }
+        #info {
+            margin-top: 20px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>ISBN Tarama</h1>
+    <div id="camera"></div>
+    <div id="info">
+        <p>ISBN bilgisi buraya gelecek...</p>
+    </div>
+
+    <script>
+        function startScanner() {
+            const info = document.getElementById("info");
+
+            Quagga.init({
+                inputStream: {
+                    type: "LiveStream",
+                    target: document.querySelector("#camera"),
+                    constraints: {
+                        facingMode: "environment" // Arka kamera kullanımı
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader"] // ISBN, genellikle EAN-13 formatındadır
+                }
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    info.innerHTML = `<p class="error">Tarayıcı başlatılamadı: ${err.message}</p>`;
+                    return;
+                }
+                Quagga.start();
+            });
+
+            Quagga.onDetected(async function (data) {
+                const isbn = data.codeResult.code;
+                fetchBookInfo(isbn);
+            });
+        }
+
+        async function fetchBookInfo(isbn) {
+            const info = document.getElementById("info");
+            info.innerHTML = `<p>ISBN: ${isbn}. Bilgiler yükleniyor...</p>`;
+
+            try {
+                const response = await fetch(`https://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&format=json&jscmd=data`);
+                const data = await response.json();
+
+                if (data[`ISBN:${isbn}`]) {
+                    const book = data[`ISBN:${isbn}`];
+                    info.innerHTML = `
+                        <h2>${book.title}</h2>
+                        <p>Yazar: ${book.authors ? book.authors.map(a => a.name).join(', ') : "Bilinmiyor"}</p>
+                        <p>Yayınevi: ${book.publishers ? book.publishers.map(p => p.name).join(', ') : "Bilinmiyor"}</p>
+                        <p>Yayın Yılı: ${book.publish_date || "Bilinmiyor"}</p>
+                        <img src="${book.cover ? book.cover.medium : ''}" alt="Kitap Kapağı" style="max-width: 200px;">
+                    `;
+                } else {
+                    info.innerHTML = `<p class="error">Kitap bilgisi bulunamadı.</p>`;
+                }
+            } catch (error) {
+                info.innerHTML = `<p class="error">Hata oluştu: ${error.message}</p>`;
+            }
+        }
+
+        // Tarayıcı başlat
+        startScanner();
+    </script>
+</body>
+</html>

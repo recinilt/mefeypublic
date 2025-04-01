@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script
+  src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+  integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+  crossorigin="anonymous"></script>
+  <script src="custom.js"></script>
+  <style>
+      fieldset{
+          border:none;
+
+      }
+  </style>
+</head>
+<body>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+    <fieldset>
+        <label for="name">Personel Adı</label>
+        <input type="text" name="personel_name" id="name">
+    </fieldset>
+    <fieldset>
+        <label for="file">Personel Resmi</label>
+        <input type="file" name="file" id="file">
+    </fieldset>
+    <button type="submit">Kaydet</button>
+    <div id="res"></div>
+</form>
+</body>
+</html>

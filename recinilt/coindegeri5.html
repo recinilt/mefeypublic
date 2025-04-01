@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+        const fetch = require('node-fetch');
+
+async function getCoinList() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/coins/list');
+        const data = await response.json();
+        data.forEach(coin => {
+            const coinName = coin.name.replace(/\s+/g, '-');
+            console.log(`Name: ${coinName}, Symbol: ${coin.symbol}`);
+        });
+    } catch (error) {
+        console.error('Coin listesini alırken bir hata oluştu:', error);
+    }
+}
+
+getCoinList();
+
+    </script>
+</body>
+</html>

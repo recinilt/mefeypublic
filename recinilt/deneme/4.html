@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+$(document).ready(function(){
+    var myurl4 = "https://video.google.com/timedtext?lang=tr&v=yizckrcFsz8"
+ var mydata="";
+  $("button").click(function(){
+    $.get(myurl4, function(data, status){
+      alert("Data: " + data + "\nStatus: " + status);
+      console.log(data);
+      mydata = data;
+      myFunction(mydata);
+    });
+    
+  });
+
+  
+var sentences;
+var times;
+var timesentencesobj = {};
+var regexToSpace = /([&].{1,12}[;])|[!-@\[-`\{-~][a-zA-Z][!-@\[-`\{-~]?[!-@\[-`\{-~]|(["-&])|([\(-\+])|([-])|([/@])|([<->])|([\[-`])|([\{-~])/gmui;
+var regexToComma = /([!\?:\n;])/gmui;
+
+function sentenceparse(str) {
+    console.log("sentenceparse begin");
+    let i = 0;
+    let sl = sentences.length;
+    //console.log(sentences);
+    for (i = 0; i < sl; i++) {
+        sentences[i] = sentences[i].replace(regexToSpace, " ");
+        sentences[i] = sentences[i].replace(regexToComma, ",");
+
+    }
+    return sentences;
+}
+
+
+  function myFunction(xml) {
+
+var i, xmlDoc, l, sentencenodes;
+xmlDoc = xml.responseXML;
+//txt = "";
+times = [];
+sentences = [];
+
+sentencenodes = xmlDoc.getElementsByTagName("text");
+l = sentencenodes.length;
+for (i = 0; i < l; i++) {
+    times.push(Number(sentencenodes[i].getAttributeNode("start").nodeValue).toFixed(0));
+    sentences.push(sentencenodes[i].childNodes[0].nodeValue);
+    //txt += x[i].getAttributeNode("start").nodeValue + "<br>";
+}
+sentenceparse(sentences);
+console.log(sentences);
+
+console.log(times);
+return times, sentences;
+}
+
+
+
+});
+</script>
+</head>
+<body>
+
+<button>Send an HTTP GET request to a page and get the result back</button>
+
+</body>
+</html>
+
+       
+       

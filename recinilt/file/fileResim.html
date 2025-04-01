@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <input type="file" id="inpFile" name="inpFile">
+    <button id="yukle" onclick="yukle()">yükle</button>
+    <div id="imgdiv" src="">
+        <img src="" alt="" id="myimg">
+    </div>
+
+    <script>
+        var inpFile = document.getElementById("inpFile");
+        var myimg = document.getElementById("myimg");
+        function yukle(){
+            var file = inpFile.files[0];
+            if (file){
+                var reader = new FileReader();
+                reader.addEventListener("load", function(){
+                    console.log(this);
+                    myimg.setAttribute("src", this.result);
+                });
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

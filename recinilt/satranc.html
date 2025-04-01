@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satranç Oyunu</title>
+    <style>
+        #chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            width: 80vw;
+            height: 80vw;
+            max-width: 600px;
+            max-height: 600px;
+            margin: auto;
+        }
+        .square {
+            width: 10vw;
+            height: 10vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .light {
+            background-color: #f0d9b5;
+        }
+        .dark {
+            background-color: #b58863;
+        }
+        .piece {
+            font-size: 5vw;
+            user-select: none;
+            cursor: pointer;
+        }
+        .selected {
+            background-color: rgba(255, 255, 0, 0.5); /* Sarı renkli seçim efekti */
+        }
+    </style>
+</head>
+<body>
+    <div id="chessboard"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const board = document.getElementById('chessboard');
+            const rows = 8, cols = 8;
+            let squares = Array.from({ length: rows }, () => Array(cols).fill(null));
+            let selectedPiece = null;
+
+            function createBoard() {
+                for (let row = 0; row < rows; row++) {
+                    for (let col = 0; col < cols; col++) {
+                        const square = document.createElement('div');
+                        square.classList.add('square');
+                        square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+                        square.id = `square-${row}-${col}`;
+                        board.appendChild(square);
+                        squares[row][col] = square;
+
+                        if ((row + col) % 2 === 0 && row < 3) {
+                            createPiece(row, col, 'P');
+                        } else if ((row + col) % 2 === 0 && row > 4) {
+                            createPiece(row, col, 'p');
+                        }
+                    }
+                }
+            }
+
+            function createPiece(row, col, symbol) {
+                const pieceElement = document.createElement('span');
+                pieceElement.textContent = symbol;
+                pieceElement.classList.add('piece');
+                pieceElement.addEventListener('click', () => selectPiece(pieceElement, row, col));
+                squares[row][col].appendChild(pieceElement);
+            }
+
+            function selectPiece(piece, row, col) {
+                if (selectedPiece) {
+                    movePiece(row, col);
+                } else {
+                    selectedPiece = { piece, row, col };
+                    piece.parentElement.classList.add('selected');
+                }
+            }
+
+            function movePiece(toRow, toCol) {
+                if (selectedPiece) {
+                    const { piece, row, col } = selectedPiece;
+                    if (squares[toRow][toCol].childElementCount === 0) {
+                        squares[toRow][toCol].appendChild(piece);
+                        squares[row][col].classList.remove('selected');
+                        selectedPiece = null;
+                    }
+                }
+            }
+
+            createBoard();
+        });
+    </script>
+</body>
+</html>

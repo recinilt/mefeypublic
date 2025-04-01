@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div id="result"></div>
+
+<script>
+// Check browser support
+if (typeof(Storage) !== "undefined") {
+  // Store
+  localStorage.setItem("hisseler", "Smith john 143 - fgr dkdm 334 - lms ksl 323");
+  var myhisseler = localStorage.getItem("hisseler").split(" - ");
+  console.log(myhisseler);
+  var mylstor = myhisseler.join(" - ");
+  localStorage.setItem("hisseler2",mylstor);
+  //localStorage.setItem(1 , '{"first":"recep", "last":"yeni"}');
+  console.log(localStorage.length);
+  console.log(localStorage);
+  // Retrieve
+  document.getElementById("result").innerHTML = localStorage.getItem("hisseler");
+} else {
+  document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+}
+</script>
+
+</body>
+</html>

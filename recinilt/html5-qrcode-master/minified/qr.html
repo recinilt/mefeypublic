@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner</title>
+    <script src="html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #reader {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        #input-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>QR Code Scanner</h1>
+
+    <div id="input-container">
+        <input type="text" id="barcodeInput" placeholder="Scanned QR/Barcode" readonly>
+    </div>
+
+    <button id="toggleCameraButton">Start Camera</button>
+
+    <div id="reader" style="display: none;"></div>
+
+    <script>
+        let cameraRunning = false;
+        const readerElement = document.getElementById('reader');
+        const barcodeInput = document.getElementById('barcodeInput');
+        const toggleCameraButton = document.getElementById('toggleCameraButton');
+        let html5QrCode;
+
+        // Function to start the camera and initialize the QR Code scanner
+        function startCamera() {
+            html5QrCode = new Html5Qrcode("reader");
+            readerElement.style.display = "block";
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Use rear camera if available
+                { fps: 10, qrbox: 250 },
+                qrCodeMessage => {
+                    barcodeInput.value = qrCodeMessage; // Set the input value
+                    stopCamera(); // Automatically stop the camera after scanning
+                    cameraRunning = !cameraRunning;
+                    toggleCameraButton.textContent = "Start Camera";
+
+                },
+                errorMessage => {
+                    console.log("QR Code scanning error: ", errorMessage);
+                }
+            ).catch(err => {
+                console.error("Unable to start scanning: ", err);
+            });
+        }
+
+        // Function to stop the camera and clean up resources
+        function stopCamera() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    readerElement.style.display = "none";
+                    html5QrCode.clear();
+                }).catch(err => {
+                    console.error("Error stopping camera: ", err);
+                });
+            }
+        }
+
+        // Toggle camera on button click
+        toggleCameraButton.addEventListener('click', () => {
+            if (cameraRunning) {
+                stopCamera();
+                toggleCameraButton.textContent = "Start Camera";
+            } else {
+                startCamera();
+                toggleCameraButton.textContent = "Stop Camera";
+            }
+            cameraRunning = !cameraRunning;
+        });
+    </script>
+
+</body>
+</html>

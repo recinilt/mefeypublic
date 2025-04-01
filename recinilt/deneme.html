@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Altyazı İndirici</title>
+</head>
+<body>
+    <!-- YouTube video linkini girebilmek için bir input ve buton -->
+    <input type="text" id="videoLink" placeholder="YouTube Video Linki">
+    <button onclick="fetchSubtitles()">Altyazıları Getir</button>
+
+    <!-- Altyazıları listelemek için bir dropdown -->
+    <select id="subtitleList"></select>
+    <button onclick="downloadSubtitle()">Altyazıyı İndir</button>
+
+    <script>
+        const API_KEY = 'AIzaSyDRGZd5uBVuIVGFHZdy9b9pJZKKFn5rl6s'; // API anahtarınızı buraya ekleyin
+
+        function getVideoIdFromUrl(url) {
+            // YouTube video linkinden video ID'sini çıkarma
+            const regex = /(?:v=|\/videos\/|\/embed\/|\/youtu.be\/|\/\/youtu.be\/)([^#&?]*).*/;
+            const match = url.match(regex);
+            return match && match[1];
+        }
+
+        async function fetchSubtitles() {
+            const videoLink = document.getElementById('videoLink').value;
+            const videoId = getVideoIdFromUrl(videoLink);
+            if (!videoId) {
+                alert('Geçerli bir YouTube video linki girin.');
+                return;
+            }
+
+            // Video ismini al
+            const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`);
+            const videoData = await videoResponse.json();
+            const videoTitle = videoData.items[0].snippet.title;
+
+            // Altyazıları getir
+            const subtitleResponse = await fetch(`https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId=${videoId}&key=${API_KEY}`);
+            const subtitleData = await subtitleResponse.json();
+
+            const subtitleList = document.getElementById('subtitleList');
+            subtitleList.innerHTML = ''; // Önceki altyazıları temizle
+            subtitleData.items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.snippet.language;
+                option.dataset.videoTitle = videoTitle; // Video ismini altyazı seçeneğine ekleyin
+                subtitleList.appendChild(option);
+            });
+        }
+
+        function downloadSubtitle() {
+            const subtitleOption = document.getElementById('subtitleList').selectedOptions[0];
+            const subtitleId = subtitleOption.value;
+            const videoTitle = subtitleOption.dataset.videoTitle; // Video ismini altyazı seçeneğinden al
+
+            // YouTube API'sini kullanarak seçilen altyazıyı indir
+            fetch(`https://www.googleapis.com/youtube/v3/captions/${subtitleId}?tfmt=srt&key=${API_KEY}`)
+                .then(response => response.text())
+                .then(data => {
+                    // Altyazıyı UTF-8 yazı kodunda oluştur
+                    const blob = new Blob([data], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${videoTitle}.srt`; // Altyazı ismini video ismiyle aynı yap
+                    a.click();
+                    URL.revokeObjectURL(url);
+                });
+        }
+    </script>
+</body>
+</html>

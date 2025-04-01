@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    
+</head>
+<body>
+    
+    <div id="map" style="height: 400px; width: 100%;">
+
+    </div>
+
+    <script>
+        //şu videodan izlenerek yapıldı
+        //https://www.youtube.com/watch?v=zbFDQ16oRwY
+        function initMap(){
+            var options={
+                zoom:11,
+                center:{lat:41, lng:29}
+            }
+            var image1='https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png';
+            var map= new google.maps.Map(document.getElementById("map"), options);
+            
+            /*
+            var marker=new google.maps.Marker({
+                position:{lat:41, lng:29},
+                map:map
+                
+            });
+
+            var infoWindow=new google.maps.InfoWindow({
+                content:"<h2>Restaurant <span>tel:021244343434</span></h2>"
+            });
+            marker.addListener("click",function () {
+                infoWindow.open(map,marker);
+            });
+            */
+
+            var markers =[
+                {
+                    coordinates:{lat:41.01,lng:29.01},
+                content:"<h1>Restaurant1</h1>",
+                image:image1
+                },
+                {
+                    coordinates:{lat:41.05,lng:29.05},
+                content:"<h1>Restaurant2</h1>"
+                },
+                {
+                    coordinates:{lat:36.98542,lng:35.32502}
+                },
+                {
+                    coordinates:{lat:41.15,lng:29.15},
+                content:"<h1>Restaurant3</h1>",
+                image:image1
+                }
+            ];
+
+            for(var i=0;i<markers.length;i++){
+                AddMarker(markers[i]);
+            }
+
+
+            // AddMarker({
+            //     coordinates:{lat:41.05,lng:29.05},
+            //     content:"<h1>Restaurant2</h1>"
+            // });
+           
+
+            function AddMarker(options) {
+                var marker2=new google.maps.Marker({
+                    position:options.coordinates,
+                    map:map
+                });
+                if (options.image){
+                    marker2.setIcon(options.image);
+                }
+                
+                if (options.content){
+                    
+                var infoWindow2=new google.maps.InfoWindow({
+                    content:options.content
+                });
+                marker2.addListener("click",function () {
+                    infoWindow2.open(map,marker2);
+                });
+                }
+            }
+            /*
+            AddMarker({lat:41.01,lng:29.01});
+            AddMarker({lat:41.05,lng:29.05});
+            function AddMarker(coordinates) {
+                var marker2=new google.maps.Marker({
+                    position:coordinates,
+                    map:map
+                });
+            }
+            */
+
+        }
+
+        //google maps keyi şöyle alındı:
+        //https://console.cloud.google.com/apis/credentials?project=mymaps-267321
+        //kimlik bilgileri,
+        //kimlik bilgisi oluştur,
+        //api anahtarı.
+
+        /*
+        google maps api tutorial
+        https://developers.google.com/maps/documentation/javascript/tutorial
+        
+        var demeden, = ile değişken tanımlıyorlar.
+
+değişkendeki () fonksiyonu, sonradan sadece o kısmı alıp tanımlıyorlar.
+() fonksiyondaki parametreleri, parametre:açıklama şeklinde yapıyorlar.
+
+mesela
+map = new google.maps.Map(mapDiv:Node, opts?:MapOptions)
+
+Map(mapDiv:Node, opts?:MapOptions)
+
+
+        */
+    </script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyr4zvLBEYY1DW0lY1Kkd1Hvw_rp3WTgk&callback=initMap"
+  type="text/javascript"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script> -->
+
+</head>
+<body> 
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/pandas-js@0.2.4/dist/index.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script>
+
+    <script>
+        console.log (ccxt.exchanges)
+    </script>
+    
+    <script>
+
+// Binance API ve Secret Key'inizi buraya girin
+
+
+//////////////////
+//const ccxt = require('ccxt');
+
+// Binance API ve Secret Key'inizi buraya girin
+const apiKey = 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU';
+const apiSecret = '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD';
+
+// Binance istemcisini başlatın
+const exchange = new ccxt.binance({
+    'apiKey': apiKey,
+    'secret': apiSecret,
+    'enableRateLimit': true,
+});
+
+// Supertrend hesaplama fonksiyonu
+function supertrend(high, low, close, period = 7, multiplier = 3) {
+    const hl2 = high.map((h, i) => (h + low[i]) / 2);
+    let atr = Array(high.length).fill(0);
+
+    // ATR hesaplama
+    for (let i = 1; i < hl2.length; i++) {
+        atr[i] = Math.abs(hl2[i] - hl2[i - 1]);
+    }
+    atr = atr.slice(period).map((_, i, arr) => arr.slice(i, i + period).reduce((a, b) => a + b, 0) / period);
+
+    let upperBand = hl2.map((h, i) => h + (multiplier * (atr[i] || 0)));
+    let lowerBand = hl2.map((h, i) => h - (multiplier * (atr[i] || 0)));
+    let st = Array(hl2.length).fill(0);
+
+    for (let i = period; i < hl2.length; i++) {
+        st[i] = close[i] > upperBand[i - 1] ? lowerBand[i] : upperBand[i];
+    }
+
+    return st;
+}
+
+// Veri çekme fonksiyonu
+async function fetch_data(symbol, timeframe = '15m', limit = 400) {
+    const ohlcv = await exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+    const timestamps = ohlcv.map(x => x[0]);
+    const opens = ohlcv.map(x => x[1]);
+    const highs = ohlcv.map(x => x[2]);
+    const lows = ohlcv.map(x => x[3]);
+    const closes = ohlcv.map(x => x[4]);
+    const volumes = ohlcv.map(x => x[5]);
+    return { timestamps, opens, highs, lows, closes, volumes };
+}
+
+// Alım satım sinyallerini üretme fonksiyonu
+function generate_signals(closes, st) {
+    const buySignals = closes.map((close, i) => close > st[i] && close <= st[i - 1]);
+    const sellSignals = closes.map((close, i) => close < st[i] && close >= st[i - 1]);
+    return { buySignals, sellSignals };
+}
+
+
+// Alım satım işlemleri ve kar zarar hesaplamaları için ek mantık
+function executeTrades(closes, buySignals, sellSignals) {
+    let position = null;
+    let totalProfit = 0;
+    let tradeHistory = [];
+
+    closes.forEach((close, index) => {
+        if (!position && buySignals[index]) {
+            position = close; // Alım yap
+            console.log(`Alım Yapıldı: Fiyat ${close}`);
+        } else if (position && sellSignals[index]) {
+            const profitLoss = close - position;
+            totalProfit += profitLoss; // Kar/zarar hesapla
+            tradeHistory.push({ buy: position, sell: close, profitLoss: profitLoss });
+            position = null; // Pozisyonu kapat
+            console.log(`Satım Yapıldı: Fiyat ${close}, Kar/Zarar: ${profitLoss}`);
+        }
+    });
+
+    return { totalProfit, tradeHistory };
+}
+
+
+// Ana fonksiyon
+(async function main() {
+    const symbol = 'BTC/USDT'; // İşlem yapmak istediğiniz sembolü buraya girin
+    const { highs, lows, closes } = await fetch_data(symbol);
+    const st = supertrend(highs, lows, closes);
+
+    const { buySignals, sellSignals } = generate_signals(closes, st);
+
+    // Alım satım işlemlerini ve kar zarar hesaplamalarını burada gerçekleştirin
+    // Bu kısım, işlem sinyallerine göre alım satım işlemlerini ve kar/zarar hesaplamalarını içerecek şekilde genişletilebilir.
+    console.log('Alım satım sinyalleri burada gösterilecek.');
+
+    //const { buySignals, sellSignals } = generate_signals(closes, st);
+    const { totalProfit, tradeHistory } = executeTrades(closes, buySignals, sellSignals);
+
+    console.log(`Toplam Kar/Zarar: ${totalProfit}`);
+    console.log('İşlem Geçmişi:', tradeHistory);
+
+})();
+
+    </script>
+</body>
+</html>

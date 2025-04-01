@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATR to Price Ratio for Top 250 Coins</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>ATR to Price Ratio for Top 250 Coins</h1>
+    <label for="intervalSelect">Choose interval:</label>
+    <select id="intervalSelect">
+        <option value="1m">1 Minute</option>
+        <option value="5m" selected>5 Minutes</option>
+        <option value="15m">15 Minutes</option>
+        <option value="1h">1 Hour</option>
+        <option value="4h">4 Hours</option>
+        <option value="12h">12 Hours</option>
+        <option value="1d">1 Day</option>
+    </select>
+    <label for="periodInput">Periods to fetch:</label>
+    <input id="periodInput" type="number" value="2500" min="70" max="2500">
+    <button onclick="displayData()" id="my3button">Fetch Data</button>
+    <table id="coinsTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Coin Pair</th>
+                <th onclick="sortTable(1)">Current ATR/Price</th>
+                <th onclick="sortTable(2)">Exponential Avg ATR/Price</th>
+                <th onclick="sortTable(3)">Current Price</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <script>
+        const mycoins=['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'XRPUSDT', 'EOSUSDT', 'LTCUSDT', 'TRXUSDT', 'ETCUSDT', 'LINKUSDT', 'XLMUSDT', 'ADAUSDT', 'XMRUSDT', 'DASHUSDT', 'ZECUSDT', 'XTZUSDT', 'BNBUSDT', 'ATOMUSDT', 'ONTUSDT', 'IOTAUSDT', 'BATUSDT', 'VETUSDT', 'NEOUSDT', 'QTUMUSDT', 'IOSTUSDT', 'THETAUSDT', 'ALGOUSDT', 'ZILUSDT', 'KNCUSDT', 'ZRXUSDT', 'COMPUSDT', 'OMGUSDT', 'DOGEUSDT', 'SXPUSDT', 'KAVAUSDT', 'BANDUSDT', 'RLCUSDT', 'WAVESUSDT', 'MKRUSDT', 'SNXUSDT', 'DOTUSDT', 'DEFIUSDT', 'YFIUSDT', 'BALUSDT', 'CRVUSDT', 'TRBUSDT', 'RUNEUSDT', 'SUSHIUSDT', 'EGLDUSDT', 'SOLUSDT', 'ICXUSDT', 'STORJUSDT', 'BLZUSDT', 'UNIUSDT', 'AVAXUSDT', 'FTMUSDT', 'ENJUSDT', 'FLMUSDT', 'RENUSDT', 'KSMUSDT', 'NEARUSDT', 'AAVEUSDT', 'FILUSDT', 'RSRUSDT', 'LRCUSDT', 'OCEANUSDT', 'CVCUSDT', 'BELUSDT', 'CTKUSDT', 'AXSUSDT', 'ALPHAUSDT', 'ZENUSDT', 'SKLUSDT', 'GRTUSDT', '1INCHUSDT', 'CHZUSDT', 'SANDUSDT', 'ANKRUSDT', 'LITUSDT', 'UNFIUSDT', 'REEFUSDT', 'RVNUSDT', 'SFPUSDT', 'XEMUSDT', 'BTCSTUSDT', 'COTIUSDT', 'CHRUSDT', 'MANAUSDT', 'ALICEUSDT', 'HBARUSDT', 'ONEUSDT', 'LINAUSDT', 'STMXUSDT', 'DENTUSDT', 'CELRUSDT', 'HOTUSDT', 'MTLUSDT', 'OGNUSDT', 'NKNUSDT', 'SCUSDT', 'DGBUSDT', '1000SHIBUSDT', 'BAKEUSDT', 'GTCUSDT', 'BTCDOMUSDT', 'IOTXUSDT', 'RAYUSDT', 'C98USDT', 'MASKUSDT', 'ATAUSDT', 'DYDXUSDT', '1000XECUSDT', 'GALAUSDT', 'CELOUSDT', 'ARUSDT', 'KLAYUSDT', 'ARPAUSDT', 'CTSIUSDT', 'LPTUSDT', 'ENSUSDT', 'PEOPLEUSDT', 'ROSEUSDT', 'DUSKUSDT', 'FLOWUSDT', 'IMXUSDT', 'API3USDT', 'GMTUSDT', 'APEUSDT', 'WOOUSDT', 'FTTUSDT', 'JASMYUSDT', 'DARUSDT', 'OPUSDT', 'INJUSDT', 'STGUSDT', 'SPELLUSDT', '1000LUNCUSDT', 'LUNA2USDT', 'LDOUSDT', 'CVXUSDT', 'ICPUSDT', 'APTUSDT', 'QNTUSDT', 'FETUSDT', 'FXSUSDT', 'HOOKUSDT', 'MAGICUSDT', 'TUSDT', 'HIGHUSDT', 'MINAUSDT', 'ASTRUSDT', 'AGIXUSDT', 'PHBUSDT', 'GMXUSDT', 'CFXUSDT', 'STXUSDT', 'BNXUSDT', 'ACHUSDT', 'SSVUSDT', 'CKBUSDT', 'PERPUSDT', 'TRUUSDT', 'LQTYUSDT', 'USDCUSDT', 'IDUSDT', 'ARBUSDT', 'JOEUSDT', 'TLMUSDT', 'AMBUSDT', 'LEVERUSDT', 'RDNTUSDT', 'HFTUSDT', 'XVSUSDT', 'ETHBTC', 'BLURUSDT', 'EDUUSDT', 'IDEXUSDT', 'SUIUSDT', '1000PEPEUSDT', '1000FLOKIUSDT', 'UMAUSDT', 'RADUSDT', 'KEYUSDT', 'COMBOUSDT', 'NMRUSDT', 'MAVUSDT', 'MDTUSDT', 'XVGUSDT', 'WLDUSDT', 'PENDLEUSDT', 'ARKMUSDT', 'AGLDUSDT', 'YGGUSDT', 'DODOXUSDT', 'BNTUSDT', 'OXTUSDT', 'SEIUSDT', 'CYBERUSDT', 'HIFIUSDT', 'ARKUSDT', 'GLMRUSDT', 'BICOUSDT', 'STRAXUSDT', 'LOOMUSDT', 'BIGTIMEUSDT', 'BONDUSDT', 'ORBSUSDT', 'STPTUSDT', 'WAXPUSDT', 'BSVUSDT', 'RIFUSDT', 'POLYXUSDT', 'GASUSDT', 'POWRUSDT', 'SLPUSDT', 'TIAUSDT', 'SNTUSDT', 'CAKEUSDT', 'MEMEUSDT', 'TWTUSDT', 'TOKENUSDT', 'ORDIUSDT', 'STEEMUSDT', 'BADGERUSDT', 'ILVUSDT', 'NTRNUSDT', 'KASUSDT', 'BEAMXUSDT', '1000BONKUSDT', 'PYTHUSDT', 'SUPERUSDT', 'USTCUSDT', 'ONGUSDT', 'ETHWUSDT', 'JTOUSDT', '1000SATSUSDT', 'AUCTIONUSDT', '1000RATSUSDT', 'ACEUSDT', 'MOVRUSDT', 'NFPUSDT', 'BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'XRPUSDC', 'AIUSDT', 'XAIUSDT', 'DOGEUSDC', 'WIFUSDT', 'MANTAUSDT', 'ONDOUSDT', 'LSKUSDT', 'ALTUSDT', 'JUPUSDT', 'ZETAUSDT', 'RONINUSDT', 'DYMUSDT', 'SUIUSDC', 'OMUSDT', 'LINKUSDC', 'PIXELUSDT', 'STRKUSDT', 'MAVIAUSDT', 'ORDIUSDC', 'GLMUSDT', 'PORTALUSDT', 'TONUSDT', 'AXLUSDT', 'MYROUSDT', '1000PEPEUSDC', 'METISUSDT', 'AEVOUSDT', 'WLDUSDC', 'VANRYUSDT', 'BOMEUSDT', 'ETHFIUSDT', 'AVAXUSDC', '1000SHIBUSDC', 'ENAUSDT', 'WUSDT', 'WIFUSDC', 'BCHUSDC', 'TNSRUSDT', 'SAGAUSDT', 'LTCUSDC', 'NEARUSDC', 'TAOUSDT', 'OMNIUSDT', 'ARBUSDC', 'NEOUSDC', 'FILUSDC', 'TIAUSDC', 'BOMEUSDC', 'REZUSDT', 'ENAUSDC', 'ETHFIUSDC', '1000BONKUSDC', 'BBUSDT', 'NOTUSDT', 'TURBOUSDT', 'IOUSDT', 'ZKUSDT', 'MEWUSDT', 'LISTAUSDT', 'ZROUSDT', 'BTCUSDT_241227', 'ETHUSDT_241227', 'CRVUSDC', 'RENDERUSDT', 'BANANAUSDT', 'RAREUSDT', 'GUSDT', 'SYNUSDT', 'SYSUSDT', 'VOXELUSDT', 'BRETTUSDT', 'ALPACAUSDT', 'POPCATUSDT', 'SUNUSDT', 'VIDTUSDT', 'NULSUSDT', 'DOGSUSDT', 'MBOXUSDT', 'CHESSUSDT', 'FLUXUSDT', 'BSWUSDT', 'QUICKUSDT', 'NEIROETHUSDT', 'RPLUSDT', 'AERGOUSDT', 'POLUSDT', 'UXLINKUSDT', '1MBABYDOGEUSDT', 'NEIROUSDT', 'KDAUSDT', 'FIDAUSDT', 'FIOUSDT', 'CATIUSDT', 'GHSTUSDT', 'LOKAUSDT', 'HMSTRUSDT', 'BTCUSDT_250328', 'ETHUSDT_250328', 'REIUSDT', 'COSUSDT', 'EIGENUSDT', 'DIAUSDT', '1000CATUSDT', 'SCRUSDT', 'GOATUSDT', 'MOODENGUSDT', 'SAFEUSDT', 'SANTOSUSDT', 'TROYUSDT', 'PONKEUSDT', 'COWUSDT', 'CETUSUSDT', '1000000MOGUSDT', 'GRASSUSDT', 'DRIFTUSDT', 'SWELLUSDT', 'ACTUSDT', 'PNUTUSDT', 'HIPPOUSDT', '1000XUSDT', 'DEGENUSDT', 'BANUSDT', 'AKTUSDT', 'SLERFUSDT', 'SCRTUSDT', '1000CHEEMSUSDT', '1000WHYUSDT', 'THEUSDT', 'MORPHOUSDT', 'CHILLGUYUSDT', 'KAIAUSDT', 'AEROUSDT', 'ACXUSDT', 'ORCAUSDT', 'MOVEUSDT', 'RAYSOLUSDT', 'KOMAUSDT', 'VIRTUALUSDT', 'SPXUSDT', 'MEUSDT']
+
+        const coins=mycoins.slice(0,250)
+
+        const calculateExpAverage = (values, alpha = 0.1) => {
+            return values.reduce((avg, value, index) => {
+                if (index === 0) return value;
+                return alpha * value + (1 - alpha) * avg;
+            }, 0);
+        };
+
+        const getATRandPrice = async (symbol, interval, periods) => {
+            try {
+                const klineResponse = await axios.get('https://api.binance.com/api/v3/klines', {
+                    params: {
+                        symbol: symbol,
+                        interval: interval,
+                        limit: periods
+                    }
+                });
+                const priceResponse = await axios.get(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+
+                let atrValues = [];
+                for (let i = 0; i < klineResponse.data.length; i += 14) {
+                    const segment = klineResponse.data.slice(i, i + 14);
+                    const highs = segment.map(k => parseFloat(k[2]));
+                    const lows = segment.map(k => parseFloat(k[3]));
+                    const closes = segment.map(k => parseFloat(k[4]));
+                    const trs = highs.map((high, idx) => Math.max(high - lows[idx], Math.abs(high - closes[idx - 1] || 0), Math.abs(lows[idx] - (closes[idx - 1] || 0))));
+                    const atr = trs.reduce((a, b) => a + b, 0) / trs.length;
+                    atrValues.push(atr);
+                }
+                const price = parseFloat(priceResponse.data.price);
+                const atrToPriceRatios = atrValues.map(atr => atr / price);
+                const expAvgATRPrice = calculateExpAverage(atrToPriceRatios);
+                const currentATRPrice = atrToPriceRatios[0];
+
+                return { symbol, currentATRPrice, expAvgATRPrice, price };
+            } catch (error) {
+                console.error('Failed to fetch or process data for:', symbol, error);
+                return { symbol, currentATRPrice: 0, expAvgATRPrice: 0, price: 0 };
+            }
+        };
+
+        const displayData = async () => {
+            document.getElementById("my3button").disabled = true;
+            const interval = document.getElementById('intervalSelect').value;
+            const periods = document.getElementById('periodInput').value;
+            const tableBody = document.getElementById('coinsTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = ''; // Clear previous data
+            const results = await Promise.all(coins.map(symbol => getATRandPrice(symbol, interval, periods)));
+            results.forEach(result => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${result.symbol}</td><td>${result.currentATRPrice.toFixed(6)}</td><td>${result.expAvgATRPrice.toFixed(6)}</td><td>${result.price.toFixed(4)}</td>`;
+                tableBody.appendChild(row);
+            });
+            setTimeout(function() {
+                console.log("30 saniye sonra çalıştı!");
+                document.getElementById("my3button").disabled = false;
+            }, 30000);
+        };
+
+        function sortTable(columnIndex) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("coinsTable");
+            switching = true;
+            dir = "asc";
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("TD")[columnIndex];
+                    y = rows[i + 1].getElementsByTagName("TD")[columnIndex];
+                    if (dir == "asc") {
+                        if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount ++;
+                } else {
+                    if (switchcount === 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karekod ve Barkod Parse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        input {
+            font-size: 18px;
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        .output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Karekod ve Barkod Parse</h1>
+    <input type="text" id="barcodeInput" placeholder="Barkod veya Karekod okutun" autofocus>
+    <div class="output">
+        <h3>Sonuçlar</h3>
+        <p><strong>GTIN:</strong> <span id="gtin">-</span></p>
+        <p><strong>Son Kullanma Tarihi:</strong> <span id="expiry">-</span></p>
+    </div>
+
+    <script>
+        document.getElementById('barcodeInput').addEventListener('input', function (e) {
+            const barcodeText = e.target.value;
+
+            // GS1 formatına göre regex ile parse
+            const gtinRegex = /\(01\)(\d{14})/; // GTIN formatı
+            const expiryRegex = /\(17\)(\d{6})/; // YYMMDD formatında SKT
+
+            const gtinMatch = barcodeText.match(gtinRegex);
+            const expiryMatch = barcodeText.match(expiryRegex);
+
+            const gtin = gtinMatch ? gtinMatch[1] : 'Bulunamadı';
+            const expiry = expiryMatch ? formatExpiryDate(expiryMatch[1]) : 'Bulunamadı';
+
+            document.getElementById('gtin').textContent = gtin;
+            document.getElementById('expiry').textContent = expiry;
+
+            // Son kullanma tarihini formatla (YYMMDD → GG/AA/YYYY)
+            function formatExpiryDate(dateString) {
+                const year = '20' + dateString.substring(0, 2);
+                const month = dateString.substring(2, 4);
+                const day = dateString.substring(4, 6);
+                return `${day}/${month}/${year}`;
+            }
+        });
+    </script>
+</body>
+</html>

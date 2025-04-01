@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://unpkg.com/ccxt"></script>
+    <script>
+        // from variable id
+const exchangeId = 'binance'
+    , exchangeClass = ccxt[exchangeId]
+    , exchange = new exchangeClass ({
+        'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+        'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+    });
+    console.log(exchange.fetchOrderBook ('ETH/BTC'))
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

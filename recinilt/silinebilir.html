@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1)); // 0 ile i arasında bir rastgele indeks seçilir
+        [array[i], array[j]] = [array[j], array[i]]; // Elemanların yerini değiştirir
+    }
+    return array;
+}
+
+// Örnek kullanım:
+const isimListesi = ["Ahmet", "Mehmet", "Ayşe", "Fatma", "Ali"];
+const karistirilmisListe = shuffleArray(isimListesi);
+
+console.log(karistirilmisListe);
+console.log(karistirilmisListe[2])
+
+    </script>
+</body>
+</html>

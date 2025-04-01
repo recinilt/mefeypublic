@@ -1,0 +1,32 @@
+pythonda
+1. **Veri Toplama**:
+   - BTCUSDT'nin 1 dakikalık zaman dilimindeki 1440 geriye dönük kapanış fiyatlarını ve yüzde 3 yukarı/aşağı fiyatlardaki alım-satım emirlerini alır ve kaydeder.
+   - ETHUSDT'nin 1 dakikalık zaman dilimindeki 1440 geriye dönük kapanış fiyatlarını alır ve kaydeder.
+
+2. **İşleme Dönüştürme**:
+   - btc ve eth verilerindeki 1 dakikalık veriyi 3 dakikalık periyotlara dönüştürür.
+
+3. **Sinyal ve Strateji**:
+   - **Al Sinyali**:
+     -  Al sinyali, btcusdt, "emir oranı" (yani o anki fiyatın yüzde 3 aşağısına kadarki alış emirleri toplamının, o anki fiyatın yüzde 3 yukarısına kadarki satış emirlerine olan oranı) belirli bir sayının üzerindeyse ve kısa EMA uzun EMA'nın üzerindeyse oluşur. ve al sinyali ile eth alınır.
+   - **Sat Sinyali**:
+     - Sat sinyali, al sinyalinin bozulduğu noktada gerçekleşir. ve eth satılır.
+   - **Parametre Optimizasyonu**:
+     - Kısa EMA, uzun EMA ve emir oranı parametrelerinin hangisinin daha kârlı olduğunu bulur.
+     - En iyi bakiyeye ulaştıran ilk 50 parametre kombinasyonunu raporlar.
+
+4. **Sonuç Çıktıları**:
+   - En iyi 50 parametre kombinasyonunda:
+     - Kısa EMA değeri.
+     - Uzun EMA değeri.
+     - Emir oranı.
+     - İşlem sayısı.
+     - Son bakiye raporlanır.
+   - İşlem yapmayan kombinasyonlar hariç tutulur.
+
+5. **Progress Bar**:
+   - Denemeler sırasında bir ilerleme çubuğu eklenir.
+
+6. **Dosyaya ve Konsola Çıktı**:
+   - Tüm sonuçlar konsola yazdırılır ve amaca uygun bir isimle ve tarih/saat dakika saniye damgalı bir dosyaya, stratejiyi özetleyen bir yazı eşliğinde kaydedilir.
+

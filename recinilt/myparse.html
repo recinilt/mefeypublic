@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        <p>Package Dimensions: <input type="text" id="myText" value="31.2 x 25.2 x 18.6 cm; 1.13 Kilograms"></p> <button onclick="myParse()">Hesapla</button>
+        <p id="sonuc"></p>
+        <p id="sonuc2"></p>
+    </div>
+
+        <script>
+          //var myText1 = "";
+          function myParse() {
+            var myText1=document.getElementById("myText").value;
+            const numbers = myText1.match(/\d+\.\d+|\d+/g);
+            const words = myText1.match(/\b\w+\b/g);
+      
+            console.log(`Numbers: ${numbers}`);
+            console.log(`Words: ${words}`);
+      
+            var nF=[];
+            nF.push(Number(numbers[0]));
+            nF.push(Number(numbers[1]));
+            nF.push(Number(numbers[2]));
+            nF.sort((a, b) => a - b);
+            console.log(nF);
+
+            if(myText1.includes("cm")){
+                console.log("max 45-34-26----40x30x23cm olmalı.")
+                document.getElementById("sonuc").innerHTML="max 45-34-26----40x30x23cm altında olmalı.";
+                if(nF[2]>40 || nF[1]>30 || nF[0]>23){
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= OVERSIZE";
+                } else if((nF[2]*0.4*nF[1]*0.4*nF[0]*0.4)/139 >50){
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= OVERSIZE";
+                } else {
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= Standart Size";
+                }
+
+            } else if(myText1.includes("in") || myText1.includes('"')){
+                console.log("max 17x13x10 inch olmalı")
+                document.getElementById("sonuc").innerHTML="max 17x13x10 inch altında olmalı";
+                if(nF[2]>17 || nF[1]>13 || nF[0]>10){
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= OVERSIZE";
+                } else if((nF[2]*nF[1]*nF[0])/139 >50){
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= OVERSIZE";
+                } else {
+                    document.getElementById("sonuc2").innerHTML=nF[2]+"-"+nF[1]+"-"+nF[0]+"= Standart Size";
+                }
+
+            } 
+            
+            //document.getElementById("myText").innerHTML = myText;
+          }
+
+          //myParse("31.2 x 25.2 x 18.6 cm; 1.13 Kilograms");
+      
+      
+        </script>
+      
+</body>
+</html>

@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <button class="enableEthereumButton">Enable Ethereum</button>
+    <h2>Account: <span class="showAccount"></span></h2>
+    <button class="ekle">$Fidan Token Ekle</button>
+
+    <a href="https://docs.metamask.io/guide/getting-started.html#basic-considerations">docs</a>
+
+
+
+    <script>
+        if (typeof window.ethereum !== 'undefined') {
+  console.log('MetaMask is installed!');
+}
+
+const ethereumButton = document.querySelector('.enableEthereumButton');
+const showAccount = document.querySelector('.showAccount');
+const ekle = document.querySelector('.ekle');
+
+ethereumButton.addEventListener('click', () => {
+  getAccount();
+});
+
+async function getAccount() {
+  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+  console.log(accounts);
+  const account = accounts[0];  
+  showAccount.innerHTML = account;
+}
+
+ekle.addEventListener("click", ()=>{
+  ekleyelim();
+});
+
+async function ekleyelim() {
+  ethereum
+  .request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20',
+      options: {
+        address: '0xfd77d50113d6acbd818319d0174fc4a63af2cdec',
+        symbol: 'Fidan',
+        decimals: 18,
+        image: 'https://www.mefey.tk/recinilt/favicon.png',
+      },
+    },
+  })
+  .then((success) => {
+    if (success) {
+      console.log('Fidan successfully added to wallet!')
+    } else {
+      throw new Error('Something went wrong.')
+    }
+  })
+  .catch(console.error)
+}
+
+
+/////////////////
+
+const tokenAddress = '0xd00981105e61274c8a5cd5a88fe7e037d935b513';
+const tokenSymbol = 'TUT';
+const tokenDecimals = 18;
+const tokenImage = 'http://placekitten.com/200/300';
+
+try {
+  // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+  const wasAdded = await ethereum.request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20', // Initially only supports ERC20, but eventually more!
+      options: {
+        address: tokenAddress, // The address that the token is at.
+        symbol: tokenSymbol, // A ticker symbol or shorthand, up to 5 chars.
+        decimals: tokenDecimals, // The number of decimals in the token
+        image: tokenImage, // A string url of the token logo
+      },
+    },
+  });
+
+  if (wasAdded) {
+    console.log('Thanks for your interest!');
+  } else {
+    console.log('Your loss!');
+  }
+} catch (error) {
+  console.log(error);
+}
+
+
+    </script>
+</body>
+</html>
+
+

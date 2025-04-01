@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script>
+    <script>
+     (async function () {
+
+        const exchangeId = 'binance'
+        , exchangeClass = ccxt[exchangeId]
+        , exchange = new exchangeClass ({
+            'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+            'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+        })
+        console.log (binance.id, await binance.createMarketBuyOrder ('BTC/USDT', 15))
+/*
+    let kraken    = new ccxt.kraken ()
+    let bitfinex  = new ccxt.bitfinex ({ verbose: true })
+    let huobipro  = new ccxt.huobipro ()
+    let okcoinusd = new ccxt.okcoin ({
+        apiKey: 'YOUR_PUBLIC_API_KEY',
+        secret: 'YOUR_SECRET_PRIVATE_KEY',
+    })
+
+    const exchangeId = 'binance'
+        , exchangeClass = ccxt[exchangeId]
+        , exchange = new exchangeClass ({
+            'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+            'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+        })
+        
+
+    console.log (kraken.id,    await kraken.loadMarkets ())
+    console.log (bitfinex.id,  await bitfinex.loadMarkets  ())
+    console.log (huobipro.id,  await huobipro.loadMarkets ())
+
+    console.log (kraken.id,    await kraken.fetchOrderBook (kraken.symbols[0]))
+    console.log (bitfinex.id,  await bitfinex.fetchTicker ('BTC/USD'))
+    console.log (huobipro.id,  await huobipro.fetchTrades ('ETH/USDT'))
+
+    console.log (okcoinusd.id, await okcoinusd.fetchBalance ())
+
+    // sell 1 BTC/USD for market price, sell a bitcoin for dollars immediately
+    console.log (okcoinusd.id, await okcoinusd.createMarketSellOrder ('BTC/USD', 1))
+
+    // buy 1 BTC/USD for $2500, you pay $2500 and receive ฿1 when the order is closed
+    console.log (okcoinusd.id, await okcoinusd.createLimitBuyOrder ('BTC/USD', 1, 2500.00))
+
+    // pass/redefine custom exchange-specific order params: type, amount, price or whatever
+    // use a custom order type
+    bitfinex.createLimitSellOrder ('BTC/USD', 1, 10, { 'type': 'trailing-stop' })
+*/
+}) ();
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altyazı Okuyucu</title>
+</head>
+<body>
+    <!-- Kullanıcının altyazı dosyasını seçebilmesi için bir dosya inputu -->
+    <input type="file" id="subtitleFile" accept=".srt">
+    <!-- Dosyayı okumak için bir buton -->
+    <button onclick="readFile()">Dosyayı Oku</button>
+
+    <script>
+        // Dosyayı okuma fonksiyonu
+        function readFile() {
+            // Dosya inputunu DOM'dan al
+            const fileInput = document.getElementById('subtitleFile');
+            // Seçilen ilk dosyayı al (eğer varsa)
+            const file = fileInput.files[0];
+            if (file) {
+                // FileReader ile dosyayı oku
+                const reader = new FileReader();
+                // Dosyayı UTF-8 formatında metin olarak oku
+                reader.readAsText(file, 'UTF-8');
+                reader.onload = function (event) {
+                    // Dosya okunduğunda içeriği al ve altyazıyı parse etme fonksiyonuna gönder
+                    const content = event.target.result;
+                    parseSubtitles(content);
+                };
+            }
+        }
+
+        // Altyazıyı parse etme fonksiyonu
+        function parseSubtitles(content) {
+            // Altyazı formatını (zaman damgası ve metin) yakalamak için regex
+            const regex = /(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s+([\s\S]*?)(?=\d+\s+\d{2}:\d{2}:\d{2},\d{3} --> |\s*$)/g;
+            let match;
+            // Her eşleşme için
+            while (match = regex.exec(content)) {
+                // Başlangıç ve bitiş zamanlarını milisaniye olarak al
+                const startTime = new Date('1970-01-01T' + match[1].replace(',', '.') + 'Z').getTime();
+                const endTime = new Date('1970-01-01T' + match[2].replace(',', '.') + 'Z').getTime();
+                // Altyazı metnini al
+                const text = match[3].trim();
+                // Belirtilen zaman damgasında metni okuma fonksiyonunu çağır
+                setTimeout(() => {
+                    speak(text);
+                }, startTime);
+            }
+        }
+
+        // Metni okuma fonksiyonu
+        function speak(text) {
+            // Metni okumak için bir SpeechSynthesisUtterance nesnesi oluştur
+            const utterance = new SpeechSynthesisUtterance(text);
+            // Metni oku
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

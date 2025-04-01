@@ -1,0 +1,12 @@
+Pythonda bir kod yazmanı istiyorum. Btcusdt nin 1 dakikalık zaman dilimlerindeki 1440 geriye dönük yüzde 3 aşağısına kadarki alım emirlerini ve yüzde 3 yukarısına kadarki satış emirlerini, btc nin 1 dakikalık zaman dilimindeki 1440 periyodun geriye dönük kapanış fiyatlarını, tarih saat dakika saniye damgalı bir dosyaya kaydetsin. 
+Ethusdt nin 1 dakikalık zaman dilimindeki 1440 periyodun geriye dönük kapanış fiyatlarını, tarih saat dakika saniye damgalı bir dosyaya kaydetsin. 
+Sonra bu btcusdt dosyası verilerine göre şöyle al sat sinyali oluştursun, 
+Al sinyali, yüzde 3 alım toplamının yüzde 3 satım toplamına oranı (emir oranı diyeceğim bundan sonra) bir sayının üzerinde ise ve ema kısa ema uzunun üzerinde ise alsın. 
+Sat sinyali, al sinyali bozulunca satsın. 
+Emir oranının ve kısa emanın ve uzun emanın kaç olması daha karlı olur hesaplasın. 
+İşlem yapmayan denemeleri es geç. 
+Zarar da olsa ilk 50 sonucu göster. 
+Sonuçta, kaç işlem yapıldığı ve son bakiyeyi de göstersin. Pandas numpy kullanma. Bu 1 dakikalık verileri, 3 dakikalık zaman dilimleri olarak kullan. 
+
+Ben istiyorum ki, en iyi 50 parametreleri bana söylesin. Çıktıda, kaç işlem yapıldığı, kısa ema değeri uzun ema değeri, emir oranı yazsın. Bu kısa ema uzun ema ve emir oranının kaç olması gerektiği yazsın yani. Bir çok denem yapsın, en iyi bakiyeye ulaştıran ilk 50'sinin kısa uzun ema ve emir oranı ve işlem sayısı yazsın. Hiç işlem yapmayanlar elensin. ve de işlem devam ederken bir progressbar da ekle.
+ve de, sonuçları hem konsolda göster, hem de stratejiyi özetleyen bir yazı ile birlikte tarih saat dakika saniye damgalı ve strateji ile ilgili bir dosya adı oluşturarak  bir dosyaya sonuçları kaydet.

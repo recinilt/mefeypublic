@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USDT İşlem Aracı</title>
+</head>
+<body>
+    <h1>USDT İşlem Aracı</h1>
+    <form id="form">
+        <label for="text-input">Metin:</label><br>
+        <textarea id="text-input" rows="10" cols="50" placeholder="Metni buraya yapıştırın"></textarea><br><br>
+
+        <label for="action">İşlem Türü:</label><br>
+        <select id="action">
+            <option value="sell">Sell</option>
+            <option value="buy">Buy</option>
+        </select><br><br>
+
+        <label for="threshold">Fark:</label><br>
+        <input type="number" id="threshold" placeholder="Fark değeri girin"><br><br>
+
+        <button type="button" onclick="processText()">Getir</button>
+    </form>
+
+    <h2>Sonuç:</h2>
+    <ul id="results"></ul>
+
+    <script>
+        function processText() {
+            const text = document.getElementById('text-input').value;
+            const action = document.getElementById('action').value;
+            const threshold = parseFloat(document.getElementById('threshold').value);
+            const results = document.getElementById('results');
+
+            // Sonuçları temizle
+            results.innerHTML = '';
+
+            if (!text || isNaN(threshold)) {
+                alert('Lütfen tüm alanları doldurun.');
+                return;
+            }
+
+            // Metni satır satır işleyin
+            const lines = text.split('\n');
+            const usdtLines = [];
+
+            lines.forEach(line => {
+                const match = line.match(/(\w+USDT)\s+([\d.,]+)\s+([\d.,]+)/);
+                if (match) {
+                    const symbol = match[1];
+                    const firstValue = parseFloat(match[2].replace(',', '.'));
+                    const secondValue = parseFloat(match[3].replace(',', '.'));
+                    const myFark = firstValue - secondValue;
+                    usdtLines.push({ symbol, myFark });
+                }
+            });
+
+            // İşlem türüne göre sıralama ve filtreleme
+            let filtered;
+            if (action === 'sell') {
+                filtered = usdtLines.filter(item => item.myFark < threshold)
+                    .sort((a, b) => a.myFark - b.myFark);
+            } else if (action === 'buy') {
+                filtered = usdtLines.filter(item => item.myFark > threshold)
+                    .sort((a, b) => b.myFark - a.myFark);
+            }
+
+            // Sonuçları listeleme
+            filtered.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item.symbol} - MyFark: ${item.myFark.toFixed(2)}`;
+                results.appendChild(listItem);
+            });
+
+            if (filtered.length === 0) {
+                const listItem = document.createElement('li');
+                listItem.textContent = 'Uygun sonuç bulunamadı.';
+                results.appendChild(listItem);
+            }
+        }
+    </script>
+</body>
+</html>

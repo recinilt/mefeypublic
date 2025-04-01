@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GS1 Barcode Parser</title>
+    <script src="https://cdn.jsdelivr.net/npm/@peterbrockfeld/gs1-barcode-parser"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        input {
+            font-size: 18px;
+            padding: 10px;
+            width: 300px;
+            margin-bottom: 20px;
+        }
+        .output {
+            margin-top: 20px;
+        }
+        .output p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>GS1 Barkod ve Karekod Parser</h1>
+    <input type="text" id="barcodeInput" placeholder="Barkod veya Karekod okutun" autofocus>
+    <div class="output" id="output">
+        <h3>Çözümlenen Bilgiler</h3>
+        <p>Henüz bir barkod okutulmadı.</p>
+    </div>
+
+    <script>
+        document.getElementById('barcodeInput').addEventListener('input', function (e) {
+            const barcodeText = e.target.value.trim();
+            const outputDiv = document.getElementById('output');
+
+            // Barkod verisini GS1 parser ile işleme
+            try {
+                const parsedResult = new GS1Barcode(barcodeText);
+
+                // Çıktı oluşturma
+                let outputHtml = '<h3>Çözümlenen Bilgiler</h3>';
+                if (parsedResult.getElement('01')) {
+                    outputHtml += `<p><strong>GTIN:</strong> ${parsedResult.getElement('01')}</p>`;
+                }
+                if (parsedResult.getElement('17')) {
+                    const expiry = formatExpiryDate(parsedResult.getElement('17'));
+                    outputHtml += `<p><strong>Son Kullanma Tarihi:</strong> ${expiry}</p>`;
+                }
+                if (parsedResult.getElement('10')) {
+                    outputHtml += `<p><strong>Lot Numarası:</strong> ${parsedResult.getElement('10')}</p>`;
+                }
+                if (parsedResult.getElement('21')) {
+                    outputHtml += `<p><strong>Seri Numarası:</strong> ${parsedResult.getElement('21')}</p>`;
+                }
+                outputDiv.innerHTML = outputHtml;
+            } catch (error) {
+                outputDiv.innerHTML = `<h3>Hata</h3><p>Barkod parse edilemedi: ${error.message}</p>`;
+            }
+
+            // Son kullanma tarihini formatlama (YYMMDD → GG/AA/YYYY)
+            function formatExpiryDate(dateString) {
+                const year = '20' + dateString.substring(0, 2);
+                const month = dateString.substring(2, 4);
+                const day = dateString.substring(4, 6);
+                return `${day}/${month}/${year}`;
+            }
+        });
+    </script>
+</body>
+</html>

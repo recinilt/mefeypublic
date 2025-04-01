@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altyazı Okuyucu</title>
+</head>
+
+<body>
+    <input type="file" id="subtitleFile" accept=".srt">
+    <button onclick="readAndSpeak()">Altyazıyı Oku</button>
+
+    <script>
+        function readAndSpeak() {
+            const fileInput = document.getElementById('subtitleFile');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (event) {
+                    const content = event.target.result;
+                    const utf8Content = new TextDecoder('utf-8').decode(new Uint8Array(content));
+                    const subtitles = parseSubtitles(utf8Content);
+                    speakSubtitles(subtitles);
+                };
+
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        function parseSubtitles(content) {
+            const regex = /(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\s([\s\S]*?)(?=\d+\s|\s*$)/g;
+            let match;
+            const subtitles = [];
+
+            while ((match = regex.exec(content)) !== null) {
+                const startTime = convertToMilliseconds(match[1]);
+                const text = match[3].trim().replace(/\n/g, ' ');
+
+                subtitles.push({ startTime, text });
+            }
+
+            return subtitles;
+        }
+
+        function convertToMilliseconds(time) {
+            const parts = time.split(':');
+            const hours = parseInt(parts[0], 10);
+            const minutes = parseInt(parts[1], 10);
+            const secondsAndMillis = parts[2].split(',');
+            const seconds = parseInt(secondsAndMillis[0], 10);
+            const milliseconds = parseInt(secondsAndMillis[1], 10);
+
+            return hours * 3600000 + minutes * 60000 + seconds * 1000 + milliseconds;
+        }
+
+        function speakSubtitles(subtitles) {
+            let index = 0;
+
+            function speakNext() {
+                if (index < subtitles.length) {
+                    const utterance = new SpeechSynthesisUtterance(subtitles[index].text);
+                    utterance.onend = () => {
+                        index++;
+                        if (index < subtitles.length) {
+                            const delay = subtitles[index].startTime - subtitles[index - 1].startTime;
+                            setTimeout(speakNext, delay);
+                        }
+                    };
+                    window.speechSynthesis.speak(utterance);
+                }
+            }
+
+            speakNext();
+        }
+    </script>
+</body>
+
+</html>

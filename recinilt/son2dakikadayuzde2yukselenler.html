@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures Checker</title>
+</head>
+<body>
+    <h1>Binance Futures USDT Pairs</h1>
+    <input type="number" id="myInput" value="2.5">
+    <button id="startButton">Veriyi Başlat</button><span id="myload"></span>
+    <p>(Veri yüklenmesi yaklaşık 2 dakika alır. Butona bastıktan sonra, otomatik olarak her 2 dakikada bir kendisi araştırır. Sonuç bulursa da sesli uyarı verir. Cep telefonunuzdan açıyorsanız, ayarlardan chrome uygulama ayarlarına girip, "Kullanılmıyorsa uygulama etkinliğini duraklat."ı kapatın, "Pil tasarrufu" bölümünde de kısıtlama yok'u seçin. telefon ekranı kapalıyken de uyarı verir.)</p>
+    <div id="result">(2 dakikada bir otomatik yenilenir. 2 dakika içinde yüzde 2.5 çıkan varsa listelenir ve sesli ikaz yapılır.)</div>
+
+    <audio id="alarm" src="alarm.wav" preload="auto"></audio> <!-- Alarm sesi için HTML5 audio -->
+    
+    <script>
+        // Alarm sesini çal
+        function playAlarm() {
+            const alarm = document.getElementById('alarm');
+            alarm.play();
+        }
+
+        async function fetchFuturesData() {
+            const resultDiv = document.getElementById('result');
+            const loadingSpan = document.getElementById("myload");
+            loadingSpan.innerText = "Loading...";
+
+            try {
+                const inputValue = parseFloat(document.getElementById('myInput').value);
+                if (isNaN(inputValue) || inputValue <= 0) {
+                    resultDiv.innerHTML = '<h2>Lütfen geçerli bir yüzde değeri girin.</h2>';
+                    loadingSpan.innerText = "";
+                    return;
+                }
+
+                // Binance USDT Futures çiftlerini al
+                const exchangeInfoResponse = await fetch('https://fapi.binance.com/fapi/v1/exchangeInfo');
+                const exchangeInfo = await exchangeInfoResponse.json();
+                const usdtPairs = exchangeInfo.symbols
+                    .filter(pair => pair.quoteAsset === 'USDT' && pair.status === 'TRADING')
+                    .map(pair => pair.symbol);
+
+                let foundPairs = [];
+
+                for (let pair of usdtPairs) {
+                    try {
+                        // Her bir paritenin son iki periyodundaki 1 dakikalık kline verilerini al
+                        const klinesResponse = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=${pair}&interval=1m&limit=2`);
+                        if (!klinesResponse.ok) continue; // 400 gibi hataları atla
+                        const klines = await klinesResponse.json();
+
+                        if (klines.length === 2) {
+                            const openPrice = parseFloat(klines[0][1]); // İlk periyodun açılış fiyatı
+                            const closePrice = parseFloat(klines[1][4]); // İkinci periyodun kapanış fiyatı
+
+                            const percentageChange = ((closePrice - openPrice) / openPrice) * 100;
+
+                            if (percentageChange >= inputValue) {
+                                const tradingViewLink = `http://tradingview.com/chart/?symbol=BINANCE:${pair}&interval=5`;
+                                foundPairs.push(`<li>${pair} (%${percentageChange.toFixed(2)}) <a href="${tradingViewLink}" target="_blank">Grafik</a></li>`);
+                            }
+                        }
+                    } catch (innerError) {
+                        console.error(`Hata: ${pair} için veri alınamadı.`, innerError);
+                    }
+                }
+
+                if (foundPairs.length > 0) {
+                    resultDiv.innerHTML = `<h2>Son 2 dakikada %${inputValue} ve üzeri yükselen pariteler:</h2><ul>${foundPairs.join('')}</ul>`;
+                    playAlarm(); // Alarm sesi çal
+                } else {
+                    resultDiv.innerHTML = `<h2>Son 2 dakikada %${inputValue} ve üzeri yükselen bir parite bulunamadı.</h2>`;
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                resultDiv.innerHTML = '<h2>Veri alınırken bir hata oluştu.</h2>';
+            } finally {
+                loadingSpan.innerText = "";
+            }
+        }
+
+        // Başlat butonuna tıklanınca veri çekme işlemini başlat
+        document.getElementById('startButton').addEventListener('click', function() {
+            fetchFuturesData();
+            setInterval(fetchFuturesData, 120000); // 2 dakika = 120000 ms
+        });
+    </script>
+</body>
+</html>

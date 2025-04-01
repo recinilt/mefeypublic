@@ -1,0 +1,35 @@
+/* Temel stilleri buraya ekleyebilirsiniz */
+table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  th, td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 8px;
+  }
+  
+  .completed {
+    background-color: green;
+  }
+  
+  .missed {
+    background-color: red;
+  }
+  .container {
+    width: 90%; /* Sabit genişlik yerine yüzdelik genişlik */
+    max-width: 1200px; /* Maksimum genişlik belirleyin */
+    margin: 0 auto; /* Ortala */
+  }
+
+  @media (max-width: 768px) {
+    .menu {
+      display: none;
+    }
+    .hamburger-menu {
+      display: block;
+    }
+  }
+
+  

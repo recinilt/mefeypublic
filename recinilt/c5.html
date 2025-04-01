@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Long/Short Oranı</title>
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        li:hover {
+            background-color: #d0e0ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Coin Long/Short Oranı</h1>
+    <form id="form">
+        <label for="coin">Coin Çifti:</label><br>
+        <input type="text" id="coin" placeholder="Örn: LDOUSDT"><br><br>
+
+        <label for="period">Periyot Seçin:</label><br>
+        <select id="period">
+            <option value="5m">5 Dakika</option>
+            <option value="15m">15 Dakika</option>
+            <option value="1h">1 Saat</option>
+            <option value="4h">4 Saat</option>
+            <option value="12h">12 Saat</option>
+            <option value="1d">1 Gün</option>
+            <option value="1w">1 Hafta</option>
+            <option value="1M">1 Ay</option>
+            <option value="1y">1 Yıl</option>
+        </select><br><br>
+
+        <button type="button" onclick="addCoin()">Ekle</button>
+    </form>
+
+    <h2>Coin Listesi:</h2>
+    <ul id="coin-list"></ul>
+
+    <h2>Sonuç:</h2>
+    <div id="result">Henüz bir sonuç yok.</div>
+
+    <script>
+        const coinList = document.getElementById('coin-list');
+        const result = document.getElementById('result');
+
+        function addCoin() {
+            const coin = document.getElementById('coin').value.trim().toUpperCase();
+            const period = document.getElementById('period').value;
+
+            if (!coin) {
+                alert('Lütfen bir coin çifti girin.');
+                return;
+            }
+
+            const listItem = document.createElement('li');
+            listItem.textContent = coin + " " + period;
+            listItem.addEventListener('click', () => getCoinData(coin, period));
+            coinList.appendChild(listItem);
+
+            // Temizleme
+            document.getElementById('coin').value = '';
+        }
+
+        async function getCoinData(coin, period) {
+            result.innerHTML = `İşleniyor... (${coin}, Periyot: ${period})`;
+
+            try {
+                // Binance API endpoints
+                const accountUrl = `https://fapi.binance.com/futures/data/topLongShortAccountRatio?symbol=${coin}&period=${period}`;
+                const positionsUrl = `https://fapi.binance.com/futures/data/topLongShortPositionRatio?symbol=${coin}&period=${period}`;
+
+                // API'den veriyi al
+                const [accountResponse, positionsResponse] = await Promise.all([ 
+                    fetch(accountUrl),
+                    fetch(positionsUrl)
+                ]);
+
+                if (!accountResponse.ok || !positionsResponse.ok) {
+                    throw new Error('Coin çifti bulunamadı veya API hatası.');
+                }
+
+                const accountData = await accountResponse.json();
+                const positionsData = await positionsResponse.json();
+
+                // Son veriyi kontrol et
+                const accountLastEntry = accountData.length > 0 ? accountData[accountData.length - 1] : null;
+                const positionsLastEntry = positionsData.length > 0 ? positionsData[positionsData.length - 1] : null;
+
+                let resultHTML = `<h3>${coin} Sonuçları (${period}):</h3>`;
+
+                // Account long/short ratio
+                if (accountLastEntry) {
+                    const accountRatio = parseFloat(accountLastEntry.longShortRatio);
+                    resultHTML += `<p><b>Account:</b> ${getTrend(accountRatio)} (${accountRatio.toFixed(2)})</p>`;
+                } else {
+                    resultHTML += `<p><b>Account:</b> Veri bulunamadı.</p>`;
+                }
+
+                // Positions long/short ratio
+                if (positionsLastEntry) {
+                    const positionsRatio = parseFloat(positionsLastEntry.longShortRatio);
+                    resultHTML += `<p><b>Positions:</b> ${getTrend(positionsRatio)} (${positionsRatio.toFixed(2)})</p>`;
+                } else {
+                    resultHTML += `<p><b>Positions:</b> Veri bulunamadı.</p>`;
+                }
+
+                result.innerHTML = resultHTML;
+            } catch (error) {
+                console.error(error);
+                result.innerHTML = `Hata: ${error.message}`;
+            }
+        }
+
+        function getTrend(ratio) {
+            if (ratio > 1.1) {
+                return 'LONG';
+            } else if (ratio < 0.9) {
+                return 'SHORT';
+            } else {
+                return 'ARAFTA';
+            }
+        }
+    </script>
+</body>
+</html>

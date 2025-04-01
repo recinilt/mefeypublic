@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<div ng-app="myApp" ng-controller="myCtrl">
+
+A: <input type="number" id="AA" value="1"><br>
+B: <input type="number"  id="BB" value="1"><br>
+C: <input type="number" id="CC" value="1"><br>
+<br>
+<button id="hesapla" onclick="hesapla()">Hesapla</button><br>
+
+D: <span id="DD"></span><br>
+Stop Loss: <span id="sl"></span><br>
+Küçük Hedef 0,38 TP1: <span id="kh"></span><br>
+Büyük Hedef 0,61 TP2: <span id="bh"></span><br>
+
+
+</div>
+
+<script>
+
+var aa = document.getElementById("AA");
+var bb = document.getElementById("BB");
+var cc = document.getElementById("CC");
+var dd = document.getElementById("DD");
+var sl = document.getElementById("sl");
+var kh = document.getElementById("kh");
+var bh = document.getElementById("bh");
+
+console.log(aa.value);
+function hesapla(){
+    var d = cc.value - (aa.value - bb.value);
+    dd.innerHTML = d;
+    sl.innerHTML = d - ((aa.value - bb.value) * 0.38);
+    kh.innerHTML = d + ((aa.value - bb.value) * 0.38);
+    bh.innerHTML = d + ((aa.value - bb.value) * 0.61)
+    console.log(aa.value);
+}
+
+</script>
+
+</body>
+</html>

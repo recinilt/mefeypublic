@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html  lang="tr"  xmlns:og="http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEFEY - Ramazan Yeni</title>
+
+    <!-- Made by Recep YENİ recepyeni@yahoo.com -->
+
+    <meta property = "og: type" content = "website" />
+    <meta property = "og: title" content = "MEFEY - Ramazan Yeni" />
+    <meta property = "og: description" content = "Tekstil çorap üretiminde faaliyet göstermekteyiz." />
+    <meta property = "og: image" content = "img/icon.jpg" />
+    <meta property = "og: url" content = "https://www.mefey.tk" />
+    <meta property = "og: site_name" content = "MEFEY - Ramazan Yeni" />
+
+    <link rel="icon" type="image/x-icon" href="img/icon.jpg">
+    
+        <!-- Required meta tags -->
+        
+    
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta http-equiv="Content-Type" content="text/html; ">
+        <meta http-equiv="Content-Language" content="tr">
+        <meta name="keywords" content="Ramazan, yeni, ramazan yeni, mefey, mefey çorap, çorap, tekstil, borsa, hisse, hesap, hesaplama">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="Ramazan Yeni">
+        <!-- <meta http-equiv="refresh" content="500">  -->
+        <!-- <title>merhabalar Patent, Arduino, Subtitle Reader, WebDesign</title> -->
+        <meta name="description" content="Tekstil çorap üretiminde faaliyet göstermekteyiz. Ramazan Yeni">
+    
+    
+
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-CuOF+2SnTUfTwSZjCXf01h7uYhfOBuxIhGKPbfEJ3+FqH/s6cIFN9bGr1HmAg4fQ" crossorigin="anonymous">
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script> -->
+    <script src="js/angular.min.js"></script>
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DREN3WGVRC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-DREN3WGVRC');
+</script>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- 
+  https://fonts.google.com/icons 
+  <span class="material-icons">face</span>
+-->
+
+    <style>
+       .baslik {
+         margin: 20px auto;
+         padding: 5px;
+         border: solid 2px gray;
+         border-radius: 5px;
+         background-color: aliceblue; 
+         background: linear-gradient(to right, rgba(255, 0, 0, 0.281) 0%,rgba(4, 0, 255, 0.281) 50%, rgba(2, 255, 0, 0.281) 100%); width: fit-content;
+         box-shadow: 5px 5px 15px 5px black;
+         /* transform: scale(1.2) rotate(2deg) translate(7px, 8px) skew(3deg, 4deg); */
+       }
+
+
+    </style>
+</head>
+<body>
+
+  <div class="container">
+  <div data-ng-app="myApp" data-ng-controller="myCtrl">
+    
+
+<!--  -->
+<h6 class="baslik"><span class="material-icons">
+  timer
+  </span>KAÇ DK GEÇMİŞ?</h6>
+<div class="col-lg-4">
+  
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">1. GÜN: </span>
+    <input type="number"  class="form-control"  data-ng-model="gun1"><span style="position: absolute; right: 5px;"></span>
+    <button ng-click="dkKaydet()">Kaydet</button>
+      <p>{{dkErrortext}}</p>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    
+    <span class="input-group-text text-primary">1. SAAT: </span>
+    <input type="number"  class="form-control"  data-ng-model="saat1"><span style="position: absolute; right: 5px;"></span> 
+    <span class="input-group-text text-primary">1. DK.: </span>
+    <input type="number"  class="form-control"  data-ng-model="dk1"><span style="position: absolute; right: 5px;"></span> <br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">2. GÜN: </span>
+    <input type="number"  class="form-control" data-ng-init="gun2=zaman.getDate()" data-ng-model="gun2"><span style="position: absolute; right: 5px;"></span>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">2. SAAT: </span>
+    <input type="number"  class="form-control" data-ng-init="saat2=zaman.getHours()" data-ng-model="saat2"><span style="position: absolute; right: 5px;"></span> 
+    <span class="input-group-text text-primary">2. DK.: </span>
+    <input type="number"  class="form-control" data-ng-init="dk2=zaman.getMinutes()" data-ng-model="dk2"><span style="position: absolute; right: 5px;"></span> <br>
+  </div>
+  
+</div>
+
+
+<br>
+Kaç Dk. Geçmiş?: <span style="color: red;"> {{(gun2*1440 + saat2*60 + dk2)-(gun1*1440 + saat1*60 + dk1)}}</span><br>
+Yani Kaç Saat Geçmiş?: <span style="color: blue;"> {{(((gun2*1440 + saat2*60 + dk2)-(gun1*1440 + saat1*60 + dk1))/60).toFixed(1)}}</span><br>
+Yani Kaç Gün Geçmiş?: <span style="color: fuchsia;"> {{(((gun2*1440 + saat2*60 + dk2)-(gun1*1440 + saat1*60 + dk1))/1440).toFixed(2)}}</span><br>
+Bir gün: {{60*24}} dk
+
+<!--  -->
+<hr>
+
+
+<!--  -->
+<h6 class="baslik"><span class="material-icons">
+  android
+  </span>İÇLER DIŞLAR ÇARPIMI</h6>   
+<div class="col-lg-4">
+  
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">1. SAYI: </span>
+    <input type="number"  class="form-control" data-ng-init="idc1=10" data-ng-model="idc1"><span style="position: absolute; right: 5px;"></span> 
+    <span class="input-group-text text-primary">2. SAYI: </span>
+    <input type="number"  class="form-control" data-ng-init="idc2=4" data-ng-model="idc2"><span style="position: absolute; right: 5px;"></span> <br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">3. SAYI: </span>
+    <input type="number"  class="form-control" data-ng-init="idc3=24" data-ng-model="idc3"><span style="position: absolute; right: 5px;"></span> 
+    <span class="input-group-text text-primary">SONUÇ: </span>
+    <input type="number"  class="form-control" data-ng-model="((idc3*idc2)/idc1)"><br>
+  </div>
+  
+</div>
+
+
+<br>
+
+
+
+
+<hr>
+
+<h6 class="baslik"><span class="material-icons">
+  highlight_off
+  </span>TERS ORANTI</h6>
+<div class="col-lg-4">
+  
+  <div class="input-group mb-3" style="position: relative;">
+    
+    <input type="number"  class="form-control" data-ng-init="to1=20" data-ng-model="to1"><span > X </span> 
+    
+    <input type="number"  class="form-control" data-ng-init="to2=4" data-ng-model="to2"><span> = </span>
+    
+    <input type="number"  class="form-control" data-ng-init="to3=10" data-ng-model="to3"><span> X </span> 
+    <span class="input-group-text text-primary">SONUÇ: </span>
+    <input type="number"  class="form-control" data-ng-model="((to1*to2)/to3)"><br>
+    <br>
+  </div>
+  
+  
+</div>
+
+
+<br>
+
+
+<!--  -->
+
+<hr>
+
+
+
+
+
+
+
+<!--  -->
+
+<h6 class="baslik"><span class="material-icons">reorder</span> GRID TRADING</h6>
+<div class="col-lg-4">
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Şuanki fiyat: </span>
+    <input type="number"  class="form-control"  data-ng-init="gridFiyat=20" data-ng-model="gridFiyat"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Grid aralık oranı: %</span>
+    <input type="number"  class="form-control" data-ng-init="gridOran=0.49"  data-ng-model="gridOran"><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Kaç adet grid: </span>
+    <input type="number"  class="form-control" data-ng-init="gridAdet=50"  data-ng-model="gridAdet"><br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Adetlik alım: </span>
+    <input type="number"  class="form-control" data-ng-init="gridAlim=10.2"  data-ng-model="gridAlim"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+</div>
+ 
+
+
+<br>
+<!-- Kaç USD gerekli? <span style="color: red;">{{((gridFiyat * (1-(((gridAdet*gridOran)/4)*0.01))*gridAdet/2)+(((gridAlim/gridFiyat) * gridAdet * gridFiyat/2))).toFixed(8)}} </span>  USD<br>  -->
+Kaç USD gerekli? <span style="color: red;">{{(
+  (gridAdet/2) * (
+  (gridAlim/(gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2)))))    *    
+  (gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2))))    +    
+  (gridAlim/(gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2)))))    *  
+  gridFiyat  
+  ) /2
+  +
+  (gridAlim/((1-((gridAdet/2)*gridOran*0.01))*gridFiyat)) * gridFiyat * (gridAdet/2)
+).toFixed(8)}} </span>  USD<br> 
+
+Üst limit: <span style="color: blue;">{{(gridFiyat + (gridFiyat*(gridOran*0.01) * (gridAdet/2))).toFixed(8)}}</span><br>
+Alt limit: <span style="color: blue;">{{(gridFiyat - (gridFiyat*(gridOran*0.01) * (gridAdet/2))).toFixed(8)}}</span><br>
+Adetlik Lot: <span style="color: green;"> {{(gridAlim/((1-((gridAdet/2)*gridOran*0.01))*gridFiyat)).toFixed(8)}} </span><br>
+<!-- Toplam Gereken: <span style="color: green;"> {{((gridAdet/2)*(gridAlim/((1-((gridAdet/2)*gridOran*0.01))*gridFiyat))).toFixed(8)}} </span> lot ve <span style="color: red;">{{(((gridFiyat) * (1-(((gridAdet*gridOran)/4)*0.01))*gridAdet/2)).toFixed(8)}} </span>  USD<br> -->
+Toplam Gereken: <span style="color: green;"> {{((gridAdet/2)*(gridAlim/((1-((gridAdet/2)*gridOran*0.01))*gridFiyat))).toFixed(8)}} </span> lot ve 
+<span style="color: red;">{{(
+  (gridAdet/2) * (
+  (gridAlim/(gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2)))))    *    
+  (gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2))))    +    
+  (gridAlim/(gridFiyat - (gridFiyat*(gridOran*0.01) * ((gridAdet/2)))))    *  
+  gridFiyat  
+  ) /2
+).toFixed(8)}} </span>  USD<br>
+
+<hr>
+
+<!--  -->
+
+<!--  -->
+
+<h6 class="baslik"><span class="material-icons">reorder</span> GRID TRADING AŞAĞIYA</h6>
+<div class="col-lg-4">
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Üst limit: </span>
+    <input type="number"  class="form-control"  data-ng-init="gridUstLimit=20" data-ng-model="gridUstLimit"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Grid aralık oranı: %</span>
+    <input type="number"  class="form-control" data-ng-init="gridUstOran=0.44"  data-ng-model="gridUstOran"><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Kaç adet grid: </span>
+    <input type="number"  class="form-control" data-ng-init="gridUstAdet=50"  data-ng-model="gridUstAdet"><br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Adetlik alım: </span>
+    <input type="number"  class="form-control" data-ng-init="gridUstAlim=10.2"  data-ng-model="gridUstAlim"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+</div>
+
+
+ 
+<br>
+<!-- Kaç USD gerekli? <span style="color: red;">{{(gridUstAlim * gridUstAdet).toFixed(8)}} </span>  USD<br> -->
+<!-- Kaç USD gerekli? <span style="color: red;">{{(gridUstLimit * (1-(((gridUstAdet*gridUstOran)/2)*0.01))*gridUstAdet).toFixed(8)}} </span>  USD<br> -->
+Kaç USD gerekli? <span style="color: red;">{{(
+  gridUstAdet * (
+  (gridUstAlim/(gridUstLimit - (gridUstLimit*(gridUstOran*0.01) * (gridUstAdet))))    *    
+  (gridUstLimit - (gridUstLimit*(gridUstOran*0.01) * (gridUstAdet)))    +    
+  (gridUstAlim/(gridUstLimit - (gridUstLimit*(gridUstOran*0.01) * (gridUstAdet))))    *  
+  gridUstLimit  
+  ) /2
+  ).toFixed(8)}} </span>  USD<br>
+Üst limit: <span style="color: blue;">{{gridUstLimit.toFixed(8)}}</span><br>
+Alt limit: <span style="color: blue;">{{(gridUstLimit - (gridUstLimit*(gridUstOran*0.01) * (gridUstAdet))).toFixed(8)}}</span><br>
+<!-- Adetlik Lot: <span style="color: green;"> {{(gridUstAlim/((1-(gridUstAdet*gridUstOran*0.01))*gridUstLimit)).toFixed(8)}} </span><br> -->
+Adetlik Lot: <span style="color: green;"> {{(gridUstAlim/(gridUstLimit - (gridUstLimit*(gridUstOran*0.01) * (gridUstAdet)))).toFixed(8)}} </span><br>
+Toplam Lot: <span style="color: green;"> {{(gridUstAdet*(gridUstAlim/((1-(gridUstAdet*gridUstOran*0.01))*gridUstLimit))).toFixed(8)}} </span><br>
+Aşağıya %: <span style="color: blue;">{{(gridUstOran*gridUstAdet).toFixed(2)}}</span><br>
+<!-- Adetlik Lot: <span style="color: green;"> {{(gridUstAlim/gridUstLimit).toFixed(8)}} </span><br> -->
+<hr>
+
+<!--  -->
+<!--  -->
+
+<h6 class="baslik"><span class="material-icons">reorder</span> GRID TRADING YUKARIYA</h6>
+<div class="col-lg-4">
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Şuanki Fiyat: </span>
+    <input type="number"  class="form-control"  data-ng-init="gridAltFiyat=20" data-ng-model="gridAltFiyat"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Alt limit: </span>
+    <input type="number"  class="form-control"  data-ng-init="gridAltLimit=20" data-ng-model="gridAltLimit"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Grid aralık oranı: %</span>
+    <input type="number"  class="form-control" data-ng-init="gridAltOran=0.55"  data-ng-model="gridAltOran"><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Kaç adet grid: </span>
+    <input type="number"  class="form-control" data-ng-init="gridAltAdet=50"  data-ng-model="gridAltAdet"><br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Adetlik alım: </span>
+    <input type="number"  class="form-control" data-ng-init="gridAltAlim=10.2"  data-ng-model="gridAltAlim"><span style="position: absolute; right: 5px;"> USD</span><br>
+  </div>
+</div>
+
+
+
+<br>
+Kaç USD gerekli? <span style="color: red;">{{(((gridAltAlim/gridAltLimit) * gridAltAdet * gridAltFiyat)).toFixed(8)}} </span>  USD<br>
+<!-- Kaç USD gerekli? <span style="color: red;">{{((gridAltAlim * gridAltAdet)*(1 + ((gridAltAdet/2)*gridAltOran*0.01))).toFixed(8)}} </span>  USD<br> -->
+Üst limit: <span style="color: blue;">{{(gridAltLimit + (gridAltLimit*(gridAltOran*0.01) * (gridAltAdet))).toFixed(8)}}</span><br>
+Alt limit: <span style="color: blue;">{{gridAltLimit.toFixed(8)}}</span><br>
+Adetlik Lot: <span style="color: green;"> {{(gridAltAlim/gridAltLimit).toFixed(8)}} </span><br>
+Toplam Lot: <span style="color: green;"> {{(gridAltAdet*(gridAltAlim/gridAltLimit)).toFixed(8)}} </span><br>
+Yukarıya %: <span style="color: blue;">{{(gridAltOran*gridAltAdet).toFixed(2)}}</span><br>
+<hr>
+
+<!--  -->
+
+
+
+
+
+
+
+<!--  -->
+
+<h6 class="baslik"><span class="material-icons">face</span> %X KARLA BİRLEŞİK ÇARPAN</h6>
+<div class="col-lg-4">
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Anapara: </span>
+    <input type="number"  class="form-control"  data-ng-model="anapara4"><span style="position: absolute; right: 5px;"> TL</span><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Kazanç oranı: %</span>
+    <input type="number"  class="form-control"  data-ng-model="oran4"><br>
+  </div>
+  <div class="input-group mb-3">
+    <span class="input-group-text text-primary">Kaç adet: </span>
+    <input type="number"  class="form-control"  data-ng-model="adet4"><br>
+  </div>
+  <div class="input-group mb-3" style="position: relative;">
+    <span class="input-group-text text-primary">Adetlik kesinti: </span>
+    <input type="number"  class="form-control"  data-ng-model="kesinti4"><span style="position: absolute; right: 5px;"> TL</span><br>
+  </div>
+</div>
+
+
+
+<br>
+Sonuç: <span style="color: red;">{{sonuc4()}} </span>  TL<br>
+Kar yüzdesi: %<span style="color: blue;">{{(((sonuc4()-anapara4)/anapara4)*100).toFixed(0)}}</span><br>
+Kaç kat kazanç: <span style="color: green;">{{(((sonuc4()-anapara4)/anapara4)).toFixed(8)}}</span>
+<hr>
+
+<!--  -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      <h6 class="baslik"><span class="material-icons">fingerprint</span> MAALİYET HESAPLAMA:</h6>
+      <div class="col-lg-4">
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">İlk Lot Sayısı: </span>
+          <input type="number"  class="form-control"  data-ng-model="ilklot"><span style="position: absolute; right: 5px;">adet</span><br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">İlk Hisse Maaliyeti: </span>
+          <input type="number"  class="form-control"  data-ng-model="ilkmaaliyet"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">İkinci Lot Sayısı: </span>
+          <input type="number"  class="form-control"  data-ng-model="ikincilot"><span style="position: absolute; right: 5px;">adet</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">İkinci Hisse Maaliyeti: </span>
+          <input type="number"  class="form-control"  data-ng-model="ikincimaaliyet"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+      </div>
+
+
+      <br>
+      Son maaliyet:<span style="color: red;">{{sonmaaliyet()}} </span>  TL<br>
+      Toplam hisse adedi:<span style="color: rgb(4, 0, 255);">{{ilklot + ikincilot}} </span>  TL<br>
+      Toplam tutar:<span style="color: rgb(17, 0, 255);">{{(sonmaaliyet() * (ilklot + ikincilot)).toFixed(8)}} </span>  TL<br>
+      
+      <hr>
+      <!--  -->
+
+      <h6 class="baslik"><span class="material-icons">
+        favorite_border
+        </span>%X KAR İÇİN KAÇTAN SATMAN GEREKLİ?  :</h6>
+      <div class="col-lg-4">
+      <div class="input-group mb-3" style="position: relative;">
+        <span class="input-group-text text-primary">Lot sayısı: </span>
+        <input type="number"  class="form-control"  data-ng-model="adet"><span style="position: absolute; right: 5px;">adet</span> <br>
+      </div>
+      <div class="input-group mb-3" style="position: relative;">
+        <span class="input-group-text text-primary">Hisse maaliyeti: </span>
+        <input type="number"  class="form-control"  data-ng-model="maaliyet"><span style="position: absolute; right: 5px;">TL</span> <br>
+      </div>
+      <div class="input-group mb-3">
+        <span class="input-group-text text-primary">Kar etmek istediğin yüzde: %</span>
+        <input type="number"  class="form-control"  data-ng-model="kar"><br>
+      </div>
+    </div>
+      <br>
+      1 adet lotu satman gereken fiyat: <span style="color: red;">{{hisseSon()}} </span>  TL<br>
+      Toplam ele geçecek tutar: <span style="color:blue;" >{{hisseSon() * adet}}</span> TL <br>
+      Toplam net kar: <span style="color: green;">{{netkar1() }}</span>
+      <ul>
+        <li ng-repeat="x in products">
+          <span style="color:orange;">{{x.name}}</span> <span style="color:blue;">{{x.maaliyet}}</span> * <span style="color: green;">%{{x.kar}}</span> = <span style="color: red;">{{x.tutar}}</span><span ng-click="removeItem($index)">&times;</span>
+        </li>
+      </ul>
+      Hisse ismi: <input type="text" ng-model="addMe">
+      <button ng-click="addItem()">Ekle</button>
+      <p>{{errortext}}</p>
+
+
+
+
+      <hr>
+      <!--  -->
+      <h6 class="baslik"><span class="material-icons">
+        grade
+        </span>SATMAK İSTEDİĞİN KAZANÇ ORANI NE?  :</h6>
+      <div class="col-lg-4">
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">Lot sayısı: </span>
+          <input type="number"  class="form-control"  data-ng-model="adet2"><span style="position: absolute; right: 5px;">adet</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">1 lot Hisse maaliyeti: </span>
+          <input type="number"  class="form-control"  data-ng-model="maaliyet2"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">1 lotu kaçtan satmak istiyorsun? </span>
+          <input type="number"  class="form-control"  data-ng-model="fiyat2"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+      </div>
+
+      
+      <br>
+      Yüzdelik kazancın: <span style="color: red;">% {{farkyuzde()}}</span><br>
+      
+      Toplam ele geçecek tutar: <span style="color:green;">{{mytutar2()}}</span> TL <br>
+      Elde ettiğin net kar: <span style="color: blue;">{{mykar2()}} </span>  TL<br>
+
+      <hr>
+
+
+      <h6 class="baslik"><span class="material-icons">
+        verified
+        </span>PDDD/DD  :</h6>
+      <div class="col-lg-4">
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">PD/DD: </span>
+          <input type="number"  class="form-control" data-ng-init="PDDD=1.90" data-ng-model="PDDD"><span style="position: absolute; right: 5px;"></span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">DEFTER DEĞERİ:</span>
+          <input type="number"  class="form-control" data-ng-init="defterDegeri=7.84" data-ng-model="defterDegeri"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">1 LOT FİYATI: </span>
+          <input type="number"  class="form-control" data-ng-init="simdikiFiyat=14.94" data-ng-model="simdikiFiyat"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+      </div>
+
+      
+      <br>
+      PDDD/DD <span style="color: red;">{{(PDDD/defterDegeri).toFixed(2)}}</span><br>
+      
+      İlk Hedef: <span style="color:green;">{{((simdikiFiyat/(PDDD/defterDegeri))).toFixed(2)}}</span> TL {{(((simdikiFiyat/(PDDD/defterDegeri)))/simdikiFiyat).toFixed(1)}}x<br>
+      İkinci Hedef:  <span style="color: blue;">{{(((simdikiFiyat/(PDDD/defterDegeri))*1.6)).toFixed(2)}} </span>  TL {{((((simdikiFiyat/(PDDD/defterDegeri))*1.6))/simdikiFiyat).toFixed(1)}}x<br>
+      <a href="https://www.borsagundem.com/piyasa-ekrani/hisse-detay/ASELS" target="_blank">Aselsan</a>
+
+      <hr>
+      <!--  -->
+      <h6 class="baslik"><span class="material-icons">
+        pets
+        </span>X HİSSESİ NE KADARLIK OLSUN?  :</h6>
+      <div class="col-lg-4">
+        
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">1 lot Hisse maaliyeti: </span>
+          <input type="number"  class="form-control" data-ng-init="maaliyet3=100" data-ng-model="maaliyet3"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">Kaç liralık alacaksın?: </span>
+          <input type="number"  class="form-control"  data-ng-init="fiyat3=10" data-ng-model="fiyat3"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+      </div>
+
+      
+      <br>
+      Eline kaç lot geçecek? <span style="color: red;"> {{(fiyat3/maaliyet3).toFixed(8)}}</span><br>
+      
+      
+
+      <hr>
+      <h6 class="baslik"><span class="material-icons">
+        shopping_bag
+        </span>ELİNDEKİ LOT KAÇ TL YAPAR? :</h6>
+      <div class="col-lg-4">
+        
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">1 lot Hisse maaliyeti: </span>
+          <input type="number"  class="form-control" data-ng-init="maaliyet4=1852" data-ng-model="maaliyet4"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">Kaç lotun var?: </span>
+          <input type="number"  class="form-control"  data-ng-init="fiyat4=0.008" data-ng-model="fiyat4"><span style="position: absolute; right: 5px;">Adet</span> <br>
+        </div>
+      </div>
+
+      
+      <br>
+      Eline kaç TL geçecek? <span style="color: red;"> {{(fiyat4*maaliyet4).toFixed(8)}}</span><br>
+      
+      
+
+      <hr>
+            
+      
+
+      
+
+      
+      
+      <br><br><br><br>
+
+      <!--  -->
+      <h6 class="baslik"><span class="material-icons">
+        flutter_dash
+        </span>ATR Sistemi</h6>
+      <div class="col-lg-4">
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">Hisse Fiyatı: </span>
+          <input type="number"  class="form-control" data-ng-init="hisse5=18; atr5=0.4" data-ng-model="hisse5"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        <div class="input-group mb-3" style="position: relative;">
+          <span class="input-group-text text-primary">ATR Seviyesi: </span>
+          <input type="number"  class="form-control" data-ng-model="atr5"><span style="position: absolute; right: 5px;">TL</span> <br>
+        </div>
+        
+      </div>
+
+
+      <br>
+      Stop Loss: <span style="color: red;">{{(hisse5 - (1.5*atr5)).toFixed(8)}} </span>  TL<br>
+      -1. basamak: <span style="color: red;">{{(hisse5 - (1*atr5)).toFixed(8)}} </span>  TL<br>
+      0. basamak: <span style="color: blue;">{{(hisse5).toFixed(8)}} </span>  TL<br>
+      1. basamak: <span style="color: red;">{{(hisse5 + (1*atr5)).toFixed(8)}} </span>  TL<br>
+      2. basamak: <span style="color: red;">{{(hisse5 + (2*atr5)).toFixed(8)}} </span>  TL<br>
+      3. basamak: <span style="color: red;">{{(hisse5 + (3*atr5)).toFixed(8)}} </span>  TL<br>
+      4. basamak: <span style="color: red;">{{(hisse5 + (4*atr5)).toFixed(8)}} </span>  TL<br>
+      5. basamak: <span style="color: red;">{{(hisse5 + (5*atr5)).toFixed(8)}} </span>  TL<br>
+      6. basamak: <span style="color: red;">{{(hisse5 + (6*atr5)).toFixed(8)}} </span>  TL<br>
+      7. basamak: <span style="color: red;">{{(hisse5 + (7*atr5)).toFixed(8)}} </span>  TL<br>
+      8. basamak: <span style="color: red;">{{(hisse5 + (8*atr5)).toFixed(8)}} </span>  TL<br>
+      9. basamak: <span style="color: red;">{{(hisse5 + (9*atr5)).toFixed(8)}} </span>  TL<br>
+      10. basamak: <span style="color: red;">{{(hisse5 + (10*atr5)).toFixed(8)}} </span>  TL<br>
+      11. basamak: <span style="color: red;">{{(hisse5 + (11*atr5)).toFixed(8)}} </span>  TL<br>
+      12. basamak: <span style="color: red;">{{(hisse5 + (12*atr5)).toFixed(8)}} </span>  TL<br>
+      13. basamak: <span style="color: red;">{{(hisse5 + (13*atr5)).toFixed(8)}} </span>  TL<br>
+      
+      <hr>
+      <!--  -->
+
+      
+        
+      </div>
+      
+      <!--  -->
+
+
+
+    </div>
+
+
+
+
+
+
+      <script>
+      var app = angular.module('myApp', []);
+      app.controller('myCtrl', function($scope) {
+
+
+
+
+        //KAÇ DK GEÇMİŞ?
+        //var d = new Date();
+//a = d.getDay();     // getting the weekday
+$scope.zaman=new Date();
+//$scope.saat2=d.getHours();
+//$scope.dk2=d.getMinutes();
+
+//getDate();          // day as a number (1-31)
+//getDay();           // weekday as a number (0-6)
+//getFullYear();      // four digit year (yyyy)
+//getHours();         // hour (0-23)
+//getMilliseconds();  // milliseconds (0-999)
+//getMinutes();       // minutes (0-59)
+//getMonth();         // month (0-11)
+//getSeconds();       // seconds (0-59)
+//getTime();          // milliseconds since 1970
+          
+  $scope.gun1=$scope.zaman.getDate();
+  $scope.saat1= 13;
+  $scope.dk1= 13;
+          
+
+
+  
+
+          if (typeof(Storage) !== "undefined") {
+            if (localStorage.getItem("dklar")){
+              var myDklar = localStorage.getItem("dklar").split("*");
+              $scope.gun1=Number(myDklar[0]);
+              $scope.saat1=Number(myDklar[1]);
+              $scope.dk1=Number(myDklar[2]);
+              console.log(myDklar);
+              
+            } else {
+            $scope.gun1=$scope.zaman.getDate();
+            $scope.saat1= 13;
+            $scope.dk1= 13;
+            }
+          } else {
+            $scope.gun1=$scope.zaman.getDate();
+            $scope.saat1= 13;
+            $scope.dk1= 13;
+          }
+
+          console.log($scope.gun1);
+
+  
+            // localStorage.setItem("hisseler", "Smith john 143 - fgr dkdm 334 - lms ksl 323");
+            
+            // console.log(myhisseler);
+            // var mylstor = myhisseler.join(" - ");
+            // localStorage.setItem("hisseler2",mylstor);
+           
+
+          
+$scope.dkKaydet = function () {
+      if (typeof(Storage) !== "undefined") {
+            
+              myDklar33 = $scope.gun1 + "*" + $scope.saat1 + "*" + $scope.dk1;
+              console.log(myDklar33);
+              localStorage.setItem("dklar" , myDklar33);
+    } 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //} else {
+  //  $scope.errortext = "The item is already in your shopping list.";
+  //}
+
+/*
+$scope.removeItem = function (x) {
+  //$scope.errortext = "";
+  $scope.products.splice(x, 1);
+
+  if (typeof(Storage) !== "undefined") {
+            //if (localStorage.getItem("hisseler")){
+              //var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              $scope.mylstore = [];
+              for(var i=0; i<$scope.products.length;i++){
+                $scope.mylstore.push($scope.products[i].name + " "+ $scope.products[i].maaliyet + " "+ $scope.products[i].kar + " "+ $scope.products[i].tutar);
+              }
+              $scope.myhisseler3 = $scope.mylstore.join(" - ");
+              localStorage.setItem("hisseler",$scope.myhisseler3);
+  }
+}
+*/
+        //////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          //%X KAR ETMEK İÇİN KAÇTAN SATMAN GEREKLİ?
+         $scope.adet=1;
+          $scope.maaliyet= 100;
+        $scope.kar= 5;
+          
+          $scope.hisseSon= function(){
+          $scope.toplam=$scope.maaliyet + ($scope.maaliyet * $scope.kar * 0.01);
+          $scope.toplam=$scope.toplam.toFixed(8);
+          return $scope.toplam;
+          }
+
+          $scope.netkar1 = function(){
+            return Number(($scope.hisseSon() * $scope.adet) - ($scope.maaliyet * $scope.adet)).toFixed(8);
+          }
+
+          
+          
+
+          $scope.products = [];
+          if (typeof(Storage) !== "undefined") {
+            if (localStorage.getItem("hisseler")){
+              var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              for(var i=0; i<myhisseler.length;i++){
+                var hiss=myhisseler[i].split(" ");
+                var myhisse ={};
+                myhisse.name = hiss[0];
+                myhisse.maaliyet=hiss[1];
+                myhisse.kar = hiss[2];
+                myhisse.tutar=hiss[3];
+                $scope.products.push(myhisse);
+                console.log(myhisse);
+              }
+            }
+          }
+
+            // localStorage.setItem("hisseler", "Smith john 143 - fgr dkdm 334 - lms ksl 323");
+            
+            // console.log(myhisseler);
+            // var mylstor = myhisseler.join(" - ");
+            // localStorage.setItem("hisseler2",mylstor);
+           
+
+          
+$scope.addItem = function () {
+  //$scope.hisseadi = "";
+  //$scope.errortext = "";
+  if (!$scope.addMe) {return;}
+  //if ($scope.products.indexOf($scope.addMe) == -1) {
+    $scope.hisseadi = {};
+    $scope.hisseadi.name = $scope.addMe;
+    $scope.hisseadi.maaliyet=$scope.maaliyet;
+    $scope.hisseadi.kar = $scope.kar;
+    $scope.hisseadi.tutar= $scope.hisseSon();
+
+    //$scope.addMe + " hissesini %" + $scope.kar + " ile satmak için " + $scope.hisseSon() + " fiyattan satman gerek.";
+    //$scope.products.push($scope.hisseadi.name + " hissesini %" + $scope.hisseadi.kar + " ile satmak için " + $scope.hisseadi.tutar + " fiyattan satman gerek.");
+    $scope.products.push($scope.hisseadi);
+
+    if (typeof(Storage) !== "undefined") {
+            //if (localStorage.getItem("hisseler")){
+              //var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              $scope.mylstore = [];
+              for(var i=0; i<$scope.products.length;i++){
+                $scope.mylstore.push($scope.products[i].name + " "+$scope.products[i].maaliyet + " "+ $scope.products[i].kar + " "+ $scope.products[i].tutar);
+              }
+              $scope.myhisseler3 = $scope.mylstore.join(" - ");
+              localStorage.setItem("hisseler",$scope.myhisseler3);
+    }
+}
+  //} else {
+  //  $scope.errortext = "The item is already in your shopping list.";
+  //}
+
+
+$scope.removeItem = function (x) {
+  //$scope.errortext = "";
+  $scope.products.splice(x, 1);
+
+  if (typeof(Storage) !== "undefined") {
+            //if (localStorage.getItem("hisseler")){
+              //var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              $scope.mylstore = [];
+              for(var i=0; i<$scope.products.length;i++){
+                $scope.mylstore.push($scope.products[i].name + " "+ $scope.products[i].maaliyet + " "+ $scope.products[i].kar + " "+ $scope.products[i].tutar);
+              }
+              $scope.myhisseler3 = $scope.mylstore.join(" - ");
+              localStorage.setItem("hisseler",$scope.myhisseler3);
+  }
+}
+        //////////////////////////
+
+        //SATMAK İSTEDİĞİN FİYATTAKİ KAZANÇ ORANI NE? 
+        $scope.adet2=1;
+          $scope.maaliyet2= 100;
+        $scope.fiyat2= 105;
+          
+          $scope.farkyuzde= function(){
+          $scope.fark = $scope.fiyat2 - $scope.maaliyet2;
+          $scope.farkyuz = $scope.fark / $scope.maaliyet2;
+          $scope.farkyuz *= 100;
+          $scope.farkyuz = Number($scope.farkyuz).toFixed(8);
+          return $scope.farkyuz;
+          }
+
+          $scope.mytutar2 = function(){
+            $scope.tutar2 = $scope.adet2 * $scope.fiyat2;
+            $scope.tutar2 = Number($scope.tutar2).toFixed(8);
+            return $scope.tutar2;
+          }
+
+          $scope.mykar2 = function(){
+            $scope.kar3 =  ($scope.adet2 * $scope.fiyat2) - ($scope.adet2 * $scope.maaliyet2);
+            $scope.kar3 = Number($scope.kar3).toFixed(8);
+            return $scope.kar3;
+          }
+          //////////////////////////
+
+        
+        //MAALİYET HESAPLAMA
+        $scope.ilklot=100;
+        $scope.ilkmaaliyet= 10;
+        $scope.ikincilot=200;
+        $scope.ikincimaaliyet= 20;
+
+        $scope.sonmaaliyet= function(){
+          var ortalama=(($scope.ilklot * $scope.ilkmaaliyet) + ($scope.ikincilot * $scope.ikincimaaliyet))/($scope.ilklot+$scope.ikincilot);
+          ortalama=ortalama.toFixed(8);
+          return ortalama;
+          }
+          ///////////////
+          
+
+        //%X KARLA BİRLEŞİK ÇARPAN:
+        $scope.anapara4=10000;
+        $scope.adet4=200;
+        $scope.oran4=0.2;
+        $scope.kesinti4=0;
+
+        $scope.sonuc4 = function(){
+          var sum = Number($scope.anapara4);
+      var i=0;
+      for(i=0;i<Number($scope.adet4);i++){
+      sum=sum + (sum*Number($scope.oran4*0.01));
+      if($scope.kesinti4){
+          sum=sum-($scope.kesinti4);
+      }
+      }
+      return Number(sum).toFixed(8);
+        }
+      //////////////////////////////////
+
+        //ATR Sistemi
+        //$scope.hisse5=18;
+        //$scope.atr5=0.4;
+
+        
+      });
+      </script>
+
+
+
+
+<!-- 
+<hr>
+<h5 class="baslik">%X KARLA BİRLEŞİK ÇARPAN</h5>
+<div id="mydiv1"></div>
+<div id="mydiv2"></div>
+<p>anapara: <input type="number" id="anapara"></p>
+<p>adet: <input type="number" name="" id="adet"></p>
+<p>oran: %<input type="number" name="" id="oran"></p>
+<p>adet başına kesinti: <input type="number" name="" id="kesinti"></p>
+<button id="buton">hesapla</button>
+<p>sonuç: <span id="sonuc"></span></p>
+ -->
+
+<!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+<script>
+
+  //$(document).ready(function () {
+
+    /*
+      console.log("document ready");
+
+      
+      
+      $("#buton").click(function () {
+          var myanapara=$("#anapara").val();
+      var myadet=$("#adet").val();
+      var myoran=$("#oran").val();
+      var mykesinti=$("#kesinti").val();
+          var mysonuc=kademeli(myanapara,myadet,myoran,mykesinti);
+          mysonuc = Number(mysonuc).toFixed(8);
+          $("#sonuc").html(mysonuc);
+          console.log(myoran);
+      });
+
+     
+      
+
+      var a=kademeli(1000,52,0.05);
+  function kademeli(anapara,adet,oran,kesinti) {
+      var sum = Number(anapara);
+      var i=0;
+      for(i=0;i<Number(adet);i++){
+      sum=sum + (sum*Number(oran*0.01));
+      if(kesinti){
+          sum=sum-(kesinti);
+      }
+      }
+      return sum;
+  }
+
+  */
+  //$("#mydiv2").html(a);
+     
+  /*
+      var str='{"names":[' + // create json object
+  '{"first":"Hakuna","lastN":"Matata"},' +
+  '{"first":"Jane","lastN":"Doe"},' +
+  '{"first":"Air":"lastN":"Jordan"}]}';
+  var obj = JSON.parse(str);
+  //document.write(obj.names[1].first);
+  console.log(obj.names[1].first);
+      */
+  //});
+
+ 
+
+  
+
+</script>
+
+<SCript>
+  var currenciesList = [];
+var todayDate = new Date().toISOString().slice(0,10);
+var pairing = prompt('What pairing(s) would you like?', 'BTC,ETH,USD,USDT') || 'BTC,ETH,USD,USDT';
+var limit = prompt('How many symbols do you want?', '50') || '50';
+var exchange = prompt('Enter the TradingView exchange code (optional)', 'BITTREX') || '';
+exchange = exchange.toUpperCase();
+pairing = pairing.toUpperCase();
+pairing = pairing.replace(/[^A-Z0-9,]+/g,'');
+pairingArray = pairing.split(',');
+for(var o=0;o<pairingArray.length;o++){
+  var count = 1;
+  $("table#currencies tr[role=row] > td.circulating-supply > a > span.hidden-xs").each(function(i,v){
+    var symbol = $(v).text();
+    symbol = symbol.replace('MIOTA', 'IOTA');
+    if(symbol != pairingArray[o] && exchange != ''){ symbol = exchange + ':' + symbol; }
+    if(count<=limit){
+      if(symbol != pairingArray[o]){
+        currenciesList.push(symbol + pairingArray[o]);
+      }
+      count++;
+    }
+  });
+}
+var element = document.createElement('a');
+element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(currenciesList.join("\n")));
+element.setAttribute('download', 'CMC100 (' + todayDate + ').txt');
+element.style.display = 'none';
+document.body.appendChild(element);
+element.click();
+document.body.removeChild(element);
+</SCript>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-popRpmFF9JQgExhfw5tZT4I9/CI5e2QcuUZPOVXb1m7qUmeR2b50u+YFEYe1wgzy" crossorigin="anonymous"></script>
+</body>
+</html>

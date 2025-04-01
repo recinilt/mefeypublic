@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QR Kod ve Barkod Tarayıcı</title>
+    <style>
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+      }
+
+      /* Bildirim stili */
+      #notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        background-color: #f44336; /* Kırmızı */
+        color: white;
+        border-radius: 5px;
+        z-index: 1000; /* Diğer öğelerin üzerinde görünmesini sağlar */
+        display: none; /* Başlangıçta gizli */
+      }
+
+      /* Ürün adı input stilini düzenle - minimum genişlik */
+      #productTable input[type="text"][data-field="productName"] {
+        min-width: 50px; /* Minimum genişlik */
+      }
+    </style>
+  </head>
+  <body>
+    <h2>QR Kod / Barkod Tarayıcı</h2>
+
+    <input type="text" id="scannerInput" placeholder="QR Kod veya Barkod Okutun" />
+
+    <div id="notification"></div>
+
+    <h3>Ürün Listesi</h3>
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>Sıra</th>
+          <th>Ürün Adı</th>
+          <th>Ürün Kutu Sayısı</th>
+          <th>Ürün İçerik Sayısı</th>
+          <th>Son Kullanma Tarihi (Yıl)</th>
+          <th>Son Kullanma Tarihi (Ay)</th>
+          <th>Kaydet</th>
+          <th>İptal</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h3>Ürün Özeti</h3>
+    <table id="summaryTable">
+      <thead>
+        <tr>
+          <th>Sıra</th>
+          <th>Ürün Adı</th>
+          <th>Toplam Ürün Kutu Sayısı</th>
+          <th>Toplam Ürün İçerik Sayısı</th>
+          <th>Detay</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <input type="text" id="fileNameInput" placeholder="Dosya Adı" />
+    <button onclick="downloadExcel()">İndir</button>
+
+    <script src="xlsx.full.min.js"></script>
+    <script src="ilacgtinleri.js"></script>
+    <script>
+      let products = [];
+    
+      // Sayfa yüklendiğinde localStorage'i kontrol et ve productNames'i güncelle
+      for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        if (key.startsWith('010') || key.startsWith('86')) { // Ürün kodu kontrolü
+          try {
+            let storedProduct = JSON.parse(localStorage.getItem(key));
+            // Eğer productNames'de aynı key yoksa veya name/unitCount farklıysa güncelle
+            if (!productNames[key] || productNames[key].name !== storedProduct.name || productNames[key].unitCount !== storedProduct.unitCount) {
+              productNames[key] = storedProduct;
+            }
+          } catch (error) {
+            console.error('Hata:', error);
+          }
+        }
+      }
+    
+      updateProductTable();
+      updateSummaryTable();
+    
+      const scannerInput = document.getElementById('scannerInput');
+      scannerInput.focus();
+    
+      function parseText(text) {
+        const substring = text.substring(30, 40);
+        const index17 = substring.indexOf("17");
+        if (index17 !== -1) {
+          const firstPart = text.substring(0, 30 + index17);
+          const secondPart = text.substring(30 + index17 + 2);
+          const firstTwoDigits = secondPart.substring(0, 2);
+          const thirdAndFourthDigits = secondPart.substring(2, 4);
+          return [firstTwoDigits, thirdAndFourthDigits];
+        } else {
+          return "17 metni 30-40 karakterleri arasında bulunamadı.";
+        }
+      }
+    
+      let inputTimer;
+      scannerInput.addEventListener('input', function() {
+        clearTimeout(inputTimer);
+        inputTimer = setTimeout(() => {
+          const inputValue = this.value;
+          this.value = '';
+    
+          if (!inputValue.startsWith('01086') && !inputValue.startsWith('86')) {
+            showNotification('Geçersiz QR Kod veya Barkod! Lütfen 01086 veya 86 ile başlayan bir kod girin.');
+            return;
+          }
+    
+          let productCode, expiryYear, expiryMonth;
+          var existingProduct = null
+          if (inputValue.startsWith('86') && inputValue.length === 13) {
+            productCode = inputValue;
+            expiryYear = 3000;
+            expiryMonth = 12;
+          } else if (inputValue.startsWith('01086') && inputValue.length >= 40) {
+            existingProduct = products.find((p) => p.fullCode === inputValue);
+            productCode = inputValue.substring(0, 16);
+            expiryYear = parseInt('20' + parseText(inputValue)[0]);
+            expiryMonth = parseInt(parseText(inputValue)[1]);
+          } else {
+            showNotification('Geçersiz QR Kod veya Barkod!');
+            return;
+          }
+    
+          if (existingProduct) {
+            showNotification('Bu QR kod zaten tarandı!');
+            return;
+          }
+    
+          const now = new Date();
+          const currentYear = now.getFullYear();
+          const currentMonth = now.getMonth() + 1;
+          if (expiryYear < currentYear || (expiryYear === currentYear && expiryMonth < currentMonth)) {
+            showNotification('Son kullanma tarihi geçmiş bir ürün eklendi!');
+          }
+    
+          const productName = getProductName(productCode); // localStorage'den oku
+          const unitCount = getProductUnitCount(productCode); // localStorage'den oku
+          const newProduct = {
+            timestamp: Date.now(),
+            productCode: productCode,
+            productName: productName,
+            boxCount: 1,
+            unitCount: unitCount,
+            expiryYear: expiryYear,
+            expiryMonth: expiryMonth,
+            fullCode: inputValue,
+          };
+    
+          products.push(newProduct);
+          updateProductTable();
+          updateSummaryTable();
+        }, 300);
+      });
+    
+      // localStorage'den ürün adını oku
+      function getProductName(productCode) {
+        try {
+          let storedProduct = JSON.parse(localStorage.getItem(productCode));
+          if (storedProduct) {
+            return storedProduct.name;
+          }
+        } catch (error) {
+          console.error('Hata:', error);
+        }
+        return productNames[productCode] ? productNames[productCode].name : 'Bilinmeyen';
+      }
+    
+      // localStorage'den ürün içeriğini oku
+      function getProductUnitCount(productCode) {
+        try {
+          let storedProduct = JSON.parse(localStorage.getItem(productCode));
+          if (storedProduct) {
+            return storedProduct.unitCount;
+          }
+        } catch (error) {
+          console.error('Hata:', error);
+        }
+        return productNames[productCode] ? productNames[productCode].unitCount : 1;
+      }
+    
+      function updateProductTable() {
+        const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+    
+        products.forEach((product, index) => {
+          const row = tableBody.insertRow();
+          row.insertCell().textContent = index + 1;
+          row.insertCell().innerHTML = `<input type="text" value="${product.productName}" data-timestamp="${product.timestamp}" data-field="productName">`;
+          row.insertCell().innerHTML = `<input type="number" value="${product.boxCount}" data-timestamp="${product.timestamp}" data-field="boxCount">`;
+          row.insertCell().innerHTML = `<input type="number" value="${product.unitCount}" data-timestamp="${product.timestamp}" data-field="unitCount">`;
+          row.insertCell().innerHTML = `<input type="number" value="${product.expiryYear}" data-timestamp="${product.timestamp}" data-field="expiryYear">`;
+          row.insertCell().innerHTML = `<input type="number" value="${product.expiryMonth}" data-timestamp="${product.timestamp}" data-field="expiryMonth">`;
+          row.insertCell().innerHTML = `<button onclick="saveProduct(${product.timestamp})">Kaydet</button>`;
+          row.insertCell().innerHTML = `<button onclick="deleteProduct(${product.timestamp})">İptal</button>`;
+        });
+    
+        adjustInputWidths();
+      }
+    
+      function updateSummaryTable() {
+        const tableBody = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+        tableBody.innerHTML = '';
+    
+        const summary = {};
+        products.forEach((product) => {
+          const key = product.productName;
+          if (!summary[key]) {
+            summary[key] = {
+              boxCount: 0,
+              unitCount: 0,
+              expiryDetails: {},
+            };
+          }
+          summary[key].boxCount += product.boxCount;
+          summary[key].unitCount += product.boxCount * product.unitCount;
+    
+          const expiryKey = `SKT-${product.expiryYear}-${product.expiryMonth.toString().padStart(2, '0')}`;
+          summary[key].expiryDetails[expiryKey] = (summary[key].expiryDetails[expiryKey] || 0) + product.boxCount;
+        });
+        let index = 1;
+        for (const productName in summary) {
+          const row = tableBody.insertRow();
+          row.insertCell().textContent = index++;
+          row.insertCell().textContent = productName;
+          row.insertCell().textContent = summary[productName].boxCount;
+          row.insertCell().textContent = summary[productName].unitCount;
+    
+          let expiryDetails = [];
+          for (const expiryKey in summary[productName].expiryDetails) {
+            expiryDetails.push(`${expiryKey}:${summary[productName].expiryDetails[expiryKey]} kutu`);
+          }
+          row.insertCell().textContent = expiryDetails.join(', ');
+        }
+      }
+    
+      // saveProduct fonksiyonunu localStorage'i güncelleyecek şekilde düzenle
+      function saveProduct(timestamp) {
+        const productIndex = products.findIndex((p) => p.timestamp === timestamp);
+        const row = document.getElementById('productTable').rows[productIndex + 1];
+    
+        // localStorage'e kaydet
+        const productCode = products[productIndex].productCode;
+        localStorage.setItem(productCode, JSON.stringify({
+          name: row.cells[1].firstChild.value,
+          unitCount: parseInt(row.cells[3].firstChild.value),
+        }));
+    
+        // productNames'i güncelle (Artık sadece ilk yüklemede kullanılacak)
+        productNames[productCode] = {
+          name: row.cells[1].firstChild.value,
+          unitCount: parseInt(row.cells[3].firstChild.value),
+        };
+        updateSummaryTable();
+      }
+    
+      function deleteProduct(timestamp) {
+        products = products.filter((p) => p.timestamp !== timestamp);
+        updateProductTable();
+        updateSummaryTable();
+      }
+    
+      document.getElementById('productTable').addEventListener('change', function(event) {
+        const timestamp = parseInt(event.target.dataset.timestamp);
+        const field = event.target.dataset.field;
+        const newValue = event.target.value;
+    
+        const productIndex = products.findIndex((p) => p.timestamp === timestamp);
+        products[productIndex][field] = field === 'boxCount' || field === 'unitCount' ? parseInt(newValue) : newValue;
+    
+        updateSummaryTable();
+    
+        if (field === 'productName') {
+          adjustInputWidth(event.target);
+        }
+      });
+    
+      function downloadExcel() {
+        const fileName = document.getElementById('fileNameInput').value || 'urun_ozeti.xlsx';
+    
+        const ws = XLSX.utils.table_to_sheet(document.getElementById('summaryTable'));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Ürün Özeti');
+        XLSX.writeFile(wb, fileName);
+      }
+    
+      function showNotification(message) {
+        const notificationDiv = document.getElementById('notification');
+        notificationDiv.textContent = message;
+        notificationDiv.style.display = 'block';
+        setTimeout(() => {
+          notificationDiv.style.display = 'none';
+        }, 3000);
+      }
+    
+      function adjustInputWidths() {
+        const inputs = document.querySelectorAll('#productTable input[type="text"][data-field="productName"]');
+        inputs.forEach(adjustInputWidth);
+      }
+    
+      function adjustInputWidth(input) {
+        const temp = document.createElement('span');
+        temp.style.visibility = 'hidden';
+        temp.style.position = 'absolute';
+        temp.style.whiteSpace = 'pre';
+        temp.textContent = input.value;
+        document.body.appendChild(temp);
+        input.style.width = temp.offsetWidth + 'px';
+        document.body.removeChild(temp);
+      }
+    </script>
+  </body>
+</html>

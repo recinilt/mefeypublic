@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script>
+    <script>
+        //const ccxt = require('ccxt');
+
+(async () => {
+  const exchange = new ccxt.binance({
+    'apiKey': 'YOUR_API_KEY',
+    'secret': 'YOUR_SECRET',
+  });
+
+  // 15 dakikalık mumlar için '15m' kullanın
+  const timeframe = '15m';
+  const symbol = 'BTC/USDT'; // İstediğiniz sembolü kullanın
+  const limit = 400; // Geriye dönük veri miktarı
+
+  try {
+    const ohlcv = await exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+    console.log(ohlcv);
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapingbee ile Veri Çekme</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<h1>Çekilen Veri:</h1>
+<p id="data">Veri yükleniyor...</p>
+
+<script>
+    $(document).ready(function() {
+        var SCRAPINGBEE_API_KEY = 'B7HB6IVPAPKDKOV76V6LHTMZCA51H3Z3MO2ZULJVNME4QJRQWBP7LU13AKXO4PIO8A7K0BZ297VQ1QRJ'; // Buraya Scrapingbee API anahtarınızı ekleyin
+        var targetURL = 'https://www.borsagundem.com.tr/piyasa-ekrani/hisse-detay/ASELS';
+
+        $.ajax({
+            url: 'https://app.scrapingbee.com/api/v1/?api_key=' + SCRAPINGBEE_API_KEY + '&url=' + encodeURIComponent(targetURL),
+            type: 'GET',
+            success: function(res) {
+                var html = $.parseHTML(res);
+                // XPath'i CSS seçiciye dönüştürdüm, bu örnek için doğru olmayabilir.
+                var value = $(html).find('div.hisdtl > div.dtb1 > ul > li.s3 > span').text();
+                $('#data').text(value);
+                console.log(value + "lkmlm");
+            },
+            error: function() {
+                $('#data').text('Veri çekilemedi.');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin Order Depth Calculator</title>
+</head>
+<body>
+<h1>Coin Order Depth Calculator</h1>
+<label for="symbol">Enter symbol (e.g., BTCUSDT):</label>
+<input type="text" id="symbol" name="symbol">
+<button onclick="calculateDepth()">Calculate Depth</button>
+<p id="result"></p>
+
+<script>
+function getApiData(symbol, callback) {
+    const url = `https://api.binance.com/api/v3/depth?symbol=${symbol.toUpperCase()}&limit=1000`;
+    fetch(url)
+    .then(response => response.json())
+    .then(data => callback(null, data))
+    .catch(error => callback(error, null));
+}
+
+function calculateDepth() {
+    const symbol = document.getElementById('symbol').value;
+    getApiData(symbol, (err, data) => {
+        if (err) {
+            document.getElementById('result').innerHTML = 'Error fetching data: ' + err;
+            return;
+        }
+
+        const asks = data.asks; // Selling orders
+        const bids = data.bids; // Buying orders
+        const currentPrice = parseFloat(asks[0][0]);
+        const upperLimit = currentPrice * 1.03;
+        const lowerLimit = currentPrice * 0.97;
+
+        let askSum = 0;
+        for (let i = 0; i < asks.length; i++) {
+            if (parseFloat(asks[i][0]) <= upperLimit) {
+                askSum += parseFloat(asks[i][1]);
+            }
+        }
+
+        let bidSum = 0;
+        for (let i = 0; i < bids.length; i++) {
+            if (parseFloat(bids[i][0]) >= lowerLimit) {
+                bidSum += parseFloat(bids[i][1]);
+            }
+        }
+
+        document.getElementById('result').innerHTML = `Total selling orders up to +3%: ${askSum.toFixed(2)}<br>Total buying orders down to -3%: ${bidSum.toFixed(2)}`;
+    });
+}
+</script>
+</body>
+</html>

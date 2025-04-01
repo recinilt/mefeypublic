@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+        //const fetch = require('node-fetch');
+
+async function getCoinMarketValues(coinIds) {
+    const marketValues = [];
+    
+    for (const coinId of coinIds) {
+        try {
+            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`);
+            const data = await response.json();
+            marketValues.push({ name: data.name, marketValue: data.market_data.market_cap.usd });
+        } catch (error) {
+            console.error(`Coin '${coinId}' verisi alınırken hata oluştu:`, error);
+        }
+    }
+    
+    return marketValues;
+}
+
+async function findMaxMarketValueCoin() {
+    const coinIds = ['bitcoin', 'ethereum', 'ripple', 'litecoin', 'cardano']; // Listede yer almasını istediğin coinlerin ID'leri
+    
+    const marketValues = await getCoinMarketValues(coinIds);
+    
+    let maxMarketValueCoin = marketValues[0];
+
+    for (let i = 1; i < marketValues.length; i++) {
+        if (marketValues[i].marketValue > maxMarketValueCoin.marketValue) {
+            maxMarketValueCoin = marketValues[i];
+        }
+    }
+    
+    console.log(`En yüksek piyasa değerine sahip coin: ${maxMarketValueCoin.name}, Piyasa Değeri: ${maxMarketValueCoin.marketValue} USD`);
+}
+
+findMaxMarketValueCoin();
+
+    </script>
+</body>
+</html>

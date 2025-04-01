@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Trader Long/Short Ratio</title>
+</head>
+<body>
+    <h1>Top Trader Long/Short Ratio (Positions)</h1>
+    <div id="ratio"></div>
+    <script>
+        async function fetchTopTraderLongShortRatio() {
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const targetUrl = 'https://api.binance.com/futures/data/topLongShortPositionRatio?pair=BTCUSD&period=1h';
+            const response = await fetch(proxyUrl + targetUrl);
+            const data = await response.json();
+            const ratio = data[0].longShortRatio;
+            document.getElementById('ratio').innerText = `Top Trader Long/Short Ratio: ${ratio}`;
+        }
+
+        fetchTopTraderLongShortRatio();
+    </script>
+</body>
+</html>

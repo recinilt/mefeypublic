@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIST 100 Hisseleri Değerlendirme</title>
+</head>
+
+<body>
+
+    <table id="hisseTablosu">
+        <thead>
+            <tr>
+                <th>Hisse Kodu</th>
+                <th>F/K</th>
+                <th>FD/FAVÖK</th>
+                <th>Net Borç/FAVÖK</th>
+                <th>Özsermaye Karlılık Oranı</th>
+                <th>Ciro Büyüme Oranı</th>
+                <th>P/BV</th>
+                <th>Temettü Verimi</th>
+                <th>Likidite Oranları</th>
+                <th>Sonuç Puanı</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Veriler buraya gelecek -->
+        </tbody>
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        async function scrapeData() {
+            console.log("scrapedatafunc çalıştı");
+            var scrapapikey = "B7HB6IVPAPKDKOV76V6LHTMZCA51H3Z3MO2ZULJVNME4QJRQWBP7LU13AKXO4PIO8A7K0BZ297VQ1QRJ";
+            const urlbist100 = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temel-Degerler-Ve-Oranlar.aspx?endeks=01';
+            const scrapingBeeUrl = `https://app.scrapingbee.com/api/v1/?api_key=${scrapapikey}&url=${encodeURIComponent(urlbist100)}`;
+
+            const response = await fetch(scrapingBeeUrl);
+            const data = await response.text();
+            return data;
+            /*
+            for (let i = 1; i <= 100; i++) {
+                const hisse = {
+                    kod: $(data).find(`#temelTBody_Ozet > tr:nth-child(${i}) > td.sorting_1 > a`).text().replace(',', '.'),
+                    f_k: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(3)`).text().replace(',', '.')),
+                    fd_favok: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(4)`).text().replace(',', '.')),
+                    net_borc_favok: parseFloat(0),
+                    ozsermaye_karli: parseFloat(0),
+                    ciro_buyume: parseFloat(0),
+                    p_bv: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(6)`).text().replace(',', '.')),
+                    temettu_verimi: parseFloat(0),
+                    likidite: parseFloat(0)
+                };
+
+                populateTable(hisse);
+            };
+            */
+        };
+
+        function populateTable(hisse) {
+            console.log("populateTableFunc çalıştı");
+            const score = calculateScore(hisse);
+
+            const row = `
+                <tr>
+                    <td>${hisse.kod}</td>
+                    <td>${hisse.f_k}</td>
+                    <td>${hisse.fd_favok}</td>
+                    <td>${hisse.net_borc_favok}</td>
+                    <td>${hisse.ozsermaye_karli}</td>
+                    <td>${hisse.ciro_buyume}</td>
+                    <td>${hisse.p_bv}</td>
+                    <td>${hisse.temettu_verimi}</td>
+                    <td>${hisse.likidite}</td>
+                    <td>${score}</td>
+                </tr>
+            `;
+
+            $('#hisseTablosu tbody').append(row);
+        };
+
+        // Puanlama fonksiyonu
+        function calculateScore(hisse) {
+            console.log("calculateScoreFunc çalıştı");
+        var score = 0;
+
+        // F/K Oranı
+        if (hisse.f_k < 10) score += 10;
+        else if (hisse.f_k >= 10 && hisse.f_k < 15) score += 8;
+        else if (hisse.f_k >= 15 && hisse.f_k < 20) score += 6;
+        else score += 4;
+
+        // FD/FAVÖK Oranı
+        if (hisse.fd_favok < 5) score += 10;
+        else if (hisse.fd_favok >= 5 && hisse.fd_favok < 10) score += 8;
+        else if (hisse.fd_favok >= 10 && hisse.fd_favok < 15) score += 6;
+        else score += 4;
+
+        // Net Borç/FAVÖK
+        if (hisse.net_borc_favok < 1) score += 10;
+        else if (hisse.net_borc_favok >= 1 && hisse.net_borc_favok < 2) score += 8;
+        else if (hisse.net_borc_favok >= 2 && hisse.net_borc_favok < 3) score += 6;
+        else score += 4;
+
+        // Özsermaye Karlılık Oranı
+        if (hisse.ozsermaye_karli > 20) score += 10;
+        else if (hisse.ozsermaye_karli <= 20 && hisse.ozsermaye_karli > 15) score += 8;
+        else if (hisse.ozsermaye_karli <= 15 && hisse.ozsermaye_karli > 10) score += 6;
+        else score += 4;
+
+        // Ciro Büyüme Oranı
+        if (hisse.ciro_buyume > 20) score += 10;
+        else if (hisse.ciro_buyume <= 20 && hisse.ciro_buyume > 15) score += 8;
+        else if (hisse.ciro_buyume <= 15 && hisse.ciro_buyume > 10) score += 6;
+        else score += 4;
+
+        // P/BV
+        if (hisse.p_bv < 1) score += 10;
+        else if (hisse.p_bv >= 1 && hisse.p_bv < 2) score += 8;
+        else if (hisse.p_bv >= 2 && hisse.p_bv < 3) score += 6;
+        else score += 4;
+
+        // Temettü Verimi
+        if (hisse.temettu_verimi > 5) score += 10;
+        else if (hisse.temettu_verimi <= 5 && hisse.temettu_verimi > 4) score += 8;
+        else if (hisse.temettu_verimi <= 4 && hisse.temettu_verimi > 2) score += 6;
+        else score += 4;
+
+        // Likidite Oranları
+        if (hisse.likidite > 2) score += 10;
+        else if (hisse.likidite <= 2 && hisse.likidite > 1.5) score += 8;
+        else if (hisse.likidite <= 1.5 && hisse.likidite > 1) score += 6;
+        else score += 4;
+
+        return score;
+    };
+
+        // Sayfa yüklendiğinde veriyi çek
+        $(document).ready(function() {
+            console.log("sayfa yüklendi");
+            scrapeData().then(data => {
+                for (let i = 1; i <= 100; i++) {
+                const hisse = {
+                    kod: $(data).find(`#temelTBody_Ozet > tr:nth-child(${i}) > td.sorting_1 > a`).text().replace(',', '.'),
+                    f_k: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(3)`).text().replace(',', '.')),
+                    fd_favok: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(4)`).text().replace(',', '.')),
+                    net_borc_favok: parseFloat(0),
+                    ozsermaye_karli: parseFloat(0),
+                    ciro_buyume: parseFloat(0),
+                    p_bv: parseFloat($(data).find(`#temelTBody_Finansal > tr:nth-child(${i}) > td:nth-child(6)`).text().replace(',', '.')),
+                    temettu_verimi: parseFloat(0),
+                    likidite: parseFloat(0)
+                };
+
+                populateTable(hisse);
+                };
+            });
+        });
+
+        
+    </script>
+</body>
+
+</html>

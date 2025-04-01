@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ev Temizliği ve Düzeni - ToDo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .todo-container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .completed {
+            color: green;
+        }
+        .missed {
+            color: red;
+        }
+        .navigation button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .navigation button:disabled {
+            background-color: #ccc;
+        }
+        .icon {
+            font-size: 1.2em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ev Temizliği ve Düzeni - ToDo List</h1>
+    <div class="todo-container">
+        <div class="navigation">
+            <button id="prev-month">&laquo; Geçen Ay</button>
+            <span id="current-month">Ocak 2025</span>
+            <button id="next-month">Sonraki Ay &raquo;</button>
+        </div>
+        <table id="todo-table">
+            <thead>
+                <tr>
+                    <th>Tarih</th>
+                    <th>Günlük İşler</th>
+                    <th>Haftalık İşler</th>
+                    <th>Aylık İşler</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic rows will be injected here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const dailyTasks = [
+            "Yatakları toplamak.",
+            "Kirli kıyafetleri çamaşır sepetine koymak.",
+            "Bulaşıkları yıkamak veya bulaşık makinesine yerleştirmek.",
+            "Tezgâhları silmek (mutfak ve banyo).",
+            "Çöpleri toplamak ve çöp kutusunu boşaltmak.",
+            "Eşyaları yerlerine koymak (kitap, kıyafet, oyuncak vb.).",
+            "Zemini süpürmek (kırıntılar veya tozlar için)."
+        ];
+
+        const weeklyTasks = [
+            "Evi süpürmek veya elektrikli süpürgeyle temizlemek.",
+            "Yerleri silmek (mutfak, banyo ve oturma alanları).",
+            "Toz almak (mobilyalar, raflar, televizyon vb.).",
+            "Lavaboları ve aynaları temizlemek.",
+            "Duş ve banyo küvetini temizlemek.",
+            "Çarşafları değiştirmek ve yatakları havalandırmak.",
+            "Çamaşır yıkamak, kurutmak ve katlayıp yerine koymak.",
+            "Fırın, mikrodalga ve buzdolabını dıştan silmek.",
+            "Dolapların veya çekmecelerin içini düzenlemek."
+        ];
+
+        const monthlyTasks = [
+            "Buzdolabını içten temizlemek ve eski yiyecekleri atmak.",
+            "Perdeleri veya storları temizlemek (toz almak veya yıkamak).",
+            "Halıları yıkamak veya silmek.",
+            "Klima filtrelerini temizlemek.",
+            "Fırını derinlemesine temizlemek.",
+            "Pencereleri silmek (iç ve dış).",
+            "Dolapların üst kısımlarını veya ulaşması zor alanları temizlemek."
+        ];
+
+        const currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+
+        const todoTable = document.getElementById("todo-table").querySelector("tbody");
+        const currentMonthSpan = document.getElementById("current-month");
+        const prevMonthButton = document.getElementById("prev-month");
+        const nextMonthButton = document.getElementById("next-month");
+        const storageKey = "todo-list-data";
+
+        function saveData(data) {
+            const filteredData = {};
+            Object.keys(data).forEach((dateKey) => {
+                const dayData = data[dateKey];
+                const completedTasks = {
+                    daily: dayData.daily.filter(status => status === "completed"),
+                    weekly: dayData.weekly.filter(status => status === "completed"),
+                    monthly: dayData.monthly.filter(status => status === "completed")
+                };
+                if (completedTasks.daily.length || completedTasks.weekly.length || completedTasks.monthly.length) {
+                    filteredData[dateKey] = completedTasks;
+                }
+            });
+            localStorage.setItem(storageKey, JSON.stringify(filteredData));
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem(storageKey);
+            return savedData ? JSON.parse(savedData) : {};
+        }
+
+        let todoData = loadData();
+
+        function updateCalendar() {
+            currentMonthSpan.textContent = `${getMonthName(currentMonth)} ${currentYear}`;
+            renderTable(currentYear, currentMonth);
+        }
+
+        function getMonthName(monthIndex) {
+            const monthNames = [
+                "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+                "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+            ];
+            return monthNames[monthIndex];
+        }
+
+        function renderTable(year, month) {
+            todoTable.innerHTML = ""; // Clear existing rows
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = `${year}-${month + 1}-${day}`;
+                const date = new Date(year, month, day);
+                const isPast = date < currentDate;
+                const isToday = date.toDateString() === currentDate.toDateString();
+                const isFuture = date > currentDate;
+                const isWeekStart = date.getDay() === 1; // Monday
+                const isMonthStart = day === 1;
+                const dayData = todoData[dateKey] || { daily: [], weekly: [], monthly: [] };
+
+                todoData[dateKey] = dayData;
+                todoTable.innerHTML += createRow(
+                    `${day}/${month + 1}/${year}`,
+                    dailyTasks,
+                    isWeekStart ? weeklyTasks : [],
+                    isMonthStart ? monthlyTasks : [],
+                    dayData,
+                    isPast,
+                    isToday,
+                    isFuture
+                );
+            }
+
+            attachEventListeners();
+        }
+
+        function createRow(date, daily, weekly, monthly, dayData, isPast, isToday, isFuture) {
+            return `
+                <tr>
+                    <td>${date}</td>
+                    <td>${createTaskCell(daily, dayData.daily, isPast, isToday, isFuture)}</td>
+                    <td>${createTaskCell(weekly, dayData.weekly, isPast, isToday, isFuture)}</td>
+                    <td>${createTaskCell(monthly, dayData.monthly, isPast, isToday, isFuture)}</td>
+                </tr>
+            `;
+        }
+
+        function createTaskCell(tasks, statusData, isPast, isToday, isFuture) {
+            return tasks
+                .map((task, index) => {
+                    const status = statusData[index] || "";
+                    let icon = "";
+
+                    if (status === "completed") {
+                        icon = "✅";
+                    } else if (isToday) {
+                        icon = "";
+                    } else if (isPast) {
+                        icon = "❌";
+                    }
+
+                    return `
+                        <div>
+                            <span class="icon">${icon}</span>
+                            <input type="checkbox" data-task-index="${index}" ${status === "completed" ? "checked" : ""} ${isFuture ? "disabled" : ""} />
+                            <span>${task}</span>
+                        </div>
+                    `;
+                })
+                .join("");
+        }
+
+        function attachEventListeners() {
+            document.querySelectorAll("input[type='checkbox']").forEach((checkbox) => {
+                checkbox.addEventListener("change", () => {
+                    const date = checkbox.dataset.date; // Tarih bilgisi
+                    const type = checkbox.dataset.type; // Günlük, haftalık veya aylık
+                    const taskIndex = checkbox.dataset.index; // Görev indeksi
+
+                    // Eğer 'todoData[date]' yoksa, oluştur.
+                    if (!todoData[date]) {
+                        todoData[date] = { daily: [], weekly: [], monthly: [] };
+                    }
+
+                    // Eğer ilgili türde görev yoksa, varsayılan bir görev dizisi oluştur.
+                    if (!todoData[date][type]) {
+                        todoData[date][type] = [];
+                    }
+
+                    // Görevi işaretle veya kaldır
+                    todoData[date][type][taskIndex] = { completed: checkbox.checked };
+
+                    // Veriyi kaydet
+                    saveData(todoData);
+                    });
+
+                /*
+                checkbox.addEventListener("change", (event) => {
+                    const taskIndex = event.target.dataset.taskIndex;
+                    const parentRow = event.target.closest("tr");
+                    const dateKey = parentRow.querySelector("td").textContent;
+
+                    const dayData = todoData[dateKey];
+                    const statusArray = dayData.daily;
+
+                    if (event.target.checked) {
+                        statusArray[taskIndex] = "completed";
+                    } else {
+                        statusArray[taskIndex] = "";
+                    }
+
+                    saveData(todoData);
+                });
+                */
+            });
+        }
+        
+        prevMonthButton.addEventListener("click", () => {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            updateCalendar();
+        });
+
+        nextMonthButton.addEventListener("click", () => {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            updateCalendar();
+        });
+
+        updateCalendar();
+    </script>
+
+
+
+
+</body>
+</html>

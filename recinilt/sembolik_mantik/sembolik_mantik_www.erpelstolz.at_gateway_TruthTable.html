@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<title>Logic Calculator: Truth Tables (featuring a purple monster and
+a duck)</title>
+
+<link rev="made" rel="author" href="mailto:christian.gottschall@posteo.de">
+<link rel="canonical" href="https://www.erpelstolz.at/gateway/TruthTable.html">
+
+<link rel="alternate" hreflang="de" href="https://www.erpelstolz.at/gateway/Wahrheitstabellen.html">
+<link rel="alternate" hreflang="en" href="https://www.erpelstolz.at/gateway/TruthTable.html">
+
+<link rel="shortcut icon" href="rsc/favicon-table.ico" type="image/x-icon">
+<link rel="icon" href="rsc/favicon-table.ico" type="image/x-icon">
+
+
+<meta HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=utf-8">
+
+
+<meta name="description" content="This is a versatile truth-table calculator for propositional logic. It is dedicated to the memory of Dr. Klaus Dethloff who taught this stuff and much more.">
+
+
+<meta name="keywords" content="Logic Calculator, truth table, Wahrheitstabelle, Wahrheitstafel, propositional logic, Aussagenlogik">
+
+<link rel="stylesheet" type="text/css" href="../styles/normal-5.css">
+<link rel="stylesheet" type="text/css" href="../styles/formular-5.css">
+<link rel="stylesheet" type="text/css" href="../styles/monster-5.css">
+
+<meta name=viewport content="width=width, initial-scale=1">
+
+<script src="js/Knoten.js" charset="utf-8"></script>
+<script src="js/Parser.js" charset="utf-8"></script>
+<script src="js/Wahrheitstabelle.js" charset="utf-8"></script>
+
+<script src="js/interface.js" charset="utf-8"></script>
+
+<noscript>
+<style> .scriptsEnabled { display: none } </style>
+</noscript>
+
+</head>
+
+
+<body onload="wahrheitstabelle_script_enabled()">
+
+
+<main>
+
+<header>
+<h1>Logic Calculator: Truth Tables</h1>
+<p>(featuring a purple monster and a psychic duck)</p>
+</header>
+
+
+<nav>
+<p>
+<a href="formular-uk.html">Other programs</a> &mdash; <a href="/christian/homepage-uk.html">author</a> &mdash; <a href="Wahrheitstabellen.html">Deutsch</a>
+</p>
+</nav>
+
+
+
+<div id="scriptsEnabled" class="scriptsEnabled">
+
+
+<section> <!-- intro -->
+
+<details>
+<summary>Welcome to this truth-table calculator for classical logic.
+Click this heading to see a more detailed introduction.</summary>
+
+
+<h2>Introduction</h2>
+
+<div style="margin-left:1em; max-width:42em;">
+
+<p>
+This truth-table calculator for classical logic shows, well,
+<a href="https://www.britannica.com/topic/truth-table">truth-tables</a>
+for propositions of classical logic. Featuring a purple munster and a duck,
+and optionally showing intermediate results, it is one of the better
+instances of its kind.
+</p>
+
+<p>
+Use the buttons below (or your keyboard) to enter a proposition, then
+gently touch the duck to have it calculate the truth-table for you. Each
+time you touch the friendly monster to the duck's left, it will eat
+up a character (or, if there is selected text, the whole selection). If
+you double-click the monster, it will eat up the whole input (yum!).
+</p>
+<p>Once the
+table is there, use the button &quot;Show intermediate results&quot; or
+&quot;Hide intermediate results&quot; to show or hide intermediate
+results in the table.
+</p>
+
+<p>
+Since 2021 you may enter more than one proposition at a time, separating
+them with commas (e.g. &quot; P&and;Q, P&or;Q, P&rarr;Q&quot;). This
+makes it easier e.g. to compare propositions and to check if an argument
+is semantically valid.
+</p>
+
+<p>
+See a few examples below. Clicking on an example will copy it to the
+input field. Alternatively, you may leave the input field completely
+empty. On touching the duck, its psychic personality will find out
+what proposition you are thinking of (this is an experimental feature).
+</p>
+
+<p>
+<span onClick="ueberschreibknopfGedrueckt(this)">(P→Q)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P∧Q)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P∨Q)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P⊽Q)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P↮Q)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P∨¬P)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P∧¬P)</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P→((Q→R)∧(¬S∨R)))</span> &mdash;
+<span onClick="ueberschreibknopfGedrueckt(this)">(P→Q)∨(Q→R)</span>
+<span onClick="ueberschreibknopfGedrueckt(this)">((P ⊼ Q) ⊽ (P ⊼ Q))</span>
+</p>
+
+<p>
+If you prefer using your keyboard, you may use the strings &quot;&amp;&quot;
+or &quot;&amp;&amp;&quot; to denote &quot;∧&quot;; the strings
+&quot;|&quot; or &quot;||&quot; to denote &quot;∨&quot;; the strings
+&quot;=&gt;&quot; or &quot;-&gt;&quot; to denote &quot;→&quot;; the string
+&quot;&lt;=&gt;&quot; or &quot;&lt;-&gt;&quot; to denote &quot;↔&quot;;
+and the strings &quot;!&quot; or &quot;~&quot; to denote &quot;¬&quot;.
+</p>
+
+<p>
+The tables are calculated in your
+browser, so the calculator is available offline, and the government won't
+ever find out what propositions you are working with (unless they hack
+your computer).
+</p>
+
+
+</div>
+
+</details>
+
+</section> <!-- intro -->
+
+
+<!-- Eingabebereich -->
+
+<section>
+
+<h2>Proposition</h2>
+
+
+<div id="Eingabebereich" class="eingabebereich">
+
+<p>
+<input type="text" id="TextAreaAusdruck" pattern="[ 0-9A-Za-z¬⊼∧⊽∨→↔↮()&|<=>~!,]+" style="width:97%;">
+</p>
+
+<div class="knopfgruppe">
+<input type="image" src="rsc/monster-klein.png" class="monsterklasse" name="EraseButton" id="EraseButton" alt="Monster that will eat a character" onClick="loeschtaste()" onDblClick="allesLoeschen()" style="height:85px;">
+<input type="image" src="rsc/gans-klein.png" name="AcceptButton" id="AcceptButton" alt="Duck that will show a truth-table" onClick="tabellenbau()" style="height:85px;">
+</div>
+
+
+<p id="Fehlerfeld" class="fehlermeldung" style="display:none; width:auto;">
+No errors so far.
+</p>
+
+<div id="knoepfe" class="knopfbereich">
+
+<span class="knopfgruppe">
+<button type="button" title="Negation (not)" onClick="knopfGedrueckt(this)">¬</button>
+<button type="button" title="Conjunction (and)" onClick="knopfGedrueckt(this)">∧</button>
+<button type="button" title="Sheffer stroke (NAND)" onClick="knopfGedrueckt(this)">⊼</button>
+<button type="button" title="Disjunction (or)" onClick="knopfGedrueckt(this)">∨</button>
+<button type="button" title="Peirce's arrow (NOR)" onClick="knopfGedrueckt(this)">⊽</button>
+<button type="button" title="exclusive or (XOR)" onClick="knopfGedrueckt(this)">↮</button>
+</span>
+
+<span class="knopfgruppe">
+<button type="button" title="Conditional (if&hellip; then)" onClick="knopfGedrueckt(this)">→</button>
+<button type="button" title="Biconditional" onClick="knopfGedrueckt(this)">↔</button>
+<button type="button" title="Open bracket" onClick="knopfGedrueckt(this)">(</button>
+<button type="button" title="Closed bracket" onClick="knopfGedrueckt(this)">)</button>
+</span>
+
+
+<span class="knopfgruppe">
+
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">P</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">Q</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">R</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">S</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">T</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">U</button>
+</span>
+
+<span class="knopfgruppe">
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">A</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">B</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">C</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">D</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">E</button>
+<button type="button" title="Propositional constant" onClick="knopfGedrueckt(this)">F</button>
+</span>
+
+<span class="knopfgruppe">
+<button type="button" title="Further proposition" onClick="knopfGedrueckt(this)">,</button>
+</span>
+
+</div> <!-- Knöpfe -->
+
+</div> <!-- Eingabebereich -->
+
+</section>
+
+
+<hr style="margin-top:1em;">
+
+
+<section>
+
+<h2 id="TruthTableHeader">Truth Table</h2>
+
+<div id="Ausgabebereich">
+
+<p id="ChangeVerbosity" style=" display:none;">
+<button type="button" id="VerbosityButton" title="Change verbosity" onClick="change_verbosity()" style="width:auto; height:auto; font-size:large;">Show intermediate results</button>
+</p>
+
+<div id="Uebersichtstabelle" style="display:block;">
+<p>
+You haven't entered a proposition yet.
+</p>
+</div>
+
+<div id="Detailtabelle" style="display:none;">
+<p>
+You haven't entered a proposition yet.
+</p>
+</div>
+
+</div> <!-- Ausgabebereich -->
+
+</section>
+
+
+</div> <!-- javascriptEnabled -->
+
+
+<noscript>
+
+<p style="font-size:125%;">
+
+<img src="rsc/monster.png" class="monsterklasseDauerhaft" alt="Monster that would like you to use the JavaScript version of this calculator" style="height:85px; float:left; margin-right:1em; margin-bottom:0.5em;">
+
+This truth-table calculator needs JavaScript to run properly (or, rather,
+to run at all). But fear not - if you don't like JavaScript, but still
+want to see truth-tables, you may use the truth-table functions of
+the <a href="formular-uk-zentral.html">server-side logic calculator</a>.
+On the other hand, if your browser does support JavaScript, you might
+ponder to turn it on for this page.
+</p>
+
+</noscript>
+
+
+
+</main>
+
+<hr style="clear:both;">
+
+<div class="spende">
+<div style="float:left; margin-right:1em;">
+
+<form action="https://www.paypal.com/donate" method="post" target="_blank">
+<input type="hidden" name="business" value="WNVV2HW7JB9E2" />
+<input type="hidden" name="item_name" value="Duck Pride Canned Worms - Software" />
+<input type="hidden" name="currency_code" value="EUR" />
+<input type="submit" name="submit" value="Donation" class="spendenknopf">
+</form>
+
+</div>
+<p>
+Operating the Logic server currently costs about 113.88€ per year
+(virtual server 85.07€, domain fee 28.80€), hence the Paypal donation link.
+</p>
+</div>
+
+
+<footer>
+<p style="clear:both;">
+&copy; Christian Gottschall / christian.gottschall@posteo.de / 2021-01-02
+</p>
+</footer>
+
+
+</body>
+</html>

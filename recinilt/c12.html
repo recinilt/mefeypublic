@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Korelasyon Şiddeti Raporu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        th.sortable:hover {
+            background-color: #45a049;
+        }
+        th.sortable:after {
+            content: " ↓";
+        }
+        th.sortable[data-order="desc"]:after {
+            content: " ↑";
+        }
+        #inputContainer {
+            text-align: center;
+            margin: 20px;
+        }
+        #inputText {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        #processButton {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #processButton:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="text-align: center; margin-top: 20px;">Korelasyon Şiddeti Raporu</h2>
+
+    <div id="inputContainer">
+        <textarea id="inputText" rows="10" placeholder="Metni buraya yapıştırın..."></textarea><br>
+        <button id="processButton" onclick="processData()">Veriyi İşle</button>
+    </div>
+
+    <table id="reportTable">
+        <thead>
+            <tr>
+                <th class="sortable" onclick="sortTable(0)">Symbol</th>
+                <th class="sortable" onclick="sortTable(1)">Fark (IncScore - DecScore)</th>
+                <th class="sortable" onclick="sortTable(2)">Son Sayı</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Veriler buraya JavaScript ile eklenecek -->
+        </tbody>
+    </table>
+
+    <script>
+        let data = [];
+
+        // Metni işleyip tabloyu dolduracak fonksiyon
+        function processData() {
+            const inputText = document.getElementById("inputText").value.trim();
+            if (!inputText) {
+                alert("Lütfen bir metin girin.");
+                return;
+            }
+
+            // Metni satırlara ayıralım
+            const lines = inputText.split('\n');
+            data = [];
+            
+            lines.forEach(line => {
+                // Virgülleri noktalara çeviriyoruz
+                const lineWithDots = line.replace(/,/g, '.');
+                const parts = lineWithDots.split(/\s+/); // Boşluklarla ayıralım
+                
+                if (parts.length >= 5 && parts[0].includes('USDT')) {
+                    const symbol = parts[0];
+                    const incScore = parseFloat(parts[1]);
+                    const decScore = parseFloat(parts[2]);
+                    const volumePerDay = parseInt(parts[3], 10);
+                    const minorTrendScore = parseFloat(parts[4]);
+
+                    // Fark hesaplama (IncScore - DecScore)
+                    const fark = (incScore - decScore).toFixed(2);
+                    // Son sayıyı al
+                    const sonSayi = minorTrendScore.toFixed(2);
+
+                    // Yeni veri ekleyelim
+                    data.push([symbol, incScore, decScore, volumePerDay, minorTrendScore, fark, sonSayi]);
+                }
+            });
+
+            // Tabloyu güncelleyelim
+            loadTableData();
+        }
+
+        // Verileri tabloya ekleyelim
+        function loadTableData() {
+            const tableBody = document.getElementById("tableBody");
+            tableBody.innerHTML = ""; // Önceden eklenen verileri temizleyelim
+
+            data.forEach(row => {
+                const tableRow = `<tr>
+                    <td>${row[0]}</td>
+                    <td>${row[5]}</td>
+                    <td>${row[6]}</td>
+                </tr>`;
+                tableBody.innerHTML += tableRow;
+            });
+        }
+
+        // Tabloyu sıralama fonksiyonu
+        function sortTable(columnIndex) {
+            const table = document.getElementById("reportTable");
+            const rows = Array.from(table.rows).slice(1); // Başlık hariç alıyoruz
+            const isDescending = table.rows[0].cells[columnIndex].getAttribute("data-order") === "desc";
+
+            rows.sort((rowA, rowB) => {
+                const cellA = rowA.cells[columnIndex].innerText;
+                const cellB = rowB.cells[columnIndex].innerText;
+                const compare = isNaN(cellA) || isNaN(cellB)
+                    ? cellA.localeCompare(cellB)
+                    : parseFloat(cellA) - parseFloat(cellB);
+                return isDescending ? -compare : compare;
+            });
+
+            rows.forEach(row => table.appendChild(row)); // Sıralanmış satırları tekrar tabloya ekleyelim
+
+            // Başlık sıralama yönünü değiştir
+            table.rows[0].cells[columnIndex].setAttribute("data-order", isDescending ? "asc" : "desc");
+        }
+    </script>
+</body>
+</html>

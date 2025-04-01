@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html  lang="tr"  xmlns:og="http://ogp.me/ns#">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEFEY - Ramazan Yeni</title>
+
+
+    <meta property = "og: type" content = "website" />
+    <meta property = "og: title" content = "MEFEY - Ramazan Yeni" />
+    <meta property = "og: description" content = "Tekstil çorap üretiminde faaliyet göstermekteyiz." />
+    <meta property = "og: image" content = "img/icon.jpg" />
+    <meta property = "og: url" content = "https://www.mefey.tk" />
+    <meta property = "og: site_name" content = "MEFEY - Ramazan Yeni" />
+    
+        <!-- Required meta tags -->
+        
+    
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"> -->
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <meta http-equiv="Content-Type" content="text/html; ">
+        <meta http-equiv="Content-Language" content="tr">
+        <meta name="keywords" content="Ramazan, yeni, ramazan yeni, mefey, mefey çorap, çorap, tekstil, borsa, hisse, hesap, hesaplama">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="Ramazan Yeni">
+        <!-- <meta http-equiv="refresh" content="500">  -->
+        <!-- <title>merhabalar Patent, Arduino, Subtitle Reader, WebDesign</title> -->
+        <meta name="description" content="Tekstil çorap üretiminde faaliyet göstermekteyiz. Ramazan Yeni">
+    
+    
+
+
+
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script> -->
+    <script src="js/angular.min.js"></script>
+    <style>
+       .baslik {
+         margin: 20px auto;
+         padding: 5px;
+         border: solid 2px gray;
+         border-radius: 5px;
+         background-color: aliceblue; 
+         background: linear-gradient(to right, rgba(255, 0, 0, 0.281) 0%,rgba(4, 0, 255, 0.281) 50%, rgba(2, 255, 0, 0.281) 100%); width: fit-content;
+         box-shadow: 5px 5px 15px 5px black;
+         /* transform: scale(1.2) rotate(2deg) translate(7px, 8px) skew(3deg, 4deg); */
+       }
+
+
+    </style>
+</head>
+<body>
+
+  <div data-ng-app="myApp" data-ng-controller="myCtrl">
+    <!--  -->
+      <h5 class="baslik">%X KAR ETMEK İÇİN KAÇTAN SATMAN GEREKLİ?  :</h5>
+      Lot sayısı: <input type="number" data-ng-model="adet"> adet<br>
+      Hisse maaliyeti: <input type="number" data-ng-model="maaliyet"> TL<br>
+      Kar etmek istediğin yüzde: %<input type="number" data-ng-model="kar"><br>
+      <br>
+      1 adet lotu satman gereken fiyat: <span style="color: red;">{{hisseSon()}} </span>  TL<br>
+      Toplam ele geçecek tutar: <span style="color:blue;" >{{hisseSon() * adet}}</span> TL <br>
+      Toplam net kar: <span style="color: green;">{{netkar1() }}</span>
+      <ul>
+        <li ng-repeat="x in products">
+          <span style="color:orange;">{{x.name}}</span> <span style="color:blue;">{{x.maaliyet}}</span> * <span style="color: green;">%{{x.kar}}</span> = <span style="color: red;">{{x.tutar}}</span><span ng-click="removeItem($index)">&times;</span>
+        </li>
+      </ul>
+      Hisse ismi: <input type="text" ng-model="addMe">
+      <button ng-click="addItem()">Ekle</button>
+      <p>{{errortext}}</p>
+
+
+
+
+      <hr>
+      <!--  -->
+      <h5 class="baslik">SATMAK İSTEDİĞİN FİYATTAKİ KAZANÇ ORANI NE?  :</h5>
+      Lot sayısı: <input type="number" data-ng-model="adet2"> adet<br>
+      1 lot Hisse maaliyeti: <input type="number" data-ng-model="maaliyet2"> TL<br>
+      1 lotu kaçtan satmak istiyorsun? <input type="number" data-ng-model="fiyat2"><br>
+      <br>
+      Yüzdelik kazancın: <span style="color: red;">% {{farkyuzde()}}</span><br>
+      
+      Toplam ele geçecek tutar: <span style="color:green;">{{mytutar2()}}</span> TL <br>
+      Elde ettiğin net kar: <span style="color: blue;">{{mykar2()}} </span>  TL<br>
+
+      <hr>
+      <!--  -->
+      <h5 class="baslik">MAALİYET HESAPLAMA:</h5>
+      İlk Lot Sayısı: <input type="number" data-ng-model="ilklot"> adet<br>
+      İlk Hisse Maaliyeti: <input type="number" data-ng-model="ilkmaaliyet"> TL<br><br>
+      İkinci Lot Sayısı: <input type="number" data-ng-model="ikincilot"> adet<br>
+      İkinci Hisse Maaliyeti: <input type="number" data-ng-model="ikincimaaliyet"> TL<br>
+      <br>
+      Son maaliyet:<span style="color: red;">{{sonmaaliyet()}} </span>  TL<br>
+      
+      <hr>
+      <!--  -->
+      <h5 class="baslik">%X KARLA BİRLEŞİK ÇARPAN</h5>
+      Anapara: <input type="number" data-ng-model="anapara4"> TL<br>
+      Günlük kazanç oranı: %<input type="number" data-ng-model="oran4"><br>
+      Kaç gün: <input type="number" data-ng-model="adet4"><br><br>
+      Günlük kesinti: <input type="number" data-ng-model="kesinti4"> TL<br>
+      <br>
+      Sonuç: <span style="color: red;">{{sonuc4()}} </span>  TL<br>
+      Kar yüzdesi: %<span>{{(((sonuc4()-anapara4)/anapara4)*100).toFixed(0)}}</span><br>
+      <br><br><br><br>
+      
+        
+      </div>
+      
+      <script>
+      var app = angular.module('myApp', []);
+      app.controller('myCtrl', function($scope) {
+
+          
+          //%X KAR ETMEK İÇİN KAÇTAN SATMAN GEREKLİ?
+         $scope.adet=1;
+          $scope.maaliyet= 100;
+        $scope.kar= 5;
+          
+          $scope.hisseSon= function(){
+          $scope.toplam=$scope.maaliyet + ($scope.maaliyet * $scope.kar * 0.01);
+          $scope.toplam=$scope.toplam.toFixed(2);
+          return $scope.toplam;
+          }
+
+          $scope.netkar1 = function(){
+            return Number(($scope.hisseSon() * $scope.adet) - ($scope.maaliyet * $scope.adet)).toFixed(2);
+          }
+
+          
+          
+
+          $scope.products = [];
+          if (typeof(Storage) !== "undefined") {
+            if (localStorage.getItem("hisseler")){
+              var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              for(var i=0; i<myhisseler.length;i++){
+                var hiss=myhisseler[i].split(" ");
+                var myhisse ={};
+                myhisse.name = hiss[0];
+                myhisse.maaliyet=hiss[1];
+                myhisse.kar = hiss[2];
+                myhisse.tutar=hiss[3];
+                $scope.products.push(myhisse);
+                console.log(myhisse);
+              }
+            }
+          }
+
+            // localStorage.setItem("hisseler", "Smith john 143 - fgr dkdm 334 - lms ksl 323");
+            
+            // console.log(myhisseler);
+            // var mylstor = myhisseler.join(" - ");
+            // localStorage.setItem("hisseler2",mylstor);
+           
+
+          
+$scope.addItem = function () {
+  //$scope.hisseadi = "";
+  //$scope.errortext = "";
+  if (!$scope.addMe) {return;}
+  //if ($scope.products.indexOf($scope.addMe) == -1) {
+    $scope.hisseadi = {};
+    $scope.hisseadi.name = $scope.addMe;
+    $scope.hisseadi.maaliyet=$scope.maaliyet;
+    $scope.hisseadi.kar = $scope.kar;
+    $scope.hisseadi.tutar= $scope.hisseSon();
+
+    //$scope.addMe + " hissesini %" + $scope.kar + " ile satmak için " + $scope.hisseSon() + " fiyattan satman gerek.";
+    //$scope.products.push($scope.hisseadi.name + " hissesini %" + $scope.hisseadi.kar + " ile satmak için " + $scope.hisseadi.tutar + " fiyattan satman gerek.");
+    $scope.products.push($scope.hisseadi);
+
+    if (typeof(Storage) !== "undefined") {
+            //if (localStorage.getItem("hisseler")){
+              //var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              $scope.mylstore = [];
+              for(var i=0; i<$scope.products.length;i++){
+                $scope.mylstore.push($scope.products[i].name + " "+$scope.products[i].maaliyet + " "+ $scope.products[i].kar + " "+ $scope.products[i].tutar);
+              }
+              $scope.myhisseler3 = $scope.mylstore.join(" - ");
+              localStorage.setItem("hisseler",$scope.myhisseler3);
+    }
+}
+  //} else {
+  //  $scope.errortext = "The item is already in your shopping list.";
+  //}
+
+
+$scope.removeItem = function (x) {
+  //$scope.errortext = "";
+  $scope.products.splice(x, 1);
+
+  if (typeof(Storage) !== "undefined") {
+            //if (localStorage.getItem("hisseler")){
+              //var myhisseler = localStorage.getItem("hisseler").split(" - ");
+              $scope.mylstore = [];
+              for(var i=0; i<$scope.products.length;i++){
+                $scope.mylstore.push($scope.products[i].name + " "+ $scope.products[i].maaliyet + " "+ $scope.products[i].kar + " "+ $scope.products[i].tutar);
+              }
+              $scope.myhisseler3 = $scope.mylstore.join(" - ");
+              localStorage.setItem("hisseler",$scope.myhisseler3);
+  }
+}
+        //////////////////////////
+
+        //SATMAK İSTEDİĞİN FİYATTAKİ KAZANÇ ORANI NE? 
+        $scope.adet2=1;
+          $scope.maaliyet2= 100;
+        $scope.fiyat2= 105;
+          
+          $scope.farkyuzde= function(){
+          $scope.fark = $scope.fiyat2 - $scope.maaliyet2;
+          $scope.farkyuz = $scope.fark / $scope.maaliyet2;
+          $scope.farkyuz *= 100;
+          $scope.farkyuz = Number($scope.farkyuz).toFixed(2);
+          return $scope.farkyuz;
+          }
+
+          $scope.mytutar2 = function(){
+            $scope.tutar2 = $scope.adet2 * $scope.fiyat2;
+            $scope.tutar2 = Number($scope.tutar2).toFixed(2);
+            return $scope.tutar2;
+          }
+
+          $scope.mykar2 = function(){
+            $scope.kar3 =  ($scope.adet2 * $scope.fiyat2) - ($scope.adet2 * $scope.maaliyet2);
+            $scope.kar3 = Number($scope.kar3).toFixed(2);
+            return $scope.kar3;
+          }
+          //////////////////////////
+
+        
+        //MAALİYET HESAPLAMA
+        $scope.ilklot=100;
+        $scope.ilkmaaliyet= 10;
+        $scope.ikincilot=200;
+        $scope.ikincimaaliyet= 20;
+
+        $scope.sonmaaliyet= function(){
+          var ortalama=(($scope.ilklot * $scope.ilkmaaliyet) + ($scope.ikincilot * $scope.ikincimaaliyet))/($scope.ilklot+$scope.ikincilot);
+          ortalama=ortalama.toFixed(2);
+          return ortalama;
+          }
+          ///////////////
+          
+
+        //%X KARLA BİRLEŞİK ÇARPAN:
+        $scope.anapara4=10000;
+        $scope.adet4=200;
+        $scope.oran4=0.2;
+        $scope.kesinti4=0;
+
+        $scope.sonuc4 = function(){
+          var sum = Number($scope.anapara4);
+      var i=0;
+      for(i=0;i<Number($scope.adet4);i++){
+      sum=sum + (sum*Number($scope.oran4*0.01));
+      if($scope.kesinti4){
+          sum=sum-($scope.kesinti4);
+      }
+      }
+      return Number(sum).toFixed(2);
+        }
+      //////////////////////////////////
+
+
+        
+      });
+      </script>
+
+
+
+
+<!-- 
+<hr>
+<h5 class="baslik">%X KARLA BİRLEŞİK ÇARPAN</h5>
+<div id="mydiv1"></div>
+<div id="mydiv2"></div>
+<p>anapara: <input type="number" id="anapara"></p>
+<p>adet: <input type="number" name="" id="adet"></p>
+<p>oran: %<input type="number" name="" id="oran"></p>
+<p>adet başına kesinti: <input type="number" name="" id="kesinti"></p>
+<button id="buton">hesapla</button>
+<p>sonuç: <span id="sonuc"></span></p>
+ -->
+
+<!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+<script>
+
+  //$(document).ready(function () {
+
+    /*
+      console.log("document ready");
+
+      
+      
+      $("#buton").click(function () {
+          var myanapara=$("#anapara").val();
+      var myadet=$("#adet").val();
+      var myoran=$("#oran").val();
+      var mykesinti=$("#kesinti").val();
+          var mysonuc=kademeli(myanapara,myadet,myoran,mykesinti);
+          mysonuc = Number(mysonuc).toFixed(2);
+          $("#sonuc").html(mysonuc);
+          console.log(myoran);
+      });
+
+     
+      
+
+      var a=kademeli(1000,52,0.05);
+  function kademeli(anapara,adet,oran,kesinti) {
+      var sum = Number(anapara);
+      var i=0;
+      for(i=0;i<Number(adet);i++){
+      sum=sum + (sum*Number(oran*0.01));
+      if(kesinti){
+          sum=sum-(kesinti);
+      }
+      }
+      return sum;
+  }
+
+  */
+  //$("#mydiv2").html(a);
+     
+  /*
+      var str='{"names":[' + // create json object
+  '{"first":"Hakuna","lastN":"Matata"},' +
+  '{"first":"Jane","lastN":"Doe"},' +
+  '{"first":"Air":"lastN":"Jordan"}]}';
+  var obj = JSON.parse(str);
+  //document.write(obj.names[1].first);
+  console.log(obj.names[1].first);
+      */
+  //});
+
+ 
+
+  
+
+</script>
+
+  
+</body>
+</html>

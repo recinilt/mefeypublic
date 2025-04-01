@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Zinciri Kırma</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="zincir.css">
+</head>
+<body>
+  <h1>Zinciri Kırma</h1>
+
+  <h2>Yeni Alışkanlık Ekle</h2>
+  <form id="habitForm">
+    <label for="habitName">Alışkanlık Adı:</label>
+    <input type="text" id="habitName" name="habitName"><br><br>
+    <label for="initialGoal">İlk Hedef (ör. her gün 10 sayfa kitap okumak):</label>
+    <input type="text" id="initialGoal" name="initialGoal"><br><br>
+    <h3>Hedefler</h3>
+    <div id="targets">
+      </div>
+    <button type="submit">Kaydet</button>
+  </form>
+
+  <h2>Alışkanlıklarım</h2>
+  <ul id="habitList">
+  </ul>
+
+  <script src="zincir.js"></script>
+</body>
+</html>

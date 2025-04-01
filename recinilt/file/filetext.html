@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file" id="inpFile" name="inpFile">
+    <button id="yukle" onclick="yukle()">yükle</button>
+    <div>
+        <p id="mytext"></p>
+        
+    </div>
+
+    <script>
+        var inpFile = document.getElementById("inpFile");
+        var mytext = document.getElementById("mytext");
+        function yukle(){
+            var file = inpFile.files[0];
+            if (file){
+                var reader = new FileReader();
+                reader.onload = function () {
+                    console.log(file);
+                    console.log(reader.result);
+                    console.log(reader);
+                    mytext.innerHTML=reader.result;
+                }
+                reader.readAsText(file);
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        function diji_saat(){
+            var tarih = new Date();
+            var saat = tarih.getHours();
+            if(saat<10){saat="0" +saat;}
+            var dakika = tarih.getMinutes();
+            if(dakika<10){dakika="0" +dakika;}
+            var saniye = tarih.getSeconds();
+            if(saniye<10){saniye="0" +saniye;}
+
+            ////////////
+            var div_style = document.getElementById("saat");
+            if(saniye%2==0){
+                div_style.style.backgroundColor="#000";
+                div_style.style.color="#fff";
+            } else {
+                div_style.style.backgroundColor="#999";
+                div_style.style.color="#000";
+            }
+
+            //////////
+
+            var saat_veri = saat + ":" + dakika + ":" + saniye;
+            document.getElementById("saat").innerHTML=saat_veri;
+        }
+        setInterval("diji_saat();",1000);
+    </script>
+    <style>
+        #saat{
+            margin: 20px auto;
+            padding: 4px;
+            width: 200px;
+            height: auto;
+            font-family: cursive ;
+            font-size: 36px;
+            color: #000;
+            border: 2px solid #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body onload="diji_saat();">
+    <div id="saat">19:00:45</div>
+</body>
+</html>

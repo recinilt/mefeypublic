@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    
+<h6 class="baslik">Coin Piyasa Değeri:</h6>
+  <div class="col-lg-4">
+    <div class="input-group mb-3" style="position: relative;">
+      <p>Piyasa Değeri = Bireysel Coin Fiyat x Toplam Dolaşımdaki Arz</p>
+      <p>Örneğin, Bitcoin’in piyasa değerini hesaplayalım. Nisan 2021 itibariyle, tek bir Bitcoin’in fiyatı 55,165 dolar ve toplam dolaşımdaki arz 18,686,162 BTC’dir. Bu bilgileri kullanarak Bitcoin’in piyasa değerini hesaplayabiliriz:</p>
+      <p>Piyasadaki tüm coinlerin toplam değeri, yani market cap: Haziran 2024: 82 Trilyon Dolar</p>
+      <p>BTC Piyasa Değeri = 55.000 x 18.000.000 = 1.03 trilyon dolar.</p>
+    </div>
+  
+  <a href="https://www.coingecko.com/tr/coins/bitcoin" target="_blank">BTC</a>
+  <a href="https://coinmarketcap.com/tr/currencies/bitcoin/" target="_blank">BTC</a>
+  <a href="https://coinmarketcap.com/tr/charts/#volume-24h" target="_blank">Piyasa</a>
+  
+  <p>
+    <input type="text" id="mycoin" ><button onclick="getirirmisin()">Getir</button><span id="yukleniyor">Yükleniyor</span>
+    <p>
+        Piyasadaki tüm coinlerin toplam değeri, yani market cap: <span id="marketcap"></span> <br>
+        Coin Name: <span id="coinname"></span> <br>
+        Coin Symbol: <span id="coinsymbol"></span> <br>
+        Coin Piyasa Değeri: <span id="coindegeri"></span> <br>
+        Bitcoin'in Kaçta Biri: <span id="kactabiribtc"></span> <br>
+        Ethereum'un Kaçta Biri: <span id="kactabirieth"></span> <br>
+
+        
+    </p>
+  </p>
+
+    <script>
+        var cname=[];
+        var csymbol=[];
+        document.addEventListener('DOMContentLoaded', function() {
+        fetch('https://api.coingecko.com/api/v3/coins/list')
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        //const coins = data.coins;
+        data.forEach(coin => {
+            const coinName = coin.name.replace(/\s+/g, '-');
+            console.log(`Name: ${coinName}, Symbol: ${coin.symbol}`);
+            cname.push(coinName);
+            csymbol.push(coin.symbol)
+        }); 
+        console.log(cname[2]);
+        console.log(csymbol[2]);
+        document.getElementById("yukleniyor").innerHTML="Yüklendi.";
+    })
+    .catch(error => {
+        console.error('Hata:', error);
+    });
+    
+});
+
+////////////////////
+
+async function getCoinMarketValues(coinIds) {
+    const marketValues = [];
+    
+    for (const coinId of coinIds) {
+        try {
+            const response = await fetch(`https://api.coingecko.com/api/v3/coins/${coinId}`);
+            const data = await response.json();
+            marketValues.push({ name: data.name, marketValue: data.market_data.market_cap.usd });
+        } catch (error) {
+            console.error(`Coin '${coinId}' verisi alınırken hata oluştu:`, error);
+        }
+    }
+    
+    return marketValues;
+}
+
+async function findMaxMarketValueCoin(coinIds) {
+    //const coinIds = ['bitcoin', 'ethereum', 'ripple', 'litecoin', 'cardano']; // Listede yer almasını istediğin coinlerin ID'leri
+    
+    const marketValues = await getCoinMarketValues(coinIds);
+    
+    let maxMarketValueCoin = marketValues[0];
+
+    for (let i = 1; i < marketValues.length; i++) {
+        if (marketValues[i].marketValue > maxMarketValueCoin.marketValue) {
+            maxMarketValueCoin = marketValues[i];
+        }
+    }
+    
+    console.log(`En yüksek piyasa değerine sahip coin: ${maxMarketValueCoin.name}, Piyasa Değeri: ${maxMarketValueCoin.marketValue} USD`);
+    return [maxMarketValueCoin.name, maxMarketValueCoin.marketValue];
+}
+
+//findMaxMarketValueCoin(coinids);
+
+//////////////////
+
+// Örnek kullanım
+//getMarketValue('bitcoin');
+
+function getirirmisin() {
+    //console.log(csymbol[1]);
+    //console.log(cname[1]);
+    //console.log(csymbol);
+    document.getElementById("yukleniyor").innerHTML="Yükleniyor...";
+    var mycoin1 = document.getElementById("mycoin").value;
+    //console.log(mycoin1)
+    //console.log(csymbol.indexOf(mycoin1));
+    // Aranan kelimenin tüm indekslerini saklamak için bir liste oluştur 
+    const indices = []; 
+    // Döngü kullanarak dizideki tüm indeksleri bul 
+    let index = csymbol.indexOf(mycoin1); 
+    while (index !== -1) { 
+        indices.push(index); 
+        index = csymbol.indexOf(mycoin1, index + 1);
+    }
+    console.log(indices);
+
+    var mynames=[];
+// Belirli indekslerdeki kelimeleri konsola yazdırma
+indices.forEach(index => {
+    if (index < cname.length) {
+        console.log(`Index ${index}: ${cname[index]}`);
+        mynames.push(cname[index]);
+    } else {
+        console.log(`Index ${index} geçerli değil.`);
+    }
+});
+
+    console.log(mynames);
+    var mySonuc = findMaxMarketValueCoin(mynames);
+    console.log(mySonuc);
+    /*
+    var mycoin2 = "";
+    var mynames=[];
+    var mynamesvalue=[];
+    for (let myi = 0; myi < indices.length; myi++) {
+        //const element = indices[index];
+        mynames.push(cname[myi]);
+        mynamesvalue.push(getMarketValue(cname[myi])) ;
+        console.log(getMarketValue(cname[myi]));
+    };
+    
+    const maxIndex = mynamesvalue.reduce((maxIdx, currentValue, currentIndex, array) => currentValue > array[maxIdx] ? currentIndex : maxIdx, 0);
+    mycoin2=mynames[maxIndex];
+    */
+
+    //var myindex = csymbol.indexOf(String(mycoin1));
+    //var mycoin2 = cname[myindex];
+    //console.log(mycoin2)
+    document.getElementById("coinname").innerHTML=mycoin2;
+    document.getElementById("coinsymbol").innerHTML=mycoin1;
+    var myadres='https://api.coingecko.com/api/v3/coins/' + mycoin2;
+    
+    fetch(myadres)
+        .then(response => response.json())
+        .then(data => {
+            const coinSupply = data.market_data.current_price.usd;
+            document.getElementById('coindegeri').innerText = coinSupply.toLocaleString();
+            document.getElementById("yukleniyor").innerHTML="Yüklendi.";
+        })
+        .catch(error => {
+            console.error('Error fetching BTC supply:', error);
+            document.getElementById('coindegeri').innerText = 'Veri alınamadı';
+        });
+        
+    
+};
+
+    
+    </script>
+</body>
+</html>

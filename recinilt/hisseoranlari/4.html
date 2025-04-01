@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <script>
+        function scrapeData() {
+            var cors = "https://www.cors-hub.com/"
+                var urlbist100 = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temel-Degerler-Ve-Oranlar.aspx?endeks=01#page-1';
+                axios.get(cors + urlbist100).then(response => {
+                    const data = response.data;
+                        var adres = '/html//form/div[4]/div/div[2]/div/div/div[1]/div/div[3]/div[2]/div/div/div[1]/div/div/div[2]/div[2]/div[1]/div[2]/div/div/div[2]/div[2]/table/tbody/tr[1]/td[1]/a';
+                        const hisse = $(data).find(adres).text()
+                        console.log(hisse);
+                });
+            
+        };
+        scrapeData();
+    </script>
+</body>
+</html>

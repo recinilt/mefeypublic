@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p id="text"></p>
+    
+
+    <script>
+        
+        console.log("recep");
+        function uyarla(sutun, satir, buyuk1, puan1, aralik2b, aralik2k, puan2, aralik3b, aralik3k, puan3, aralik4b, aralik4k, puan4, puan5) {
+            var formul = "";
+            var hucre = "";
+            hucre = sutun + satir;
+            console.log(hucre);
+            //EĞER(D2>=15;4     //;EĞER(VE(D2<15;D2>=10);6      //;EĞER(VE(D2<10;D2>=5);8    //;EĞER(VE(D2<5;D2>0);10;0))))
+            formul = "EĞER(" + hucre + ">=" + buyuk1 + ";" + puan1 +                 ";EĞER(VE(" + hucre + "<" + aralik2b + ";" + hucre + ">=" + aralik2k + ");" + puan2 +                 ";EĞER(VE(" + hucre + "<" + aralik3b + ";" + hucre + ">=" + aralik3k + ");" + puan3 +                 ";EĞER(VE(" + hucre + "<" + aralik4b + ";" + hucre + ">=" + aralik4k + ");" + puan4 + ";0))))";
+
+            console.log(formul + "<br><br><br>");
+            return(formul);
+        };
+
+        var formu = uyarla("H", 2, 3, 4, 3, 2, 6, 2, 1, 8, 1, 0, 10, 0);
+        console.log(formu);
+        document.getElementById("text").innerHTML = formu;
+
+
+
+    </script>
+</body>
+</html>

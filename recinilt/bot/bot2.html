@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Supertrend Al-Sat Botu</title>
+</head>
+<body>
+<h1>Supertrend Al-Sat Botu</h1>
+<button id="startBot">Botu Başlat</button>
+<div id="log"></div>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script>
+<script>
+// Binance API ve Secret Keylerinizi buraya girin
+const API_KEY = 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU';
+const SECRET_KEY = '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD';
+
+// Supertrend hesaplama fonksiyonu
+function calculateSupertrend(data) {
+    // Supertrend algoritmasını buraya ekleyin
+    // Bu örnek için basit bir mantık kullanacağız
+    return true// data[data.length - 1].close > data[data.length - 1].open;
+}
+
+// Binance API'den veri çekme fonksiyonu
+async function fetchCandlestickData(symbol, interval, limit) {
+    const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.map(candle => ({
+        open: parseFloat(candle[1]),
+        close: parseFloat(candle[4]),
+    }));
+}
+
+// Botun ana fonksiyonu
+async function startBot() {
+    const symbol = 'BTCUSDT'; // İşlem yapılacak sembol
+    const interval = '15m'; // Zaman dilimi
+    const limit = 400; // Geriye dönük veri miktarı
+
+    try {
+        const candleData = await fetchCandlestickData(symbol, interval, limit);
+        const isBuySignal = calculateSupertrend(candleData);
+
+        document.getElementById('log').innerHTML += `<p>${isBuySignal ? 'Al' : 'Sat'} sinyali algılandı.</p>`;
+        // Burada alım veya satım işlemi yapılabilir
+    } catch (error) {
+        console.error('Bir hata oluştu:', error);
+    }
+}
+
+document.getElementById('startBot').addEventListener('click', startBot);
+</script>
+</body>
+</html>

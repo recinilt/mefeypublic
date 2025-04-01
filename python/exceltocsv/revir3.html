@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revir3 İşleme</title>
+</head>
+<body>
+    <table border="1" id="resultTable">
+        <thead>
+            <tr>
+                <th>Sıra</th>
+                <th>İsim</th>
+                <th>Kutu</th>
+                <th>Birim</th>
+                <th>Detay</th>
+                <th>Yer</th>
+                <th>Sayfa</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script src="deneme1.js">
+
+    </script>
+    <script>
+        // Verilen veri
+        
+
+        // Veriyi işleme
+        function mergeData(data) {
+            const merged = {};
+
+            // Aynı 'name' değerlerine sahip olanları birleştir
+            data.forEach(item => {
+                if (!merged[item.name]) {
+                    merged[item.name] = { ...item };
+                } else {
+                    merged[item.name].kutu += item.kutu;
+                    merged[item.name].birim += item.birim;
+                    merged[item.name].detay += `, ${item.detay}`;
+                    merged[item.name].yer += `, ${item.yer}`;
+                    merged[item.name].sayfa += `, ${item.sayfa}`;
+                }
+            });
+
+            // Nesneyi alfabetik sıraya göre diziye dönüştür
+            return Object.keys(merged).sort().map((key, index) => {
+                const item = merged[key];
+                return { sıra: index + 1, ...item };
+            });
+        }
+
+        // Tabloyu oluşturma
+        function createTable(data) {
+            const tbody = document.querySelector("#resultTable tbody");
+            tbody.innerHTML = ""; // Önceki veriyi temizle
+
+            data.forEach(row => {
+                const tr = document.createElement("tr");
+                Object.values(row).forEach(value => {
+                    const td = document.createElement("td");
+                    td.textContent = value;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        // İşlenmiş veriyi al ve tabloya ekle
+        const processedData = mergeData(liste);
+        createTable(processedData);
+    </script>
+</body>
+</html>

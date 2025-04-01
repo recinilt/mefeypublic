@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Trend Analyzer</title>
+    <style>
+
+        #loader {
+            border: 16px solid #f3f3f3; /* iç rengi */
+            border-top: 16px solid #3498db; /* animasyon rengi */
+            border-radius: 50%; /* yuvarlak şekil */
+            width: 60px; /* genişlik */
+            height: 60px; /* yükseklik */
+            animation: spin 2s linear infinite; /* dönme animasyonu */
+            display: none; /* başlangıçta gizli */
+            position: absolute;
+            left: 0; /* sol tarafa yasla */
+            top: 320px; /* butonun altına yerleştir */
+            margin-left: 20px; /* sol boşluk */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-block {
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+        .result-block h2 {
+            margin: 0 0 10px 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Crypto Trend Analyzer</h1>
+    <p>(Veri çekimi ve işlenmesi zaman alabilir. Otomatik yenileme mevcuttur. Piyasa değerine göre ilk 100 coine bakar.)</p>
+    <div id="loader"></div>
+    <form id="form">
+        <label for="direction">Direction:</label>
+        <select id="direction" name="direction">
+            <option value="up">Yükseliş</option>
+            <option value="down" selected>Düşüş</option>
+        </select>
+        <br>
+        <label for="interval">Zaman Dilimi:</label>
+        <select id="interval" name="interval">
+            <option value="1m">1m</option>
+            <option value="5m" selected>5m</option>
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="12h">12h</option>
+            <option value="1d">1d</option>
+        </select>
+        <br>
+        <label for="periods">Periyot Sayısı:</label>
+        <input type="number" id="periods" name="periods" value="3">
+        <br>
+        <label for="percentChange">Minimum Yüzde Değişimi:</label>
+        <input type="number" id="percentChange" name="percentChange" value="1">
+        <br><span id="myozet">X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.</span><br>
+        <button id="mybutton" type="button" onclick="fetchData()">Analyze Trends</button>
+    </form>
+    <div id="results"></div>
+
+<script>
+let timeoutHandle; // Zamanlayıcı tutucu
+
+async function fetchData() {
+    clearTimeout(timeoutHandle); // Mevcut zamanlayıcıyı iptal et
+    const loader = document.getElementById('loader');
+    const resultsDiv = document.getElementById('results');
+    loader.style.display = 'block';
+    document.getElementById("mybutton").disabled=true;
+    
+    const direction = document.getElementById('direction').value;
+    const interval = document.getElementById('interval').value;
+    const periods = parseInt(document.getElementById('periods').value);
+    const percentChange = parseFloat(document.getElementById('percentChange').value);
+    document.getElementById("myozet").innerText=`${interval} zaman dilimindeki son ${periods} periyod sürekli ${direction} eğiliminde ise ve son periyod ile ilk periyod arasında yüzde ${percentChange} değişim var ise listelenir.`;
+    var sonucverdimi = true;
+
+    try {
+        // Yalnızca futures sembollerini çekiyoruz
+        const futuresResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+        let futuresSymbols = futuresResponse.data.symbols
+            .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+            .map(s => s.symbol);
+
+        // İlk 100 sembol
+        let validSymbols = futuresSymbols.slice(0, 100);
+
+        let validPairs = []; // 1er 1e gönderir
+        for (let i = 0; i < validSymbols.length; i += 1) {
+            const batch = validSymbols.slice(i, i + 1);
+            const requests = batch.map(symbol => axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${periods}`));
+            const responses = await Promise.all(requests.map(p => p.catch(e => e)));
+
+            responses.forEach((response, index) => {
+                if (response instanceof Error) return;
+                const data = response.data;
+                if (data.length < periods) return;
+
+                const closes = data.map(k => parseFloat(k[4]));
+
+                let consistentTrend = true;
+                for (let j = 1; j < closes.length; j++) {
+                    if ((direction === 'up' && closes[j] <= closes[j - 1]) ||
+                        (direction === 'down' && closes[j] >= closes[j - 1])) {
+                        consistentTrend = false;
+                        break;
+                    }
+                }
+
+                if (consistentTrend) {
+                    const firstClose = closes[0];
+                    const lastClose = closes[closes.length - 1];
+                    let change = 0;
+                    if (direction === 'up') {
+                        change = ((lastClose - firstClose) / firstClose) * 100;
+                    } else if (direction === 'down') {
+                        change = (Math.abs(lastClose - firstClose) / lastClose) * 100;
+                    }
+
+                    if (change >= percentChange) {
+                        const symbol = batch[index];
+                        const myInterval = interval === "1m" ? 1 : interval === "5m" ? 5 : interval === "15m" ? 15 : interval === "1h" ? 60 : interval === "4h" ? 240 : interval === "12h" ? 720 : 1440;
+                        const link = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}&interval=${myInterval}`;
+                        validPairs.push(`${symbol}: %${change.toFixed(2)} consistent ${direction} <a href="${link}" target="_blank">View Chart</a>`);
+                    }
+                }
+            });
+
+            // API limitlerine takılmamak için küçük bir bekleme
+            await new Promise(resolve => setTimeout(resolve, 140));
+        }
+
+        loader.style.display = 'none';
+
+        const timestamp = new Date().toLocaleString();
+        let resultHTML = `<div class="result-block"><h2>${timestamp}</h2>`;
+        if (validPairs.length > 0) {
+            resultHTML += validPairs.join('<br>');
+            const audio = new Audio('alarm.wav');
+            audio.play();
+            sonucverdimi = true;
+        } else {
+            resultHTML += 'Kriterlere uygun sonuç bulunamadı.';
+            const audio = new Audio('brr.wav');
+            audio.play();
+            sonucverdimi = false;
+        }
+        document.getElementById("mybutton").disabled=false;
+        document.getElementById("myozet").innerText=`X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.`
+        resultHTML += '</div>';
+
+        // Yeni sonuçları en üste ekle
+        resultsDiv.insertAdjacentHTML('afterbegin', resultHTML);
+
+    } catch (error) {
+        console.error('API Error:', error);
+        loader.style.display = 'none';
+        const timestamp = new Date().toLocaleString();
+        let errorHTML = `<div class="result-block"><h2>${timestamp}</h2>API error. Please try again later.</div>`;
+        resultsDiv.insertAdjacentHTML('afterbegin', errorHTML);
+    }
+
+    // Belirli süre sonra tekrar çalıştır
+    timeoutHandle = setTimeout(fetchData, sonucverdimi ? 20000 : 10000);
+}
+</script>
+</body>
+</html>

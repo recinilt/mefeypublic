@@ -1,0 +1,5 @@
+
+
+bu başarılı stratejiyi, python kodu olarak yaz. binance api ile otomatik alıp kapatıp satıp kapatabileyim.
+15x kaldıraçla, 2 usdt harcamayla yani 20 usdt büyüklüğünde pozisyon açacak şekilde ayarla. precisiona da dikkat et, precision bilgisini alıp da quantity'yi belirle.
+longdan shorta veya shorttan longa geçerken eski pozisyonu otomatik kapatan bir kod yaz.

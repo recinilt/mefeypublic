@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance USDT Sıralama</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h2>Binance USDT Sıralama Uygulaması</h2>
+    <div>
+        <textarea id="inputText" rows="10" cols="50" placeholder="Verileri buraya yapıştırın..."></textarea>
+    </div>
+
+    <div>
+        <label for="periodSelect">Periyot Seçin:</label>
+        <select id="periodSelect">
+            <option value="5m">5m</option>
+            <option value="15m">15m</option>
+            <option value="1h">1h</option>
+            <option value="4h">4h</option>
+            <option value="12h">12h</option>
+            <option value="1d">1d</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="maPeriodSelect">Hareketli Ortalama Periyodu Seçin (Varsayılan 6):</label>
+        <select id="maPeriodSelect">
+            <option value="6">6</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+        </select>
+    </div>
+
+    <button onclick="processData()">Verileri İşle</button>
+
+    <h3>Sonuçlar</h3>
+    <table id="resultTable" border="1">
+        <thead>
+            <tr>
+                <th>Coin</th>
+                <th id="myfarkHeader" onclick="sortTableByMyFark()">MyFark</th>
+                <th id="longShortHeader" onclick="sortTableByLongShort()">Long/Short Oranı</th>
+                <th id="avgLongShortHeader" onclick="sortTableByAvgLongShort()">Ortalama Long/Short</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function processData() {
+            const inputText = document.getElementById('inputText').value;
+            const period = document.getElementById('periodSelect').value;
+            const maPeriod = parseInt(document.getElementById('maPeriodSelect').value);  // Hareketli ortalama periyodunu al
+
+            const lines = inputText.split("\n");
+            const coins = [];
+            lines.forEach(line => {
+                const match = line.match(/(\w+USDT)\s([\d,\.]+)\s([\d,\.]+)/);
+                if (match) {
+                    const coin = match[1];
+                    let firstValue = parseFloat(match[2].replace(',', '.'));
+                    let secondValue = parseFloat(match[3].replace(',', '.'));
+                    const myfark = (firstValue - secondValue).toFixed(2);
+
+                    coins.push({ coin, myfark });
+                }
+            });
+
+            // Veriyi Binance API'ye gönderelim (long/short oranını alalım)
+            await fetchBinanceData(coins, period, maPeriod);
+        }
+
+        async function fetchBinanceData(coins, period, maPeriod) {
+            const resultTable = document.getElementById('resultTable').getElementsByTagName('tbody')[0];
+            resultTable.innerHTML = '';  // Temizle
+
+            const promises = coins.map(async (coin) => {
+                const longShortRatio = await calculateLongShortRatio(coin.coin, period);
+
+                // Eğer longShortRatio geçerli değilse, 1 olarak kabul edelim.
+                const validLongShortRatio = isNaN(longShortRatio) ? 1 : longShortRatio;
+
+                const row = resultTable.insertRow();
+                const cellCoin = row.insertCell(0);
+                const cellMyFark = row.insertCell(1);
+                const cellLongShort = row.insertCell(2);
+                const cellAvgLongShort = row.insertCell(3);
+
+                cellCoin.textContent = coin.coin;
+                cellMyFark.textContent = coin.myfark;
+
+                let longShort = '';
+                if (validLongShortRatio > 1.1) {
+                    longShort = 'LONG';
+                } else if (validLongShortRatio < 0.9) {
+                    longShort = 'SHORT';
+                } else {
+                    longShort = 'NEUTRAL';
+                }
+                cellLongShort.textContent = `${longShort} (${validLongShortRatio.toFixed(2)})`;
+
+                // Ortalama Long/Short hesapla
+                const avgLongShortRatio = await calculateAvgLongShortRatio(coin.coin, period, maPeriod);
+                cellAvgLongShort.textContent = avgLongShortRatio.toFixed(2);
+            });
+
+            // Tüm promises tamamlandıktan sonra tabloyu sıralayabiliriz
+            await Promise.all(promises);
+        }
+
+        async function calculateLongShortRatio(symbol, period) {
+            const apiUrl = `https://fapi.binance.com/futures/data/topLongShortPositionRatio`;
+            try {
+                const response = await fetch(`${apiUrl}?symbol=${symbol}&period=${period}`);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    return parseFloat(data[0].longShortRatio);
+                } else {
+                    return NaN;
+                }
+            } catch (error) {
+                console.error('Binance API hatası:', error);
+                return NaN;
+            }
+        }
+
+        async function calculateAvgLongShortRatio(symbol, period, maPeriod) {
+            const apiUrl = `https://fapi.binance.com/futures/data/topLongShortPositionRatio`;
+            try {
+                const response = await fetch(`${apiUrl}?symbol=${symbol}&period=${period}`);
+                const data = await response.json();
+
+                if (data && data.length > 0) {
+                    // Son 'maPeriod' kadar veriyi al ve hareketli ortalamayı hesapla
+                    const relevantData = data.slice(-maPeriod);  // Son 'maPeriod' kadar veriyi al
+                    const sum = relevantData.reduce((acc, item) => acc + parseFloat(item.longShortRatio), 0);
+                    const avg = sum / relevantData.length;
+                    return avg;
+                } else {
+                    return NaN;
+                }
+            } catch (error) {
+                console.error('Binance API hatası:', error);
+                return NaN;
+            }
+        }
+
+        function sortTableByMyFark() {
+            const table = document.getElementById('resultTable');
+            const rows = Array.from(table.rows).slice(1);
+
+            const sortedRows = rows.sort((rowA, rowB) => {
+                const myfarkA = parseFloat(rowA.cells[1].textContent);
+                const myfarkB = parseFloat(rowB.cells[1].textContent);
+                return myfarkB - myfarkA;
+            });
+
+            sortedRows.forEach(row => table.appendChild(row));
+        }
+
+        function sortTableByLongShort() {
+            const table = document.getElementById('resultTable');
+            const rows = Array.from(table.rows).slice(1);
+
+            const sortedRows = rows.sort((rowA, rowB) => {
+                const longShortA = parseFloat(rowA.cells[2].textContent.split('(')[1].split(')')[0]);
+                const longShortB = parseFloat(rowB.cells[2].textContent.split('(')[1].split(')')[0]);
+                return longShortB - longShortA;
+            });
+
+            sortedRows.forEach(row => table.appendChild(row));
+        }
+
+        function sortTableByAvgLongShort() {
+            const table = document.getElementById('resultTable');
+            const rows = Array.from(table.rows).slice(1);
+
+            const sortedRows = rows.sort((rowA, rowB) => {
+                const avgLongShortA = parseFloat(rowA.cells[3].textContent);
+                const avgLongShortB = parseFloat(rowB.cells[3].textContent);
+                return avgLongShortB - avgLongShortA;
+            });
+
+            sortedRows.forEach(row => table.appendChild(row));
+        }
+    </script>
+</body>
+</html>

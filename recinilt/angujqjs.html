@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+
+</head>
+<body>
+    
+    <div ng-app="">
+        <ul>
+            <li>ul>li*5{$}tab 1</li>
+            <li id="li2" ng-model="li2">2</li>
+            <li id="li3">3 <input id="inp" type="text" ng-model="li3" value="r"></li>
+            <li id="li4">4 {{li2}}</li>
+            <li id="li5">5</li>
+            <li id="li8">li8</li>
+            <li id="li9">li9</li>
+            <li id="li6">li6</li>
+            <li id="li7">li7</li>
+            
+            
+        </ul>
+        <p><div id="mydiv">mydiv</div></p>
+        <p><div id="mydiv2">mydiv2</div></p>
+
+
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $("#li2").click(function(e){
+                $(this).hide(200);
+                $("#li2").show(200);
+                $("#li2").toggle(200);
+                $("#li2").toggle(200, function(){$("#li4").text("animation complete");});
+
+                
+                
+                });
+            $("#li4").click(function(){
+                    $(this).fadeOut(200).fadeIn(200).fadeToggle().fadeToggle().fadeTo(500,0.25);
+                });
+                $("#li5").click(function(){
+                    $(this).slideDown(200).slideUp(200).slideToggle(500);
+                });
+                $("#li6").animate({color:'red',height:"200px"},2000,function(){$("#li6").text("animate");});
+            
+            $("#li7").css("backgroundColor","green").slideUp(500).slideDown(500);
+
+            $("#mydiv").load("guldur.html iframe");
+            $("#mydiv2").load("mymaps.html",function(responseTxt,statusTxt,xhr){
+                if(statusTxt=="success"){$("#li8").text("content loaded succesfully");} else {
+                    $("#li8").text("Error: "+xhr.status + ": " + xhr.statusTxt );
+                }
+                
+            });
+
+            $.get("tts1.html",function(data,status){$("#li9").html(data);});
+            $.POST("virlesikkademelicarpan.html").
+
+
+
+        });
+
+    </script>
+</body>
+</html>

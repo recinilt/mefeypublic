@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google ile Giriş</title>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="1048458464810-3iii1dnefn6un2krnvovhrqj6gqho322.apps.googleusercontent.com">
+    <script>
+        const erisebilenler = ["recepyeni@gmail.com", "reccirik@gmail.com"];
+
+        function onSignIn(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            const email = profile.getEmail();
+
+            if (erisebilenler.includes(email)) { 
+                merhabaRecep();
+            } else {
+                erisiminizYok();
+            }
+        }
+
+        function merhabaRecep() {
+            document.getElementById('message').innerText = "Merhaba Recep";
+        }
+
+        function erisiminizYok() {
+            document.getElementById('message').innerText = "Erişiminiz yok";
+        }
+    </script>
+</head>
+<body>
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+    <div id="message"></div>
+</body>
+</html>

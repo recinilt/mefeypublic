@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetvel Sitesi</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #cetvel {
+            width: 80%;
+            height: 50px;
+            background-color: #fff;
+            border: 1px solid #000;
+            position: relative;
+        }
+        .mark {
+            position: absolute;
+            height: 100%;
+            width: 1px;
+            background-color: #000;
+        }
+        .mark.long {
+            height: 100%;
+        }
+        .mark.short {
+            height: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div id="cetvel"></div>
+
+    <!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cetvel Sitesi</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #cetvel {
+            width: 80%;
+            height: 50px;
+            background-color: #fff;
+            border: 1px solid #000;
+            position: relative;
+        }
+        .mark {
+            position: absolute;
+            height: 100%;
+            width: 1px;
+            background-color: #000;
+        }
+        .mark.long {
+            height: 100%;
+        }
+        .mark.short {
+            height: 50%;
+        }
+        .number {
+            position: absolute;
+            top: 100%;
+            transform: translateX(-50%);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="cetvel"></div>
+
+    <script>
+        function createRuler() {
+            const cetvel = document.getElementById('cetvel');
+            const width = cetvel.clientWidth;
+            const numMarks = width / 10;
+
+            for (let i = 0; i < numMarks; i++) {
+                const mark = document.createElement('div');
+                mark.classList.add('mark');
+                mark.style.left = `${i * 10}px`;
+
+                if (i % 10 === 0) {
+                    mark.classList.add('long');
+                    const number = document.createElement('div');
+                    number.classList.add('number');
+                    number.style.left = `${i * 10}px`;
+                    number.textContent = i / 10;
+                    cetvel.appendChild(number);
+                } else {
+                    mark.classList.add('short');
+                }
+
+                cetvel.appendChild(mark);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const cetvel = document.getElementById('cetvel');
+            cetvel.innerHTML = '';
+            createRuler();
+        });
+
+        createRuler();
+    </script>
+</body>
+</html>
+
+</body>
+</html>

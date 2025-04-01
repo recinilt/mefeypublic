@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- <script src="js/jquery-3.4.1.min.js"></script> -->
+
+    <style>
+        .baslik {
+          margin: 20px auto;
+          padding: 5px;
+          border: solid 2px gray;
+          border-radius: 5px;
+          background-color: aliceblue; 
+          background: linear-gradient(to right, rgba(255, 0, 0, 0.281) 0%,rgba(4, 0, 255, 0.281) 50%, rgba(2, 255, 0, 0.281) 100%); width: fit-content;
+          box-shadow: 5px 5px 15px 5px black;
+          /* transform: scale(1.2) rotate(2deg) translate(7px, 8px) skew(3deg, 4deg); */
+        }
+ 
+ 
+     </style>
+    
+</head>
+<body>
+
+
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <div style="color:blue;background-color: rgb(226, 223, 223);border-radius: 3px 0 0 3px;padding: 10px;">Anapara:</div>
+                </td>
+                <td>
+                    <input id="anapara" type="text" style="padding: 10px;">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div style="color:blue;background-color: rgb(226, 223, 223);border-radius: 3px 0 0 3px;padding: 10px;">Kazanç Oranı: %</div>
+                </td>
+                <td>
+                    <input id="oran" type="text" style="padding: 10px;">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div style="color:blue;background-color: rgb(226, 223, 223);border-radius: 3px 0 0 3px;padding: 10px;">Kaç Adet:</div>
+                </td>
+                <td>
+                    <input id="adet" type="text" style="padding: 10px;">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div style="color:blue;background-color: rgb(226, 223, 223);border-radius: 3px 0 0 3px;padding: 10px;">Adetteki Eklenti:</div>
+                </td>
+                <td>
+                    <input id="kesinti" type="text" style="padding: 10px;">
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+
+<!-- 
+    <div id="mydiv1"></div>
+    <div id="mydiv2"></div>
+    <p>Anapara: <input type="number" id="anapara"></p>
+    <p>Kazanç Oranı: %<input type="number" name="" id="oran"></p>
+    <p>Kaç Adet: <input type="number" name="" id="adet"></p>    
+    <p>Adetteki Eklenti: <input type="number" name="" id="kesinti"></p>
+     -->
+    <p>Sonuç: <span id="sonuc" style="color: red;"></span></p>
+    <p>Kaç Kat Kazanç: <span id="kazanc" style="color: red;"></span> </p> 
+    <h3 class="baslik">%X KARLA BİLEŞİK ÇARPAN</h3>
+
+
+    
+    <script>
+        
+
+            
+            var adet = document.getElementById("adet");
+            var oran = document.getElementById("oran");
+            var anapara = document.getElementById("anapara");
+            var kesinti = document.getElementById("kesinti");
+            var sonuc = document.getElementById("sonuc");
+            var buton = document.getElementById("buton");
+            var kazanc = document.getElementById("kazanc");
+            var deneme = document.getElementById("deneme");
+            anapara.value=8000;
+            oran.value=36;
+            adet.value=20;
+            
+
+
+
+
+            var hesaplala = function () {
+                var myanapara=anapara.value;
+            var myadet=adet.value;
+            var myoran=oran.value;
+            var mykesinti=kesinti.value;
+                var mysonuc=kademeli(myanapara,myadet,myoran,mykesinti);
+                mysonuc = Number(mysonuc).toFixed(2);
+                sonuc.innerHTML=mysonuc;
+                var mykazanc = (mysonuc / myanapara - 1).toFixed(2);
+                kazanc.innerHTML=mykazanc;                
+                console.log(myoran);                
+            };
+
+            anapara.addEventListener("keyup",hesaplala);
+            adet.addEventListener("keyup",hesaplala);
+            oran.addEventListener("keyup",hesaplala);
+            kesinti.addEventListener("keyup",hesaplala);
+            hesaplala();
+
+
+                  
+            
+
+            var a=kademeli(1000,52,0.05);
+        function kademeli(anapara,adet,oran,kesinti) {
+            var sum = Number(anapara);
+            var i=0;
+            for(i=0;i<Number(adet);i++){
+            sum=sum + (sum*Number(oran*0.01));
+            if(kesinti){
+                sum=sum + Number(kesinti);
+            }
+            }
+            return sum;
+        }
+      
+
+
+       ////////////////////////////////
+        /*
+        $(document).ready(function () {
+            console.log("document ready");
+
+            
+            
+            $("#buton").click(function () {
+                var myanapara=$("#anapara").val();
+            var myadet=$("#adet").val();
+            var myoran=$("#oran").val();
+            var mykesinti=$("#kesinti").val();
+                var mysonuc=kademeli(myanapara,myadet,myoran,mykesinti);
+                mysonuc = Number(mysonuc).toFixed(2);
+                $("#sonuc").html(mysonuc);
+                console.log(myoran);
+            });
+
+           
+            
+
+            var a=kademeli(1000,52,0.05);
+        function kademeli(anapara,adet,oran,kesinti) {
+            var sum = Number(anapara);
+            var i=0;
+            for(i=0;i<Number(adet);i++){
+            sum=sum + (sum*Number(oran*0.01));
+            if(kesinti){
+                sum=sum-(kesinti/4);
+            }
+            }
+            return sum;
+        }
+
+        */
+
+        //$("#mydiv2").html(a);
+           
+        /*
+            var str='{"names":[' + // create json object
+        '{"first":"Hakuna","lastN":"Matata"},' +
+        '{"first":"Jane","lastN":"Doe"},' +
+        '{"first":"Air":"lastN":"Jordan"}]}';
+        var obj = JSON.parse(str);
+        //document.write(obj.names[1].first);
+        console.log(obj.names[1].first);
+            */
+        //});
+
+
+    </script>
+    
+</body>
+</html>

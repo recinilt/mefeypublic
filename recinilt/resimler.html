@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p><button onclick="antlasma()">Antlaşma</button></p>
+    <p><button onclick="magara()">Mağara</button></p>
+    <p><button onclick="seviye()">Seviye</button></p>
+    <img src="" alt="" id="resim" width="100%">
+
+    <script>
+        var resim = document.querySelector("#resim");
+        function antlasma() {
+            resim.setAttribute("src", "img/antlasma.jpg");
+        };
+        function magara() {
+            resim.setAttribute("src", "img/magara.jpeg");
+        };
+        function seviye() {
+            resim.setAttribute("src", "img/seviye.png");
+        };
+    </script>
+
+
+</body>
+</html>

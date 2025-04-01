@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aşı Bilgileri</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .accordion {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .accordion-header {
+            padding: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            border: none;
+            text-align: left;
+        }
+
+        .accordion-header:hover {
+            background-color: #0056b3;
+        }
+
+        .accordion-content {
+            padding: 15px;
+            display: none;
+            border-top: 1px solid #ccc;
+            background-color: #ffffff;
+        }
+
+        .accordion-content p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Aşı Bilgileri</h1>
+
+<div class="accordion">
+    <button class="accordion-header" data-target="content1">Rutin Aşılar</button>
+    <div class="accordion-content" id="content1">
+        <p>Türkiye’de Sağlık Bakanlığı’nın önerdiği rutin aşılar, bebeklikten erişkinliğe kadar uygulanan, toplum sağlığını korumak için önerilen aşılardır. Bu aşılardan bazıları şunlardır:</p>
+        <ul>
+            <li><strong>Bebek ve Çocukluk Çağı Aşıları:</strong>
+                <ul>
+                    <li><strong>Hepatit B Aşısı:</strong> Doğumda, 1. ayda ve 6. ayda yapılır.</li>
+                    <li><strong>BCG (Verem) Aşısı:</strong> 2. ayın sonunda yapılır.</li>
+                    <li><strong>DaBT-İPA-Hib (Beşli Karma Aşı):</strong> Difteri, boğmaca, tetanoz, çocuk felci ve menenjit (Hib) hastalıklarına karşı korur. 2., 4., 6. ayda ve 18. ayda uygulanır.</li>
+                    <li><strong>KPA (Konjuge Pnömokok Aşısı):</strong> Zatürre ve menenjite karşı korur. 2., 4., 6. ayda ve 12. ayda uygulanır.</li>
+                    <li><strong>KKK (Kızamık, Kızamıkçık, Kabakulak):</strong> 1 yaşında ve 4-6 yaş arasında uygulanır.</li>
+                    <li><strong>Hepatit A Aşısı:</strong> 18. ay ve 24. ayda yapılır.</li>
+                    <li><strong>Su Çiçeği Aşısı:</strong> 12. ayda uygulanır.</li>
+                </ul>
+            </li>
+            <li><strong>Okul Çağı Aşıları:</strong>
+                <ul>
+                    <li><strong>DaBT-İPA (Dörtlü Karma Aşı):</strong> 4-6 yaş arasında uygulanır.</li>
+                    <li><strong>Td (Tetanoz ve Difteri Aşısı):</strong> 13 yaşında yapılır.</li>
+                </ul>
+            </li>
+            <li><strong>Ergenlik ve Yetişkinlikte Önerilen Aşılar:</strong>
+                <ul>
+                    <li><strong>HPV Aşısı:</strong> Human Papilloma Virüsü'ne (rahim ağzı kanseri) karşı koruma sağlar. 9-26 yaş arasında önerilir.</li>
+                    <li><strong>Grip Aşısı:</strong> Her yıl tekrarlanır.</li>
+                    <li><strong>COVID-19 Aşısı:</strong> Güncel sağlık otoritelerinin önerilerine göre uygulanır.</li>
+                    <li><strong>Tetanos Aşısı:</strong> Her 10 yılda bir tekrarlanır.</li>
+                    <li><strong>Zatürre Aşısı:</strong> 65 yaş üstü veya risk grubundaki kişiler için önerilir.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Bu liste, genel uygulamaları içerir; kişisel sağlık durumunuza göre doktorunuz farklı aşı takvimleri önerebilir. Aşı takvimini düzenli kontrol ettirmeniz önemlidir.</p>
+    </div>
+</div>
+
+<div class="accordion">
+    <button class="accordion-header" data-target="content2">Erişkinlik Aşıları</button>
+    <div class="accordion-content" id="content2">
+        <p>Erişkinlik döneminde bazı aşılar belirli aralıklarla tekrarlanmalıdır. Ayrıca, bağışıklık sisteminin durumu, mesleki riskler, seyahat planları veya kronik hastalıklar gibi faktörlere göre de ek aşılar gerekebilir. Erişkinlerde tekrar yapılması önerilen aşılar şunlardır:</p>
+        <ul>
+            <li><strong>Tetanos-Difteri (Td veya Tdap) Aşısı:</strong>
+                <ul>
+                    <li>Her 10 yılda bir tekrarlanmalıdır.</li>
+                    <li>Eğer çocuklukta eksik yapılmışsa veya bilinmiyorsa, tamamlayıcı dozlar önerilir.</li>
+                    <li>Özellikle kazalarda (yaralanma, paslı metal teması) ek doz gerekebilir.</li>
+                </ul>
+            </li>
+            <li><strong>Grip (Influenza) Aşısı:</strong>
+                <ul>
+                    <li>Her yıl yapılmalıdır.</li>
+                    <li>Özellikle 65 yaş üstü, kronik hastalığı olanlar, gebeler ve sağlık çalışanları için önerilir.</li>
+                </ul>
+            </li>
+            <li><strong>Zatürre (Pnömokok) Aşısı:</strong>
+                <ul>
+                    <li>65 yaş üstünde bir doz yapılır. Daha önce yapılmamışsa, 5 yıl sonra tekrar doz gerekebilir.</li>
+                    <li>65 yaş altı kişilerde; kronik hastalık (KOAH, diyabet), bağışıklık sistemi zayıflığı veya splenektomi durumlarında önerilir.</li>
+                </ul>
+            </li>
+            <li><strong>Hepatit B Aşısı:</strong>
+                <ul>
+                    <li>Eğer aşılanmamış veya bağışıklık yoksa, 3 dozluk seri uygulanmalıdır.</li>
+                    <li>Risk grupları (sağlık çalışanları, kan teması riski olanlar) için önemlidir.</li>
+                </ul>
+            </li>
+            <li><strong>Hepatit A Aşısı:</strong>
+                <ul>
+                    <li>Daha önce aşılanmamış veya geçirmemiş erişkinlerde 2 doz şeklinde yapılır.</li>
+                    <li>Özellikle seyahat veya mesleki risk taşıyanlarda önerilir.</li>
+                </ul>
+            </li>
+            <li><strong>COVID-19 Aşısı:</strong>
+                <ul>
+                    <li>Güncel kılavuzlara göre önerilir.</li>
+                    <li>Özellikle risk grubundaki kişiler düzenli rapel dozları almalıdır.</li>
+                </ul>
+            </li>
+            <li><strong>HPV Aşısı:</strong>
+                <ul>
+                    <li>26 yaşına kadar önerilse de, bazı rehberler 45 yaşına kadar yapılmasını destekler.</li>
+                    <li>Kadın ve erkeklerde rahim ağzı kanseri veya genital siğillere karşı koruma sağlar.</li>
+                </ul>
+            </li>
+            <li><strong>Su Çiçeği (Varisella) Aşısı:</strong>
+                <ul>
+                    <li>Daha önce geçirmemiş veya aşılanmamış erişkinlere 2 doz önerilir.</li>
+                </ul>
+            </li>
+            <li><strong>Zona (Herpes Zoster) Aşısı:</strong>
+                <ul>
+                    <li>50 yaş üstü erişkinlere önerilir.</li>
+                    <li>Zona hastalığına karşı koruma sağlar ve komplikasyonları azaltır.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Eğer bir seyahat planı veya özel bir risk faktörünüz varsa (örneğin salgın bölgesine seyahat, bağışıklık yetmezliği), doktorunuz ek aşılar önerebilir. Aşı takviminizi düzenli kontrol ettirmeniz önemlidir.</p>
+    </div>
+</div>
+
+<div class="accordion">
+    <button class="accordion-header" data-target="content3">Sarı Humma Hastalığı ve Aşısı</button>
+    <div class="accordion-content" id="content3">
+        <h2>Sarı Humma Hastalığı</h2>
+        <p><strong>Sarı humma</strong>, sarı humma virüsünün neden olduğu, sivrisineklerle bulaşan viral bir hastalıktır. Tropikal Afrika ve Güney Amerika'nın bazı bölgelerinde yaygın olarak görülür. Hastalık, genellikle hafif seyirli olsa da, şiddetli vakalarda ölümcül olabilir.</p>
+        <h3>Belirtileri:</h3>
+        <ul>
+            <li>Ateş ve titreme</li>
+            <li>Kas ağrıları (özellikle sırt ve dizlerde)</li>
+            <li>Baş ağrısı</li>
+            <li>Bulantı ve kusma</li>
+            <li>Yorgunluk ve halsizlik</li>
+            <li><strong>Şiddetli vakalarda:</strong>
+                <ul>
+                    <li>Sarılık (deride ve gözlerde sararma)</li>
+                    <li>Kanama (burun, ağız veya gözlerden)</li>
+                    <li>Karaciğer ve böbrek yetmezliği</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Sarı humma enfeksiyonu için spesifik bir tedavi bulunmamaktadır. Destekleyici tedavi, semptomların hafifletilmesi ve komplikasyonların yönetilmesini hedefler.</p>
+        <h2>Sarı Humma Aşısı</h2>
+        <p><strong>Sarı humma aşısı</strong>, bu hastalıktan korunmanın en etkili yoludur. Aşı, canlı zayıflatılmış bir virüs içerir ve genellikle bir dozluk bir aşı yeterli bağışıklık sağlar. Aşı, sarı humma hastalığının endemik olduğu bölgelere seyahat edenler veya bu bölgelerde yaşayanlar için önerilir.</p>
+        <h3>Kimler aşı olmalıdır?</h3>
+        <ul>
+            <li>Sarı humma hastalığının yaygın olduğu bölgelere seyahat eden kişiler</li>
+            <li>Salgın bölgelerinde yaşayanlar</li>
+            <li>Bazı ülkelerde zorunlu aşı sertifikası istenmektedir (Uluslararası Seyahat Aşı Kartı).</li>
+        </ul>
+        <h3>Koruma Süresi:</h3>
+        <p>Bir doz sarı humma aşısı, genellikle ömür boyu bağışıklık sağlar.</p>
+        <h2>Sarı Humma Aşısının Yan Etkileri</h2>
+        <p>Aşı genellikle güvenli olmakla birlikte, bazı hafif ve nadiren de ciddi yan etkilere neden olabilir.</p>
+        <h3>Hafif Yan Etkiler:</h3>
+        <ul>
+            <li>Enjeksiyon bölgesinde ağrı, kızarıklık veya şişlik</li>
+            <li>Hafif ateş</li>
+            <li>Kas ağrısı</li>
+            <li>Baş ağrısı</li>
+        </ul>
+        <h3>Ciddi Yan Etkiler (Nadir):</h3>
+        <ul>
+            <li><strong>Alerjik Reaksiyonlar:</strong> Döküntü, kaşıntı, nefes almada zorluk gibi belirtiler (anafilaksi).</li>
+            <li><strong>Sarı Humma Aşısına Bağlı Visserotropik Hastalık (YEL-AVD):</strong> Aşı virüsünün vücutta çoğalmasına bağlı ciddi enfeksiyon. Karaciğer, böbrek ve diğer organlar etkilenebilir.</li>
+            <li><strong>Sarı Humma Aşısına Bağlı Nörotropik Hastalık (YEL-AND):</strong> Merkezi sinir sistemi iltihabı, ensefalit gibi ciddi nörolojik komplikasyonlar.</li>
+        </ul>
+        <h3>Kimler Sarı Humma Aşısı Yaptırmamalıdır?</h3>
+        <ul>
+            <li>6 aydan küçük bebekler</li>
+            <li>Şiddetli yumurta alerjisi olanlar</li>
+            <li>Bağışıklık sistemi zayıflamış kişiler (örneğin, HIV enfeksiyonu, kanser tedavisi görenler)</li>
+            <li>Gebeler (yalnızca salgın bölgelerinde zorunlu olduğunda yapılabilir)</li>
+        </ul>
+        <p>Aşı olmadan önce doktorla görüşerek kişisel riskler değerlendirilmelidir. Sarı humma bölgelerine seyahat etmeden önce aşı yapılması ve seyahat sağlık sertifikası alınması önerilir.</p>
+    </div>
+</div>
+
+<div class="accordion">
+    <button class="accordion-header" data-target="content4">Tifo Hastalığı ve Aşısı</button>
+    <div class="accordion-content" id="content4">
+        <h2>Tifo Hastalığı</h2>
+        <p><strong>Tifo</strong>, <em>Salmonella typhi</em> bakterisinin neden olduğu ciddi bir enfeksiyondur. Genellikle kontamine su ve yiyeceklerin tüketilmesiyle bulaşır. Tifo, kötü hijyen koşullarının yaygın olduğu gelişmekte olan ülkelerde daha sık görülür.</p>
+        <h3>Belirtileri:</h3>
+        <ul>
+            <li>Yüksek ateş (39-40°C)</li>
+            <li>Şiddetli baş ağrısı</li>
+            <li>Karın ağrısı ve rahatsızlık</li>
+            <li>İştah kaybı</li>
+            <li>Kabızlık veya ishal</li>
+            <li>Deride gül renkli döküntüler (rose spots)</li>
+            <li>Halsizlik ve yorgunluk</li>
+        </ul>
+        <p>Etkili tedavi edilmezse, tifo ciddi komplikasyonlara yol açabilir, örneğin bağırsak delinmesi, enfeksiyonun yayılması ve hatta ölüm.</p>
+        <h3>Tedavi:</h3>
+        <p>Tifo hastalığı genellikle antibiyotiklerle tedavi edilir. Bunun yanında, yeterli sıvı alımı ve beslenme destekleyici tedavi olarak uygulanır.</p>
+        <h2>Tifo Aşısı</h2>
+        <p>Tifo aşısı, bu hastalıktan korunmanın önemli bir yoludur, özellikle risk altındaki bölgelerde seyahat eden kişiler için önerilir. İki tür tifo aşısı vardır:</p>
+        <ol>
+            <li><strong>Oral Tifo Aşısı:</strong>
+                <ul>
+                    <li>Ağız yoluyla alınır (canlı, zayıflatılmış bakteri içerir).</li>
+                    <li>6 yaş ve üzeri kişiler için uygundur.</li>
+                    <li>4 dozluk bir seri halinde alınır (her 2 günde bir bir doz).</li>
+                </ul>
+            </li>
+            <li><strong>Enjekte Edilebilir Tifo Aşısı:</strong>
+                <ul>
+                    <li>Kas içine veya deri altına uygulanır (ölü bakteri içerir).</li>
+                    <li>2 yaş ve üzeri kişiler için uygundur.</li>
+                    <li>Tek doz yeterlidir.</li>
+                </ul>
+            </li>
+        </ol>
+        <h3>Kimler Tifo Aşısı Olmalıdır?</h3>
+        <ul>
+            <li>Tifo hastalığının yaygın olduğu bölgelere seyahat edenler</li>
+            <li>Riskli bölgelerde uzun süre kalanlar</li>
+            <li>Tifo bakterisiyle çalışan laboratuvar personeli</li>
+        </ul>
+        <h3>Koruma Süresi:</h3>
+        <p><strong>Oral aşı:</strong> 5 yıl boyunca koruma sağlar.<br><strong>Enjekte edilebilir aşı:</strong> 2 yıl boyunca koruma sağlar.</p>
+        <h2>Tifo Aşısının Yan Etkileri</h2>
+        <p>Tifo aşısı genellikle güvenli olmakla birlikte, bazı hafif yan etkilere neden olabilir.</p>
+        <h3>Hafif Yan Etkiler:</h3>
+        <ul>
+            <li>Enjeksiyon bölgesinde ağrı, kızarıklık veya şişlik (enjekte edilebilir aşıda)</li>
+            <li>Hafif ateş</li>
+            <li>Baş ağrısı</li>
+            <li>Halsizlik ve yorgunluk</li>
+            <li>Karın rahatsızlığı (oral aşıda)</li>
+        </ul>
+        <h3>Ciddi Yan Etkiler (Nadir):</h3>
+        <ul>
+            <li>Alerjik reaksiyonlar (cilt döküntüsü, nefes darlığı gibi anafilaktik reaksiyonlar)</li>
+            <li>Şiddetli mide-bağırsak rahatsızlıkları (oral aşıda nadiren görülür)</li>
+        </ul>
+        <h3>Kimler Tifo Aşısı Yaptırmamalıdır?</h3>
+        <ul>
+            <li>2 yaşından küçük çocuklar (enjekte edilebilir aşı için)</li>
+            <li>6 yaşından küçük çocuklar (oral aşı için)</li>
+            <li>Aşı içeriğine karşı ciddi alerjisi olan kişiler</li>
+            <li>Ateşli bir hastalık sırasında aşı ertelenmelidir.</li>
+        </ul>
+        <p>Tifo aşısı, hastalığın yaygın olduğu bölgelere seyahat planlayan kişiler için en iyi koruma yöntemlerinden biridir. Bunun yanı sıra, güvenli yiyecek ve su tüketimine dikkat edilmesi hayati önem taşır.</p>
+    </div>
+</div>
+
+<div class="accordion">
+    <button class="accordion-header" data-target="content5">Sıtma Hastalığı ve Profilaksi</button>
+    <div class="accordion-content" id="content5">
+        <h2>Sıtma Hastalığı</h2>
+        <p><strong>Sıtma</strong>, <em>Plasmodium</em> türü parazitlerin neden olduğu ve sıtma taşıyıcı sivrisinekler (Anopheles) aracılığıyla bulaşan bir enfeksiyondur. Sıtma özellikle Afrika, Güney Asya, Orta ve Güney Amerika gibi tropikal ve subtropikal bölgelerde yaygındır. Beş ana <em>Plasmodium</em> türü sıtmaya neden olur, ancak <em>Plasmodium falciparum</em> en tehlikeli olanıdır.</p>
+        <h3>Belirtileri:</h3>
+        <ul>
+            <li>Ateş (genellikle döngüsel şekilde yükselip düşer)</li>
+            <li>Titreme ve terleme</li>
+            <li>Baş ağrısı</li>
+            <li>Kas ağrısı</li>
+            <li>Bulantı ve kusma</li>
+            <li>Karın ağrısı</li>
+            <li>Yorgunluk ve halsizlik</li>
+            <li>Şiddetli vakalarda organ yetmezliği, beyin sıtması veya ölüm</li>
+        </ul>
+        <h3>Tedavi:</h3>
+        <p>Sıtmanın tedavisinde kullanılan ilaçlar enfeksiyonun türüne, hastanın yaşına, bölgenin ilaç direnci durumuna ve enfeksiyonun ciddiyetine bağlıdır. En sık kullanılan ilaçlar arasında artemisinin kombinasyon tedavileri (ACTs), klorokin ve meflokin bulunur.</p>
+        <h2>Sıtma İçin Profilaksi (Korunma)</h2>
+        <p>Sıtma riskinin yüksek olduğu bölgelere seyahat eden kişilere, enfeksiyonu önlemek için <strong>kemoprofilaksi</strong> önerilir. Koruyucu ilaçlar, sivrisinek ısırıklarını önlemeye yönelik önlemlerle birlikte kullanılır. Sık kullanılan profilaksi ilaçlarından biri <strong>Doksisiklin (Tetradox)</strong>'dur.</p>
+        <h3>Doksisiklin (Tetradox):</h3>
+        <ul>
+            <li><strong>Etki Mekanizması:</strong> Bakteriyel protein sentezini engelleyerek sıtma parazitinin gelişimini durdurur.</li>
+            <li><strong>Kullanım Talimatı:</strong> Sıtma bölgesine seyahatten 1-2 gün önce başlanır, seyahat boyunca her gün alınır ve bölgeden ayrıldıktan sonra 4 hafta boyunca kullanılır.</li>
+            <li><strong>Doz:</strong> Genellikle günde 1 tablet (100 mg) şeklinde alınır.</li>
+        </ul>
+        <h3>Diğer Profilaksi İlaçları:</h3>
+        <ul>
+            <li><strong>Meflokin (Lariam):</strong> Haftada bir alınır.</li>
+            <li><strong>Atovakuon-Proguanil (Malarone):</strong> Günlük alınır, kısa süreli seyahatler için uygundur.</li>
+            <li><strong>Klorokin:</strong> Sadece klorokine duyarlı bölgelerde kullanılır.</li>
+        </ul>
+        <h2>Doksisiklin ve Diğer İlaçların Yan Etkileri</h2>
+        <h3>Doksisiklin (Tetradox):</h3>
+        <ul>
+            <li><strong>Yaygın Yan Etkiler:</strong>
+                <ul>
+                    <li>Mide bulantısı ve kusma</li>
+                    <li>İştah kaybı</li>
+                    <li>Karın ağrısı</li>
+                    <li>İshal</li>
+                    <li>Mantar enfeksiyonları (özellikle vajinal mantar)</li>
+                </ul>
+            </li>
+            <li><strong>Hassasiyet Yan Etkileri:</strong>
+                <ul>
+                    <li>Güneşe karşı artan hassasiyet (fotosensitivite), ciltte kızarıklık ve yanıklar</li>
+                </ul>
+            </li>
+            <li><strong>Nadir Yan Etkiler:</strong>
+                <ul>
+                    <li>Özofajit (yutak tahrişi, tableti yutarken yeterince su içilmediğinde ortaya çıkabilir)</li>
+                    <li>Alerjik reaksiyonlar (döküntü, kaşıntı, anafilaksi)</li>
+                </ul>
+            </li>
+        </ul>
+        <h3>Meflokin (Lariam):</h3>
+        <ul>
+            <li><strong>Yaygın Yan Etkiler:</strong>
+                <ul>
+                    <li>Mide bulantısı</li>
+                    <li>Baş dönmesi</li>
+                    <li>Baş ağrısı</li>
+                </ul>
+            </li>
+            <li><strong>Nadir Yan Etkiler:</strong>
+                <ul>
+                    <li>Psikiyatrik semptomlar (anksiyete, depresyon, halüsinasyonlar)</li>
+                    <li>Uyku bozuklukları</li>
+                </ul>
+            </li>
+        </ul>
+        <h3>Atovakuon-Proguanil (Malarone):</h3>
+        <ul>
+            <li><strong>Yaygın Yan Etkiler:</strong>
+                <ul>
+                    <li>Mide bulantısı</li>
+                    <li>Karın ağrısı</li>
+                    <li>İştah kaybı</li>
+                    <li>Baş ağrısı</li>
+                </ul>
+            </li>
+            <li><strong>Nadir Yan Etkiler:</strong>
+                <ul>
+                    <li>Alerjik reaksiyonlar</li>
+                    <li>Karaciğer enzimlerinde artış</li>
+                </ul>
+            </li>
+        </ul>
+        <h3>Klorokin:</h3>
+        <ul>
+            <li><strong>Yaygın Yan Etkiler:</strong>
+                <ul>
+                    <li>Bulantı ve kusma</li>
+                    <li>Kaşıntı (özellikle koyu tenli bireylerde yaygındır)</li>
+                </ul>
+            </li>
+            <li><strong>Nadir Yan Etkiler:</strong>
+                <ul>
+                    <li>Görme bozuklukları (uzun süreli kullanımda retina hasarı riski)</li>
+                </ul>
+            </li>
+        </ul>
+        <h2>Profilaksi ve Korunma Önerileri</h2>
+        <ul>
+            <li>Profilaksi ilaçları düzenli olarak ve doğru sürede kullanılmalıdır.</li>
+            <li>Sivrisinek ısırıklarını önlemek için koruyucu giysiler, sinek kovucular (DEET içerikli), cibinlikler ve klima gibi önlemler alınmalıdır.</li>
+            <li>Seyahat dönüşünde sıtma semptomları görülürse acilen sağlık kuruluşuna başvurulmalıdır. Sıtma semptomları hastalık bulaşmasından haftalar hatta aylar sonra ortaya çıkabilir.</li>
+        </ul>
+    </div>
+</div>
+
+
+<script>
+    const headers = document.querySelectorAll('.accordion-header');
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const targetId = header.getAttribute('data-target');
+            const targetContent = document.getElementById(targetId);
+
+            // Close all open contents
+            document.querySelectorAll('.accordion-content').forEach(content => {
+                if (content !== targetContent) {
+                    content.style.display = 'none';
+                }
+            });
+
+            // Toggle current content
+            if (targetContent.style.display === 'block') {
+                targetContent.style.display = 'none';
+            } else {
+                targetContent.style.display = 'block';
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

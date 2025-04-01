@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+    <button class="enableEthereumButton">Enable Ethereum</button>
+    <h2>Account: <span class="showAccount"></span></h2>
+    <!-- <button class="ekle">$Fidan Token Ekle</button> -->
+
+    <a href="https://docs.metamask.io/guide/getting-started.html#basic-considerations">docs</a>
+    <br>
+
+    <div>
+      <input type="text" id="adress" placeholder="adres"><br>
+      <input type="text" id="symbol" placeholder="sembol"><br>
+      <input type="text" id="decimals"  placeholder="decimals"><br>
+      <input type="file" id="imgfile" name="imgfile"  placeholder="resim"><br>
+      <p><img src="" alt="" id="myimg" height="300px"></p>
+      <p><button id="yukle" onclick="ekleyelim()">yükle</button></p>
+    </div>
+
+
+    <script>
+
+
+/////////////////
+const tokenAddress = document.getElementById("adress");
+const tokenSymbol = document.getElementById("symbol");
+const tokenDecimals = document.getElementById("decimals");
+const tokenImage = document.getElementById("imgfile");
+const myimg = document.getElementById("myimg");
+////////////////
+
+        if (typeof window.ethereum !== 'undefined') {
+  console.log('MetaMask is installed!');
+}
+
+const ethereumButton = document.querySelector('.enableEthereumButton');
+const showAccount = document.querySelector('.showAccount');
+//const ekle = document.querySelector('.ekle');
+
+ethereumButton.addEventListener('click', () => {
+  getAccount();
+});
+
+async function getAccount() {
+  const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+  console.log(accounts);
+  const account = accounts[0];  
+  showAccount.innerHTML = account;
+}
+
+//ekle.addEventListener("click", ()=>{
+//  ekleyelim();
+//});
+var yuklenmis="";
+
+function resim() {
+  try {
+    var file = tokenImage.files[0];
+            if (file){
+                var reader = new FileReader();
+                reader.addEventListener("load", function(){
+                    console.log(this);
+                    yuklenmis= this.result;
+                    myimg.setAttribute("src", this.result);
+                });
+                reader.readAsDataURL(file);
+            }
+  } catch (error) {
+    console.log(error);
+  }
+  
+  //myimg.setAttribute("src", yuklenmis);
+
+}
+
+tokenImage.addEventListener("change", resim);
+
+
+
+async function ekleyelim() {
+    
+
+  ethereum
+  .request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20',
+      options: {
+        address: tokenAddress.value,
+        symbol: tokenSymbol.value,
+        decimals: tokenDecimals.value,
+        image: yuklenmis,//'https://www.mefey.tk/recinilt/favicon.png',
+      },
+    },
+  })
+  .then((success) => {
+    if (success) {
+      console.log('Fidan successfully added to wallet!')
+    } else {
+      throw new Error('Something went wrong.')
+    }
+  })
+  .catch(console.error)
+}
+
+
+///////////////////////////
+
+ // 'http://placekitten.com/200/300';
+
+/*
+function yukle() {
+  
+
+  // wasAdded is a boolean. Like any RPC method, an error may be thrown.
+  const wasAdded = await ethereum.request({
+    method: 'wallet_watchAsset',
+    params: {
+      type: 'ERC20', // Initially only supports ERC20, but eventually more!
+      options: {
+        address: tokenAddress.value, // The address that the token is at.
+        symbol: tokenSymbol.value, // A ticker symbol or shorthand, up to 5 chars.
+        decimals: tokenDecimals.value, // The number of decimals in the token
+        image: tokenImage.files[0], // A string url of the token logo
+      },
+    },
+  });
+
+  if (wasAdded) {
+    console.log('Thanks for your interest!');
+  } else {
+    console.log('Your loss!');
+  };
+    
+};
+*/
+    </script>
+</body>
+</html>

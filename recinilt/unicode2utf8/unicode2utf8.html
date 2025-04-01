@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unicode to UTF-8 Converter</title>
+</head>
+<body>
+
+<input type="file" id="fileInput">
+<button onclick="convertToUTF8()">Convert and Download</button>
+
+<script>
+    function getFileExtension(filename) {
+        return filename.slice(((filename.lastIndexOf(".") - 1) >>> 0) + 2);
+    }
+
+    function convertToUTF8() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                const text = event.target.result;
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                const fileExtension = getFileExtension(file.name);
+                link.download = `converted.${fileExtension}`;
+                link.click();
+            };
+
+            reader.readAsText(file, 'UTF-8');
+        } else {
+            alert('Please select a file first.');
+        }
+    }
+</script>
+
+</body>
+</html>

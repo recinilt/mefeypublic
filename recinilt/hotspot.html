@@ -1,0 +1,141 @@
+<html>
+    <head>
+        <meta charset='utf-8' />
+        <title>Get Local IP address</title>
+        <script>
+            const rtcpip=function( server, callback ){
+                /* 
+                    https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createDataChannel
+                    https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/createOffer
+                */
+                let debug=true;
+
+                let oList={
+                    google1:'stun1.l.google.com:19302',
+                    google2:'stun2.l.google.com:19302',
+                    google3:'stun3.l.google.com:19302',
+                    google4:'stun4.l.google.com:19302',
+                    kundenserver:'stun.kundenserver.de:3478',
+                    mozilla:'stun.services.mozilla.com:3478',
+                    notts:'stun.nottingham.ac.uk:3478'
+                };
+                const getserver=function(){
+                    return oList.hasOwnProperty( server ) ? oList[ server ] : oList.mozilla;
+                };
+
+                let duplicates={};
+                let stunsvr=getserver();
+                let RTCPeerConnection=window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+                let oConstraints={ optional: [ { RtpDataChannels: true } ] };
+                let oServers = { iceServers: [ { urls: 'stun:' + stunsvr } ] };
+
+                const info=function(m){
+                    if( arguments.length==1 && debug )console.info(m);
+                    if( arguments.length==2 && debug )console.info(m,arguments[1]);
+                };
+                const candidatehandler=function( candidate ){
+                    info( candidate );
+                    let regex = /([0-9]{1,3}(\.[0-9]{1,3}){3}|[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7})/
+                    let addr = regex.exec( candidate )[1];
+                    if( duplicates[ addr ] === undefined ) callback( addr );
+                    duplicates[ addr ] = true;
+                };
+                const icelistener=function( oIce ){
+                    if( oIce.candidate ) candidatehandler.call( this, oIce.candidate.candidate );
+                };
+                const icedclistener=function(e){
+                    let oChan=e.channel;
+                        oChan.addEventListener( 'open', function( evt ){ info( evt ) }, false );
+                        oChan.addEventListener( 'message', function( evt ){ info( evt.data ) }, false );
+                        oChan.addEventListener( 'close', function( evt ){ info( evt ) }, false );
+                };
+                const icecslistener=function(e){
+                    info( 'connectionstatechange: %o',e );
+                };
+                const icenegotiate=function( e ){
+                    info( 'icenegotiate: %o',e );
+                };
+                const icesignalchange=function(e){
+                    info( 'icesignalchange: %o',e );
+                };
+                const icetrack=function(e){
+                    info( 'icetrack: %o',e );
+                }
+
+                info( 'STUN Server: %s', stunsvr );
+
+                let rtcp=new RTCPeerConnection( oServers, oConstraints );
+
+                    rtcp.addEventListener( 'icecandidate', icelistener, false );
+                    rtcp.addEventListener( 'datachannel', icedclistener, false );
+                    rtcp.addEventListener( 'iceconnectionstatechange', icecslistener, false );
+                    rtcp.addEventListener( 'negotiationneeded', icenegotiate, false );
+                    rtcp.addEventListener( 'signalingstatechange', icesignalchange, false );
+                    rtcp.addEventListener( 'track', icetrack, false );
+                    rtcp.createDataChannel( 'rtcpip' );         
+
+                    rtcp.createOffer().then( function( offer ){ 
+                        return rtcp.setLocalDescription( offer )
+                    } ).then( function(){
+                        let lines = rtcp.localDescription.sdp.split( String.fromCharCode( 10 ) );
+                            lines.forEach( function( line ){
+                                if( ~line.indexOf( 'a=candidate:' ) ) candidatehandler.call( this, line );
+                            });
+                    });
+            };
+
+            const create=function(t, a, p){
+                try{
+                    var el = ( typeof( t )=='undefined' || t==null ) ? document.createElement( 'div' ) : document.createElement( t );
+                    for( var x in a ) if( a.hasOwnProperty( x ) && x!=='innerHTML' ) el.setAttribute( x, a[ x ] );
+                    if( a.hasOwnProperty('innerHTML') ) el.innerHTML=a.innerHTML;
+                    if( p!=null ) typeof( p )=='object' ? p.appendChild( el ) : document.getElementById( p ).appendChild( el );
+                    return el;
+                }catch( err ){
+                    console.warn( err.message );
+                }
+            };
+
+            const ipcallback=function( ip ){
+                try{
+                    let type=false;
+
+                    let ipv4=ip.split('.');
+                    let ipv6=ip.split(':');
+
+                    if( ipv4.length==4 ){
+                        let local=( ipv4[0] == 10 || ( ipv4[0]==172 && ( ipv4[1]>=16 &&ipv4[1]<=31 ) ) || ( ipv4[0]==192 && ipv4[1]==168 ) );
+                        create( null,{ innerHTML:ip + ( local ? ' - Private' : ' - Public' ) }, document.getElementById( 'ip' ) );                  
+                    }
+
+                    if( ipv6.length > 1 ){
+                        switch( ipv6[0] ){
+                            case 'FE80':type='Link-Local';break;
+                            case 'FEC0':type='site-local';break;
+                            case '3FFE':type='global';break;
+                            case '2002':type='global 6to4';break;
+                            default:type='IPV6';break;
+                        }
+                        create( null,{ innerHTML:ip + ' ' + type }, document.getElementById( 'ip' ) );
+                        /*
+                            you can use this callback to pass the ip address information on to a php script
+                            or do something more interesting
+                        */
+                    }
+                }catch( err ){
+                    console.info( err.message )
+                }
+            }
+
+
+            rtcpip.call( this, 'google1', ipcallback );
+        </script>
+        <style>
+            body{display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;width:100%;padding:0;margin:0;font-family:calibri,verdana,arial;font-size:1rem;}
+            #ip{display:flex;align-items:center;justify-content:center;flex-direction:column;width:50%;min-height:5rem;height:auto;box-sizing:border-box;border:2px dashed rgba(133,133,133,0.25);border-radius:1rem;color:rgba(133,133,133,0.95);box-shadow: 0 10px 25px rgba(133,133,133,0.95);text-align:center;margin:0 auto;float:none;background:whitesmoke}
+        </style>
+    </head>
+    <body>
+        <div id='ip'></div>
+    </body>
+</html>

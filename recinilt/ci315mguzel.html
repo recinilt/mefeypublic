@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin İşlem Analizi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        li:hover {
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Coin İşlem Analizi</h1>
+
+    <textarea id="text-input" placeholder="Korelasyon raporunu buraya yapıştırın"></textarea><br>
+    <label for="mode">İşlem Modu:</label>
+    <select id="mode">
+        <option value="sell">Sell</option>
+        <option value="buy">Buy</option>
+    </select><br><br>
+    <label for="fark">Fark Değeri:</label>
+    <input type="number" id="fark" step="0.01"><br><br>
+    <button onclick="processData()">Getir</button>
+
+    <h2>Sonuçlar</h2>
+    <ul id="coin-list"></ul>
+
+    <h2>Seçilen Coin Detayı</h2>
+    <div id="result">Henüz bir coin seçilmedi.</div>
+
+    <script>
+        function processData() {
+            const textInput = document.getElementById('text-input').value;
+            const mode = document.getElementById('mode').value;
+            const farkValue = parseFloat(document.getElementById('fark').value);
+
+            if (!textInput || isNaN(farkValue)) {
+                alert('Lütfen geçerli bir metin ve fark değeri girin.');
+                return;
+            }
+
+            const lines = textInput.split('\n');
+            const coinData = [];
+
+            lines.forEach(line => {
+                const match = line.match(/(\w+USDT)\s+([\d.,]+)\s+([\d.,]+)/);
+                if (match) {
+                    const coin = match[1];
+                    const firstValue = parseFloat(match[2].replace(',', '.'));
+                    const secondValue = parseFloat(match[3].replace(',', '.'));
+                    const myFark = firstValue - secondValue;
+
+                    coinData.push({ coin, myFark });
+                }
+            });
+
+            const filteredData = coinData.filter(item => {
+                return mode === 'sell'
+                    ? item.myFark < farkValue
+                    : item.myFark > farkValue;
+            });
+
+            filteredData.sort((a, b) => {
+                return mode === 'sell'
+                    ? a.myFark - b.myFark
+                    : b.myFark - a.myFark;
+            });
+
+            const coinList = document.getElementById('coin-list');
+            coinList.innerHTML = '';
+
+            filteredData.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${item.coin} (myFark: ${item.myFark.toFixed(2)})`;
+                listItem.addEventListener('click', () => getCoinDetails(item.coin));
+                coinList.appendChild(listItem);
+            });
+        }
+
+        async function getCoinDetails(coin) {
+            const result = document.getElementById('result');
+            result.innerHTML = `İşleniyor... (${coin})`;
+
+            try {
+                const accountUrl = `https://fapi.binance.com/futures/data/topLongShortAccountRatio?symbol=${coin}&period=15m`;
+                const positionsUrl = `https://fapi.binance.com/futures/data/topLongShortPositionRatio?symbol=${coin}&period=15m`;
+
+                const [accountResponse, positionsResponse] = await Promise.all([
+                    fetch(accountUrl),
+                    fetch(positionsUrl)
+                ]);
+
+                if (!accountResponse.ok || !positionsResponse.ok) {
+                    throw new Error('API hatası veya coin çifti bulunamadı.');
+                }
+
+                const accountData = await accountResponse.json();
+                const positionsData = await positionsResponse.json();
+
+                const accountRatio = accountData.length > 0
+                    ? parseFloat(accountData[accountData.length - 1].longShortRatio)
+                    : null;
+                const positionsRatio = positionsData.length > 0
+                    ? parseFloat(positionsData[positionsData.length - 1].longShortRatio)
+                    : null;
+
+                let resultHTML = `<h3>${coin} Sonuçları:</h3>`;
+
+                if (accountRatio !== null) {
+                    resultHTML += `<p><b>Account:</b> ${getTrend(accountRatio)} (${accountRatio.toFixed(2)})</p>`;
+                } else {
+                    resultHTML += `<p><b>Account:</b> Veri bulunamadı.</p>`;
+                }
+
+                if (positionsRatio !== null) {
+                    resultHTML += `<p><b>Positions:</b> ${getTrend(positionsRatio)} (${positionsRatio.toFixed(2)})</p>`;
+                } else {
+                    resultHTML += `<p><b>Positions:</b> Veri bulunamadı.</p>`;
+                }
+
+                result.innerHTML = resultHTML;
+            } catch (error) {
+                console.error(error);
+                result.innerHTML = `Hata: ${error.message}`;
+            }
+        }
+
+        function getTrend(ratio) {
+            if (ratio > 1.1) {
+                return 'LONG';
+            } else if (ratio < 0.9) {
+                return 'SHORT';
+            } else {
+                return 'ARAFTA';
+            }
+        }
+    </script>
+</body>
+</html>

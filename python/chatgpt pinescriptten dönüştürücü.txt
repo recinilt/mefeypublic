@@ -1,0 +1,1 @@
+bu pinescript kodunu, python koduna çevirebilir misin? bir fonksiyon halinde, o fonksiyon çalışınca, binance api ile binanctan güncel verileri alsın, o anda buy pozisyonu mu sell pozisyonu mu onu söylesin. buy pozisyonu için True, sell pozisyonu için False versin. stoploss da ise close döndürsün. IOTAUSDT DE ÇALIŞTIRACAĞIM. pandas numpy kullanılmasın.

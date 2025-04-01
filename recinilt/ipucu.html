@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hover Solution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .question-container {
+            margin: 20px;
+            font-size: 16px;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 24px;
+            margin-left: 8px;
+            position: relative;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border: 2px solid white;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background-color: #f00;
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .question-container {
+                margin: 10px;
+                font-size: 14px;
+            }
+
+            .info-icon {
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+                line-height: 20px;
+            }
+
+            .close-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+
+            .modal img {
+                max-width: 95%;
+                max-height: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="question-container">
+        Soru: Bu özelliği nasıl uygularız?
+        <div class="info-icon" data-image="cozum.png">i</div>
+    </div>
+
+    <div class="question-container">
+        Soru: Çözüm adımları neler?
+        <div class="info-icon" data-image="cozum2.png">i</div>
+    </div>
+
+    <div class="question-container">
+        Soru: Hangi araçlar kullanılmalı?
+        <div class="info-icon" data-image="cozum3.png">i</div>
+    </div>
+
+    <div class="modal" id="image-modal">
+        <button class="close-btn" id="close-modal">&times;</button>
+        <img src="" alt="Solution">
+    </div>
+
+    <script>
+        document.querySelectorAll('.info-icon').forEach(icon => {
+            icon.addEventListener('click', () => {
+                const imageSrc = icon.getAttribute('data-image');
+                const modal = document.getElementById('image-modal');
+                const modalImage = modal.querySelector('img');
+                modalImage.src = imageSrc;
+                modal.style.display = 'flex';
+            });
+        });
+
+        document.getElementById('close-modal').addEventListener('click', () => {
+            const modal = document.getElementById('image-modal');
+            modal.style.display = 'none';
+        });
+
+        document.getElementById('image-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+        const regex = /^[0-9]{2}:[0-9]{2}:[0-9]{2}/gm;
+const str = `1
+00:00:09,680 --> 00:00:15,753
+Herkesi sevmeye çalışma!
+Kendin ol.
+
+2
+00:00:24,233 --> 00:00:26,866
+(M:) Gözlerin düşünceli bakıyor.
+
+3
+00:00:26,866 --> 00:00:31,622
+(S:) Sana bir şeyler daha sormalı mıyım onu düşünüyordum.
+
+140
+00:07:32,043 --> 00:07:35,373
+-Ramana Maharsi-
+
+141
+00:07:38,000 --> 00:00:00,000
+Amara.org topluluğu tarafından hazırlanan altyazılar
+
+`;
+let m;
+var tttt=[];
+while ((m = regex.exec(str)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+    }
+    
+    // The result can be accessed through the `m`-variable.
+    m.forEach((match, groupIndex) => {
+        console.log(`Found match, group ${groupIndex}: ${match}`);
+        
+        tttt.push(match);
+
+    });
+
+}
+console.log(tttt);
+    </script>
+</body>
+</html>

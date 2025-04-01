@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance Futures Kontrol</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Binance Futures Periyot Kontrol</h1>
+    <form id="settingsForm">
+        <label for="period">Periyot (varsayılan 7):</label>
+        <input type="number" id="period" name="period" value="7" min="1">
+
+        <label for="interval">Zaman Dilimi:</label>
+        <select id="interval" name="interval">
+            <option value="1m" selected>1 Dakika</option>
+            <option value="5m" >5 Dakika</option>
+            <option value="15m">15 Dakika</option>
+            <option value="1h">1 Saat</option>
+            <option value="4h">4 Saat</option>
+            <option value="12h">12 Saat</option>
+            <option value="1d">1 Gün</option>
+        </select>
+
+        <button type="button" onclick="fetchData()">Verileri Çek</button>
+    </form>
+
+    <h2>Sonuçlar</h2>
+    <div id="results"></div>
+
+<script>
+async function fetchData() {
+    const period = parseInt(document.getElementById('period').value); // Kullanıcının seçtiği periyot
+    const interval = document.getElementById('interval').value; // Kullanıcının seçtiği zaman dilimi
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = "Veriler çekiliyor...";
+
+    try {
+        // Binance Futures API'den işlem çiftlerini al
+        const symbolsResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+        const symbols = symbolsResponse.data.symbols
+            .filter(symbol => symbol.quoteAsset === 'USDT' && symbol.status === 'TRADING') // Sadece USDT çiftleri ve aktif semboller
+            .map(s => s.symbol);
+
+        const matchingPairs = [];
+
+        // Her bir işlem çifti için veri al ve kontrol et
+        for (const symbol of symbols) {
+            try {
+                // Binance Kline API'den verileri çek
+                const klineResponse = await axios.get(`https://fapi.binance.com/fapi/v1/klines`, {
+                    params: {
+                        symbol: symbol,
+                        interval: interval,
+                        limit: period + 1 // Girilen periyot + 1 (bir önceki periyodu kontrol etmek için)
+                    }
+                });
+
+                const klines = klineResponse.data;
+
+                // Tüm periyotlar boyunca artış kontrolü
+                let isIncreasing = true;
+                for (let i = 1; i < klines.length; i++) {
+                    const prevClose = parseFloat(klines[i - 1][4]); // Bir önceki periyodun kapanış fiyatı
+                    const currentClose = parseFloat(klines[i][4]);  // Mevcut periyodun kapanış fiyatı
+
+                    if (currentClose <= prevClose) {
+                        isIncreasing = false; // Eğer bir periyot bile düşüşteyse
+                        break;
+                    }
+                }
+
+                // Eğer tüm periyotlarda artış varsa, listeye ekle
+                if (isIncreasing) {
+                    matchingPairs.push(symbol);
+                }
+            } catch (error) {
+                console.warn(`Skipping ${symbol}:`, error.response?.data?.msg || error.message);
+            }
+        }
+
+        // Sonuçları ekrana yazdır
+        resultsDiv.innerHTML = '';
+        if (matchingPairs.length > 0) {
+            matchingPairs.forEach(pair => {
+                const tradingViewUrl = `https://www.tradingview.com/chart/?symbol=BINANCE:${pair}`;
+                resultsDiv.innerHTML += `<p>${pair} <a href="${tradingViewUrl}" target="_blank">Grafiği Görüntüle</a></p>`;
+            });
+        } else {
+            resultsDiv.innerHTML = '<p>Hiçbir eşleşme bulunamadı.</p>';
+        }
+    } catch (error) {
+        console.error('General error:', error.response?.data || error.message);
+        resultsDiv.innerHTML = '<p>Bir hata oluştu. Lütfen tekrar deneyin.</p>';
+    }
+}
+
+</script>
+</body>
+</html>

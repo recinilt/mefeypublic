@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+    <speak>
+        <par>
+          <media xml:id="question" begin="0.5s">
+            <speak>Who invented the Internet?</speak>
+          </media>
+          <media xml:id="answer" begin="question.end+2.0s">
+            <speak>The Internet was invented by cats.</speak>
+          </media>
+          <media begin="answer.end-0.2s" soundLevel="-6dB">
+            <audio
+              src="https://actions.google.com/.../cartoon_boing.ogg"/>
+          </media>
+          <media repeatCount="3" soundLevel="+2.28dB"
+            fadeInDur="2s" fadeOutDur="0.2s">
+            <audio
+              src="https://actions.google.com/.../cat_purr_close.ogg"/>
+          </media>
+        </par>
+      </speak>
+</body>
+</html>

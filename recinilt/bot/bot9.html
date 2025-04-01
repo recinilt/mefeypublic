@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Binance API ile İşlem Yapma</title>
+    <script src="https://unpkg.com/ccxt"></script>
+    <script>
+        console.log(ccxt.exchanges)
+       
+    // CCXT kütüphanesini yükleyin ve gerekli ayarları yapın
+    const exchange = new ccxt.binance({
+        'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+        'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+        // 'enableRateLimit': true,  // Eğer isterseniz etkinleştirebilirsiniz
+    });
+    console.log(exchange.fetchAccountPositions())
+    console.log(exchange.fetchOrderBook ('ETH/BTC'))
+
+    // Piyasa bilgilerini almak için fonksiyon
+    async function fetchMarket() {
+        const market = await exchange.fetchTicker('BTC/USDT');
+        console.log(market);
+    }
+
+    // Long pozisyon açmak için fonksiyon
+    async function openLong() {
+        // Burada işlem miktarını ve kaldıraç oranını belirleyebilirsiniz
+        const amount = 20; // 20 USDT değerinde
+        const leverage = 3; // 3x kaldıraç
+
+        // Piyasa emri gönderme (Gerçek işlem yapmaz)
+        const order = await exchange.createMarketBuyOrder('BTC/USDT', amount);
+        console.log(order);
+    }
+
+    // Long pozisyonu kapatmak için fonksiyon
+    async function closeLong() {
+        // Burada pozisyonun tamamını kapatmak için gerekli miktarı belirleyebilirsiniz
+        const order = await exchange.createMarketSellOrder('BTC/USDT', amount);
+        console.log(order);
+    }
+
+    </script>
+</head>
+<body>
+    <button onclick="fetchMarket()">Piyasa Bilgisi Al</button>
+    <button onclick="openLong()">Long Aç</button>
+    <button onclick="closeLong()">Long Kapat</button>
+</body>
+</html>

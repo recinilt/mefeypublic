@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Yalla Sun Coin (YSU)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        h1 {
+            color: #ffc107;
+        }
+        #circulating-supply {
+            font-size: 1.5em;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Yalla Sun Coin (YSU)</h1>
+        <p id="circulating-supply">Dolaşımdaki Arz: Bilgiler Yükleniyor...</p>
+    </div>
+
+    <script>
+        async function getCirculatingSupply() {
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/coins/yalla-sun');
+                const data = await response.json();
+                const circulatingSupply = data.market_data.circulating_supply;
+                document.getElementById('circulating-supply').textContent = `Dolaşımdaki Arz: ${circulatingSupply}`;
+            } catch (error) {
+                console.error('Dolaşımdaki arz bilgisi alınırken bir hata oluştu:', error);
+                document.getElementById('circulating-supply').textContent = 'Dolaşımdaki Arz bilgisi alınamadı.';
+            }
+        }
+
+        window.onload = getCirculatingSupply;
+    </script>
+</body>
+</html>

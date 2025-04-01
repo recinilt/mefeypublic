@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ccxt": "^4.3.44",
+    "pandas-js": "^0.2.4"
+  }
+}

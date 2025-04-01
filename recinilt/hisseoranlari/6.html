@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veri Çekme Örneği</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+ 
+<h1>Çekilen Veri:</h1>
+<p id="data">Veri yükleniyor...</p>
+
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: 'https://www.borsagundem.com.tr/piyasa-ekrani/hisse-detay/ASELS',
+            type: 'GET',
+            success: function(res) {
+                var html = $.parseHTML(res);
+                // XPath'i CSS seçiciye dönüştürdüm, bu örnek için doğru olmayabilir.
+                var value = $(html).find('#wrap > div.hisdtl > div.dtb1 > ul > li.s3 > span').text();
+                $('#data').text(value);
+            },
+            error: function() {
+                $('#data').text('Veri çekilemedi. CORS politikası nedeniyle engellendi olabilir.');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

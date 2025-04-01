@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="giris"><button id="uret">üret</button>
+    <p id="tc"></p>
+
+
+    <script>
+        var giris = document.getElementById("giris");
+        var tc = document.getElementById("tc");
+        var uret = document.getElementById("uret");
+
+        uret.addEventListener("click", randomuret);
+
+        function randomuret() {
+            
+            
+            while (3){
+                var r=Math.random();
+            r = r * 100000000000;
+            r=Math.floor(r);
+            
+            r=r.toString().split("");
+
+                if (r.length == 11){
+                    if (r[0] != 0){
+                        console.log("geldi");
+                        var a=setTimeout(() => {
+                            tc.innerHTML=r;
+                            console.log(r);
+                        }, 200);
+                        a;
+                        
+                        
+                        
+                    } else {
+                        continue
+                    }
+                
+                } else {
+                    continue
+                }
+            }
+
+            alert("bitti");
+            return;
+            
+
+        }
+    </script>
+</body>
+</html>

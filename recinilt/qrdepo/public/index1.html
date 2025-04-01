@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr"> 
+
+<head>
+  <!-- Google tag (gtag.js) google analytics-->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-P2HRSNHY54"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-P2HRSNHY54');
+  </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR ve Barkod Okuyucu ile Ürün Tablosu</title>
+  <meta name="description" content="QR ve barkod okuyucu ile ürünlerinizi kolayca sayın ve yönetin. Ürün tablosu, raf yönetimi ve detaylı raporlama özellikleriyle işinizi kolaylaştırın.">
+  <meta name="keywords" content="QR kod, barkod, okuyucu, ürün tablosu, stok sayımı, raf yönetimi, envanter, raporlama"> 
+  <link rel="canonical" href="https://qrdepo.netlify.app/"> 
+
+  <script src="html5-qrcode.min.js"></script>
+  <script src="xlsx.full.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fa;
+      /* Açık gri arka plan */
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h1,
+    h2,
+    h3 {
+      color: #343a40;
+      /* Koyu gri başlıklar */
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #dee2e6;
+      /* Açık gri kenarlıklar */
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e9ecef;
+      /* Açık gri başlık arka planı */
+    }
+
+    button {
+      background-color: #007bff;
+      /* Mavi buton rengi */
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #0069d9;
+      /* Daha koyu mavi hover rengi */
+    }
+
+    #reader {
+      width: 300px;
+      margin: 20px auto;
+    }
+
+    #shelf-name {
+      margin-top: 10px;
+      padding: 8px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+
+    /* Ekstra stil düzenlemeleri */
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>QR ve Barkod Okuyucu ile Ürün Tablosu</h1> 
+    <h3 >Kullanımı</h3> 
+    <ul>
+      <li>Start Scanning'e basın ve ilaç kutusunun QR kodunu okutun.</li>
+      <li>Eğer taratılan ürünler tablosunda ilacın ismi tanımlı değilse, ürün adı-içerik sayısı bölümüne ilacın ismini ve içeriğinin sayısını (kaç tablet vb.) yazıp kaydet'e basın, otomatik güncelleyecektir.</li>
+      <li>Raflara kaydetmek için, raftaki ilaçları okutup raf ismini girip (mesela 1. Raf, veya da birinci çekmece vb.) Rafı Kaydet'e basın ve diğer raf sayımına geçin.</li>
+      <li>Ürün kodu-ürün adı eşleşmelerini başka bir bilgisayara veya telefona yüklemek için, ürün kodu ürün adı eşleşmelerini bilgisayara kaydet deyin, indirilen dosyayı yeni cihaza gönderin, o cihazda sayıma başlamadan önce dosya seç ile o dosyayı okuyun ve sayıma başlayın.</li>
+      <li>Sayım sonucunu excel formatında indirmek için, Ürün Özeti Tablosunu İndir ve Raf Tablolarını İndir tablolarını kullanın.</li>
+    </ul>
+
+    <div class="row">
+      <div class="col-md-12">
+        <button id="start-btn" class="btn btn-primary">Start Scanning</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div id="reader" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Taranan Ürünler</h2> 
+        <table id="product-table" class="table">
+          <thead>
+            <tr>
+              <th>Ürün Kodu</th> 
+              <th>Yıl</th> 
+              <th>Ay</th> 
+              <th>Ürün Adı</th> 
+              <th>Tam QR/Barkod</th> 
+              <th>Ürün Adı - İçerik Sayısı</th> 
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Ürün Özeti</h2> 
+        <table id="summary-table" class="table">
+          <thead>
+            <tr>
+              <th>Ürün Adı</th> 
+              <th>Toplam Sayı</th> 
+              <th>Toplam Birim Sayısı</th> 
+              <th>Detaylar (Yıl-Ay: Sayı)</th> 
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Geçerli Raf</h2> 
+        <table id="shelf-table" class="table">
+          <thead>
+            <tr>
+              <th>Ürün Adı</th> 
+              <th>Toplam Sayı</th> 
+              <th>Toplam Birim Sayısı</th> 
+              <th>Detaylar (Yıl-Ay: Sayı)</th> 
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+        <div class="form-group">
+          <input type="text" id="shelf-name" class="form-control" placeholder="Raf ismi girin">
+        </div>
+        <button id="save-shelf-btn" class="btn btn-primary">Rafı Kaydet</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <h2>Kaydedilen Raflar</h2> 
+        <div id="saved-shelves">
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <button id="download-btn" class="btn btn-secondary">Ürün Kodu - Ürün Adı Eşleşmelerini Bilgisayara
+          Kaydet</button>
+        <p></p><br>
+        <input type="file" id="upload-btn" class="form-control-file">
+        (Dosya yüklendiğinde otomatik olarak Ürün Kodu - Ürün Adı eşleşmelerini Dosyadan Getirir.)
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12">
+        <button id="download-summary-btn" class="btn btn-success">Ürün Özeti Tablosunu İndir</button>
+        <button id="download-shelves-btn" class="btn btn-success">Raf Tablolarını İndir</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="ilacgtinleri.js"></script>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    
+</head>
+<body>
+    
+    <p><div id="mytext"></div></p>
+    <input type="file">
+
+    <script>
+        var input = document.querySelector("input[type='file']");
+        input.addEventListener("change", function(e){
+            console.log(input.files);
+            console.log(input.files[0].name);
+
+            var reader = new FileReader();
+            reader.onload = function(){
+              
+                var aa=reader.result;
+                console.log(aa);
+                // var lines = reader.result.split("\n").map(function(line){
+                //     return line.split(",");
+                // })
+                // console.log(lines);
+            }
+           reader.readAsText(input.files[0]);
+            // reader.readAsDataURL(input.files[0])
+        }, false);
+
+        $(document).ready(function(){
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video ve Altyazı Senkronize Oynatıcı</title>
+    <style>
+        #subtitleDisplay {
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            pointer-events: none;
+            z-index: 2147483647;
+        }
+
+        .video-container {
+            position: relative;
+            width: 640px;
+            margin: 0 auto;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .full-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1000;
+            background: black;
+        }
+
+        .full-screen video {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video ve Altyazı Senkronize Oynatıcı</h1>
+
+    <label for="videoFile">Video Dosyasını Seç:</label>
+    <input type="file" id="videoFile" accept="video/mp4">
+    <br>
+
+    <label for="subtitleFile">Altyazı Dosyasını Seç (SRT veya VTT formatında):</label>
+    <input type="file" id="subtitleFile" accept=".srt,.vtt">
+    <br>
+
+    <button id="startPlayback">Başlat</button>
+    <button id="toggleFullScreen">Tam Ekran</button>
+
+    <div class="video-container" id="videoContainer">
+        <video id="videoPlayer" controls>
+            Tarayıcınız video etiketini desteklemiyor.
+        </video>
+        <div id="subtitleDisplay"></div>
+    </div>
+
+    <script>
+        let subtitles = [];
+        let currentSubtitleIndex = 0;
+        let subtitleInterval;
+
+        const videoContainer = document.getElementById("videoContainer");
+        const videoPlayer = document.getElementById("videoPlayer");
+        const subtitleDisplay = document.getElementById("subtitleDisplay");
+        const toggleFullScreenBtn = document.getElementById("toggleFullScreen");
+
+        document.getElementById('startPlayback').addEventListener('click', () => {
+            const videoInput = document.getElementById('videoFile');
+            const subtitleInput = document.getElementById('subtitleFile');
+
+            if (videoInput.files.length === 0 || subtitleInput.files.length === 0) {
+                alert('Lütfen hem video hem de altyazı dosyasını seçin.');
+                return;
+            }
+
+            const videoFile = URL.createObjectURL(videoInput.files[0]);
+            const subtitleFile = subtitleInput.files[0];
+
+            loadVideo(videoFile);
+            loadSubtitles(subtitleFile);
+        });
+
+        toggleFullScreenBtn.addEventListener("click", () => {
+            if (!videoContainer.classList.contains("full-screen")) {
+                videoContainer.classList.add("full-screen");
+                toggleFullScreenBtn.textContent = "Küçük Ekran";
+            } else {
+                videoContainer.classList.remove("full-screen");
+                toggleFullScreenBtn.textContent = "Tam Ekran";
+            }
+        });
+
+        function loadVideo(videoFile) {
+            videoPlayer.src = videoFile;
+
+            videoPlayer.addEventListener('seeked', syncSubtitleToCurrentTime);
+        }
+
+        function loadSubtitles(subtitleFile) {
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                let subtitleText;
+                try {
+                    subtitleText = new TextDecoder("windows-1254").decode(event.target.result);
+                } catch (error) {
+                    subtitleText = new TextDecoder("iso-8859-9").decode(event.target.result);
+                }
+
+                if (subtitleFile.name.endsWith('.vtt')) {
+                    parseVTTSubtitles(subtitleText);
+                } else if (subtitleFile.name.endsWith('.srt')) {
+                    parseSRTSubtitles(subtitleText);
+                } else {
+                    alert('Geçersiz altyazı formatı. Lütfen VTT veya SRT dosyası seçin.');
+                }
+            };
+
+            reader.readAsArrayBuffer(subtitleFile);
+        }
+
+        function parseVTTSubtitles(subtitleText) {
+            parseSubtitles(subtitleText);
+        }
+
+        function parseSRTSubtitles(subtitleText) {
+            parseSubtitles(subtitleText);
+        }
+
+        function parseSubtitles(subtitleText) {
+            subtitles = [];
+            const lines = subtitleText.split('\n');
+            let currentStartTime = 0;
+            let currentText = '';
+
+            lines.forEach((line) => {
+                if (/^\d+$/.test(line.trim())) {
+                    return;
+                } else if (line.includes('-->')) {
+                    const times = line.split(' --> ');
+                    currentStartTime = parseTime(times[0]);
+                } else if (line.trim() === '') {
+                    if (currentText) {
+                        const cleanText = cleanHTMLTags(currentText.trim());
+                        subtitles.push({
+                            start: currentStartTime,
+                            text: cleanText
+                        });
+                        currentText = '';
+                    }
+                } else {
+                    currentText += line + ' ';
+                }
+            });
+
+            startSubtitleSync();
+        }
+
+        function parseTime(timeString) {
+            const parts = timeString.split(':');
+            const secondsParts = parts[2].split(/[,\\.]/);
+            return (
+                parseInt(parts[0], 10) * 3600 +
+                parseInt(parts[1], 10) * 60 +
+                parseInt(secondsParts[0], 10) +
+                parseInt(secondsParts[1], 10) / 1000
+            );
+        }
+
+        function cleanHTMLTags(text) {
+            const div = document.createElement('div');
+            div.innerHTML = text;
+            return div.textContent || div.innerText || "";
+        }
+
+        function startSubtitleSync() {
+            if (subtitleInterval) {
+                clearInterval(subtitleInterval);
+            }
+
+            subtitleInterval = setInterval(() => {
+                const currentTime = videoPlayer.currentTime;
+
+                if (currentSubtitleIndex < subtitles.length) {
+                    const subtitle = subtitles[currentSubtitleIndex];
+
+                    if (currentTime >= subtitle.start) {
+                        subtitleDisplay.textContent = subtitle.text;
+                        speakSubtitle(subtitle.text);
+                        currentSubtitleIndex++;
+                    }
+                } else {
+                    subtitleDisplay.textContent = '';
+                    clearInterval(subtitleInterval);
+                }
+            }, 500);
+        }
+
+        function syncSubtitleToCurrentTime() {
+            const currentTime = videoPlayer.currentTime;
+
+            currentSubtitleIndex = subtitles.findIndex(subtitle => subtitle.start > currentTime) - 1;
+            if (currentSubtitleIndex < 0) currentSubtitleIndex = 0;
+        }
+
+        function speakSubtitle(text) {
+            window.speechSynthesis.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'tr-TR';
+            utterance.rate = 5.0;
+            utterance.volume = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+    </script>
+</body>
+</html>

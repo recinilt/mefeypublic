@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Numbered Channels Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <h1>Canlı Yayın İzle</h1>
+
+    <label for="channelSelect">Kanal Seçin:</label>
+    <select id="channelSelect">
+        <!-- Kanallar buraya dinamik olarak yüklenecek -->
+    </select>
+
+    <br><br>
+
+    <video id="channelPlayer" controls width="640" height="360">
+        Tarayıcınız video öğesini desteklemiyor.
+    </video>
+
+    <script src="numbered_channels.js"></script>
+    <script>
+        // M3U dosyasındaki veriyi (const m3uContent) numbered_channels.js dosyasından alıyoruz
+        
+
+        // M3U içeriğini ayrıştırma
+        const channels = [];
+        const lines = m3uContent.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].startsWith('#EXTINF')) {
+                const name = lines[i].split(',')[1];
+                const url = lines[i + 1];
+                channels.push({ name, url });
+            }
+        }
+
+        // Kanalları <select> öğesine ekleme
+        const channelSelect = document.getElementById('channelSelect');
+        channels.forEach((channel, index) => {
+            const option = document.createElement('option');
+            option.value = channel.url;
+            option.textContent = channel.name;
+            channelSelect.appendChild(option);
+        });
+
+        // HLS.js kullanarak video oynatma
+        const player = document.getElementById('channelPlayer');
+        const hls = new Hls();
+
+        function loadChannel(url) {
+            if (Hls.isSupported()) {
+                hls.loadSource(url);
+                hls.attachMedia(player);
+                player.play();
+            } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                player.src = url;
+                player.play();
+            } else {
+                alert('Bu tarayıcı HLS akışını desteklemiyor.');
+            }
+        }
+
+        // Kanal değiştiğinde video oynatıcıyı güncelleme
+        channelSelect.addEventListener('change', (event) => {
+            const url = event.target.value;
+            loadChannel(url);
+        });
+
+        // İlk kanalı varsayılan olarak yükle
+        if (channels.length > 0) {
+            channelSelect.value = channels[0].url;
+            loadChannel(channels[0].url);
+        }
+    </script>
+</body>
+</html>

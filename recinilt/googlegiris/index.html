@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Giriş</title>
+</head>
+<body>
+  <h1>Google Giriş</h1> 
+  <div id="mygoogle"></div>
+
+
+  <div id="mesaj"></div>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="myk.js"></script>
+  <script>
+    function divolustur() {
+      // İlk div'i oluştur
+      const div1 = document.createElement("div");
+      div1.id = "g_id_onload";
+      div1.setAttribute("data-client_id", "781281213732-6r1rntjd2euhge1p3ncpg0r1src4tvid.apps.googleusercontent.com");
+      div1.setAttribute("data-callback", "handleCredentialResponse");
+      div1.setAttribute("data-auto_prompt", "false");
+
+      // İkinci div'i oluştur
+      const div2 = document.createElement("div");
+      div2.className = "g_id_signin";
+      div2.setAttribute("data-type", "standard");
+      div2.setAttribute("data-size", "large");
+      div2.setAttribute("data-theme", "outline");
+      div2.setAttribute("data-text", "sign_in_with");
+      div2.setAttribute("data-shape", "rectangular");
+      div2.setAttribute("data-logo_alignment", "left");
+
+      // Div'leri sayfa içeriğine ekle
+      const mygoogle=document.getElementById("mygoogle");
+      mygoogle.appendChild(div1);
+      mygoogle.appendChild(div2);
+    }
+    
+    
+    function handleCredentialResponse(response) {
+      // 1. ID token'ını al
+      const id_token = response.credential; 
+
+      // 2. Token'ı doğrula
+      const url = 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=' + id_token;
+      fetch(url)
+          .then(response => response.json())
+          .then(data => {
+          // 3. Doğrulama başarılı ise e-posta adresini al
+          if (data.email) {
+              const email = data.email;
+              console.log('Token doğrulama başarılı:', email);
+              if (kullanicilar.includes(email)) {
+                hosgeldinFonksiyonu(email);
+              } else {
+                erisimEngellendiFonksiyonu();
+              }
+              // ... (e-posta adresini kullanarak diğer işlemleri yap) ...
+          } else {
+              // Token doğrulama başarısız
+              console.error('Token doğrulama başarısız.');
+              // ... (hata durumunda yapılacak işlemler) ...
+          }
+          })
+          .catch(error => {
+          // Hata yakalama
+          console.error('Token doğrulama hatası:', error);
+          // ... (hata durumunda yapılacak işlemler) ...
+          });
+    }
+    
+    
+    function hosgeldinFonksiyonu(email) {
+      const mesajDiv = document.getElementById("mesaj");
+      const isim = email.split("@")[0]; // E-postadan isim çıkarımı (basit yöntem)
+      mesajDiv.textContent = "Merhaba " + isim; 
+    }
+
+    function erisimEngellendiFonksiyonu() {
+      const mesajDiv = document.getElementById("mesaj");
+      mesajDiv.textContent = "Erişiminiz yok.";
+    }
+
+    // Bu fonksiyonlar Google API ile token doğrulama ve e-posta çıkarımı için gereklidir.
+    // Bu adımları daha sonra detaylandıracağız.
+    function extractEmailFromResponse(response) { 
+      // ... (token doğrulama ve e-posta çıkarımı) ... 
+    }
+
+    divolustur();
+  </script>
+</body>
+</html>

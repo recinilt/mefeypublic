@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <script>
+
+        var stro={first:"reco",last:"mero"};
+        var strj = JSON.stringify(stro);
+        
+        localStorage.setItem("merhaba",strj);
+        
+        console.log(localStorage.getItem("merhaba"));
+        console.log(localStorage.getItem("merhaba").first);
+        var stro2=localStorage.getItem("merhaba");
+        stro2=JSON.parse(stro2);
+        console.log(stro2);
+        console.log(stro2.first);
+
+        var stro3=[
+            {first:"recep", last:"yeni"},
+            {first:"ali", last:"veli"},
+            {first:"akıllı pavlov", last:"deli veli"}
+        ];
+        stro3=JSON.stringify(stro3);
+        localStorage.setItem("stro3",stro3);
+        var strj3=localStorage.getItem("stro3");
+        console.log(strj3);
+        strj3=JSON.parse(strj3);
+        console.log(strj3);
+        console.log(strj3[2].first);
+
+
+    </script>
+</body>
+</html>

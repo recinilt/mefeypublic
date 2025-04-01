@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script>
+    <script>
+        console.log (ccxt.exchanges)
+        const exchange = new ccxt.binance({
+    'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+    'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+  });
+// 15 dakikalık mumlar için '15m' kullanın
+const timeframe = '15m';
+  const symbol = 'BTC/USDT'; // İstediğiniz sembolü kullanın
+  const limit = 400; // Geriye dönük veri miktarı
+
+  exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+    console.log(ohlcv)
+ /*
+        (async () => {
+  const exchange = new ccxt.binance({
+    'apiKey': 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+    'secret': '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+  });
+
+  // 15 dakikalık mumlar için '15m' kullanın
+  const timeframe = '15m';
+  const symbol = 'BTC/USDT'; // İstediğiniz sembolü kullanın
+  const limit = 400; // Geriye dönük veri miktarı
+
+  exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+    console.log(ohlcv)
+   
+  try {
+    const ohlcv = await exchange.fetchOHLCV(symbol, timeframe, undefined, limit);
+    console.log(ohlcv);
+  } catch (error) {
+    console.error(error);
+  }
+  */
+})();
+
+
+    </script>
+</body>
+</html>

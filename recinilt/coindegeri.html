@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTC Arzı</title>
+</head>
+<body>
+    <h1>BTC Dolaşımdaki Arzı</h1>
+    <p id="btc-supply">Yükleniyor...</p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    fetch('https://api.coingecko.com/api/v3/coins/bitcoin')
+        .then(response => response.json())
+        .then(data => {
+            const btcSupply = data.market_data.circulating_supply;
+            document.getElementById('btc-supply').innerText = btcSupply.toLocaleString();
+        })
+        .catch(error => {
+            console.error('Error fetching BTC supply:', error);
+            document.getElementById('btc-supply').innerText = 'Veri alınamadı';
+        });
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nöbet Planlama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nöbet Planlama</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Gün</th>
+                <th>A</th>
+                <th>B</th>
+                <th>C</th>
+                <th>D</th>
+            </tr>
+        </thead>
+        <tbody id="schedule"></tbody>
+    </table>
+
+    <script>
+        const totalDays = 31;
+        const dutyLimits = { A: 5, B: 9, C: 9, D: 8 };
+        const unavailableDays = {
+            A: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            B: [],
+            C: [],
+            D: []
+        };
+        const preferredDays = {
+            A: [],
+            B: [20, 21, 25, 26, 30, 31],
+            C: [],
+            D: []
+        };
+        const schedule = {};
+
+        for (let i = 1; i <= totalDays; i++) {
+            schedule[i] = { A: false, B: false, C: false, D: false };
+        }
+
+        function isDayAllowed(person, day) {
+            if (unavailableDays[person].includes(day)) return false;
+            const restrictedDays = [day - 1, day - 2, day + 1, day + 2];
+            for (let restrictedDay of restrictedDays) {
+                if (restrictedDay >= 1 && restrictedDay <= totalDays && schedule[restrictedDay][person]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function assignDuty(person) {
+            let dutiesAssigned = 0;
+            for (let day of preferredDays[person]) {
+                if (dutiesAssigned >= dutyLimits[person]) break;
+                if (isDayAllowed(person, day)) {
+                    schedule[day][person] = true;
+                    dutiesAssigned++;
+                }
+            }
+            for (let day = 1; day <= totalDays; day++) {
+                if (dutiesAssigned >= dutyLimits[person]) break;
+                if (isDayAllowed(person, day)) {
+                    schedule[day][person] = true;
+                    dutiesAssigned++;
+                }
+            }
+        }
+
+        Object.keys(dutyLimits).forEach(assignDuty);
+
+        function renderSchedule() {
+            const tbody = document.getElementById('schedule');
+            for (let day = 1; day <= totalDays; day++) {
+                const row = document.createElement('tr');
+                const dayCell = document.createElement('td');
+                dayCell.textContent = day;
+                row.appendChild(dayCell);
+
+                ['A', 'B', 'C', 'D'].forEach(person => {
+                    const cell = document.createElement('td');
+                    cell.textContent = schedule[day][person] ? '✔' : '';
+                    row.appendChild(cell);
+                });
+
+                tbody.appendChild(row);
+            }
+        }
+
+        renderSchedule();
+    </script>
+</body>
+</html>

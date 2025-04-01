@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiFi Hotspot Kontrolü</title>
+</head>
+<body>
+    <button id="toggleHotspot">WiFi Hotspotunu Aç/Kapat</button>
+
+    <script>
+        const toggleButton = document.getElementById('toggleHotspot');
+        let hotspotActive = false;
+        function hotspotuKapat(){
+            exec('netsh wlan set hostednetwork mode=allow ssid=MyHotspot key=MyPassword');
+        }
+        function hotsoptuAc(params) {
+            exec('netsh wlan stop hostednetwork');
+        }
+        toggleButton.addEventListener('click', () => {
+            if (hotspotActive) {
+                // Hotspotu kapat
+                console.log('WiFi Hotspotu kapatılıyor...');
+                // Burada hotspotu kapatmak için gerekli kodu ekleyebilirsiniz.
+                // Örneğin: hotspotuKapat();
+            } else {
+                // Hotspotu aç
+                console.log('WiFi Hotspotu açılıyor...');
+                // Burada hotspotu açmak için gerekli kodu ekleyebilirsiniz.
+                // Örneğin: hotspotuAc();
+            }
+            hotspotActive = !hotspotActive;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin Emir Derinliği Hesaplayıcı</title>
+<style>
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
+    cursor: pointer;
+}
+#summary {
+    margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+<h1>Top 100 Coin Emir Derinliği Hesaplayıcı</h1>
+<div id="summary">
+    <h2>Toplam Alış/Satış Özeti</h2>
+    <p id="totalBuys">Toplam Alışlar: 0</p>
+    <p id="totalSells">Toplam Satışlar: 0</p>
+    <p id="ratio">Alış/Satış Oranı: 0</p>
+</div>
+<table id="resultTable">
+<thead>
+    <tr>
+        <th onclick="sortTable(0)">Coin Çifti</th>
+        <th onclick="sortTable(1)">Alış Toplamı</th>
+        <th onclick="sortTable(2)">Satış Toplamı</th>
+        <th onclick="sortTable(3)">Alış/Satış Oranı</th>
+    </tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+<script>
+const coins2 = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT"];
+const coins3=['BTCUSDT', 'ETHUSDT', 'BCHUSDT', 'XRPUSDT', 'EOSUSDT', 'LTCUSDT', 'TRXUSDT', 'ETCUSDT', 'LINKUSDT', 'XLMUSDT', 'ADAUSDT', 'XMRUSDT', 'DASHUSDT', 'ZECUSDT', 'XTZUSDT', 'BNBUSDT', 'ATOMUSDT', 'ONTUSDT', 'IOTAUSDT', 'BATUSDT', 'VETUSDT', 'NEOUSDT', 'QTUMUSDT', 'IOSTUSDT', 'THETAUSDT', 'ALGOUSDT', 'ZILUSDT', 'KNCUSDT', 'ZRXUSDT', 'COMPUSDT', 'OMGUSDT', 'DOGEUSDT', 'SXPUSDT', 'KAVAUSDT', 'BANDUSDT', 'RLCUSDT', 'WAVESUSDT', 'MKRUSDT', 'SNXUSDT', 'DOTUSDT', 'DEFIUSDT', 'YFIUSDT', 'BALUSDT', 'CRVUSDT', 'TRBUSDT', 'RUNEUSDT', 'SUSHIUSDT', 'EGLDUSDT', 'SOLUSDT', 'ICXUSDT', 'STORJUSDT', 'BLZUSDT', 'UNIUSDT', 'AVAXUSDT', 'FTMUSDT', 'ENJUSDT', 'FLMUSDT', 'RENUSDT', 'KSMUSDT', 'NEARUSDT', 'AAVEUSDT', 'FILUSDT', 'RSRUSDT', 'LRCUSDT', 'OCEANUSDT', 'CVCUSDT', 'BELUSDT', 'CTKUSDT', 'AXSUSDT', 'ALPHAUSDT', 'ZENUSDT', 'SKLUSDT', 'GRTUSDT', '1INCHUSDT', 'CHZUSDT', 'SANDUSDT', 'ANKRUSDT', 'LITUSDT', 'UNFIUSDT', 'REEFUSDT', 'RVNUSDT', 'SFPUSDT', 'XEMUSDT', 'BTCSTUSDT', 'COTIUSDT', 'CHRUSDT', 'MANAUSDT', 'ALICEUSDT', 'HBARUSDT', 'ONEUSDT', 'LINAUSDT', 'STMXUSDT', 'DENTUSDT', 'CELRUSDT', 'HOTUSDT', 'MTLUSDT', 'OGNUSDT', 'NKNUSDT', 'SCUSDT', 'DGBUSDT', '1000SHIBUSDT', 'BAKEUSDT', 'GTCUSDT', 'BTCDOMUSDT', 'IOTXUSDT', 'RAYUSDT', 'C98USDT', 'MASKUSDT', 'ATAUSDT', 'DYDXUSDT', '1000XECUSDT', 'GALAUSDT', 'CELOUSDT', 'ARUSDT', 'KLAYUSDT', 'ARPAUSDT', 'CTSIUSDT', 'LPTUSDT', 'ENSUSDT', 'PEOPLEUSDT', 'ROSEUSDT', 'DUSKUSDT', 'FLOWUSDT', 'IMXUSDT', 'API3USDT', 'GMTUSDT', 'APEUSDT', 'WOOUSDT', 'FTTUSDT', 'JASMYUSDT', 'DARUSDT', 'OPUSDT', 'INJUSDT', 'STGUSDT', 'SPELLUSDT', '1000LUNCUSDT', 'LUNA2USDT', 'LDOUSDT', 'CVXUSDT', 'ICPUSDT', 'APTUSDT', 'QNTUSDT', 'FETUSDT', 'FXSUSDT', 'HOOKUSDT', 'MAGICUSDT', 'TUSDT', 'HIGHUSDT', 'MINAUSDT', 'ASTRUSDT', 'AGIXUSDT', 'PHBUSDT', 'GMXUSDT', 'CFXUSDT', 'STXUSDT', 'BNXUSDT', 'ACHUSDT', 'SSVUSDT', 'CKBUSDT', 'PERPUSDT', 'TRUUSDT', 'LQTYUSDT', 'USDCUSDT', 'IDUSDT', 'ARBUSDT', 'JOEUSDT', 'TLMUSDT', 'AMBUSDT', 'LEVERUSDT', 'RDNTUSDT', 'HFTUSDT', 'XVSUSDT', 'ETHBTC', 'BLURUSDT', 'EDUUSDT', 'IDEXUSDT', 'SUIUSDT', '1000PEPEUSDT', '1000FLOKIUSDT', 'UMAUSDT', 'RADUSDT', 'KEYUSDT', 'COMBOUSDT', 'NMRUSDT', 'MAVUSDT', 'MDTUSDT', 'XVGUSDT', 'WLDUSDT', 'PENDLEUSDT', 'ARKMUSDT', 'AGLDUSDT', 'YGGUSDT', 'DODOXUSDT', 'BNTUSDT', 'OXTUSDT', 'SEIUSDT', 'CYBERUSDT', 'HIFIUSDT', 'ARKUSDT', 'GLMRUSDT', 'BICOUSDT', 'STRAXUSDT', 'LOOMUSDT', 'BIGTIMEUSDT', 'BONDUSDT', 'ORBSUSDT', 'STPTUSDT', 'WAXPUSDT', 'BSVUSDT', 'RIFUSDT', 'POLYXUSDT', 'GASUSDT', 'POWRUSDT', 'SLPUSDT', 'TIAUSDT', 'SNTUSDT', 'CAKEUSDT', 'MEMEUSDT', 'TWTUSDT', 'TOKENUSDT', 'ORDIUSDT', 'STEEMUSDT', 'BADGERUSDT', 'ILVUSDT', 'NTRNUSDT', 'KASUSDT', 'BEAMXUSDT', '1000BONKUSDT', 'PYTHUSDT', 
+'SUPERUSDT', 'USTCUSDT', 'ONGUSDT', 'ETHWUSDT', 'JTOUSDT', '1000SATSUSDT', 'AUCTIONUSDT', '1000RATSUSDT', 'ACEUSDT', 'MOVRUSDT', 'NFPUSDT', 'BTCUSDC', 'ETHUSDC', 'BNBUSDC', 'SOLUSDC', 'XRPUSDC', 'AIUSDT', 'XAIUSDT', 'DOGEUSDC', 'WIFUSDT', 'MANTAUSDT', 'ONDOUSDT', 'LSKUSDT', 'ALTUSDT', 'JUPUSDT', 'ZETAUSDT', 'RONINUSDT', 'DYMUSDT', 'SUIUSDC', 'OMUSDT', 'LINKUSDC', 'PIXELUSDT', 'STRKUSDT', 'MAVIAUSDT', 'ORDIUSDC', 'GLMUSDT', 'PORTALUSDT', 'TONUSDT', 'AXLUSDT', 'MYROUSDT', '1000PEPEUSDC', 'METISUSDT', 'AEVOUSDT', 'WLDUSDC', 'VANRYUSDT', 'BOMEUSDT', 'ETHFIUSDT', 'AVAXUSDC', '1000SHIBUSDC', 'ENAUSDT', 'WUSDT', 'WIFUSDC', 'BCHUSDC', 'TNSRUSDT', 'SAGAUSDT', 'LTCUSDC', 'NEARUSDC', 'TAOUSDT', 'OMNIUSDT', 'ARBUSDC', 'NEOUSDC', 'FILUSDC', 'TIAUSDC', 'BOMEUSDC', 'REZUSDT', 'ENAUSDC', 'ETHFIUSDC', '1000BONKUSDC', 'BBUSDT', 'NOTUSDT', 'TURBOUSDT', 'IOUSDT', 'ZKUSDT', 'MEWUSDT', 'LISTAUSDT', 'ZROUSDT', 'BTCUSDT_241227', 'ETHUSDT_241227', 'CRVUSDC', 'RENDERUSDT', 'BANANAUSDT', 'RAREUSDT', 'GUSDT', 'SYNUSDT', 'SYSUSDT', 'VOXELUSDT', 'BRETTUSDT', 'ALPACAUSDT', 'POPCATUSDT', 'SUNUSDT', 'VIDTUSDT', 'NULSUSDT', 'DOGSUSDT', 'MBOXUSDT', 'CHESSUSDT', 'FLUXUSDT', 'BSWUSDT', 'QUICKUSDT', 'NEIROETHUSDT', 'RPLUSDT', 'AERGOUSDT', 'POLUSDT', 'UXLINKUSDT', '1MBABYDOGEUSDT', 'NEIROUSDT', 'KDAUSDT', 'FIDAUSDT', 'FIOUSDT', 'CATIUSDT', 'GHSTUSDT', 'LOKAUSDT', 'HMSTRUSDT', 'BTCUSDT_250328', 'ETHUSDT_250328', 'REIUSDT', 'COSUSDT', 'EIGENUSDT', 'DIAUSDT', '1000CATUSDT', 'SCRUSDT', 'GOATUSDT', 'MOODENGUSDT', 'SAFEUSDT', 'SANTOSUSDT', 'TROYUSDT', 'PONKEUSDT', 'COWUSDT', 'CETUSUSDT', '1000000MOGUSDT', 'GRASSUSDT', 'DRIFTUSDT', 'SWELLUSDT', 'ACTUSDT', 'PNUTUSDT', 'HIPPOUSDT', '1000XUSDT', 'DEGENUSDT', 'BANUSDT', 'AKTUSDT', 'SLERFUSDT', 'SCRTUSDT', '1000CHEEMSUSDT', '1000WHYUSDT', 'THEUSDT', 'MORPHOUSDT', 'CHILLGUYUSDT', 'KAIAUSDT', 'AEROUSDT', 'ACXUSDT', 'ORCAUSDT', 'MOVEUSDT', 'RAYSOLUSDT', 'KOMAUSDT', 'VIRTUALUSDT', 'SPXUSDT', 'MEUSDT', 'AVAUSDT', 'DEGOUSDT', 'VELODROMEUSDT', 'MOCAUSDT', 'VANAUSDT']
+const coins=coins3.slice(0,100)
+let totalAsks = 0, totalBids = 0;
+
+function getApiData(symbol, callback) {
+    const url = `https://api.binance.com/api/v3/depth?symbol=${symbol}&limit=1000`;
+    fetch(url)
+    .then(response => response.json())
+    .then(data => callback(null, data))
+    .catch(error => callback(error, null));
+}
+
+function calculateAll() {
+    const tbody = document.getElementById('resultTable').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = ''; // Tabloyu temizle
+    totalAsks = 0; totalBids = 0; // Toplamları sıfırla
+
+    coins.forEach(symbol => {
+        getApiData(symbol, (err, data) => {
+            if (err) {
+                console.error('Error fetching data for', symbol, err);
+                return;
+            }
+
+            const currentPrice = parseFloat(data.asks[0][0]);
+            const upperLimit = currentPrice * 1.03;
+            const lowerLimit = currentPrice * 0.97;
+            let askSum = 0, bidSum = 0;
+
+            data.asks.forEach(([price, amount]) => {
+                if (parseFloat(price) <= upperLimit) askSum += parseFloat(amount);
+            });
+            data.bids.forEach(([price, amount]) => {
+                if (parseFloat(price) >= lowerLimit) bidSum += parseFloat(amount);
+            });
+
+            totalAsks += askSum;
+            totalBids += bidSum;
+
+            const ratio = (bidSum / askSum).toFixed(2);
+            const row = tbody.insertRow();
+            row.innerHTML = `<td>${symbol}</td><td>${askSum.toFixed(2)}</td><td>${bidSum.toFixed(2)}</td><td>${ratio}</td>`;
+
+            document.getElementById('totalBuys').textContent = `Toplam Alışlar: ${totalBids.toFixed(2)}`;
+            document.getElementById('totalSells').textContent = `Toplam Satışlar: ${totalAsks.toFixed(2)}`;
+            document.getElementById('ratio').textContent = `Alış/Satış Oranı: ${(totalBids / totalAsks).toFixed(2)}`;
+        });
+    });
+}
+
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("resultTable");
+    switching = true;
+    // Set the sorting direction to ascending:
+    dir = "asc";
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            if (dir == "asc") {
+                if (parseFloat(x.innerHTML) > parseFloat(y.innerHTML)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (parseFloat(x.innerHTML) < parseFloat(y.innerHTML)) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+
+calculateAll();  // Başlangıçta tüm coinler için hesaplama yap
+
+</script>
+</body>
+</html>

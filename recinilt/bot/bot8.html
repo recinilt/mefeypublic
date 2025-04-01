@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basit Ticaret Botu</title>
+    <!-- <button onclick="openLong()">Al</button> -->
+    <!-- <button onclick="closeLong()">Sat</button> -->
+    <script src="https://unpkg.com/ccxt"></script>
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script> -->
+    <script>
+
+    // CCXT kütüphanesi ile borsa nesnesini oluştur
+    
+    //const ccxt = require('ccxt');
+
+(async () => {
+  const exchange = new ccxt.binance({
+    apiKey: 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+    secret: '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD',
+    'options': {
+      'defaultType': 'future'
+    }
+  });
+
+  // Uygun risk yönetimi için bakiyenizi kontrol edin
+  const balance = await exchange.fetchBalance();
+  console.log(balance);
+
+  // Long pozisyon açma fonksiyonu
+  async function openLong() {
+    const amount = 20; // USDT cinsinden miktar
+    const leverage = 3; // Kaldıraç oranı
+
+    // Kaldıraç ayarını yap
+    await exchange.setLeverage(leverage, 'BTC/USDT');
+
+    // Piyasa emri ile long pozisyon aç
+    const order = await exchange.createMarketBuyOrder('BTC/USDT', amount);
+    console.log(order);
+  }
+
+  // Long pozisyon kapatma fonksiyonu
+  async function closeLong() {
+    const positions = await exchange.fetchPositions(['BTC/USDT']);
+    const btcPosition = positions.find(p => p.symbol === 'BTC/USDT');
+    const amount = btcPosition.amount; // Açık pozisyon miktarı
+
+    // Piyasa emri ile long pozisyon kapat
+    const order = await exchange.createMarketSellOrder('BTC/USDT', amount);
+    console.log(order);
+  }
+
+  // Botu çalıştır
+  // NOT: Gerçek işlem yapmadan önce test edin!
+  // openLong(); // Long aç
+  // closeLong(); // Long kapat
+  openLong()
+  console.log(ccxt.loadMarkets())
+})();
+
+    </script>
+</head>
+<body>
+    <button onclick="openLong()">Al</button>
+    <button onclick="closeLong()">Sat</button>
+</body>
+</html>

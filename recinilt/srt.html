@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-BW080PFGW9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-BW080PFGW9');
+</script>
+
+</head>
+
+<body>
+    <h1>Subtitle Reader</h1>
+    <h2>Made by Recep YENİ</h2>
+    <p>recepyeni@yahoo.com</p>
+    
+    <p>
+        <div id="mytext"></div>
+    </p>
+    <input type="file">
+    <button id="basla" onclick="basla()">başla</button>
+    <button onclick="bitir()">Bitir</button>
+
+    <script>
+        //Made by Recep YENİ
+        //recepyeni@yahoo.com
+        var myfile = "";
+        var mysentences = [];
+        var mytimes = [];
+        var mysectimes = [];
+
+        //tüm srt dosyası, myfile oluyor:
+        var input = document.querySelector("input[type='file']");
+        input.addEventListener("change", function (e) {
+            console.log(input.files);
+            console.log(input.files[0].name);
+
+            var reader = new FileReader();
+            reader.onload = function () {
+                myfile = reader.result;
+                console.log(myfile);
+            }
+            reader.readAsText(input.files[0]);
+        }, false);
+
+        //////////////////////
+
+
+
+        //myfile dosyası, cümlelere ve zamanlara ayrıştırılarak mysentences ve mytimes ve mysectimes arrayleri oluşturuluyor:
+        function myregexs(tumSrt) {
+            const regextosentences = /\n?^[0-9]{1,99}$\n[0-9]{2}[:]\d{2}\:\d{2}.*/gm;
+            const regextotimes = /^[0-9]{2}:[0-9]{2}:[0-9]{2}/gm;
+            var regexToSpace = /([&].{1,12}[;])|[!-@\[-`\{-~][a-zA-Z][!-@\[-`\{-~]?[!-@\[-`\{-~]|(["-&])|([\(-\+])|([-])|([/@])|([<->])|([\[-`])|([\{-~])/gmui;
+            var regexToComma = /([!\?:\n;])/gmui;
+            //cümleler alınıp okunmayan karakterler ayıklanıyor ve mysentences oluşturuluyor:
+            mysentences = myfile.split(regextosentences);
+            for (var i = 0; i < mysentences.length; i++) {
+                mysentences[i] = mysentences[i].replace(regexToSpace, " ");
+                mysentences[i] = mysentences[i].replace(regexToComma, ",");
+            };
+            mysentences.shift();
+            console.log(mysentences);
+
+            //srt zamanları ayıklanıyor ve mytimes oluşturuluyor:
+            let m;
+            while ((m = regextotimes.exec(myfile)) !== null) {
+                // This is necessary to avoid infinite loops with zero-width matches
+                if (m.index === regextotimes.lastIndex) {
+                    regextotimes.lastIndex++;
+                }
+                // The result can be accessed through the `m`-variable.
+                m.forEach((match, groupIndex) => {
+                    console.log(`Found match, group ${groupIndex}: ${match}`);
+                    mytimes.push(match);
+                });
+            }
+
+            //mytimes, mysectimesa dönüştürülüyor:
+            function timetosecond(time) {
+                var timesec = [];
+                for (var i = 0; i < time.length; i++) {
+                    var hr = time[i].slice(0, 2);
+                    var mm = time[i].slice(3, 5);
+                    var sec = time[i].slice(6, 8);
+                    var secs = Number(sec) + (Number(mm) * 60) + (Number(hr) * 60 * 60);
+                    timesec.push(secs)
+                    console.log(sec);
+                }
+                return timesec;
+            }
+            mysectimes = timetosecond(mytimes);
+            console.log(mysectimes);
+
+            ///////////////////////
+
+            console.log(mytimes);
+            console.log(mytimes.length);
+            console.log(mysentences.length);
+            console.log(mytimes);
+
+
+        }
+
+
+
+
+
+
+
+
+
+        //$(document).ready(function () {   });
+
+    
+        var mytts = (function () {
+            var mytext = "Merhabalar Merhabalar";
+            const msg = new SpeechSynthesisUtterance();
+            msg.volume = 1; // 0 to 1
+            msg.rate = 1.8; // 0.1 to 10
+            msg.pitch = 1; // 0 to 2
+            msg.text = mytext;
+            console.log(speechSynthesis.getVoices());
+
+
+            const voice = {
+                "name": "Yelda",
+                "lang": "tr-TR"
+            }; //speaks[35]; //47
+            console.log(`Voice: ${voice.name} and Lang: ${voice.lang}`);
+            msg.voiceURI = voice.name;
+            msg.lang = voice.lang;
+
+            var totts = function (tosay, volume0to1, rate0to10, pitch0to2) {
+                msg.text = tosay;
+                if (volume0to1) { msg.volume = volume0to1 };
+                if (rate0to10) { msg.rate = rate0to10 };
+                if (pitch0to2) { msg.pitch = pitch0to2 };
+                speechSynthesis.speak(msg);
+            }
+            return {
+                totts
+            };
+
+        })();
+
+
+        mytts.totts("merhabalar. nasılsın?",1,4);
+        ///////////////////
+        //şuanki saat dakika saniyeleri saniyeye dönüştüren fonksiyon:
+        function nowtosec() {
+
+            var d = new Date();
+            var nowsec = Number(d.getSeconds()) + (Number(d.getMinutes()) * 60) + (Number(d.getHours()) * 60 * 60);
+            console.log(nowsec);
+            return nowsec;
+
+        }
+        nowtosec();
+
+        //mysectimes a şuanki saniye cinsinden zaman ekleniyor. ve de şuanki saniye zaman, bu dönüştürülene erişince, o indeksteki cümle okunuyor:
+        var dongu;
+        function basla() {
+            myregexs();
+            var secplus = nowtosec();
+            var mybaslasecs = [];
+            mysectimes.forEach(function (item) {
+                item = Number(item) + secplus;
+                mybaslasecs.push(item);
+            });
+            console.log(mybaslasecs);
+            var nts = 0;
+            dongu = setInterval(() => {
+                nts = nowtosec();
+                if (mybaslasecs.indexOf(nts) > -1) {
+                    console.log(mysentences[mybaslasecs.indexOf(nts)]);
+                    mytts.totts(mysentences[mybaslasecs.indexOf(nts)],1,4);
+                    mysentences[mybaslasecs.indexOf(nts)] += "a";
+                }
+            }, 1000);
+            
+
+        }
+
+        function bitir() {
+                clearInterval(dongu);
+            };
+
+
+    </script>
+</body>
+
+</html>

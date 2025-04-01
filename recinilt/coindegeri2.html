@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Dolaşımdaki Arzı</title>
+    
+    <script>
+        function getCoinSupply() {
+    const coinInput = document.getElementById('coin-input').value.toLowerCase();
+    const apiUrl = `https://api.coingecko.com/api/v3/coins/${coinInput}`;
+
+    fetch(apiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Coin bulunamadı.');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const coinSupply = data.market_data.circulating_supply;
+            document.getElementById('coin-supply').innerText = `${coinInput.toUpperCase()} dolaşımdaki arz: ${coinSupply.toLocaleString()}`;
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            document.getElementById('coin-supply').innerText = 'Coin bulunamadı veya veri alınamadı.';
+        });
+}
+
+    </script>
+    
+</head>
+<body>
+    <h1>Coin Dolaşımdaki Arzı</h1>
+    <input type="text" id="coin-input" placeholder="Coin kısaltmasını girin (örneğin BTC)">
+    <button onclick="getCoinSupply()">Göster</button>
+    <p id="coin-supply">Dolaşımdaki arz burada görünecek</p>
+    
+</body>
+</html>

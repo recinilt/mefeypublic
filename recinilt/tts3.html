@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--- Automated Languages Detection Script By CodedSkills -->
+<!--- Do not share without this message -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+        <title>Google Translate Into Local Languages Search</title>
+
+  </head>
+  <body onload="getLocation()" style="font-family: Arial;border: 0 none;">
+		<!-- google translator element -->
+		<div id="google_translate_element">
+		</div>
+		<!-- Country Information -->
+		<div id="demo">
+			<div id="country_name">Country : </div>
+			<div id="country_code">Country Code : </div>
+			<div id="country_languages_code">Country Languages Code : </div>
+
+		</div>
+		<div>
+			<h1>Hello Friends</h1>
+			<p>Hit like and subscribe the channel for Further videos</p>
+		</div>
+		<!-- Google Web Translation Api Refrence -->
+		<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+
+		<script>
+		// Container for Web API
+		var country_languages;
+	 	var x = document.getElementById("demo");
+		// Getting GEO Location of User
+	 	function getLocation() {
+			 if (navigator.geolocation) {
+					 navigator.geolocation.getCurrentPosition(showPosition);
+			 } else {
+					 x.innerHTML = "Geolocation is not supported by this browser.";
+			 }
+	 	}
+		// Executing getUserCountry Function when gets position
+	 	function showPosition(position) {
+		 getUserCountry(position.coords.latitude,position.coords.longitude);
+	 	}
+	// function gets user country via ajax
+
+	 function getUserCountry(lat,lng) {
+		 var _json_array = [];
+		 var xhttp = new XMLHttpRequest();
+		 xhttp.open('POST','http://ws.geonames.org/countryCodeJSON?lat='+lat+'&lng='+lng+'&username=codedskills',false);
+		 xhttp.onreadystatechange = function() {
+				 var content = JSON.parse(this.responseText);
+				 var country_name = document.getElementById('country_name');
+				 var country_code = document.getElementById('country_code');
+				 var country_languages_code = document.getElementById('country_languages_code');
+				 country_name.innerHTML += " "+content.countryName;
+				 country_code.innerHTML += " "+content.countryCode;
+				 country_languages_code.innerHTML += " "+content.languages;
+				 country_languages = content.languages;
+				 // Executing Translate Script
+				 var _d_language = country_languages
+				 new google.translate.TranslateElement({includedLanguages: _d_language}, 'google_translate_element');
+		 }
+		 xhttp.send();
+	 }
+	 </script>
+  </body>
+</html>

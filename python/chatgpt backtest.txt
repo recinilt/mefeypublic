@@ -1,0 +1,1 @@
+başlangıç bakiyesi 1000 usdt olsun ve de her işlem, bakiyenin yüzde 10'u ile açılsın. ve de her işlemde binde 1 komisyon kesilsin.

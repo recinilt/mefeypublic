@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisse Bilgileri</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cheerio/0.22.0/lib/cheerio.min.js"></script>
+</head>
+<body>
+
+<h2>Hisse Bilgileri</h2>
+<table id="hisseTablosu" border="1">
+    <thead>
+        <tr>
+            <th>Hisse Kodu</th>
+            <th>Piyasa Değeri</th>
+            <th>Kapanış</th>
+            <th>Sermaye</th>
+            <th>PD/DD</th>
+            <th>F/K</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Veriler buraya eklenecek -->
+    </tbody>
+</table>
+
+<script>
+    //const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+    const proxyUrl = 'https://www.cors-hub.com/';
+    const targetUrl = 'https://www.isyatirim.com.tr/tr-tr/analiz/hisse/Sayfalar/Temel-Degerler-Ve-Oranlar.aspx?endeks=01#page-1';
+
+    axios.get(proxyUrl + targetUrl).then(response => {
+        const html = response.data;
+        const $ = cheerio.load(html);
+        const hisseTablosu = document.getElementById('hisseTablosu').getElementsByTagName('tbody')[0];
+
+        $('table tr').each((i, row) => {
+            const hisseKodu = $(row).find('#temelTBody_Ozet > tr:nth-child(1) > td.sorting_1 > a').text().trim();
+            const piyasaDegeri = $(row).find('#temelTBody_Ozet > tr:nth-child(1) > td:nth-child(5)').text().trim();
+            const kapanis = $(row).find('#temelTBody_Ozet > tr:nth-child(1) > td:nth-child(4)').text().trim();
+            const sermaye = $(row).find('#temelTBody_Ozet > tr:nth-child(4) > td:nth-child(8)').text().trim();
+            const pdDd = $(row).find('#temelTBody_Finansal > tr:nth-child(1) > td:nth-child(6)').text().trim();
+            const fk = $(row).find('#temelTBody_Finansal > tr:nth-child(1) > td:nth-child(3)').text().trim();
+
+            const newRow = hisseTablosu.insertRow();
+            newRow.insertCell(0).innerText = hisseKodu;
+            newRow.insertCell(1).innerText = piyasaDegeri;
+            newRow.insertCell(2).innerText = kapanis;
+            newRow.insertCell(3).innerText = sermaye;
+            newRow.insertCell(4).innerText = pdDd;
+            newRow.insertCell(5).innerText = fk;
+        });
+    }).catch(error => {
+        console.error('Bir hata oluştu:', error);
+    });
+</script>
+
+</body>
+</html>

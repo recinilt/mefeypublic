@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basit Ticaret Botu</title>
+    <script src="https://unpkg.com/ccxt"></script>
+    <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/ccxt@4.3.44/dist/ccxt.browser.min.js"></script> -->
+    <script>
+
+    // CCXT kütüphanesi ile borsa nesnesini oluştur
+    const exchange = new ccxt.binance({
+        apiKey: 'XCmIMjw0JJYe18WGQ7zI5GYq2D930tagNZ7rampgzgHSJOieenSJqGPxIT4HtWjU',
+        secret: '0QlevlazX4plngg3sFfhbLMuS7nTJAZ6lBiXvSSldt1TD2ab26v7H34YZ4xyOkcD'
+    });
+
+    // Alım işlemi fonksiyonu
+    async function buy() {
+        const symbol = 'BTC/USDT'; // İşlem çiftini belirle
+        const amountInUSDT = 23; // Alınacak Bitcoin'in USDT cinsinden değeri
+
+        try {
+            // Piyasa fiyatını al
+            const price = await exchange.fetchTicker(symbol);
+            const amount = amountInUSDT / price.last; // Alınacak Bitcoin miktarını hesapla
+
+            const order = await exchange.createMarketBuyOrder(symbol, amount);
+            console.log(order);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    // Satım işlemi fonksiyonu
+    async function sell() {
+        const symbol = 'BTC/USDT'; // İşlem çiftini belirle
+
+        try {
+            // Mevcut bakiyeyi al
+            const balance = await exchange.fetchBalance();
+            const amount = balance.BTC.free; // Satılacak Bitcoin miktarını belirle
+
+            const order = await exchange.createMarketSellOrder(symbol, amount);
+            console.log(order);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    </script>
+</head>
+<body>
+    <button onclick="buy()">Al</button>
+    <button onclick="sell()">Sat</button>
+</body>
+</html>

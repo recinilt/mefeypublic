@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <button onclick="vos()">vos</button>
+
+    <script>
+        var mytts = (function(){
+    var mytext = "Merhabalar Merhabalar";
+    const msg = new SpeechSynthesisUtterance();
+    msg.volume = 1; // 0 to 1
+    msg.rate = 1.8; // 0.1 to 10
+    msg.pitch = 1; // 0 to 2
+    msg.text  = mytext;
+    
+    
+    const voice = {
+        "name": "Yelda",
+        "lang": "tr-TR"
+      }; //speaks[35]; //47
+    console.log(`Voice: ${voice.name} and Lang: ${voice.lang}`);
+    msg.voiceURI = voice.name;
+    msg.lang = voice.lang;
+    
+    
+      var totts = function(tosay,volume0to1,rate0to10,pitch0to2){
+          msg.text = tosay;
+          if (volume0to1){msg.volume=volume0to1};
+          if(rate0to10){msg.rate=rate0to10};
+          if(pitch0to2){msg.pitch=pitch0to2};
+        speechSynthesis.speak(msg);
+      }
+      return {
+          totts
+      };
+    
+    })();
+    
+    mytts.totts("merhabalar.");
+    console.log("///////");
+    var vo = new SpeechSynthesisUtterance();
+    console.log(vo.lang);
+    console.log(speechSynthesis.getVoices());
+    console.log(speechSynthesis);
+
+    function vos(){
+        var vos = speechSynthesis.getVoices();
+    console.log(vos);
+    console.log(vos[3].lang);
+    }
+    </script>
+    
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <p>CSV File Explorer</p>
+    <input type="file" id="inpFile" name="inpFile"><br>
+    <input type="text" name="sutun" id="sutun" placeholder="Kaçıncı sütun?"><br>
+    <button id="yukle" onclick="yukle()">yükle</button>
+    <div>
+        <p id="secenekler"></p>
+        <p id="mytext"></p>
+        
+    </div>
+
+    <script>
+        var inpFile = document.getElementById("inpFile");
+        var mytext = document.getElementById("mytext");
+        var sutun = document.getElementById("sutun");
+        var secenekler=document.getElementById("secenekler");
+        var dosya ="";
+
+        function degisim() {
+            secenekler.innerHTML="";
+            mytext.innerHTML="";
+            var file = inpFile.files[0];
+            if (file){
+                var reader = new FileReader();
+                reader.onload = function () {
+                    //console.log(file);
+                    //console.log(reader.result);
+                    //console.log(reader);
+                    //mytext.innerHTML=reader.result;
+                    dosya = reader.result;
+                    secenekfunc(reader.result);
+                }
+                reader.readAsText(file);
+            };
+            
+        };
+
+
+        function secenekfunc(params) {
+            var liste2 = params.split("\n");
+            console.log(liste2[0]);
+
+            var domm2 = "";
+            var listeilk2 = liste2[0].split(",");
+
+            for (let i=0; i<listeilk2.length; i++){
+                var domm2 = domm2 + (i+1) + ": " + listeilk2[i] + " <> " 
+            };
+            secenekler.innerHTML=domm2;
+
+        };
+
+
+        //dosya.addEventListener("change", secenekfunc);
+ 
+
+        inpFile.addEventListener("change", degisim);
+
+        function yukle(){
+            
+            var liste = dosya.split("\n");
+            console.log(liste[0]);
+
+            var domm = "";
+            var listeilk = liste[0].split(",");
+
+            /*
+            for (let i=0; i<listeilk.length; i++){
+                var domm = domm + (i+1) + ": " + listeilk[i] + " <> " 
+            };
+            */
+            
+            for (let i = 1; i < liste.length; i++) {
+                //const element = array[i];
+
+                var oo= liste[i].split(",");
+                /*
+                for (let o=0;o<oo.length;o++){
+                    domm = domm + "<p>" + oo[o] + "</p>"
+                };
+                */
+                domm = domm + "<p>" + oo[sutun.value - 1] + "</p>"
+                domm=domm + "<hr>";
+                
+            };
+            mytext.innerHTML=domm;
+        };
+        
+        
+
+        
+    </script>
+
+    
+</body>
+</html>
