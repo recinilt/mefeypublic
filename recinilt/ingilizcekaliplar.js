@@ -1,0 +1,20 @@
+var turkceingilizce = {
+    "şimdiki zamana dair cümle kalıpları ": "present",
+    "arka plan (şu anda) türkçe cümle (ortaç – ø) ingilizce çevirisi (ortaç x1)": "yes",
+    "genelde/ canım sıkıldıkça/ derdimi anlatmak için/ vb. , konuş – ur – um": "i (do) talk",
+    "ilerde/ akşama/ seneye/ yarın/ vb. konuş – ur – um": "i will talk",
+    "icap etse/ gerekse/ gücüm olsa/ istesen/ vb. konuş – ur – um": "i would talk",
+    "genelde/ canım sıkıldıkça/ derdimi anlatmak için/ vb. konuş – uyor – um": "i ( do ) talk",
+    "şu anda/ şu dakika/ şu saatte/ bu gün, vb. konuş –  uyor – um": "i am talking",
+    " inan bana / yarın bu saatlerde / az sonra / vb. konuş – acak – ım": "i am going to talk",
+    "söz vermeyeyim ama / ‐ma ihtimali( ) var, vb. konuş –  abilir – im": "i may talk",
+    "çok düşük bir ihtimal de olsa / vb. konuş – abilir –  im (anlamı may ile aynıdır, may daha popüler)": "i   might talk  ",
+    "imkânım var / iznim var / gücüm var / vb. konuş – abilir –  im":"i can talk",
+    "imkânım olsa /mümkün olsa /gücüm olsa/ vb. varsayımsal yetenekler ve mümkünatlar için konuş – abilir –  im (icabında –er in icabında –abilir versiyonu)":"i could talk ",
+    "alternatif yok /mecburum/n’olursa olsun / vb. konuş – mak zorunda –(y) – ım":"i have to talk",
+    "maalesef / başarmak için / sonuna kadar/ vb. konuş – malı – (y) – ım":"i must talk ",
+    "bence/ ama yine de /mümkün olduğunca / vb. konuş  – ma(m) lazım":"i should talk",
+    "bir an önce / şimdiden / hızlı bir şekilde / vb. konuş – sa (m) iyi olur":"i had better talk ",
+    "bugün, bu hafta, bu sene, her zaman, hayatım boyunca, vb. zaman ibarelerinin olduğu veya zamanla ilgili hiçbir bilginin verilmediği geçmemiş zamanlar için, vb. konuş – tu – m konuş –muş durumda‐ (y) – ım konuş – muş – um.(konuşmuş durumdayım / konuşmuşum / konuşmuştum)":"i have talked (x3)",
+    "keşke / ah mümkün olsa da / ah bir /  vb. konuş – sa – m":"if i did talk = if i talkx2 =  if i talked"
+};

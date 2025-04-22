@@ -1,0 +1,23 @@
+var turkceingilizce2 = {
+    "2. GEÇMİŞ ZAMANA DAİR CÜMLE KALIPLARI": "hello",
+    "ARKA PLAN (Geçmişte) TÜRKÇE CÜMLE (Ortaç ‐İDİ) İNGİLİZCE ÇEVİRİSİ (Ortaç X2)": "yes",
+    "genelde/ canım sıkıldıkça/ derdimi anlatmak için/ alıştığım için/vb. konuş – ur – idi  – m": "i would/used to talk ",
+    "ilerde/ akşama/ seneye/ yarın/ türkçede ilerde –er için geçmiş versiyon –ecek idi dir. konuş – ur – idi – m": "i was going to talk",
+    "icap etse/ gerekse/ gücüm olsa/ istesen/ vb. konuş – ur – idi  – m": "i would have talked (x3)",
+    "genelde/ canım sıkıldıkça/ derdimi anlatmak için/ vb. konuş – uyor – idi – m": "i would/used to talk ",
+    "şu anda/ şu dakika/ şu saatte/ bu gün, vb. konuş – uyor – idi  – m": "i was talking ",
+    "inan bana / yarın bu saatlerde / az sonra / vb. konuş – acak – idi  – m": "i was going to talk",
+    "söz vermeyeyim ama / ‐ma ihtimali() var, vb. konuş – abilir – idi  – m": "i might have talked (x3)",
+    "çok düşük bir ihtimal de olsa / vb. konuş – abilir – idi – m": "i might have talked (x3)",
+    "imkânım vardı / iznim vardı / gücüm vardı /vb. konuş – abilir – idi  – m (eskiden, çocukken, vb)": "i could talk ",
+    "imkânım olsaydı /gücüm olsaydı /mümkün olsaydı/ vb. varsayımsal yetenekler ve mümkünatlar için konuş – abilir – idi – m (imkânım olsaydı / mümkün olsaydı / gücüm olsaydı / vb.)": "i could have talked      ",
+    "mecburdum /n’olursa olsun / yine de / vb. konuş – mak zorunda – idi – m": "i had to talk",
+    "maalesef / başarmak için / sonuna kadar/ vb. konuş – malı – idi  – m": "i had to talk",
+    "bence/ ama yine de /mümkün olduğunca / vb. konuş  – ma (m) lazım – idi": "  i had to talk ",
+    "geçmişten yaşanan ve bir pişmanlık halinde söylenen zorunluluk ifadeleri (..had todan farkı; o ana dair pişmanlık söz konusudur.) konuş – malı – idi  – m (ama konuşmadım, tüh)": "i should have talked",
+    " geçmişten yaşanan ve bir pişmanlık halinde söylenen zorunluluk ifadeleri konuş  – ma(m) lazım – idi (ama konuşmadım)": "i should have talked",
+    "geçmişten yaşanan ve bir pişmanlık halinde söylenen zorunluluk ifadeleri konuş – sa (m) iyi olur – idi  (ama konuşmadım)": "i should have talked",
+    "   dün, geçen hafta, 2 saat önce, lisedeyken, vb. konuş – tu – m": "i did talk = i talked (x2)",
+    "bugün, bu hafta, bu sene, her zaman, hayatım boyunca, vb. zaman ibarelerinin olduğu veya zamanla ilgili hiçbir bilginin verilmediği geçmemiş zamanlar için konuş – tu – idi  – m konuş – muş durumda – idi – m konuş – muş  – idi  ‐ m. (konuştuydum / konuşmuş  durumdaydım / konuşmuştum / vb.)": "i had talked (x3)",
+    "keşke / ah mümkün olsaydı / ah bir /  vb. konuş – sa – idi – m (konuş – sa ‐ idi – m / konuş‐muş  olsaydı‐m / konuş‐muş durumda olsaydı‐m)": "if i had talked (x3) "
+};
