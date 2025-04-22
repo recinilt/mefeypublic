@@ -16,18 +16,21 @@
 
     <h1>Kelime Okuyucu</h1>
 
-    <button id="turkceIngilizceOku">1. ŞİMDİKİ ZAMANA DAİR CÜMLE KALIPLARI</button>
-    <button id="ingilizceTurkceOku">2. GEÇMİŞ ZAMANA DAİR CÜMLE KALIPLARI</button>
+    <button id="turkceIngilizceOku">1. ŞİMDİKİ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
+    <button id="ingilizceTurkceOku">2. GEÇMİŞ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
+    <button id="egzersizoku">EGZERSİZ CÜMLE KALIPLARI</button><br>
 
     <div id="kelimeGoster"></div>
 
     <script src="ingilizcekaliplar.js"></script>
+    <script src="ingilizcekaliplaregzersiz.js"></script>
     <script src="ingilizcekaliplargecmisz.js"></script>
     <script>
         
 
         const turkceIngilizceButton = document.getElementById('turkceIngilizceOku');
         const ingilizceTurkceButton = document.getElementById('ingilizceTurkceOku');
+        const egzersizoku = document.getElementById('egzersizoku');
         const kelimeGoster = document.getElementById('kelimeGoster');
 
         let currentUtterance;
@@ -41,6 +44,11 @@
         ingilizceTurkceButton.addEventListener('click', () => {
             speechSynthesis.cancel(); 
             oku(turkceingilizce2, 'tr-TR');
+        });
+
+        egzersizoku.addEventListener('click', () => {
+            speechSynthesis.cancel(); 
+            oku(turkceingilizce3, 'tr-TR');
         });
 
         // ... (önceki kodlar) ...
