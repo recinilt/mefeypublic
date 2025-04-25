@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Görsel Oluşturma Prompt Seçici</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .option {
+      background-color: white;
+      border: 2px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .option:hover {
+      border-color: #555;
+      background-color: #e0f0ff;
+    }
+    .option.selected {
+      border-color: #007bff;
+      background-color: #cce5ff;
+    }
+    #prompt-output {
+      background-color: white;
+      padding: 20px;
+      margin-top: 40px;
+      border: 2px dashed #007bff;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Görsel Prompt Seçici</h1>
+
+  <!-- Gridler (Tüm 27 kategori) -->
+  <!-- 1. Görsel Tarzı -->
+  <h2>Görsel Tarzı</h2>
+  <div class="grid" data-category="style">
+    <div class="option">Realistic</div>
+    <div class="option">3D</div>
+    <div class="option">2D</div>
+    <div class="option">Anime</div>
+    <div class="option">Low-poly</div>
+    <div class="option">Pixel Art</div>
+    <div class="option">Oil Painting</div>
+    <div class="option">Watercolor</div>
+    <div class="option">Sketch</div>
+    <div class="option">Cyberpunk</div>
+    <div class="option">Fantasy</div>
+    <div class="option">Cartoon</div>
+    <div class="option">Line Art</div>
+  </div>
+
+  <!-- 2. Kompozisyon -->
+  <h2>Kompozisyon</h2>
+  <div class="grid" data-category="composition">
+    <div class="option">Close-up</div>
+    <div class="option">Wide Shot</div>
+    <div class="option">Top-down</div>
+    <div class="option">Side View</div>
+    <div class="option">Symmetrical</div>
+    <div class="option">Asymmetrical</div>
+    <div class="option">Bird's Eye</div>
+    <div class="option">Over the Shoulder</div>
+  </div>
+
+  <!-- 3. Atmosfer -->
+  <h2>Atmosfer</h2>
+  <div class="grid" data-category="atmosphere">
+    <div class="option">Bright</div>
+    <div class="option">Dark</div>
+    <div class="option">Happy</div>
+    <div class="option">Sad</div>
+    <div class="option">Dramatic</div>
+    <div class="option">Mystical</div>
+    <div class="option">Peaceful</div>
+    <div class="option">Tense</div>
+  </div>
+
+  <!-- 4. Mekan -->
+  <h2>Mekan</h2>
+  <div class="grid" data-category="location">
+    <div class="option">Forest</div>
+    <div class="option">City</div>
+    <div class="option">Space</div>
+    <div class="option">Underwater</div>
+    <div class="option">Desert</div>
+    <div class="option">Fantasy Land</div>
+    <div class="option">Sci-fi World</div>
+    <div class="option">Mountains</div>
+  </div>
+
+
+
+
+
+
+  <!-- (Devam eden kategoriler burada olacak - kısa tutuyorum örnek olsun diye, kalan 23 kategori aynı formatta eklenecek) -->
+
+  <h2>Oluşan Prompt</h2>
+  <div id="prompt-output">Seçim yapıldıkça burada prompt oluşacak...</div>
+  <button onclick="copyPrompt()" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Prompt'u Kopyala</button><br>
+
+  <button onclick="clearSelections()" style="margin-top:20px; padding:10px 20px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor:pointer;">Temizle</button><br>
+
+
+
+  <script>
+    const selectedOptions = [];
+    
+    function updatePrompt() {
+      let promptParts = [];
+    
+      selectedOptions.forEach(sel => {
+        if (sel.category === 'style') promptParts.push(`Create a ${sel.text} style illustration`);
+        if (sel.category === 'composition') promptParts.push(`using a ${sel.text} composition`);
+        if (sel.category === 'atmosphere') promptParts.push(`with a ${sel.text} atmosphere`);
+        if (sel.category === 'location') promptParts.push(`set in a ${sel.text}`);
+        if (sel.category === 'character') promptParts.push(`featuring a ${sel.text}`);
+        if (sel.category === 'emotion') promptParts.push(`expressing ${sel.text} emotion`);
+        if (sel.category === 'clothing') promptParts.push(`wearing ${sel.text} clothing`);
+        if (sel.category === 'lighting') promptParts.push(`lit with ${sel.text}`);
+        if (sel.category === 'format') promptParts.push(`format ${sel.text}`);
+        if (sel.category === 'effect') promptParts.push(`with ${sel.text} effect`);
+        if (sel.category === 'season') promptParts.push(`during ${sel.text}`);
+        if (sel.category === 'technique') promptParts.push(`using ${sel.text} technique`);
+        if (sel.category === 'backgroundstyle') promptParts.push(`with a ${sel.text} background`);
+        if (sel.category === 'pose') promptParts.push(`posed as ${sel.text}`);
+        if (sel.category === 'lookdirection') promptParts.push(`looking ${sel.text}`);
+        if (sel.category === 'camera') promptParts.push(`shot with a ${sel.text}`);
+        if (sel.category === 'material') promptParts.push(`featuring ${sel.text} materials`);
+        if (sel.category === 'colorpalette') promptParts.push(`with a ${sel.text} color palette`);
+        if (sel.category === 'backgroundtheme') promptParts.push(`background theme: ${sel.text}`);
+        if (sel.category === 'artmovement') promptParts.push(`inspired by ${sel.text} art style`);
+        if (sel.category === 'storyelement') promptParts.push(`telling a story about ${sel.text}`);
+        if (sel.category === 'objects') promptParts.push(`including ${sel.text}`);
+        if (sel.category === 'expressiondetail') promptParts.push(`with ${sel.text} facial expressions`);
+        if (sel.category === 'soundmotion') promptParts.push(`illustrating ${sel.text}`);
+        if (sel.category === 'environmentinteraction') promptParts.push(`with ${sel.text} interaction`);
+        if (sel.category === 'layering') promptParts.push(`with detailed ${sel.text}`);
+        if (sel.category === 'animationstyle') promptParts.push(`designed for ${sel.text} animation`);
+      });
+    
+      document.getElementById('prompt-output').textContent = promptParts.join(', ') + (promptParts.length > 0 ? '.' : '');
+    }
+    
+    document.querySelectorAll('.grid').forEach(grid => {
+      grid.addEventListener('click', function(e) {
+        if (e.target.classList.contains('option')) {
+          const category = grid.getAttribute('data-category');
+          const text = e.target.textContent;
+    
+          // Eğer zaten seçiliyse: kaldır
+          const index = selectedOptions.findIndex(opt => opt.category === category && opt.text === text);
+          if (index > -1) {
+            selectedOptions.splice(index, 1); // kaldır
+            e.target.classList.remove('selected');
+          } else {
+            selectedOptions.push({ category, text }); // ekle
+            e.target.classList.add('selected');
+          }
+    
+          updatePrompt();
+        }
+      });
+    });
+    
+    // Clear (Temizle) Butonu Fonksiyonu
+    function clearSelections() {
+      selectedOptions.length = 0;
+      document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+      updatePrompt();
+    }
+
+    function copyPrompt() {
+  const promptText = document.getElementById('prompt-output').textContent;
+  
+  if (promptText.trim() !== '') {
+    navigator.clipboard.writeText(promptText)
+      .then(() => {
+        alert('Prompt başarıyla kopyalandı! 📋');
+      })
+      .catch(err => {
+        alert('Kopyalama başarısız oldu. Tarayıcı izin vermiyor olabilir.');
+      });
+  } else {
+    alert('Kopyalanacak bir prompt yok!');
+  }
+}
+
+    </script>
+    
+    
+</body>
+</html>

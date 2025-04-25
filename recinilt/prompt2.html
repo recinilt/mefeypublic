@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Prompt Oluşturucu</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        select, button { margin-top: 10px; padding: 10px; width: 100%; }
+        textarea { margin-top: 20px; width: 100%; height: 200px; }
+        label { margin-top: 15px; display: block; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Gelişmiş Prompt Oluşturucu</h1>
+
+    <label>Görsel Tarzı:</label>
+    <select id="style">
+        <option value="Photorealistic">Gerçekçi</option>
+        <option value="Anime">Anime</option>
+        <option value="3D Model">3D Modelleme</option>
+        <option value="Cartoon">Çizgi Film</option>
+        <option value="Pixel Art">Piksel Art</option>
+        <option value="Watercolor">Sulu Boya</option>
+        <option value="Abstract">Soyut</option>
+    </select>
+
+    <label>Kompozisyon:</label>
+    <select id="composition">
+        <option value="Close-up">Yakın Plan</option>
+        <option value="Medium Shot">Orta Plan</option>
+        <option value="Wide Shot">Geniş Açı</option>
+        <option value="Top-down View">Kuş Bakışı</option>
+        <option value="Worm View">Alttan Açı</option>
+        <option value="Dynamic Perspective">Perspektifli</option>
+    </select>
+
+    <label>Atmosfer:</label>
+    <select id="atmosphere">
+        <option value="Dark Gothic">Karanlık / Gotik</option>
+        <option value="Bright Happy">Aydınlık / Mutlu</option>
+        <option value="Melancholic">Melankolik</option>
+        <option value="Futuristic">Fütüristik</option>
+        <option value="Post-apocalyptic">Post-apokaliptik</option>
+    </select>
+
+    <label>Mekan:</label>
+    <select id="setting">
+        <option value="Nature">Doğa</option>
+        <option value="City">Şehir</option>
+        <option value="Space">Uzay</option>
+        <option value="Historical Site">Tarihî Mekan</option>
+        <option value="Indoor">İç Mekan</option>
+        <option value="Fantasy World">Fantastik Dünya</option>
+    </select>
+
+    <label>Karakter Özellikleri:</label>
+    <select id="character">
+        <option value="Baby">Bebek</option>
+        <option value="Child">Çocuk</option>
+        <option value="Young Adult">Genç</option>
+        <option value="Adult">Yetişkin</option>
+        <option value="Elderly">Yaşlı</option>
+        <option value="Fantasy Race">Fantezi Irkı</option>
+    </select>
+
+    <label>Duygu:</label>
+    <select id="emotion">
+        <option value="Happy">Neşeli</option>
+        <option value="Sad">Üzgün</option>
+        <option value="Angry">Sinirli</option>
+        <option value="Calm">Sakin</option>
+        <option value="Surprised">Şaşkın</option>
+    </select>
+
+    <label>Kıyafet Stili:</label>
+    <select id="outfit">
+        <option value="Modern">Modern</option>
+        <option value="Classic">Klasik</option>
+        <option value="Sci-fi">Bilimkurgu</option>
+        <option value="Historical">Tarihî</option>
+        <option value="Punk">Punk</option>
+        <option value="Steampunk">Steampunk</option>
+    </select>
+
+    <label>Işıklandırma:</label>
+    <select id="lighting">
+        <option value="Natural Light">Doğal Işık</option>
+        <option value="Artificial Light">Yapay Işık</option>
+        <option value="Shadowed">Gölgeli</option>
+        <option value="High Contrast">Kontrastlı</option>
+        <option value="Soft Light">Yumuşak Işık</option>
+    </select>
+
+    <label>Format:</label>
+    <select id="format">
+        <option value="Square 1:1">Kare (1:1)</option>
+        <option value="Widescreen 16:9">Geniş Ekran (16:9)</option>
+        <option value="Portrait 4:5">Dikey (4:5)</option>
+    </select>
+
+    <label>Efekt:</label>
+    <select id="effect">
+        <option value="Blurred Background">Bulanık Arka Plan</option>
+        <option value="Bokeh Effect">Bokeh Efekti</option>
+        <option value="Film Grain">Film Efekti</option>
+        <option value="Particles">Toz/Parçacık Efekti</option>
+        <option value="Lens Flare">Işık Patlaması</option>
+    </select>
+
+    <label>Zaman ve Mevsim:</label>
+    <select id="time">
+        <option value="Day">Gündüz</option>
+        <option value="Night">Gece</option>
+        <option value="Spring">İlkbahar</option>
+        <option value="Summer">Yaz</option>
+        <option value="Autumn">Sonbahar</option>
+        <option value="Winter">Kış</option>
+        <option value="Futuristic Era">Gelecek Zaman</option>
+        <option value="Medieval Era">Ortaçağ</option>
+    </select>
+
+    <label>Sanatsal Teknik:</label>
+    <select id="artTechnique">
+        <option value="Oil Painting">Yağlı Boya</option>
+        <option value="Sketch">Kalem Çizimi</option>
+        <option value="Ink">Mürekkep</option>
+        <option value="Mosaic">Mozaik</option>
+        <option value="Graffiti">Graffiti</option>
+        <option value="Low Poly">Low Poly</option>
+    </select>
+
+    <button onclick="generatePrompt()">Prompt Oluştur</button>
+
+    <textarea id="output" placeholder="Oluşturulan prompt burada görünecek..."></textarea>
+
+    <script>
+        function generatePrompt() {
+            const fields = ['style', 'composition', 'atmosphere', 'setting', 'character', 'emotion', 'outfit', 'lighting', 'format', 'effect', 'time', 'artTechnique'];
+            let promptParts = fields.map(id => document.getElementById(id).value);
+            const prompt = promptParts.join(", ");
+            document.getElementById('output').value = prompt;
+        }
+    </script>
+</body>
+</html>

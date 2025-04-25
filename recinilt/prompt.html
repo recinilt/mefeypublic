@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Oluşturucu</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        select, button { margin-top: 10px; padding: 10px; width: 100%; }
+        textarea { margin-top: 20px; width: 100%; height: 150px; }
+    </style>
+</head>
+<body>
+    <h1>Prompt Oluşturucu</h1>
+
+    <label>Görsel Tarzı:</label>
+    <select id="style">
+        <option value="Photorealistic">Gerçekçi</option>
+        <option value="Anime">Anime</option>
+        <option value="3D Model">3D Modelleme</option>
+        <option value="Cartoon">Çizgi Film</option>
+        <option value="Pixel Art">Piksel Art</option>
+        <option value="Watercolor">Sulu Boya</option>
+        <option value="Abstract">Soyut</option>
+    </select>
+
+    <label>Kompozisyon:</label>
+    <select id="composition">
+        <option value="Close-up">Yakın Plan</option>
+        <option value="Medium Shot">Orta Plan</option>
+        <option value="Wide Shot">Geniş Açı</option>
+        <option value="Top-down View">Kuş Bakışı</option>
+        <option value="Worm View">Alttan Açı</option>
+        <option value="Dynamic Perspective">Perspektifli</option>
+    </select>
+
+    <label>Atmosfer:</label>
+    <select id="atmosphere">
+        <option value="Dark Gothic">Karanlık / Gotik</option>
+        <option value="Bright Happy">Aydınlık / Mutlu</option>
+        <option value="Melancholic">Melankolik</option>
+        <option value="Futuristic">Fütüristik</option>
+        <option value="Post-apocalyptic">Post-apokaliptik</option>
+    </select>
+
+    <label>Mekan:</label>
+    <select id="setting">
+        <option value="Nature">Doğa</option>
+        <option value="City">Şehir</option>
+        <option value="Space">Uzay</option>
+        <option value="Historical Site">Tarihî Mekan</option>
+        <option value="Indoor">İç Mekan</option>
+        <option value="Fantasy World">Fantastik Dünya</option>
+    </select>
+
+    <label>Işıklandırma:</label>
+    <select id="lighting">
+        <option value="Natural Light">Doğal Işık</option>
+        <option value="Artificial Light">Yapay Işık</option>
+        <option value="Shadowed">Gölgeli</option>
+        <option value="High Contrast">Kontrastlı</option>
+        <option value="Soft Light">Yumuşak Işık</option>
+    </select>
+
+    <label>Format:</label>
+    <select id="format">
+        <option value="Square 1:1">Kare (1:1)</option>
+        <option value="Widescreen 16:9">Geniş Ekran (16:9)</option>
+        <option value="Portrait 4:5">Dikey (4:5)</option>
+    </select>
+
+    <button onclick="generatePrompt()">Prompt Oluştur</button>
+
+    <textarea id="output" placeholder="Oluşturulan prompt burada görünecek..."></textarea>
+
+    <script>
+        function generatePrompt() {
+            const style = document.getElementById('style').value;
+            const composition = document.getElementById('composition').value;
+            const atmosphere = document.getElementById('atmosphere').value;
+            const setting = document.getElementById('setting').value;
+            const lighting = document.getElementById('lighting').value;
+            const format = document.getElementById('format').value;
+
+            const prompt = `${style} style, ${composition} composition, ${atmosphere} atmosphere, set in ${setting}, lit with ${lighting}, format ${format}`;
+
+            document.getElementById('output').value = prompt;
+        }
+    </script>
+</body>
+</html>

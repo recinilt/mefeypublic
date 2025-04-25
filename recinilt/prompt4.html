@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Görsel Oluşturma Prompt Seçici</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .option {
+      background-color: white;
+      border: 2px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .option:hover {
+      border-color: #555;
+      background-color: #e0f0ff;
+    }
+    .option.selected {
+      border-color: #007bff;
+      background-color: #cce5ff;
+    }
+    #prompt-output {
+      background-color: white;
+      padding: 20px;
+      margin-top: 40px;
+      border: 2px dashed #007bff;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎨 Görsel Prompt Seçici</h1>
+
+  <!-- Gridler (Tüm 27 kategori) -->
+  <!-- 1. Görsel Tarzı (Gelişmiş ve Alt Başlıksız) -->
+<h2>Görsel Tarzı</h2>
+<div class="grid" data-category="style">
+  <!-- Temel Stil Türleri -->
+  <div class="option">Realistic</div>
+  <div class="option">Hyperrealistic</div>
+  <div class="option">3D</div>
+  <div class="option">2D</div>
+  <div class="option">Anime</div>
+  <div class="option">Manga</div>
+  <div class="option">Low-poly</div>
+  <div class="option">Pixel Art</div>
+  <div class="option">Isometric</div>
+  <div class="option">Vector Art</div>
+  
+  <!-- Sanatsal Teknikler -->
+  <div class="option">Oil Painting</div>
+  <div class="option">Watercolor</div>
+  <div class="option">Pencil Sketch</div>
+  <div class="option">Ink Drawing</div>
+  <div class="option">Charcoal Drawing</div>
+  <div class="option">Pastel Drawing</div>
+  <div class="option">Acrylic Painting</div>
+
+  <!-- Dijital ve Yaratıcı Stiller -->
+  <div class="option">Digital Painting</div>
+  <div class="option">Concept Art</div>
+  <div class="option">Matte Painting</div>
+  <div class="option">Photobash</div>
+  <div class="option">Collage</div>
+  <div class="option">Neon Art</div>
+  <div class="option">Synthwave</div>
+  <div class="option">Cyberpunk</div>
+  <div class="option">Steampunk</div>
+  <div class="option">Fantasy Art</div>
+  <div class="option">Sci-fi Art</div>
+
+  <!-- Soyut ve Modern Akımlar -->
+  <div class="option">Abstract</div>
+  <div class="option">Surrealism</div>
+  <div class="option">Minimalism</div>
+  <div class="option">Pop Art</div>
+  <div class="option">Art Nouveau</div>
+  <div class="option">Impressionism</div>
+  <div class="option">Expressionism</div>
+  <div class="option">Cubism</div>
+
+  <!-- Özel Stil Seçenekleri -->
+  <div class="option">Dark Fantasy</div>
+  <div class="option">Noir Style</div>
+  <div class="option">Storybook Illustration</div>
+  <div class="option">Children's Book Style</div>
+  <div class="option">Paper Cutout Art</div>
+  <div class="option">Graffiti</div>
+  <div class="option">Sticker Art</div>
+</div>
+
+
+<!-- 2. Kompozisyon (Gelişmiş ve Alt Başlıksız) -->
+<h2>Kompozisyon</h2>
+<div class="grid" data-category="composition">
+  <div class="option">Close-up</div>
+  <div class="option">Extreme Close-up</div>
+  <div class="option">Medium Shot</div>
+  <div class="option">Wide Shot</div>
+  <div class="option">Extreme Wide Shot</div>
+  <div class="option">Top-down View</div>
+  <div class="option">Bird's Eye View</div>
+  <div class="option">Worm's Eye View</div>
+  <div class="option">Side View</div>
+  <div class="option">Front View</div>
+  <div class="option">Over the Shoulder</div>
+  <div class="option">Point of View (POV)</div>
+  <div class="option">Low Angle Shot</div>
+  <div class="option">High Angle Shot</div>
+  <div class="option">Symmetrical Composition</div>
+  <div class="option">Asymmetrical Composition</div>
+  <div class="option">Rule of Thirds</div>
+  <div class="option">Centered Composition</div>
+  <div class="option">Diagonal Composition</div>
+  <div class="option">Minimal Composition</div>
+  <div class="option">Dynamic Composition</div>
+  <div class="option">Crowded Composition</div>
+  <div class="option">Negative Space Focused</div>
+  <div class="option">Frame within a Frame</div>
+  <div class="option">Leading Lines</div>
+  <div class="option">Dutch Angle (Tilted Shot)</div>
+  <div class="option">Silhouette Composition</div>
+  <div class="option">Panoramic View</div>
+  <div class="option">Overhead Composition</div>
+</div>
+
+
+<!-- 3. Atmosfer (Gelişmiş ve Alt Başlıksız) -->
+<h2>Atmosfer</h2>
+<div class="grid" data-category="atmosphere">
+  <div class="option">Bright</div>
+  <div class="option">Dark</div>
+  <div class="option">Happy</div>
+  <div class="option">Sad</div>
+  <div class="option">Dramatic</div>
+  <div class="option">Mystical</div>
+  <div class="option">Peaceful</div>
+  <div class="option">Tense</div>
+  <div class="option">Romantic</div>
+  <div class="option">Mysterious</div>
+  <div class="option">Dreamy</div>
+  <div class="option">Melancholic</div>
+  <div class="option">Adventurous</div>
+  <div class="option">Energetic</div>
+  <div class="option">Lonely</div>
+  <div class="option">Hopeful</div>
+  <div class="option">Gloomy</div>
+  <div class="option">Uplifting</div>
+  <div class="option">Whimsical</div>
+  <div class="option">Surreal</div>
+  <div class="option">Chilling</div>
+  <div class="option">Majestic</div>
+  <div class="option">Calm</div>
+  <div class="option">Exciting</div>
+  <div class="option">Epic</div>
+  <div class="option">Mournful</div>
+  <div class="option">Cheerful</div>
+  <div class="option">Serene</div>
+  <div class="option">Eerie</div>
+  <div class="option">Suspenseful</div>
+</div>
+
+
+<!-- 4. Mekan (Gelişmiş ve Alt Başlıksız) -->
+<h2>Mekan</h2>
+<div class="grid" data-category="location">
+  <div class="option">Forest</div>
+  <div class="option">Dense Jungle</div>
+  <div class="option">Desert</div>
+  <div class="option">Beach</div>
+  <div class="option">Ocean Underwater</div>
+  <div class="option">Mountains</div>
+  <div class="option">Canyon</div>
+  <div class="option">Savannah</div>
+  <div class="option">Frozen Tundra</div>
+  <div class="option">Glacier</div>
+  <div class="option">City</div>
+  <div class="option">Futuristic City</div>
+  <div class="option">Abandoned City</div>
+  <div class="option">Small Village</div>
+  <div class="option">Castle</div>
+  <div class="option">Medieval Town</div>
+  <div class="option">Ancient Ruins</div>
+  <div class="option">Temple</div>
+  <div class="option">Cave</div>
+  <div class="option">Volcano</div>
+  <div class="option">Space Station</div>
+  <div class="option">Alien Planet</div>
+  <div class="option">Floating Island</div>
+  <div class="option">Sky Kingdom</div>
+  <div class="option">Underwater City</div>
+  <div class="option">Fantasy Land</div>
+  <div class="option">Sci-fi World</div>
+  <div class="option">Haunted Forest</div>
+  <div class="option">Dreamscape</div>
+  <div class="option">Cyberpunk Alley</div>
+  <div class="option">Steampunk Town</div>
+  <div class="option">Post-apocalyptic Wasteland</div>
+  <div class="option">Snowy Village</div>
+  <div class="option">Sunny Meadow</div>
+  <div class="option">Flower Field</div>
+  <div class="option">Riverbank</div>
+  <div class="option">Misty Swamp</div>
+  <div class="option">Sunken Shipwreck</div>
+</div>
+
+<!-- 5. Karakter Özellikleri (Gelişmiş ve Alt Başlıksız) -->
+<h2>Karakter Özellikleri</h2>
+<div class="grid" data-category="character">
+  <!-- İnsan Karakterleri -->
+  <div class="option">Human</div>
+  <div class="option">Child</div>
+  <div class="option">Teenager</div>
+  <div class="option">Adult</div>
+  <div class="option">Elderly</div>
+
+  <!-- Hayvan Karakterleri -->
+  <div class="option">Animal</div>
+  <div class="option">Cute Animal</div>
+  <div class="option">Wild Beast</div>
+  <div class="option">Anthropomorphic Animal</div>
+
+  <!-- Fantastik Yaratıklar -->
+  <div class="option">Elf</div>
+  <div class="option">Fairy</div>
+  <div class="option">Dwarf</div>
+  <div class="option">Orc</div>
+  <div class="option">Goblin</div>
+  <div class="option">Dragon</div>
+  <div class="option">Phoenix</div>
+  <div class="option">Mermaid</div>
+  <div class="option">Centaur</div>
+  <div class="option">Minotaur</div>
+  <div class="option">Unicorn</div>
+
+  <!-- Bilimkurgu ve Teknolojik Karakterler -->
+  <div class="option">Robot</div>
+  <div class="option">Cyborg</div>
+  <div class="option">Android</div>
+  <div class="option">Alien</div>
+  <div class="option">Space Traveler</div>
+
+  <!-- Korku ve Karanlık Karakterler -->
+  <div class="option">Vampire</div>
+  <div class="option">Zombie</div>
+  <div class="option">Ghost</div>
+  <div class="option">Demon</div>
+  <div class="option">Werewolf</div>
+
+  <!-- Kahramanlar ve Savaşçılar -->
+  <div class="option">Superhero</div>
+  <div class="option">Villain</div>
+  <div class="option">Knight</div>
+  <div class="option">Samurai</div>
+  <div class="option">Pirate</div>
+  <div class="option">Explorer</div>
+  <div class="option">Wizard</div>
+  <div class="option">Witch</div>
+  <div class="option">Mystic Monk</div>
+
+  <!-- Özel Karakter Tipleri -->
+  <div class="option">Steampunk Adventurer</div>
+  <div class="option">Post-apocalyptic Survivor</div>
+  <div class="option">Time Traveler</div>
+  <div class="option">Cyberpunk Hacker</div>
+  <div class="option">Fantasy Hero</div>
+  <div class="option">Storybook Character</div>
+  <div class="option">Animated Mascot</div>
+</div>
+
+<!-- 6. Duygu (Gelişmiş ve Alt Başlıksız) -->
+<h2>Duygu</h2>
+<div class="grid" data-category="emotion">
+  <div class="option">Happy</div>
+  <div class="option">Sad</div>
+  <div class="option">Angry</div>
+  <div class="option">Fearful</div>
+  <div class="option">Surprised</div>
+  <div class="option">Disgusted</div>
+  <div class="option">Confused</div>
+  <div class="option">Excited</div>
+  <div class="option">Lonely</div>
+  <div class="option">Hopeful</div>
+  <div class="option">Depressed</div>
+  <div class="option">Melancholic</div>
+  <div class="option">Romantic</div>
+  <div class="option">Peaceful</div>
+  <div class="option">Calm</div>
+  <div class="option">Joyful</div>
+  <div class="option">Content</div>
+  <div class="option">Energetic</div>
+  <div class="option">Playful</div>
+  <div class="option">Anxious</div>
+  <div class="option">Terrified</div>
+  <div class="option">Grieving</div>
+  <div class="option">Optimistic</div>
+  <div class="option">Pessimistic</div>
+  <div class="option">Nostalgic</div>
+  <div class="option">Frustrated</div>
+  <div class="option">Amazed</div>
+  <div class="option">Proud</div>
+  <div class="option">Ashamed</div>
+  <div class="option">Bored</div>
+  <div class="option">Curious</div>
+  <div class="option">Courageous</div>
+  <div class="option">Jealous</div>
+  <div class="option">Embarrassed</div>
+  <div class="option">Grateful</div>
+  <div class="option">Guilty</div>
+  <div class="option">Serene</div>
+  <div class="option">Silly</div>
+  <div class="option">Determined</div>
+</div>
+
+<!-- 7. Kıyafet Stili (Gelişmiş ve Alt Başlıksız) -->
+<h2>Kıyafet Stili</h2>
+<div class="grid" data-category="clothing">
+  <div class="option">Casual</div>
+  <div class="option">Formal</div>
+  <div class="option">Business Attire</div>
+  <div class="option">Elegant Dress</div>
+  <div class="option">Streetwear</div>
+  <div class="option">Sportswear</div>
+  <div class="option">Military Uniform</div>
+  <div class="option">School Uniform</div>
+  <div class="option">Traditional Clothing</div>
+  <div class="option">Kimono</div>
+  <div class="option">Hanbok</div>
+  <div class="option">Sari</div>
+  <div class="option">Medieval Armor</div>
+  <div class="option">Knight Armor</div>
+  <div class="option">Samurai Armor</div>
+  <div class="option">Fantasy Robe</div>
+  <div class="option">Wizard Robe</div>
+  <div class="option">Steampunk Outfit</div>
+  <div class="option">Cyberpunk Outfit</div>
+  <div class="option">Post-apocalyptic Gear</div>
+  <div class="option">Pirate Outfit</div>
+  <div class="option">Explorer Outfit</div>
+  <div class="option">Royal Clothing</div>
+  <div class="option">Peasant Clothing</div>
+  <div class="option">Festival Costume</div>
+  <div class="option">Tactical Gear</div>
+  <div class="option">Space Suit</div>
+  <div class="option">Diver Suit</div>
+  <div class="option">Winter Coat</div>
+  <div class="option">Summer Dress</div>
+  <div class="option">Wedding Dress</div>
+  <div class="option">Suit and Tie</div>
+  <div class="option">Gothic Fashion</div>
+  <div class="option">Punk Fashion</div>
+  <div class="option">Lolita Fashion</div>
+  <div class="option">Fantasy Armor</div>
+  <div class="option">Beachwear</div>
+  <div class="option">Monk Robe</div>
+  <div class="option">Historical Costume</div>
+</div>
+
+<!-- 8. Işıklandırma (Gelişmiş ve Alt Başlıksız) -->
+<h2>Işıklandırma</h2>
+<div class="grid" data-category="lighting">
+  <div class="option">Natural Light</div>
+  <div class="option">Soft Light</div>
+  <div class="option">Harsh Light</div>
+  <div class="option">Low Key Lighting</div>
+  <div class="option">High Key Lighting</div>
+  <div class="option">Golden Hour Light</div>
+  <div class="option">Blue Hour Light</div>
+  <div class="option">Cinematic Lighting</div>
+  <div class="option">Backlighting</div>
+  <div class="option">Front Lighting</div>
+  <div class="option">Side Lighting</div>
+  <div class="option">Top Lighting</div>
+  <div class="option">Under Lighting</div>
+  <div class="option">Neon Lighting</div>
+  <div class="option">Glowing Light</div>
+  <div class="option">Ambient Light</div>
+  <div class="option">Dramatic Spotlight</div>
+  <div class="option">Colorful Lighting</div>
+  <div class="option">Foggy Lighting</div>
+  <div class="option">Moonlight</div>
+  <div class="option">Firelight</div>
+  <div class="option">Lantern Light</div>
+  <div class="option">Candlelight</div>
+  <div class="option">Starlight</div>
+  <div class="option">Electric Light</div>
+  <div class="option">Bioluminescent Light</div>
+  <div class="option">Mystical Light</div>
+  <div class="option">Sunset Glow</div>
+  <div class="option">Sunrise Light</div>
+  <div class="option">Rainbow Light</div>
+  <div class="option">Shadow Play</div>
+</div>
+
+<!-- 9. Format (Gelişmiş ve Alt Başlıksız) -->
+<h2>Format</h2>
+<div class="grid" data-category="format">
+  <div class="option">Square (1:1)</div>
+  <div class="option">Landscape (16:9)</div>
+  <div class="option">Portrait (9:16)</div>
+  <div class="option">Ultra-wide (21:9)</div>
+  <div class="option">Cinematic Widescreen</div>
+  <div class="option">Panoramic</div>
+  <div class="option">Vertical Panoramic</div>
+  <div class="option">4:3 Classic TV Ratio</div>
+  <div class="option">5:4 Traditional Photo Ratio</div>
+  <div class="option">2:3 DSLR Standard</div>
+  <div class="option">3:2 Photography Standard</div>
+  <div class="option">Banner Format</div>
+  <div class="option">Poster Format</div>
+  <div class="option">Album Cover (Square)</div>
+  <div class="option">Webtoon Vertical Scroll</div>
+  <div class="option">Ultra Tall (1:3)</div>
+  <div class="option">Ultra Wide (3:1)</div>
+  <div class="option">Thumbnail Format</div>
+  <div class="option">Magazine Cover</div>
+  <div class="option">Storyboard Sequence</div>
+</div>
+
+<!-- 10. Efekt (Gelişmiş ve Alt Başlıksız) -->
+<h2>Efekt</h2>
+<div class="grid" data-category="effect">
+  <div class="option">Lens Flare</div>
+  <div class="option">Motion Blur</div>
+  <div class="option">Depth of Field</div>
+  <div class="option">Vignette</div>
+  <div class="option">Film Grain</div>
+  <div class="option">Light Rays</div>
+  <div class="option">Bloom Effect</div>
+  <div class="option">Glitch Effect</div>
+  <div class="option">Chromatic Aberration</div>
+  <div class="option">Tilt Shift</div>
+  <div class="option">Bokeh Background</div>
+  <div class="option">Fog Effect</div>
+  <div class="option">Dust Particles</div>
+  <div class="option">Rain Effect</div>
+  <div class="option">Snow Effect</div>
+  <div class="option">Fire Embers</div>
+  <div class="option">Smoke Trails</div>
+  <div class="option">Water Splash</div>
+  <div class="option">Underwater Distortion</div>
+  <div class="option">Double Exposure</div>
+  <div class="option">Infrared Look</div>
+  <div class="option">Mirror Reflection</div>
+  <div class="option">Shadow Play</div>
+  <div class="option">Neon Glow</div>
+  <div class="option">Soft Glow</div>
+  <div class="option">Lightning Bolt</div>
+  <div class="option">Starfield Background</div>
+  <div class="option">Explosion Effect</div>
+  <div class="option">Magic Aura</div>
+  <div class="option">Energy Waves</div>
+  <div class="option">Color Splash</div>
+</div>
+
+<!-- 11. Zaman ve Mevsim (Gelişmiş ve Alt Başlıksız) -->
+<h2>Zaman ve Mevsim</h2>
+<div class="grid" data-category="season">
+  <!-- Mevsimler -->
+  <div class="option">Spring</div>
+  <div class="option">Summer</div>
+  <div class="option">Autumn</div>
+  <div class="option">Winter</div>
+
+  <!-- Gündüz Gece Döngüsü -->
+  <div class="option">Morning</div>
+  <div class="option">Noon</div>
+  <div class="option">Afternoon</div>
+  <div class="option">Evening</div>
+  <div class="option">Sunset</div>
+  <div class="option">Twilight</div>
+  <div class="option">Night</div>
+  <div class="option">Midnight</div>
+
+  <!-- Özel Zamanlar -->
+  <div class="option">Golden Hour</div>
+  <div class="option">Blue Hour</div>
+  <div class="option">Dawn</div>
+  <div class="option">Dusk</div>
+
+  <!-- Hava Durumu ile Zaman -->
+  <div class="option">Rainy Day</div>
+  <div class="option">Stormy Night</div>
+  <div class="option">Snowy Morning</div>
+  <div class="option">Foggy Dawn</div>
+  <div class="option">Clear Sky Day</div>
+  <div class="option">Cloudy Afternoon</div>
+
+  <!-- Atmosferik Mevsimsel Durumlar -->
+  <div class="option">Blooming Spring</div>
+  <div class="option">Hot Summer</div>
+  <div class="option">Colorful Autumn</div>
+  <div class="option">Frozen Winter</div>
+</div>
+
+<!-- 12. Sanatsal Teknik (Gelişmiş ve Alt Başlıksız) -->
+<h2>Sanatsal Teknik</h2>
+<div class="grid" data-category="technique">
+  <div class="option">Oil Painting</div>
+  <div class="option">Watercolor</div>
+  <div class="option">Pencil Sketch</div>
+  <div class="option">Ink Drawing</div>
+  <div class="option">Charcoal Drawing</div>
+  <div class="option">Pastel Drawing</div>
+  <div class="option">Acrylic Painting</div>
+  <div class="option">Digital Painting</div>
+  <div class="option">Vector Art</div>
+  <div class="option">Pixel Art</div>
+  <div class="option">3D Modeling</div>
+  <div class="option">3D Rendering</div>
+  <div class="option">Photobashing</div>
+  <div class="option">Collage Art</div>
+  <div class="option">Matte Painting</div>
+  <div class="option">Low-poly Modeling</div>
+  <div class="option">Papercut Art</div>
+  <div class="option">Silhouette Art</div>
+  <div class="option">Line Art</div>
+  <div class="option">Spray Paint Art</div>
+  <div class="option">Graffiti Art</div>
+  <div class="option">Mixed Media</div>
+  <div class="option">Photorealistic Rendering</div>
+  <div class="option">Stop Motion Style</div>
+  <div class="option">Cel Shading</div>
+  <div class="option">Hand-drawn Animation Style</div>
+  <div class="option">Glitch Art</div>
+  <div class="option">Neon Art</div>
+  <div class="option">Synthwave Style</div>
+  <div class="option">Hyperrealism</div>
+  <div class="option">Minimalist Art</div>
+  <div class="option">Surrealist Technique</div>
+  <div class="option">Fantasy Illustration</div>
+</div>
+
+<!-- 13. Arka Plan Stili (Gelişmiş ve Alt Başlıksız) -->
+<h2>Arka Plan Stili</h2>
+<div class="grid" data-category="backgroundstyle">
+  <div class="option">Detailed Background</div>
+  <div class="option">Minimal Background</div>
+  <div class="option">Flat Color Background</div>
+  <div class="option">Gradient Background</div>
+  <div class="option">Blurred Background</div>
+  <div class="option">Bokeh Background</div>
+  <div class="option">Abstract Background</div>
+  <div class="option">Nature Background</div>
+  <div class="option">Urban Background</div>
+  <div class="option">Fantasy Landscape</div>
+  <div class="option">Sci-fi Environment</div>
+  <div class="option">Outer Space Background</div>
+  <div class="option">Underwater Scene</div>
+  <div class="option">Mountains in Distance</div>
+  <div class="option">Ocean View</div>
+  <div class="option">Forest Scene</div>
+  <div class="option">Desert Landscape</div>
+  <div class="option">Snowy Landscape</div>
+  <div class="option">Sky with Clouds</div>
+  <div class="option">Starry Night Sky</div>
+  <div class="option">Sunset Horizon</div>
+  <div class="option">City Skyline</div>
+  <div class="option">Futuristic Cityscape</div>
+  <div class="option">Ruins and Ancient Temples</div>
+  <div class="option">Mystical Forest</div>
+  <div class="option">Foggy Mountains</div>
+  <div class="option">Cyberpunk City</div>
+  <div class="option">Steampunk World</div>
+  <div class="option">Post-apocalyptic Wasteland</div>
+  <div class="option">Fantasy Castle</div>
+</div>
+
+<!-- 14. Pozisyon (Gelişmiş ve Alt Başlıksız) -->
+<h2>Pozisyon</h2>
+<div class="grid" data-category="pose">
+  <div class="option">Standing</div>
+  <div class="option">Sitting</div>
+  <div class="option">Lying Down</div>
+  <div class="option">Kneeling</div>
+  <div class="option">Running</div>
+  <div class="option">Walking</div>
+  <div class="option">Jumping</div>
+  <div class="option">Flying</div>
+  <div class="option">Floating</div>
+  <div class="option">Leaning Against Wall</div>
+  <div class="option">Reaching Out</div>
+  <div class="option">Holding Hands</div>
+  <div class="option">Crossed Arms</div>
+  <div class="option">Hand on Hip</div>
+  <div class="option">Arms Spread Wide</div>
+  <div class="option">Looking Up</div>
+  <div class="option">Looking Down</div>
+  <div class="option">Turning Away</div>
+  <div class="option">Facing Forward</div>
+  <div class="option">Side Profile</div>
+  <div class="option">Back View</div>
+  <div class="option">Dynamic Action Pose</div>
+  <div class="option">Relaxed Pose</div>
+  <div class="option">Battle Stance</div>
+  <div class="option">Sitting Cross-legged</div>
+  <div class="option">Heroic Pose</div>
+  <div class="option">Crouching</div>
+  <div class="option">Sitting on Edge</div>
+  <div class="option">Holding Weapon</div>
+  <div class="option">Dancing Pose</div>
+  <div class="option">Meditating</div>
+</div>
+
+<!-- 15. Bakış Yönü (Gelişmiş ve Alt Başlıksız) -->
+<h2>Bakış Yönü</h2>
+<div class="grid" data-category="lookdirection">
+  <div class="option">Looking Forward</div>
+  <div class="option">Looking Up</div>
+  <div class="option">Looking Down</div>
+  <div class="option">Looking Left</div>
+  <div class="option">Looking Right</div>
+  <div class="option">Looking Over Shoulder</div>
+  <div class="option">Looking Away</div>
+  <div class="option">Looking at Viewer</div>
+  <div class="option">Looking into Distance</div>
+  <div class="option">Gazing Upwards</div>
+  <div class="option">Gazing Downwards</div>
+  <div class="option">Eyes Closed</div>
+  <div class="option">Sideways Glance</div>
+  <div class="option">Upward Side Glance</div>
+  <div class="option">Downward Side Glance</div>
+  <div class="option">Staring Intensely</div>
+  <div class="option">Soft Gentle Gaze</div>
+  <div class="option">Angry Glare</div>
+  <div class="option">Fearful Glance</div>
+  <div class="option">Curious Look</div>
+  <div class="option">Dreamy Look</div>
+</div>
+
+<!-- 16. Kamera Açısı (Gelişmiş ve Alt Başlıksız) -->
+<h2>Kamera Açısı</h2>
+<div class="grid" data-category="camera">
+  <div class="option">Eye Level Shot</div>
+  <div class="option">High Angle Shot</div>
+  <div class="option">Low Angle Shot</div>
+  <div class="option">Overhead Shot</div>
+  <div class="option">Bird's Eye View</div>
+  <div class="option">Worm's Eye View</div>
+  <div class="option">Dutch Angle (Tilted Shot)</div>
+  <div class="option">Close-up Shot</div>
+  <div class="option">Extreme Close-up</div>
+  <div class="option">Medium Shot</div>
+  <div class="option">Wide Shot</div>
+  <div class="option">Extreme Wide Shot</div>
+  <div class="option">Over the Shoulder Shot</div>
+  <div class="option">Point of View Shot (POV)</div>
+  <div class="option">Tracking Shot</div>
+  <div class="option">Panning Shot</div>
+  <div class="option">Dolly Zoom Effect</div>
+  <div class="option">Tilt Shot</div>
+  <div class="option">Crane Shot</div>
+  <div class="option">Handheld Camera Feel</div>
+  <div class="option">Steadicam Shot</div>
+  <div class="option">Drone Shot</div>
+  <div class="option">360-Degree Camera View</div>
+  <div class="option">Slow Zoom In</div>
+  <div class="option">Fast Zoom Out</div>
+</div>
+
+<!-- 17. Malzeme / Yüzey Dokusu (Gelişmiş ve Alt Başlıksız) -->
+<h2>Malzeme / Yüzey Dokusu</h2>
+<div class="grid" data-category="material">
+  <div class="option">Wood</div>
+  <div class="option">Metal</div>
+  <div class="option">Glass</div>
+  <div class="option">Stone</div>
+  <div class="option">Brick</div>
+  <div class="option">Concrete</div>
+  <div class="option">Fabric</div>
+  <div class="option">Silk</div>
+  <div class="option">Wool</div>
+  <div class="option">Leather</div>
+  <div class="option">Fur</div>
+  <div class="option">Paper</div>
+  <div class="option">Plastic</div>
+  <div class="option">Rubber</div>
+  <div class="option">Crystal</div>
+  <div class="option">Marble</div>
+  <div class="option">Gold</div>
+  <div class="option">Silver</div>
+  <div class="option">Copper</div>
+  <div class="option">Ice</div>
+  <div class="option">Water</div>
+  <div class="option">Fire</div>
+  <div class="option">Cloud</div>
+  <div class="option">Sand</div>
+  <div class="option">Dust</div>
+  <div class="option">Lava</div>
+  <div class="option">Velvet</div>
+  <div class="option">Denim</div>
+  <div class="option">Canvas</div>
+  <div class="option">Foam</div>
+</div>
+
+<!-- 18. Renk Paleti (Gelişmiş ve Alt Başlıksız) -->
+<h2>Renk Paleti</h2>
+<div class="grid" data-category="colorpalette">
+  <div class="option">Vibrant Colors</div>
+  <div class="option">Muted Colors</div>
+  <div class="option">Pastel Colors</div>
+  <div class="option">Neon Colors</div>
+  <div class="option">Monochrome</div>
+  <div class="option">Black and White</div>
+  <div class="option">Sepia Tone</div>
+  <div class="option">Warm Colors</div>
+  <div class="option">Cool Colors</div>
+  <div class="option">Earth Tones</div>
+  <div class="option">Desaturated Colors</div>
+  <div class="option">High Contrast Colors</div>
+  <div class="option">Soft Color Palette</div>
+  <div class="option">Dark Color Palette</div>
+  <div class="option">Light Color Palette</div>
+  <div class="option">Golden Palette</div>
+  <div class="option">Silver and Blue Palette</div>
+  <div class="option">Fire and Ice Palette</div>
+  <div class="option">Sunset Colors</div>
+  <div class="option">Ocean Colors</div>
+  <div class="option">Forest Colors</div>
+  <div class="option">Candy Colors</div>
+  <div class="option">Rainbow Colors</div>
+  <div class="option">Fantasy Colors</div>
+  <div class="option">Cyberpunk Palette</div>
+  <div class="option">Vintage Palette</div>
+</div>
+
+<!-- 19. Arka Plan Teması (Gelişmiş ve Alt Başlıksız) -->
+<h2>Arka Plan Teması</h2>
+<div class="grid" data-category="backgroundtheme">
+  <div class="option">Fantasy World</div>
+  <div class="option">Sci-fi World</div>
+  <div class="option">Medieval Village</div>
+  <div class="option">Post-apocalyptic City</div>
+  <div class="option">Cyberpunk Cityscape</div>
+  <div class="option">Steampunk World</div>
+  <div class="option">Mystical Forest</div>
+  <div class="option">Haunted Castle</div>
+  <div class="option">Futuristic Space Station</div>
+  <div class="option">Alien Planet</div>
+  <div class="option">Desert Wasteland</div>
+  <div class="option">Frozen Tundra</div>
+  <div class="option">Sunny Beach</div>
+  <div class="option">Mountain Landscape</div>
+  <div class="option">Underwater City</div>
+  <div class="option">Dreamscape</div>
+  <div class="option">Sky Kingdom</div>
+  <div class="option">Floating Islands</div>
+  <div class="option">Urban Alleyway</div>
+  <div class="option">Royal Palace</div>
+  <div class="option">Secret Garden</div>
+  <div class="option">Ancient Temple</div>
+  <div class="option">Fairy Tale Village</div>
+  <div class="option">Stormy Ocean</div>
+  <div class="option">Sunset Field</div>
+  <div class="option">Starlit Desert</div>
+  <div class="option">Ice Cavern</div>
+  <div class="option">Abandoned Amusement Park</div>
+</div>
+
+<!-- 20. Sanat Akımı / Üslubu (Gelişmiş ve Alt Başlıksız) -->
+<h2>Sanat Akımı / Üslubu</h2>
+<div class="grid" data-category="artmovement">
+  <div class="option">Impressionism</div>
+  <div class="option">Expressionism</div>
+  <div class="option">Surrealism</div>
+  <div class="option">Cubism</div>
+  <div class="option">Realism</div>
+  <div class="option">Romanticism</div>
+  <div class="option">Symbolism</div>
+  <div class="option">Futurism</div>
+  <div class="option">Art Nouveau</div>
+  <div class="option">Art Deco</div>
+  <div class="option">Minimalism</div>
+  <div class="option">Pop Art</div>
+  <div class="option">Abstract Art</div>
+  <div class="option">Baroque</div>
+  <div class="option">Rococo</div>
+  <div class="option">Gothic Art</div>
+  <div class="option">Renaissance</div>
+  <div class="option">Neoclassicism</div>
+  <div class="option">Constructivism</div>
+  <div class="option">Conceptual Art</div>
+  <div class="option">Postmodernism</div>
+  <div class="option">Dadaism</div>
+  <div class="option">Brutalism</div>
+  <div class="option">Street Art</div>
+  <div class="option">Fantasy Art</div>
+  <div class="option">Contemporary Art</div>
+</div>
+
+<!-- 21. Hikaye Unsuru (Gelişmiş ve Alt Başlıksız) -->
+<h2>Hikaye Unsuru</h2>
+<div class="grid" data-category="storyelement">
+  <div class="option">Quest for a Lost Artifact</div>
+  <div class="option">Battle Between Good and Evil</div>
+  <div class="option">Forbidden Love</div>
+  <div class="option">Mysterious Stranger Appears</div>
+  <div class="option">Journey Through Unknown Lands</div>
+  <div class="option">Escape from Danger</div>
+  <div class="option">Search for Identity</div>
+  <div class="option">Fall of a Kingdom</div>
+  <div class="option">Rebellion Against Tyranny</div>
+  <div class="option">Discovery of Hidden Powers</div>
+  <div class="option">Betrayal Among Friends</div>
+  <div class="option">Lost in a Dreamworld</div>
+  <div class="option">Time Travel Mishap</div>
+  <div class="option">Apocalyptic Survival</div>
+  <div class="option">Reunion After a Long Separation</div>
+  <div class="option">Rise of a Hero</div>
+  <div class="option">Unexpected Alliance</div>
+  <div class="option">Protecting a Sacred Place</div>
+  <div class="option">Uncovering Ancient Secrets</div>
+  <div class="option">Rivalry Turned Friendship</div>
+  <div class="option">Mystery of the Haunted Forest</div>
+  <div class="option">Rescue Mission</div>
+  <div class="option">Fateful Encounter</div>
+  <div class="option">Journey to the Stars</div>
+  <div class="option">Struggle for Freedom</div>
+</div>
+
+<!-- 22. Nesneler / Eşyalar (Gelişmiş ve Alt Başlıksız) -->
+<h2>Nesneler / Eşyalar</h2>
+<div class="grid" data-category="objects">
+  <div class="option">Ancient Sword</div>
+  <div class="option">Magic Staff</div>
+  <div class="option">Treasure Chest</div>
+  <div class="option">Mysterious Book</div>
+  <div class="option">Floating Lanterns</div>
+  <div class="option">Crystal Ball</div>
+  <div class="option">Golden Crown</div>
+  <div class="option">Old Map</div>
+  <div class="option">Magic Potion</div>
+  <div class="option">Mechanical Wings</div>
+  <div class="option">Space Helmet</div>
+  <div class="option">Futuristic Weapon</div>
+  <div class="option">Broken Robot</div>
+  <div class="option">Alien Artifact</div>
+  <div class="option">Steampunk Goggles</div>
+  <div class="option">Hourglass</div>
+  <div class="option">Key to Secret Door</div>
+  <div class="option">Ancient Relic</div>
+  <div class="option">Feathered Quill</div>
+  <div class="option">Magic Amulet</div>
+  <div class="option">Spell Scroll</div>
+  <div class="option">Lost Compass</div>
+  <div class="option">Battle Shield</div>
+  <div class="option">Dragon Egg</div>
+  <div class="option">Pirate Flag</div>
+  <div class="option">Floating Crystal</div>
+  <div class="option">Vintage Camera</div>
+  <div class="option">Sacred Gemstone</div>
+  <div class="option">Frozen Rose</div>
+</div>
+
+<!-- 23. Yüz İfadesi Detayı (Gelişmiş ve Alt Başlıksız) -->
+<h2>Yüz İfadesi Detayı</h2>
+<div class="grid" data-category="expressiondetail">
+  <div class="option">Big Smile</div>
+  <div class="option">Subtle Smile</div>
+  <div class="option">Wide Open Eyes</div>
+  <div class="option">Narrowed Eyes</div>
+  <div class="option">Furrowed Brows</div>
+  <div class="option">Raised Eyebrows</div>
+  <div class="option">Teary Eyes</div>
+  <div class="option">Blushing Cheeks</div>
+  <div class="option">Open Mouth</div>
+  <div class="option">Closed Mouth</div>
+  <div class="option">Pursed Lips</div>
+  <div class="option">Laughing Expression</div>
+  <div class="option">Crying Expression</div>
+  <div class="option">Angry Scowl</div>
+  <div class="option">Shocked Expression</div>
+  <div class="option">Pouting Lips</div>
+  <div class="option">Smirking</div>
+  <div class="option">Determined Look</div>
+  <div class="option">Confused Expression</div>
+  <div class="option">Dreamy Eyes</div>
+  <div class="option">Terrified Look</div>
+  <div class="option">Serene Expression</div>
+  <div class="option">Mischievous Grin</div>
+  <div class="option">Sad Smile</div>
+</div>
+
+<!-- 24. Ses / Hareket İfadesi (Gelişmiş ve Alt Başlıksız) -->
+<h2>Ses / Hareket İfadesi</h2>
+<div class="grid" data-category="soundmotion">
+  <div class="option">Soft Wind Blowing</div>
+  <div class="option">Rustling Leaves</div>
+  <div class="option">Waves Crashing</div>
+  <div class="option">Birds Chirping</div>
+  <div class="option">Footsteps on Gravel</div>
+  <div class="option">Thunder Rumbling</div>
+  <div class="option">Rain Falling</div>
+  <div class="option">Fire Crackling</div>
+  <div class="option">Sword Clashing</div>
+  <div class="option">Horse Galloping</div>
+  <div class="option">City Traffic Noise</div>
+  <div class="option">Distant Echo</div>
+  <div class="option">Leaves Falling Gently</div>
+  <div class="option">Flags Fluttering in Wind</div>
+  <div class="option">Hair Flowing in Breeze</div>
+  <div class="option">Bird Flying Overhead</div>
+  <div class="option">Water Splashing</div>
+  <div class="option">Crowd Cheering</div>
+  <div class="option">Whispering Voices</div>
+  <div class="option">Door Creaking Open</div>
+  <div class="option">Heartbeat Sound</div>
+  <div class="option">Snow Falling Quietly</div>
+  <div class="option">Explosion in Distance</div>
+  <div class="option">Musical Instruments Playing</div>
+</div>
+
+<!-- 25. Çevre ile Etkileşim (Gelişmiş ve Alt Başlıksız) -->
+<h2>Çevre ile Etkileşim</h2>
+<div class="grid" data-category="environmentinteraction">
+  <div class="option">Walking Through Forest</div>
+  <div class="option">Touching Water Surface</div>
+  <div class="option">Sitting on Rock</div>
+  <div class="option">Leaning Against Tree</div>
+  <div class="option">Running Across Field</div>
+  <div class="option">Hiding Behind Wall</div>
+  <div class="option">Standing in Rain</div>
+  <div class="option">Floating on Water</div>
+  <div class="option">Climbing Mountain</div>
+  <div class="option">Flying Through Clouds</div>
+  <div class="option">Reaching for the Sky</div>
+  <div class="option">Kicking up Dust</div>
+  <div class="option">Opening a Door</div>
+  <div class="option">Crossing a Bridge</div>
+  <div class="option">Diving Underwater</div>
+  <div class="option">Sliding Down Hill</div>
+  <div class="option">Resting in Meadow</div>
+  <div class="option">Swinging from Tree</div>
+  <div class="option">Walking Through Mist</div>
+  <div class="option">Standing on Cliff Edge</div>
+  <div class="option">Interacting with Floating Objects</div>
+  <div class="option">Holding a Torch in Darkness</div>
+  <div class="option">Running Through Ruins</div>
+  <div class="option">Balancing on Narrow Ledge</div>
+  <div class="option">Exploring Ancient Temple</div>
+</div>
+
+<!-- 26. Katmanlama ve Derinlik Efekti (Gelişmiş ve Alt Başlıksız) -->
+<h2>Katmanlama ve Derinlik Efekti</h2>
+<div class="grid" data-category="layering">
+  <div class="option">Strong Foreground Element</div>
+  <div class="option">Blurred Background</div>
+  <div class="option">Midground Focus</div>
+  <div class="option">Depth with Overlapping Objects</div>
+  <div class="option">Foreground Silhouette</div>
+  <div class="option">Background Light Glow</div>
+  <div class="option">Layered Landscape</div>
+  <div class="option">Fog Between Layers</div>
+  <div class="option">Sunlight Filtering Through Layers</div>
+  <div class="option">Foreground Motion Blur</div>
+  <div class="option">Framing with Natural Elements</div>
+  <div class="option">Multiple Planes of Action</div>
+  <div class="option">Leading Lines Through Layers</div>
+  <div class="option">Depth from Size Scaling</div>
+  <div class="option">Shadows Creating Depth</div>
+  <div class="option">Atmospheric Perspective</div>
+  <div class="option">Light and Dark Contrast Layers</div>
+  <div class="option">Focus Shift Between Layers</div>
+  <div class="option">Soft Focus Background</div>
+  <div class="option">Foreground Light Particles</div>
+</div>
+
+<!-- 27. Animasyon Tarzı (Gelişmiş ve Alt Başlıksız) -->
+<h2>Animasyon Tarzı</h2>
+<div class="grid" data-category="animationstyle">
+  <div class="option">2D Traditional Animation</div>
+  <div class="option">2D Digital Animation</div>
+  <div class="option">3D CGI Animation</div>
+  <div class="option">Stop Motion Animation</div>
+  <div class="option">Claymation</div>
+  <div class="option">Anime Style Animation</div>
+  <div class="option">Pixar-style 3D Animation</div>
+  <div class="option">Disney Classic 2D Animation</div>
+  <div class="option">Minimalist Animation</div>
+  <div class="option">Chibi Animation Style</div>
+  <div class="option">Motion Graphics Animation</div>
+  <div class="option">Cut-out Animation</div>
+  <div class="option">Experimental Animation</div>
+  <div class="option">Rotoscope Animation</div>
+  <div class="option">Sketchy Frame Animation</div>
+  <div class="option">Watercolor Animation</div>
+  <div class="option">Ink and Brush Animation</div>
+  <div class="option">Low Frame Rate Animation</div>
+  <div class="option">High Frame Rate Smooth Animation</div>
+  <div class="option">Paper Cutout Style</div>
+  <div class="option">Fantasy Animation</div>
+  <div class="option">Sci-fi Animation Style</div>
+  <div class="option">Dark Gothic Animation</div>
+</div>
+
+
+
+
+
+
+
+  <!-- (Devam eden kategoriler burada olacak - kısa tutuyorum örnek olsun diye, kalan 23 kategori aynı formatta eklenecek) -->
+
+  <h2>Oluşan Prompt</h2>
+  <div id="prompt-output">Seçim yapıldıkça burada prompt oluşacak...</div>
+  <button onclick="copyPrompt()" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Prompt'u Kopyala</button><br>
+
+  <button onclick="clearSelections()" style="margin-top:20px; padding:10px 20px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor:pointer;">Temizle</button><br>
+
+
+
+  <script>
+    const selectedOptions = [];
+    
+    function updatePrompt() {
+      let promptParts = [];
+    
+      selectedOptions.forEach(sel => {
+        if (sel.category === 'style') promptParts.push(`Create a ${sel.text} style illustration`);
+        if (sel.category === 'composition') promptParts.push(`using a ${sel.text} composition`);
+        if (sel.category === 'atmosphere') promptParts.push(`with a ${sel.text} atmosphere`);
+        if (sel.category === 'location') promptParts.push(`set in a ${sel.text}`);
+        if (sel.category === 'character') promptParts.push(`featuring a ${sel.text}`);
+        if (sel.category === 'emotion') promptParts.push(`expressing ${sel.text} emotion`);
+        if (sel.category === 'clothing') promptParts.push(`wearing ${sel.text} clothing`);
+        if (sel.category === 'lighting') promptParts.push(`lit with ${sel.text}`);
+        if (sel.category === 'format') promptParts.push(`format ${sel.text}`);
+        if (sel.category === 'effect') promptParts.push(`with ${sel.text} effect`);
+        if (sel.category === 'season') promptParts.push(`during ${sel.text}`);
+        if (sel.category === 'technique') promptParts.push(`using ${sel.text} technique`);
+        if (sel.category === 'backgroundstyle') promptParts.push(`with a ${sel.text} background`);
+        if (sel.category === 'pose') promptParts.push(`posed as ${sel.text}`);
+        if (sel.category === 'lookdirection') promptParts.push(`looking ${sel.text}`);
+        if (sel.category === 'camera') promptParts.push(`shot with a ${sel.text}`);
+        if (sel.category === 'material') promptParts.push(`featuring ${sel.text} materials`);
+        if (sel.category === 'colorpalette') promptParts.push(`with a ${sel.text} color palette`);
+        if (sel.category === 'backgroundtheme') promptParts.push(`background theme: ${sel.text}`);
+        if (sel.category === 'artmovement') promptParts.push(`inspired by ${sel.text} art style`);
+        if (sel.category === 'storyelement') promptParts.push(`telling a story about ${sel.text}`);
+        if (sel.category === 'objects') promptParts.push(`including ${sel.text}`);
+        if (sel.category === 'expressiondetail') promptParts.push(`with ${sel.text} facial expressions`);
+        if (sel.category === 'soundmotion') promptParts.push(`illustrating ${sel.text}`);
+        if (sel.category === 'environmentinteraction') promptParts.push(`with ${sel.text} interaction`);
+        if (sel.category === 'layering') promptParts.push(`with detailed ${sel.text}`);
+        if (sel.category === 'animationstyle') promptParts.push(`designed for ${sel.text} animation`);
+      });
+    
+      document.getElementById('prompt-output').textContent = promptParts.join(', ') + (promptParts.length > 0 ? '.' : '');
+    }
+    
+    document.querySelectorAll('.grid').forEach(grid => {
+      grid.addEventListener('click', function(e) {
+        if (e.target.classList.contains('option')) {
+          const category = grid.getAttribute('data-category');
+          const text = e.target.textContent;
+    
+          // Eğer zaten seçiliyse: kaldır
+          const index = selectedOptions.findIndex(opt => opt.category === category && opt.text === text);
+          if (index > -1) {
+            selectedOptions.splice(index, 1); // kaldır
+            e.target.classList.remove('selected');
+          } else {
+            selectedOptions.push({ category, text }); // ekle
+            e.target.classList.add('selected');
+          }
+    
+          updatePrompt();
+        }
+      });
+    });
+    
+    // Clear (Temizle) Butonu Fonksiyonu
+    function clearSelections() {
+      selectedOptions.length = 0;
+      document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+      updatePrompt();
+    }
+
+    function copyPrompt() {
+  const promptText = document.getElementById('prompt-output').textContent;
+  
+  if (promptText.trim() !== '') {
+    navigator.clipboard.writeText(promptText)
+      .then(() => {
+        alert('Prompt başarıyla kopyalandı! 📋');
+      })
+      .catch(err => {
+        alert('Kopyalama başarısız oldu. Tarayıcı izin vermiyor olabilir.');
+      });
+  } else {
+    alert('Kopyalanacak bir prompt yok!');
+  }
+}
+
+    </script>
+    
+    
+</body>
+</html>
