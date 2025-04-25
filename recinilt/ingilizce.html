@@ -15,23 +15,26 @@
 <body>
 
     <h1>Kelime Okuyucu</h1>
-
+    <h3>2. ETAP:</h3>
     <button id="turkceIngilizceOku">1. ŞİMDİKİ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
     <button id="ingilizceTurkceOku">2. GEÇMİŞ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
     <button id="egzersizoku">EGZERSİZ CÜMLE KALIPLARI</button><br>
+    <button id="etap2fiilcekimleri">2. ETAP FİİL ÇEKİMLERİ VE ANLAMLARI</button>
 
     <div id="kelimeGoster"></div>
 
     <script src="ingilizcekaliplar.js"></script>
     <script src="ingilizcekaliplaregzersiz.js"></script>
     <script src="ingilizcekaliplargecmisz.js"></script>
+    <script src="ingilizce2etapfiilcekimleri.js"></script>
     <script>
         
-
+        
         const turkceIngilizceButton = document.getElementById('turkceIngilizceOku');
         const ingilizceTurkceButton = document.getElementById('ingilizceTurkceOku');
         const egzersizoku = document.getElementById('egzersizoku');
         const kelimeGoster = document.getElementById('kelimeGoster');
+        const etap2fiilcekimleri = document.getElementById('etap2fiilcekimleri');
 
         let currentUtterance;
         let i = 0;
@@ -49,6 +52,11 @@
         egzersizoku.addEventListener('click', () => {
             speechSynthesis.cancel(); 
             oku(turkceingilizce3, 'tr-TR');
+        });
+
+        etap2fiilcekimleri.addEventListener('click', () => {
+            speechSynthesis.cancel(); 
+            oku(ingilizceturkce2etapfiilcekimleri, 'en-EN');
         });
 
         // ... (önceki kodlar) ...
