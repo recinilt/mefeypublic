@@ -138,7 +138,7 @@ async function fetchData() {
 
                         const myInterval = interval === "1m" ? 1 : interval === "5m" ? 5 : interval === "15m" ? 15 : interval === "1h" ? 60 : interval === "4h" ? 240 : interval === "12h" ? 720 : 1440;
                         const link = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}&interval=${myInterval}`;
-                        validPairs.push(`${symbol}: %${change.toFixed(2)} consistent ${direction} | 24h Vol: ${volume24h} USDT | 1h Vol: ${volume1h} USDT <a href="${link}" target="_blank">View Chart</a>`);
+                        validPairs.push(`${symbol}: %${change.toFixed(2)} consistent ${direction} | 24h Vol: ${(volume24h/1000000).toFixed(2)} milyon USDT | 1h Vol: ${(volume1h/1000000).toFixed(2)} milyon USDT | 1h/24h: ${(volume1h/volume24h).toFixed(2)} <a href="${link}" target="_blank">View Chart</a>`);
                     }
                 }
             }
