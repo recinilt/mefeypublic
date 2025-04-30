@@ -39,6 +39,7 @@
       border-left-color: red;
       font-weight: bold;
       background: #ffeaea;
+      animation: blink 1s step-start 0s infinite;
     }
     .future {
       border-left-color: lightgray;
@@ -58,6 +59,9 @@
     #startBtn:hover {
       background: #0056b3;
     }
+    @keyframes blink {
+      50% { background: #fff0f0; }
+    }
   </style>
 </head>
 <body>
@@ -72,8 +76,8 @@
   const timeline = [
     { minute: 0,  text: "Token oluşturuldu" },
     { minute: 1,  text: "A cüzdanı ile ilk alım (0.30) (%30) Gate Web3’e düşme ihtimali başladı" },
-    { minute: 3,  text: "B cüzdanı alım (0.25 SOL) (%25)" },
-    { minute: 5,  text: "C cüzdanı alım (0.20 SOL) (%20)" },
+    { minute: 4,  text: "B cüzdanı alım (0.25 SOL) (%25)" },
+    { minute: 10, text: "C cüzdanı alım (0.20 SOL) (%20)" },
     { minute: 20, text: "A cüzdanı satış (%20)" },
     { minute: 35, text: "A cüzdanı satış (%30)" },
     { minute: 40, text: "B cüzdanı satış (%50)" },
