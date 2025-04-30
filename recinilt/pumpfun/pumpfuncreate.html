@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pump.fun Timeline</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f9f9f9;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      font-size: 5vw;
+    }
+    #timeline {
+      list-style: none;
+      padding: 0;
+      max-width: 90%;
+      margin: auto;
+    }
+    #timeline li {
+      padding: 10px;
+      border-left: 5px solid gray;
+      margin: 10px 0;
+      background: #fff;
+      font-size: 4vw;
+      transition: all 0.3s ease;
+    }
+    .past {
+      border-left-color: green;
+      color: gray;
+    }
+    .current {
+      border-left-color: red;
+      font-weight: bold;
+      background: #ffeaea;
+    }
+    .future {
+      border-left-color: lightgray;
+      color: black;
+    }
+    #startBtn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 5vw;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    #startBtn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Pump.fun Token Aksiyon Takvimi</h1>
+<button id="startBtn">Token Yaratıldıysa Başlat</button>
+<ul id="timeline"></ul>
+
+<audio id="alarm" src="alarm.wav" preload="auto"></audio>
+
+<script>
+  const timeline = [
+    { minute: 0,  text: "Token oluşturuldu" },
+    { minute: 1,  text: "A cüzdanı ile ilk alım (0.30) (%30) Gate Web3’e düşme ihtimali başladı" },
+    { minute: 3,  text: "B cüzdanı alım (0.25 SOL) (%25)" },
+    { minute: 5,  text: "C cüzdanı alım (0.20 SOL) (%20)" },
+    { minute: 20, text: "A cüzdanı satış (%20)" },
+    { minute: 35, text: "A cüzdanı satış (%30)" },
+    { minute: 40, text: "B cüzdanı satış (%50)" },
+    { minute: 50, text: "A cüzdanı satış (%50)" },
+    { minute: 60, text: "B cüzdanı satış (%50)" },
+    { minute: 70, text: "C cüzdanı satış (%100)" }
+  ];
+
+  const list = document.getElementById("timeline");
+  const alarm = document.getElementById("alarm");
+  let timer = null;
+  let elapsed = 0;
+
+  function renderTimeline() {
+    list.innerHTML = "";
+    timeline.forEach((item, i) => {
+      const li = document.createElement("li");
+      li.textContent = `${item.minute}. dakika – ${item.text}`;
+      if (elapsed > item.minute) li.className = "past";
+      else if (elapsed === item.minute) li.className = "current";
+      else li.className = "future";
+      list.appendChild(li);
+    });
+  }
+
+  function startTimeline() {
+    renderTimeline();
+    timer = setInterval(() => {
+      elapsed++;
+      renderTimeline();
+      if (timeline.find(t => t.minute === elapsed)) alarm.play();
+      if (elapsed > timeline[timeline.length - 1].minute) clearInterval(timer);
+    }, 60000);
+  }
+
+  document.getElementById("startBtn").addEventListener("click", () => {
+    elapsed = 0;
+    startTimeline();
+  });
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(function(registration) {
+          console.log('ServiceWorker registered with scope:', registration.scope);
+        }, function(err) {
+          console.log('ServiceWorker registration failed:', err);
+        });
+    });
+  }
+</script>
+
+</body>
+</html>
