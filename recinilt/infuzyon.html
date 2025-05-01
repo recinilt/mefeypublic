@@ -2,66 +2,93 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>İnfüzyon Hızı Hesaplayıcı</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
       background: #f8f8f8;
+      margin: 0;
+    }
+    .container {
       max-width: 700px;
       margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    label, input, select {
-      display: block;
-      margin: 10px 0 5px;
+    h1, h3 {
+      text-align: center;
+    }
+    label {
+      margin-top: 15px;
+      font-weight: bold;
     }
     input, select {
-      padding: 6px;
+      padding: 10px;
       width: 100%;
       font-size: 16px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     .result {
-      background: #fff;
+      background: #f0f0f0;
       padding: 15px;
       margin-top: 25px;
       border-radius: 6px;
-      box-shadow: 0 0 5px #bbb;
+      font-size: 16px;
     }
-    h2 {
-      margin-top: 30px;
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 22px;
+      }
+      h3 {
+        font-size: 16px;
+      }
+      .result {
+        font-size: 15px;
+      }
     }
   </style>
 </head>
 <body>
 
-<h1>İnfüzyon Doz ve Hız Hesaplayıcı</h1>
-<h3>(Adrenalin için örnek olarak doldurulmuştur.)</h3>
+<div class="container">
+  <h1>İnfüzyon Doz ve Hız Hesaplayıcı</h1>
+  <h3>(Adrenalin için örnek olarak doldurulmuştur.)</h3>
 
-<label>Hastanın Kilosu (kg):</label>
-<input type="number" id="weight" value="70" min="1" step="0.1">
+  <label>Hastanın Kilosu (kg):</label>
+  <input type="number" id="weight" value="70" min="1" step="0.1">
 
-<label>Doz (µg/kg/dk):</label>
-<input type="number" id="dose" value="0.5" min="0.01" step="0.01">
+  <label>Doz (µg/kg/dk):</label>
+  <input type="number" id="dose" value="0.5" min="0.01" step="0.01">
 
-<label>Toplam İlaç Miktarı (mg):</label>
-<input type="number" id="drugMg" value="1" min="0.01" step="0.1">
+  <label>Toplam İlaç Miktarı (mg):</label>
+  <input type="number" id="drugMg" value="1" min="0.01" step="0.1">
 
-<label>Toplam İlaç Hacmi (ml) (örneğin: 3 ml ampul):</label>
-<input type="number" id="drugVolume" value="1" min="0.1" step="0.1">
+  <label>Toplam İlaç Hacmi (ml) (örneğin: 3 ml ampul):</label>
+  <input type="number" id="drugVolume" value="1" min="0.1" step="0.1">
 
-<label>Seyreltildiği Serum Hacmi (ml):</label>
-<input type="number" id="dilutionVolume" value="100" min="1" step="1">
+  <label>Seyreltildiği Serum Hacmi (ml):</label>
+  <input type="number" id="dilutionVolume" value="100" min="1" step="1">
 
-<label>Set Tipi (damla/ml):</label>
-<select id="dropFactor">
-  <option value="20">20 (Standart set)</option>
-  <option value="15">15</option>
-  <option value="60">60 (Mikroset)</option>
-</select>
+  <label>Set Tipi (damla/ml):</label>
+  <select id="dropFactor">
+    <option value="20">20 (Standart set)</option>
+    <option value="15">15</option>
+    <option value="60">60 (Mikroset)</option>
+  </select>
 
-<div class="result">
-  <h2>Hesaplama Sonuçları</h2>
-  <div id="results"></div>
+  <div class="result">
+    <h2>Hesaplama Sonuçları</h2>
+    <div id="results"></div>
+  </div>
 </div>
 
 <script>
