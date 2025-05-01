@@ -90,23 +90,12 @@
   const alarm = document.getElementById("alarm");
   let timer = null;
   let elapsed = 0;
-  let startTime = null;
-
-  function formatTime(date) {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  }
 
   function renderTimeline() {
     list.innerHTML = "";
-    const now = new Date();
     timeline.forEach((item, i) => {
       const li = document.createElement("li");
-      let triggerTime = "";
-      if (startTime) {
-        const eventTime = new Date(startTime.getTime() + item.minute * 60000);
-        triggerTime = ` → (${formatTime(eventTime)})`;
-      }
-      li.textContent = `${item.minute}. dakika – ${item.text}${triggerTime}`;
+      li.textContent = `${item.minute}. dakika – ${item.text}`;
       if (elapsed > item.minute) li.className = "past";
       else if (elapsed === item.minute) li.className = "current";
       else li.className = "future";
@@ -115,7 +104,6 @@
   }
 
   function startTimeline() {
-    startTime = new Date();
     renderTimeline();
     timer = setInterval(() => {
       elapsed++;
