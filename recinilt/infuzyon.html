@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>İnfüzyon Hızı Hesaplayıcı</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f8f8f8;
+      max-width: 700px;
+      margin: auto;
+    }
+    label, input, select {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input, select {
+      padding: 6px;
+      width: 100%;
+      font-size: 16px;
+    }
+    .result {
+      background: #fff;
+      padding: 15px;
+      margin-top: 25px;
+      border-radius: 6px;
+      box-shadow: 0 0 5px #bbb;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>İnfüzyon Doz ve Hız Hesaplayıcı</h1>
+<h3>(Adrenalin için örnek olarak doldurulmuştur.)</h3>
+
+<label>Hastanın Kilosu (kg):</label>
+<input type="number" id="weight" value="70" min="1" step="0.1">
+
+<label>Doz (µg/kg/dk):</label>
+<input type="number" id="dose" value="0.5" min="0.01" step="0.01">
+
+<label>Toplam İlaç Miktarı (mg):</label>
+<input type="number" id="drugMg" value="1" min="0.01" step="0.1">
+
+<label>Toplam İlaç Hacmi (ml) (örneğin: 3 ml ampul):</label>
+<input type="number" id="drugVolume" value="1" min="0.1" step="0.1">
+
+<label>Seyreltildiği Serum Hacmi (ml):</label>
+<input type="number" id="dilutionVolume" value="100" min="1" step="1">
+
+<label>Set Tipi (damla/ml):</label>
+<select id="dropFactor">
+  <option value="20">20 (Standart set)</option>
+  <option value="15">15</option>
+  <option value="60">60 (Mikroset)</option>
+</select>
+
+<div class="result">
+  <h2>Hesaplama Sonuçları</h2>
+  <div id="results"></div>
+</div>
+
+<script>
+function calculate() {
+  const weight = parseFloat(document.getElementById('weight').value);
+  const dose = parseFloat(document.getElementById('dose').value);
+  const drugMg = parseFloat(document.getElementById('drugMg').value);
+  const drugVolume = parseFloat(document.getElementById('drugVolume').value);
+  const dilutionVolume = parseFloat(document.getElementById('dilutionVolume').value);
+  const dropFactor = parseFloat(document.getElementById('dropFactor').value);
+
+  if (isNaN(weight) || isNaN(dose) || isNaN(drugMg) || isNaN(drugVolume) || isNaN(dilutionVolume)) return;
+
+  const totalVolume = dilutionVolume + drugVolume;
+  const totalMicrogram = drugMg * 1000; // mg → µg
+  const concentration = totalMicrogram / totalVolume; // µg/ml
+
+  const totalDosePerMin = weight * dose; // µg/dk
+  const mlPerMin = totalDosePerMin / concentration;
+  const mlPerHour = mlPerMin * 60;
+  const dropsPerMin = mlPerMin * dropFactor;
+
+  document.getElementById('results').innerHTML = `
+    <strong>İlaç Konsantrasyonu:</strong> ${concentration.toFixed(2)} µg/ml<br>
+    <strong>Hedef Doz:</strong> ${dose} µg/kg/dk<br>
+    <strong>Toplam Gerekli Doz:</strong> ${totalDosePerMin.toFixed(2)} µg/dk<br>
+    <strong>İnfüzyon Hızı:</strong> ${mlPerMin.toFixed(2)} ml/dk<br>
+    <strong>İnfüzyon Pompası Ayarı:</strong> ${mlPerHour.toFixed(1)} ml/saat<br>
+    <strong>Serum Seti Damla Hızı:</strong> ${dropsPerMin.toFixed(0)} damla/dk (${dropFactor} gtt/ml)
+  `;
+}
+
+document.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('input', calculate);
+});
+
+calculate();
+</script>
+
+</body>
+</html>
