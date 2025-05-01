@@ -62,6 +62,7 @@
 <div class="container">
   <h1>İnfüzyon Doz ve Hız Hesaplayıcı</h1>
   <h3>(Adrenalin için örnek olarak doldurulmuştur, değiştirebilirsiniz.)</h3>
+  <h3>(1 mg = 1000 µg)</h3>
 
   <label>Hastanın Kilosu (kg):</label>
   <input type="number" id="weight" value="70" min="1" step="0.1">
@@ -118,7 +119,7 @@ function calculate() {
     <strong>İlaç Konsantrasyonu:</strong> ${concentration.toFixed(2)} µg/ml<br>
     <strong>Hedef Doz:</strong> ${dose} µg/kg/dk<br>
     <strong>Toplam Gerekli Doz:</strong> ${totalDosePerMin.toFixed(2)} µg/dk<br>
-    <strong>İnfüzyon Hızı:</strong> ${mlPerMin.toFixed(2)} ml/dk<br>
+    <strong>İnfüzyon Hızı:</strong> ${mlPerMin.toFixed(2)} ml/dk | ${(mlPerMin*concentration).toFixed(2)} µg/dk<br>
     <strong>İnfüzyon Pompası Ayarı:</strong> ${mlPerHour.toFixed(1)} ml/saat<br>
     <strong>Serum Seti Damla Hızı:</strong> ${dropsPerMin.toFixed(0)} damla/dk (${dropFactor} gtt/ml)
   `;
