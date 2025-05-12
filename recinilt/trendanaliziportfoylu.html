@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trend Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #1e40af;
+            --background: #111827;
+            --text: #f3f4f6;
+            --card: #1f2937;
+            --border: #374151;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            background-color: var(--background);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .result-block {
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+        }
+
+        .result-block h2 {
+            margin: 0 0 0.75rem 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .result-item {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .result-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .view-chart {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .view-chart:hover {
+            color: var(--secondary);
+        }
+
+        #loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-up {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .badge-down {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .summary {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .portfolio-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .portfolio-stat {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .portfolio-stat-label {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+        }
+
+        .portfolio-stat-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .position {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .position.long {
+            border-left-color: var(--success);
+        }
+
+        .position.short {
+            border-left-color: var(--danger);
+        }
+
+        .position-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .position-title {
+            font-weight: 600;
+            font-size: 1.125rem;
+        }
+
+        .position-pnl {
+            font-weight: 600;
+        }
+
+        .position-pnl.positive {
+            color: var(--success);
+        }
+
+        .position-pnl.negative {
+            color: var(--danger);
+        }
+
+        .position-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .position-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .position-detail-label {
+            color: #9ca3af;
+            margin-bottom: 0.25rem;
+        }
+
+        .position-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .position-actions button {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+
+        .chart-container {
+            height: 200px;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (min-width: 640px) {
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 639px) {
+            .card {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .accordion {
+            cursor: pointer;
+            padding: 1rem;
+            width: 100%;
+            text-align: left;
+            border: none;
+            outline: none;
+            transition: 0.4s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card);
+            color: var(--text);
+            font-weight: 600;
+            border-radius: 0.375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .panel {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.2s ease-out;
+            background-color: var(--card);
+            margin-bottom: 1rem;
+        }
+
+        .accordion:after {
+            content: '\02795';
+            font-size: 13px;
+            color: var(--text);
+            float: right;
+            margin-left: 5px;
+        }
+
+        .active:after {
+            content: "\2796";
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            border-bottom: 1px dotted var(--text);
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--background);
+            color: var(--text);
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 1px solid var(--border);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Crypto Trend Analyzer</h1>
+            <p>(Veri çekimi ve işlenmesi zaman alabilir. Otomatik yenileme mevcuttur. Piyasa değerine göre ilk 100 coine bakar.)</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="analyzer">Trend Analyzer</div>
+            <div class="tab" data-tab="portfolio">Portfolio Simulation</div>
+            <div class="tab" data-tab="settings">Settings</div>
+        </div>
+        
+        <div id="analyzer" class="tab-content active">
+            <div class="card">
+                <form id="analyzer-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="direction" class="form-label">Direction:</label>
+                            <select id="direction" name="direction" class="form-select">
+                                <option value="up" selected>Yükseliş</option>
+                                <option value="down">Düşüş</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="interval" class="form-label">Zaman Dilimi:</label>
+                            <select id="interval" name="interval" class="form-select">
+                                <option value="1m">1m</option>
+                                <option value="5m" selected>5m</option>
+                                <option value="15m">15m</option>
+                                <option value="1h">1h</option>
+                                <option value="4h">4h</option>
+                                <option value="12h">12h</option>
+                                <option value="1d">1d</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="periods" class="form-label">Periyot Sayısı:</label>
+                            <input type="number" id="periods" name="periods" value="2" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="percentChange" class="form-label">Minimum Yüzde Değişimi:</label>
+                            <input type="number" id="percentChange" name="percentChange" value="1" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="summary" id="myozet">X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.</div>
+                    
+                    <button id="mybutton" type="button" onclick="fetchData()" class="btn btn-primary">Analyze Trends</button>
+                </form>
+                
+                <div id="loader"></div>
+            </div>
+            
+            <div id="results"></div>
+        </div>
+        
+        <div id="portfolio" class="tab-content">
+            <div class="card">
+                <div class="portfolio-summary">
+                    <div class="portfolio-stat">
+                        <div class="portfolio-stat-label">Balance</div>
+                        <div class="portfolio-stat-value" id="balance">0 USDT</div>
+                    </div>
+                    <div class="portfolio-stat">
+                        <div class="portfolio-stat-label">PnL</div>
+                        <div class="portfolio-stat-value" id="total-pnl">0 USDT</div>
+                    </div>
+                    <div class="portfolio-stat">
+                        <div class="portfolio-stat-label">ROI</div>
+                        <div class="portfolio-stat-value" id="roi">0%</div>
+                    </div>
+                    <div class="portfolio-stat">
+                        <div class="portfolio-stat-label">Win Rate</div>
+                        <div class="portfolio-stat-value" id="win-rate">0%</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="balance-chart"></canvas>
+                </div>
+                
+                <button class="accordion">Open Positions</button>
+                <div class="panel">
+                    <div id="open-positions" class="mt-4">
+                        <div class="text-center p-4 text-gray-400">No open positions</div>
+                    </div>
+                </div>
+                
+                <button class="accordion">Closed Positions</button>
+                <div class="panel">
+                    <div id="closed-positions" class="mt-4">
+                        <div class="text-center p-4 text-gray-400">No closed positions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="settings" class="tab-content">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4">Portfolio Settings</h2>
+                <form id="settings-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="initialCapital" class="form-label">
+                                Initial Capital
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Starting amount for your simulated portfolio</span>
+                                </span>
+                            </label>
+                            <input type="number" id="initialCapital" name="initialCapital" value="1000" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="riskPerTrade" class="form-label">
+                                Risk Per Trade (%)
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Percentage of portfolio risked on each trade</span>
+                                </span>
+                            </label>
+                            <input type="number" id="riskPerTrade" name="riskPerTrade" value="2" min="0.1" max="100" step="0.1" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="leverage" class="form-label">
+                                Leverage
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Trading leverage (1x to 20x)</span>
+                                </span>
+                            </label>
+                            <select id="leverage" name="leverage" class="form-select">
+                                <option value="1">1x</option>
+                                <option value="2">2x</option>
+                                <option value="3">3x</option>
+                                <option value="5" selected>5x</option>
+                                <option value="10">10x</option>
+                                <option value="20">20x</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="fee" class="form-label">
+                                Trading Fee (%)
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Fee charged per trade (entry and exit)</span>
+                                </span>
+                            </label>
+                            <input type="number" id="fee" name="fee" value="0.04" min="0" max="1" step="0.01" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="stopLoss" class="form-label">
+                                Stop Loss (%)
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Percentage loss at which to close position</span>
+                                </span>
+                            </label>
+                            <input type="number" id="stopLoss" name="stopLoss" value="5" min="0.1" max="100" step="0.1" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="takeProfit" class="form-label">
+                                Take Profit (%)
+                                <span class="tooltip">?
+                                    <span class="tooltiptext">Percentage gain at which to close position</span>
+                                </span>
+                            </label>
+                            <input type="number" id="takeProfit" name="takeProfit" value="10" min="0.1" max="1000" step="0.1" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <label for="autoTrade" class="flex items-center">
+                            <input type="checkbox" id="autoTrade" name="autoTrade" checked class="mr-2">
+                            <span>Enable Auto-Trading on Signals</span>
+                            <span class="tooltip ml-2">?
+                                <span class="tooltiptext">Automatically open positions when signals are detected</span>
+                            </span>
+                        </label>
+                    </div>
+                    
+                    <button type="button" onclick="saveSettings()" class="btn btn-primary mt-4">Save Settings</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Global variables
+    let timeoutHandle; // Timer holder
+    let portfolio = {
+        initialCapital: 1000,
+        balance: 1000,
+        openPositions: [],
+        closedPositions: [],
+        settings: {
+            riskPerTrade: 2, // % of balance to risk per trade
+            leverage: 5,
+            fee: 0.04, // % trading fee
+            stopLoss: 5, // % loss at which to close position
+            takeProfit: 10, // % gain at which to close position
+            autoTrade: true
+        },
+        stats: {
+            totalPnl: 0,
+            roi: 0,
+            totalTrades: 0,
+            winningTrades: 0,
+            winRate: 0,
+            maxDrawdown: 0
+        },
+        balanceHistory: []
+    };
+    
+    // Initialize balance chart
+    let balanceChart;
+    
+    // Initialize tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load portfolio from localStorage if available
+        loadPortfolio();
+        
+        // Setup balance chart
+        setupBalanceChart();
+        
+        // Setup accordion
+        const accordions = document.getElementsByClassName("accordion");
+        for (let i = 0; i < accordions.length; i++) {
+            accordions[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const panel = this.nextElementSibling;
+                if (panel.style.maxHeight) {
+                    panel.style.maxHeight = null;
+                } else {
+                    panel.style.maxHeight = panel.scrollHeight + "px";
+                }
+            });
+        }
+        
+        // Setup tabs
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Set active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Show active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+                
+                // Update UI for the active tab
+                if (tabId === 'portfolio') {
+                    updatePortfolioUI();
+                }
+            });
+        });
+        
+        // Populate settings form with current values
+        document.getElementById('initialCapital').value = portfolio.initialCapital;
+        document.getElementById('riskPerTrade').value = portfolio.settings.riskPerTrade;
+        document.getElementById('leverage').value = portfolio.settings.leverage;
+        document.getElementById('fee').value = portfolio.settings.fee;
+        document.getElementById('stopLoss').value = portfolio.settings.stopLoss;
+        document.getElementById('takeProfit').value = portfolio.settings.takeProfit;
+        document.getElementById('autoTrade').checked = portfolio.settings.autoTrade;
+    });
+    
+    function setupBalanceChart() {
+        const ctx = document.getElementById('balance-chart').getContext('2d');
+        balanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: portfolio.balanceHistory.map((_, index) => index),
+                datasets: [{
+                    label: 'Balance',
+                    data: portfolio.balanceHistory,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#9ca3af'
+                        }
+                    },
+                    x: {
+                        display: false
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    function updateBalanceChart() {
+        balanceChart.data.labels = portfolio.balanceHistory.map((_, index) => index);
+        balanceChart.data.datasets[0].data = portfolio.balanceHistory;
+        balanceChart.update();
+    }
+    
+    function saveSettings() {
+        // Update portfolio settings
+        portfolio.initialCapital = parseFloat(document.getElementById('initialCapital').value);
+        portfolio.settings.riskPerTrade = parseFloat(document.getElementById('riskPerTrade').value);
+        portfolio.settings.leverage = parseInt(document.getElementById('leverage').value);
+        portfolio.settings.fee = parseFloat(document.getElementById('fee').value);
+        portfolio.settings.stopLoss = parseFloat(document.getElementById('stopLoss').value);
+        portfolio.settings.takeProfit = parseFloat(document.getElementById('takeProfit').value);
+        portfolio.settings.autoTrade = document.getElementById('autoTrade').checked;
+        
+        // If balance is still at default, update it with the new initial capital
+        if (portfolio.balance === portfolio.initialCapital && portfolio.openPositions.length === 0 && portfolio.closedPositions.length === 0) {
+            portfolio.balance = portfolio.initialCapital;
+            
+            // Reset balance history
+            portfolio.balanceHistory = [portfolio.initialCapital];
+            updateBalanceChart();
+        }
+        
+        // Save to localStorage
+        savePortfolio();
+        
+        // Update UI
+        updatePortfolioUI();
+        
+        // Show confirmation
+        alert('Settings saved successfully!');
+    }
+    
+    function savePortfolio() {
+        localStorage.setItem('cryptoPortfolio', JSON.stringify(portfolio));
+    }
+    
+    function loadPortfolio() {
+        const savedPortfolio = localStorage.getItem('cryptoPortfolio');
+        if (savedPortfolio) {
+            portfolio = JSON.parse(savedPortfolio);
+            
+            // Ensure balanceHistory exists (for backwards compatibility)
+            if (!portfolio.balanceHistory) {
+                portfolio.balanceHistory = [portfolio.balance];
+            }
+        } else {
+            // Initialize with default values
+            portfolio.balanceHistory = [portfolio.initialCapital];
+        }
+    }
+    
+    function updatePortfolioUI() {
+        // Update summary stats
+        document.getElementById('balance').textContent = `${portfolio.balance.toFixed(2)} USDT`;
+        document.getElementById('total-pnl').textContent = `${portfolio.stats.totalPnl.toFixed(2)} USDT`;
+        document.getElementById('roi').textContent = `${portfolio.stats.roi.toFixed(2)}%`;
+        document.getElementById('win-rate').textContent = `${portfolio.stats.winRate.toFixed(2)}%`;
+        
+        // Update color for PnL
+        const pnlElement = document.getElementById('total-pnl');
+        if (portfolio.stats.totalPnl > 0) {
+            pnlElement.style.color = 'var(--success)';
+        } else if (portfolio.stats.totalPnl < 0) {
+            pnlElement.style.color = 'var(--danger)';
+        } else {
+            pnlElement.style.color = '';
+        }
+        
+        // Update open positions
+        const openPositionsContainer = document.getElementById('open-positions');
+        if (portfolio.openPositions.length > 0) {
+            let html = '';
+            for (const position of portfolio.openPositions) {
+                const pnlClass = position.unrealizedPnl >= 0 ? 'positive' : 'negative';
+                const positionType = position.direction === 'up' ? 'long' : 'short';
+                
+                html += `
+                    <div class="position ${positionType}">
+                        <div class="position-header">
+                            <div class="position-title">${position.symbol}</div>
+                            <div class="position-pnl ${pnlClass}">${position.unrealizedPnl >= 0 ? '+' : ''}${position.unrealizedPnl.toFixed(2)} USDT (${position.unrealizedPnlPercentage.toFixed(2)}%)</div>
+                        </div>
+                        <div class="position-details">
+                            <div class="position-detail">
+                                <span class="position-detail-label">Entry Price</span>
+                                <span>${position.entryPrice.toFixed(4)}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Current Price</span>
+                                <span>${position.currentPrice?.toFixed(4) || 'Loading...'}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Size</span>
+                                <span>${position.size.toFixed(2)} USDT</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Leverage</span>
+                                <span>${position.leverage}x</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Stop Loss</span>
+                                <span>${position.stopLossPrice?.toFixed(4) || 'None'}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Take Profit</span>
+                                <span>${position.takeProfitPrice?.toFixed(4) || 'None'}</span>
+                            </div>
+                        </div>
+                        <div class="position-actions">
+                            <button onclick="closePosition('${position.id}')" class="btn btn-danger">Close Position</button>
+                        </div>
+                    </div>
+                `;
+            }
+            openPositionsContainer.innerHTML = html;
+        } else {
+            openPositionsContainer.innerHTML = '<div class="text-center p-4 text-gray-400">No open positions</div>';
+        }
+        
+        // Update closed positions
+        const closedPositionsContainer = document.getElementById('closed-positions');
+        if (portfolio.closedPositions.length > 0) {
+            let html = '';
+            // Reverse to show newest first
+            for (const position of [...portfolio.closedPositions].reverse()) {
+                const pnlClass = position.realizedPnl >= 0 ? 'positive' : 'negative';
+                const positionType = position.direction === 'up' ? 'long' : 'short';
+                
+                html += `
+                    <div class="position ${positionType}">
+                        <div class="position-header">
+                            <div class="position-title">${position.symbol}</div>
+                            <div class="position-pnl ${pnlClass}">${position.realizedPnl >= 0 ? '+' : ''}${position.realizedPnl.toFixed(2)} USDT (${position.realizedPnlPercentage.toFixed(2)}%)</div>
+                        </div>
+                        <div class="position-details">
+                            <div class="position-detail">
+                                <span class="position-detail-label">Entry Price</span>
+                                <span>${position.entryPrice.toFixed(4)}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Exit Price</span>
+                                <span>${position.exitPrice.toFixed(4)}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Size</span>
+                                <span>${position.size.toFixed(2)} USDT</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Leverage</span>
+                                <span>${position.leverage}x</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Duration</span>
+                                <span>${position.duration}</span>
+                            </div>
+                            <div class="position-detail">
+                                <span class="position-detail-label">Close Reason</span>
+                                <span>${position.closeReason}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            closedPositionsContainer.innerHTML = html;
+        } else {
+            closedPositionsContainer.innerHTML = '<div class="text-center p-4 text-gray-400">No closed positions</div>';
+        }
+        
+        // Update balance chart
+        updateBalanceChart();
+    }
+    
+    async function fetchData() {
+        clearTimeout(timeoutHandle); // Cancel existing timer
+        const loader = document.getElementById('loader');
+        const resultsDiv = document.getElementById('results');
+        loader.style.display = 'block';
+        document.getElementById("mybutton").disabled = true;
+        
+        const direction = document.getElementById('direction').value;
+        const interval = document.getElementById('interval').value;
+        const periods = parseInt(document.getElementById('periods').value);
+        const percentChange = parseFloat(document.getElementById('percentChange').value);
+        document.getElementById("myozet").innerText = `${interval} zaman dilimindeki son ${periods} periyod sürekli ${direction} eğiliminde ise ve son periyod ile ilk periyod arasında yüzde ${percentChange} değişim var ise listelenir.`;
+        var sonucverdimi = true;
+
+        try {
+            // Check open positions first
+            await checkOpenPositions();
+            
+            // Only futures symbols are fetched
+            const futuresResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+            let futuresSymbols = futuresResponse.data.symbols
+                .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+                .map(s => s.symbol);
+
+            // First 100 symbols
+            let validSymbols = futuresSymbols.slice(0, 100);
+
+            let validPairs = []; // Send one by one
+            for (let i = 0; i < validSymbols.length; i += 1) {
+                const batch = validSymbols.slice(i, i + 1);
+                const requests = batch.map(symbol => axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${periods}`));
+                const responses = await Promise.all(requests.map(p => p.catch(e => e)));
+
+                for (let index = 0; index < responses.length; index++) {
+                    const response = responses[index];
+                    if (response instanceof Error) continue;
+                    const data = response.data;
+                    if (data.length < periods) continue;
+
+                    const closes = data.map(k => parseFloat(k[4]));
+
+                    let consistentTrend = true;
+                    for (let j = 1; j < closes.length; j++) {
+                        if ((direction === 'up' && closes[j] <= closes[j - 1]) ||
+                            (direction === 'down' && closes[j] >= closes[j - 1])) {
+                            consistentTrend = false;
+                            break;
+                        }
+                    }
+
+                    if (consistentTrend) {
+                        const firstClose = closes[0];
+                        const lastClose = closes[closes.length - 1];
+                        let change = 0;
+                        if (direction === 'up') {
+                            change = ((lastClose - firstClose) / firstClose) * 100;
+                        } else if (direction === 'down') {
+                            change = (Math.abs(lastClose - firstClose) / lastClose) * 100;
+                        }
+
+                        if (change >= percentChange) {
+                            const symbol = batch[index];
+
+                            // Now we can safely use await:
+                            const tickerResponse = await axios.get(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
+                            const volume24h = parseFloat(tickerResponse.data.quoteVolume).toFixed(2);
+
+                            const kline1hResponse = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1h&limit=1`);
+                            const volume1h = parseFloat(kline1hResponse.data[0][7]).toFixed(2);
+
+                            const myInterval = interval === "1m" ? 1 : interval === "5m" ? 5 : interval === "15m" ? 15 : interval === "1h" ? 60 : interval === "4h" ? 240 : interval === "12h" ? 720 : 1440;
+                            const link = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}&interval=${myInterval}`;
+                            
+                            validPairs.push({
+                                symbol: symbol,
+                                change: change.toFixed(2),
+                                direction: direction,
+                                volume24h: (volume24h/1000000).toFixed(2),
+                                volume1h: (volume1h/1000000).toFixed(2),
+                                ratio: (volume1h/volume24h).toFixed(2),
+                                link: link,
+                                currentPrice: lastClose
+                            });
+                            
+                            // Auto-trading: Open a position if auto-trade is enabled and we don't have a position for this symbol
+                            if (portfolio.settings.autoTrade && !hasOpenPosition(symbol)) {
+                                openPosition(symbol, direction, lastClose);
+                            }
+                        }
+                    }
+                }
+
+                // Small delay to avoid API rate limits
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            loader.style.display = 'none';
+
+            const timestamp = new Date().toLocaleString();
+            let resultHTML = `<div class="result-block"><h2>${timestamp}</h2>`;
+            
+            if (validPairs.length > 0) {
+                validPairs.forEach(pair => {
+                    const directionClass = pair.direction === 'up' ? 'badge-up' : 'badge-down';
+                    const hasPosition = hasOpenPosition(pair.symbol);
+                    resultHTML += `
+                        <div class="result-item">
+                            <div class="flex flex-wrap items-center justify-between">
+                                <div>
+                                    <strong>${pair.symbol}</strong>
+                                    <span class="badge ${directionClass}">%${pair.change} ${pair.direction === 'up' ? '↑' : '↓'}</span>
+                                    ${hasPosition ? '<span class="badge" style="background-color: var(--warning);">Position Open</span>' : ''}
+                                </div>
+                                <div>
+                                    ${!hasPosition && portfolio.settings.autoTrade ? 
+                                        `<button onclick="openPosition('${pair.symbol}', '${pair.direction}', ${pair.currentPrice})" class="view-chart mr-2" style="color: var(--success);">Open Position</button>` : 
+                                        ''}
+                                    <a href="${pair.link}" target="_blank" class="view-chart">View Chart</a>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-sm">
+                                24h Vol: ${pair.volume24h} million USDT | 1h Vol: ${pair.volume1h} million USDT | 1h/24h: ${pair.ratio}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                const audio = new Audio('alarm.wav');
+                audio.play();
+                sonucverdimi = true;
+            } else {
+                resultHTML += '<div class="p-4 text-center">No matching results found.</div>';
+                const audio = new Audio('brr.wav');
+                audio.play();
+                sonucverdimi = false;
+            }
+            
+            document.getElementById("mybutton").disabled = false;
+            document.getElementById("myozet").innerText = `X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.`;
+            resultHTML += '</div>';
+
+            // Add new results at the top
+            resultsDiv.insertAdjacentHTML('afterbegin', resultHTML);
+
+        } catch (error) {
+            console.error('API Error:', error);
+            loader.style.display = 'none';
+            const timestamp = new Date().toLocaleString();
+            let errorHTML = `<div class="result-block"><h2>${timestamp}</h2><div class="p-4 text-center text-red-500">API error. Please try again later.</div></div>`;
+            resultsDiv.insertAdjacentHTML('afterbegin', errorHTML);
+        }
+
+        // Run again after some time
+        timeoutHandle = setTimeout(fetchData, sonucverdimi ? 20000 : 10000);
+    }
+    
+    // Function to check if there's an open position for a symbol
+    function hasOpenPosition(symbol) {
+        return portfolio.openPositions.some(position => position.symbol === symbol);
+    }
+    
+    // Function to open a new position
+    function openPosition(symbol, direction, currentPrice) {
+        // Calculate position size based on risk
+        const riskAmount = portfolio.balance * (portfolio.settings.riskPerTrade / 100);
+        const leverage = portfolio.settings.leverage;
+        const positionSize = riskAmount * leverage;
+        
+        // Check if we have enough balance
+        if (positionSize > portfolio.balance) {
+            alert(`Not enough balance to open position with ${leverage}x leverage. Maximum size: ${portfolio.balance} USDT`);
+            return;
+        }
+        
+        // Calculate fees
+        const entryFee = positionSize * (portfolio.settings.fee / 100);
+        
+        // Calculate stop loss and take profit prices
+        let stopLossPrice, takeProfitPrice;
+        if (direction === 'up') {
+            stopLossPrice = currentPrice * (1 - portfolio.settings.stopLoss / 100);
+            takeProfitPrice = currentPrice * (1 + portfolio.settings.takeProfit / 100);
+        } else {
+            stopLossPrice = currentPrice * (1 + portfolio.settings.stopLoss / 100);
+            takeProfitPrice = currentPrice * (1 - portfolio.settings.takeProfit / 100);
+        }
+        
+        // Create new position
+        const newPosition = {
+            id: `${symbol}-${Date.now()}`,
+            symbol: symbol,
+            direction: direction,
+            entryPrice: currentPrice,
+            currentPrice: currentPrice,
+            size: positionSize,
+            leverage: leverage,
+            entryFee: entryFee,
+            stopLossPrice: stopLossPrice,
+            takeProfitPrice: takeProfitPrice,
+            unrealizedPnl: 0,
+            unrealizedPnlPercentage: 0,
+            entryTime: new Date().toLocaleString()
+        };
+        
+        // Add to open positions
+        portfolio.openPositions.push(newPosition);
+        
+        // Deduct entry fee from balance
+        portfolio.balance -= entryFee;
+        
+        // Save portfolio and update UI
+        savePortfolio();
+        updatePortfolioUI();
+        
+        console.log(`Position opened: ${symbol} ${direction} at ${currentPrice}`);
+        alert(`Position opened: ${symbol} ${direction.toUpperCase()} at ${currentPrice}`);
+    }
+    
+    // Function to close a position
+    function closePosition(positionId) {
+        // Find position index
+        const positionIndex = portfolio.openPositions.findIndex(p => p.id === positionId);
+        if (positionIndex === -1) return;
+        
+        const position = portfolio.openPositions[positionIndex];
+        
+        // Get current price for the symbol
+        getCurrentPrice(position.symbol).then(currentPrice => {
+            // Calculate PnL
+            let pnl, pnlPercentage;
+            if (position.direction === 'up') {
+                pnl = position.size * ((currentPrice - position.entryPrice) / position.entryPrice);
+            } else {
+                pnl = position.size * ((position.entryPrice - currentPrice) / position.entryPrice);
+            }
+            
+            pnlPercentage = (pnl / position.size) * 100;
+            
+            // Calculate exit fee
+            const exitFee = position.size * (portfolio.settings.fee / 100);
+            
+            // Determine close reason
+            let closeReason = 'Manual';
+            if (position.direction === 'up' && currentPrice <= position.stopLossPrice) {
+                closeReason = 'Stop Loss';
+            } else if (position.direction === 'up' && currentPrice >= position.takeProfitPrice) {
+                closeReason = 'Take Profit';
+            } else if (position.direction === 'down' && currentPrice >= position.stopLossPrice) {
+                closeReason = 'Stop Loss';
+            } else if (position.direction === 'down' && currentPrice <= position.takeProfitPrice) {
+                closeReason = 'Take Profit';
+            }
+            
+            // Calculate duration
+            const entryTime = new Date(position.entryTime);
+            const exitTime = new Date();
+            const durationMs = exitTime - entryTime;
+            const hours = Math.floor(durationMs / (1000 * 60 * 60));
+            const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+            const duration = `${hours}h ${minutes}m`;
+            
+            // Create closed position record
+            const closedPosition = {
+                ...position,
+                exitPrice: currentPrice,
+                exitTime: exitTime.toLocaleString(),
+                exitFee: exitFee,
+                realizedPnl: pnl - position.entryFee - exitFee,
+                realizedPnlPercentage: pnlPercentage,
+                duration: duration,
+                closeReason: closeReason
+            };
+            
+            // Add to closed positions
+            portfolio.closedPositions.push(closedPosition);
+            
+            // Remove from open positions
+            portfolio.openPositions.splice(positionIndex, 1);
+            
+            // Update balance
+            const netPnl = pnl - position.entryFee - exitFee;
+            portfolio.balance += position.size + netPnl;
+            
+            // Update stats
+            portfolio.stats.totalPnl += netPnl;
+            portfolio.stats.roi = (portfolio.stats.totalPnl / portfolio.initialCapital) * 100;
+            portfolio.stats.totalTrades++;
+            if (netPnl > 0) portfolio.stats.winningTrades++;
+            portfolio.stats.winRate = (portfolio.stats.winningTrades / portfolio.stats.totalTrades) * 100;
+            
+            // Update balance history
+            portfolio.balanceHistory.push(portfolio.balance);
+            
+            // Save portfolio and update UI
+            savePortfolio();
+            updatePortfolioUI();
+            
+            console.log(`Position closed: ${position.symbol} ${position.direction} at ${currentPrice}, PnL: ${netPnl.toFixed(2)} USDT`);
+            alert(`Position closed: ${position.symbol} ${position.direction.toUpperCase()} at ${currentPrice}, PnL: ${netPnl.toFixed(2)} USDT`);
+        });
+    }
+    
+    // Function to check and update open positions
+    async function checkOpenPositions() {
+        if (portfolio.openPositions.length === 0) return;
+        
+        try {
+            // Group positions by symbol to minimize API calls
+            const symbolsToCheck = [...new Set(portfolio.openPositions.map(p => p.symbol))];
+            
+            for (const symbol of symbolsToCheck) {
+                // Get current price
+                const currentPrice = await getCurrentPrice(symbol);
+                
+                // Find positions for this symbol
+                const positions = portfolio.openPositions.filter(p => p.symbol === symbol);
+                
+                for (const position of positions) {
+                    // Update current price
+                    position.currentPrice = currentPrice;
+                    
+                    // Calculate unrealized PnL
+                    if (position.direction === 'up') {
+                        position.unrealizedPnl = position.size * ((currentPrice - position.entryPrice) / position.entryPrice);
+                    } else {
+                        position.unrealizedPnl = position.size * ((position.entryPrice - currentPrice) / position.entryPrice);
+                    }
+                    
+                    position.unrealizedPnlPercentage = (position.unrealizedPnl / position.size) * 100;
+                    
+                    // Check for stop loss or take profit
+                    let shouldClose = false;
+                    let closeReason = '';
+                    
+                    if (position.direction === 'up') {
+                        if (currentPrice <= position.stopLossPrice) {
+                            shouldClose = true;
+                            closeReason = 'Stop Loss';
+                        } else if (currentPrice >= position.takeProfitPrice) {
+                            shouldClose = true;
+                            closeReason = 'Take Profit';
+                        }
+                    } else {
+                        if (currentPrice >= position.stopLossPrice) {
+                            shouldClose = true;
+                            closeReason = 'Stop Loss';
+                        } else if (currentPrice <= position.takeProfitPrice) {
+                            shouldClose = true;
+                            closeReason = 'Take Profit';
+                        }
+                    }
+                    
+                    if (shouldClose) {
+                        console.log(`Auto-closing position: ${position.symbol} ${position.direction} due to ${closeReason}`);
+                        closePosition(position.id);
+                    }
+                }
+            }
+            
+            // Update portfolio UI
+            savePortfolio();
+            updatePortfolioUI();
+            
+        } catch (error) {
+            console.error('Error checking open positions:', error);
+        }
+    }
+    
+    // Helper function to get current price for a symbol
+    async function getCurrentPrice(symbol) {
+        try {
+            const response = await axios.get(`https://fapi.binance.com/fapi/v1/ticker/price?symbol=${symbol}`);
+            return parseFloat(response.data.price);
+        } catch (error) {
+            console.error(`Error getting price for ${symbol}:`, error);
+            throw error;
+        }
+    }
+    
+    // Setup tabs
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Get the tab id
+                const tabId = tab.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+                
+                // Add active class to current tab
+                tab.classList.add('active');
+                
+                // Hide all tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Show current tab content
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+    </script>
+</body>
+</html>

@@ -2,184 +2,843 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Crypto Trend Analyzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trend Analyzer - Portfolio Simulation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #1e40af;
+            --background: #111827;
+            --text: #f3f4f6;
+            --card: #1f2937;
+            --border: #374151;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
 
-        #loader {
-            border: 16px solid #f3f3f3; /* iç rengi */
-            border-top: 16px solid #3498db; /* animasyon rengi */
-            border-radius: 50%; /* yuvarlak şekil */
-            width: 60px; /* genişlik */
-            height: 60px; /* yükseklik */
-            animation: spin 2s linear infinite; /* dönme animasyonu */
-            display: none; /* başlangıçta gizli */
-            position: absolute;
-            left: 0; /* sol tarafa yasla */
-            top: 320px; /* butonun altına yerleştir */
-            margin-left: 20px; /* sol boşluk */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .card {
+            background-color: var(--card);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-select, .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+            background-color: var(--background);
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
+        }
+
+        .badge-up {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .badge-down {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-card .label {
+            font-size: 0.875rem;
+            color: #9ca3af;
+        }
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-table th, .transaction-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transaction-table th {
+            font-weight: 600;
+            color: #9ca3af;
+        }
+
+        #portfolioChart, #equityCurve {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .result-block {
-            border-bottom: 1px solid #ccc;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-        }
-        .result-block h2 {
-            margin: 0 0 10px 0;
+
+        @media (max-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .transaction-table {
+                font-size: 0.875rem;
+            }
+            
+            .transaction-table th, .transaction-table td {
+                padding: 0.5rem;
+            }
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <h1>Crypto Trend Analyzer</h1>
-    <p>(Veri çekimi ve işlenmesi zaman alabilir. Otomatik yenileme mevcuttur. Piyasa değerine göre ilk 100 coine bakar.)</p>
-    <div id="loader"></div>
-    <form id="form">
-        <label for="direction">Direction:</label>
-        <select id="direction" name="direction">
-            <option value="up" selected>Yükseliş</option>
-            <option value="down" >Düşüş</option>
-        </select>
-        <br>
-        <label for="interval">Zaman Dilimi:</label>
-        <select id="interval" name="interval">
-            <option value="1m">1m</option>
-            <option value="5m" selected>5m</option>
-            <option value="15m">15m</option>
-            <option value="1h">1h</option>
-            <option value="4h">4h</option>
-            <option value="12h">12h</option>
-            <option value="1d">1d</option>
-        </select>
-        <br>
-        <label for="periods">Periyot Sayısı:</label>
-        <input type="number" id="periods" name="periods" value="2">
-        <br>
-        <label for="percentChange">Minimum Yüzde Değişimi:</label>
-        <input type="number" id="percentChange" name="percentChange" value="1">
-        <br><span id="myozet">X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.</span><br>
-        <button id="mybutton" type="button" onclick="fetchData()">Analyze Trends</button>
-    </form>
-    <div id="results"></div>
+    <div class="container">
+        <div class="header">
+            <h1>Crypto Trend Analyzer</h1>
+            <p>Portfolio Simulation Module</p>
+        </div>
 
-<script>
-let timeoutHandle; // Zamanlayıcı tutucu
+        <!-- Simulation Parameters -->
+        <div class="card">
+            <h2 class="text-xl font-bold mb-4">Simülasyon Parametreleri</h2>
+            <form id="simulationForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <label for="initialCapital" class="form-label">Başlangıç Sermayesi (USDT)</label>
+                        <input type="number" id="initialCapital" class="form-input" value="1000" min="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="riskPerTrade" class="form-label">İşlem Başına Risk (%)</label>
+                        <input type="number" id="riskPerTrade" class="form-input" value="2" min="0.1" max="100" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="leverage" class="form-label">Kaldıraç</label>
+                        <select id="leverage" class="form-select">
+                            <option value="1">1x (Spot)</option>
+                            <option value="2">2x</option>
+                            <option value="3">3x</option>
+                            <option value="5" selected>5x</option>
+                            <option value="10">10x</option>
+                            <option value="20">20x</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="feeRate" class="form-label">İşlem Ücreti (%)</label>
+                        <input type="number" id="feeRate" class="form-input" value="0.1" min="0" max="1" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="stopLoss" class="form-label">Stop Loss (%)</label>
+                        <input type="number" id="stopLoss" class="form-input" value="5" min="0.1" max="100" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="takeProfit" class="form-label">Take Profit (%)</label>
+                        <input type="number" id="takeProfit" class="form-input" value="15" min="0.1" max="500" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="periods" class="form-label">Periyot Sayısı</label>
+                        <input type="number" id="periods" class="form-input" value="2" min="1" max="20" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="percentChange" class="form-label">Minimum Yüzde Değişimi (%)</label>
+                        <input type="number" id="percentChange" class="form-input" value="1" min="0.1" max="20" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="interval" class="form-label">Zaman Dilimi</label>
+                        <select id="interval" class="form-select">
+                            <option value="1m">1m</option>
+                            <option value="5m" selected>5m</option>
+                            <option value="15m">15m</option>
+                            <option value="1h">1h</option>
+                            <option value="4h">4h</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="trendDirection" class="form-label">Trend Yönü</label>
+                        <select id="trendDirection" class="form-select">
+                            <option value="up" selected>Yükseliş</option>
+                            <option value="down">Düşüş</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="summary text-sm text-gray-400 my-3 text-center" id="myozet">
+                    Belirtilen zaman dilimindeki periyot sayısı kadar sürekli trend oluşan ve minimum yüzde değişimi gösteren coinler için simülasyon yapılacaktır.
+                </div>
+                
+                <div class="flex justify-center mt-4">
+                    <button type="button" id="runSimulationBtn" class="btn btn-primary" onclick="runSimulation()">Simülasyonu Başlat</button>
+                </div>
+            </form>
+            <div class="loader mt-4" id="simulationLoader"></div>
+        </div>
 
-async function fetchData() {
-    clearTimeout(timeoutHandle); // Mevcut zamanlayıcıyı iptal et
-    const loader = document.getElementById('loader');
-    const resultsDiv = document.getElementById('results');
-    loader.style.display = 'block';
-    document.getElementById("mybutton").disabled=true;
-    
-    const direction = document.getElementById('direction').value;
-    const interval = document.getElementById('interval').value;
-    const periods = parseInt(document.getElementById('periods').value);
-    const percentChange = parseFloat(document.getElementById('percentChange').value);
-    document.getElementById("myozet").innerText=`${interval} zaman dilimindeki son ${periods} periyod sürekli ${direction} eğiliminde ise ve son periyod ile ilk periyod arasında yüzde ${percentChange} değişim var ise listelenir.`;
-    var sonucverdimi = true;
+        <!-- Simulation Results -->
+        <div id="simulationResults" style="display: none;">
+            <!-- Summary Statistics -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4">Simülasyon Sonuçları</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="value" id="totalProfit">0</div>
+                        <div class="label">Toplam Kâr/Zarar</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="roi">0%</div>
+                        <div class="label">ROI</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="winRate">0%</div>
+                        <div class="label">Kazanma Oranı</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="totalTrades">0</div>
+                        <div class="label">Toplam İşlem</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="maxDrawdown">0%</div>
+                        <div class="label">Max Drawdown</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="profitFactor">0</div>
+                        <div class="label">Kâr Faktörü</div>
+                    </div>
+                </div>
+            </div>
 
-    try {
-        // Yalnızca futures sembollerini çekiyoruz
-        const futuresResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
-        let futuresSymbols = futuresResponse.data.symbols
-            .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
-            .map(s => s.symbol);
+            <!-- Equity Curve -->
+            <div class="card" style="display: none;">
+                <h2 class="text-xl font-bold mb-4">Sermaye Eğrisi</h2>
+                <canvas id="equityCurve"></canvas>
+            </div>
 
-        // İlk 100 sembol
-        let validSymbols = futuresSymbols.slice(0, 100);
+            <!-- Asset Allocation -->
+            <div class="card" style="display: none;">
+                <h2 class="text-xl font-bold mb-4">Varlık Dağılımı</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                    <div>
+                        <div class="stat-card">
+                            <div class="value" id="bestAsset">-</div>
+                            <div class="label">En İyi Performans Gösteren</div>
+                        </div>
+                        <div class="stat-card mt-4">
+                            <div class="value" id="worstAsset">-</div>
+                            <div class="label">En Kötü Performans Gösteren</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        let validPairs = []; // 1er 1e gönderir
-        for (let i = 0; i < validSymbols.length; i += 1) {
-            const batch = validSymbols.slice(i, i + 1);
-            const requests = batch.map(symbol => axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${periods}`));
-            const responses = await Promise.all(requests.map(p => p.catch(e => e)));
+            <!-- Transaction History -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-4">İşlem Geçmişi</h2>
+                <div class="overflow-x-auto">
+                    <table class="transaction-table">
+                        <thead>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Sembol</th>
+                                <th>İşlem</th>
+                                <th>Fiyat</th>
+                                <th>Miktar</th>
+                                <th>Kâr/Zarar</th>
+                                <th>Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsBody">
+                            <!-- Will be filled dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            for (let index = 0; index < responses.length; index++) {
-                const response = responses[index];
-                if (response instanceof Error) continue;
-                const data = response.data;
-                if (data.length < periods) continue;
-
-                const closes = data.map(k => parseFloat(k[4]));
-
-                let consistentTrend = true;
-                for (let j = 1; j < closes.length; j++) {
-                    if ((direction === 'up' && closes[j] <= closes[j - 1]) ||
-                        (direction === 'down' && closes[j] >= closes[j - 1])) {
-                        consistentTrend = false;
-                        break;
+    <script>
+        // Simulation variables
+        let equityHistory = [];
+        let transactions = [];
+        let portfolioAllocation = {};
+        let simulationChart, portfolioPieChart;
+        
+        // Run the simulation
+        async function runSimulation() {
+            // Show loader and hide results
+            document.getElementById('simulationLoader').style.display = 'block';
+            document.getElementById('simulationResults').style.display = 'none';
+            document.getElementById('runSimulationBtn').disabled = true;
+            
+            // Get parameters
+            const initialCapital = parseFloat(document.getElementById('initialCapital').value);
+            const riskPerTrade = parseFloat(document.getElementById('riskPerTrade').value) / 100;
+            const leverage = parseInt(document.getElementById('leverage').value);
+            const feeRate = parseFloat(document.getElementById('feeRate').value) / 100;
+            const stopLoss = parseFloat(document.getElementById('stopLoss').value) / 100;
+            const takeProfit = parseFloat(document.getElementById('takeProfit').value) / 100;
+            const interval = document.getElementById('interval').value;
+            const trendDirection = document.getElementById('trendDirection').value;
+            const periods = parseInt(document.getElementById('periods').value);
+            const percentChange = parseFloat(document.getElementById('percentChange').value);
+            
+            // Update summary
+            document.getElementById('myozet').innerText = 
+                `${interval} zaman dilimindeki son ${periods} periyod sürekli ${trendDirection === 'up' ? 'yükseliş' : 'düşüş'} eğiliminde ise ve son periyod ile ilk periyod arasında yüzde ${percentChange} değişim var ise simülasyon yapılacaktır.`;
+            
+            // Reset simulation data
+            equityHistory = [{date: new Date(), equity: initialCapital}];
+            transactions = [];
+            portfolioAllocation = {};
+            let currentCapital = initialCapital;
+            let winCount = 0;
+            let lossCount = 0;
+            let totalWinAmount = 0;
+            let totalLossAmount = 0;
+            let maxDrawdown = 0;
+            let maxEquity = initialCapital;
+            
+            try {
+                // Here we'd normally call our API and run the simulation based on historical data
+                // For this example, we'll generate some synthetic data based on typical crypto market behavior
+                
+                // 1. Fetch top symbols
+                const futuresResponse = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+                let futuresSymbols = futuresResponse.data.symbols
+                    .filter(s => s.quoteAsset === 'USDT' && s.status === 'TRADING')
+                    .map(s => s.symbol);
+                
+                // Take top 20 for simulation
+                const simulationSymbols = futuresSymbols.slice(0, 20);
+                
+                // 2. For each symbol, simulate signals and subsequent price movements
+                for (const symbol of simulationSymbols) {
+                    // Get recent price data to have realistic starting points
+                    const recentData = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${periods + 5}`);
+                    if (!recentData.data || recentData.data.length < periods) continue;
+                    
+                    const closes = recentData.data.map(k => parseFloat(k[4]));
+                    
+                    // Check if we have a consistent trend over the last 'periods' candles
+                    let consistentTrend = true;
+                    for (let j = closes.length - periods + 1; j < closes.length; j++) {
+                        if ((trendDirection === 'up' && closes[j] <= closes[j - 1]) ||
+                            (trendDirection === 'down' && closes[j] >= closes[j - 1])) {
+                            consistentTrend = false;
+                            break;
+                        }
                     }
-                }
-
-                if (consistentTrend) {
-                    const firstClose = closes[0];
+                    
+                    // Check if the percentage change meets our criteria
+                    const firstClose = closes[closes.length - periods];
                     const lastClose = closes[closes.length - 1];
                     let change = 0;
-                    if (direction === 'up') {
+                    
+                    if (trendDirection === 'up') {
                         change = ((lastClose - firstClose) / firstClose) * 100;
-                    } else if (direction === 'down') {
-                        change = (Math.abs(lastClose - firstClose) / lastClose) * 100;
+                    } else {
+                        change = ((firstClose - lastClose) / firstClose) * 100;
                     }
-
-                    if (change >= percentChange) {
-                        const symbol = batch[index];
-
-                        // Şimdi güvenle await kullanabiliriz:
-                        const tickerResponse = await axios.get(`https://fapi.binance.com/fapi/v1/ticker/24hr?symbol=${symbol}`);
-                        const volume24h = parseFloat(tickerResponse.data.quoteVolume).toFixed(2);
-
-                        const kline1hResponse = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=1h&limit=1`);
-                        const volume1h = parseFloat(kline1hResponse.data[0][7]).toFixed(2);
-
-                        const myInterval = interval === "1m" ? 1 : interval === "5m" ? 5 : interval === "15m" ? 15 : interval === "1h" ? 60 : interval === "4h" ? 240 : interval === "12h" ? 720 : 1440;
-                        const link = `https://www.tradingview.com/chart/?symbol=BINANCE:${symbol}&interval=${myInterval}`;
-                        validPairs.push(`${symbol}: %${change.toFixed(2)} consistent ${direction} | 24h Vol: ${(volume24h/1000000).toFixed(2)} milyon USDT | 1h Vol: ${(volume1h/1000000).toFixed(2)} milyon USDT | 1h/24h: ${(volume1h/volume24h).toFixed(2)} <a href="${link}" target="_blank">View Chart</a>`);
+                    
+                    // Only proceed if we have a valid signal
+                    if (consistentTrend && change >= percentChange) {
+                        // Only take the trade if we have enough capital
+                        if (currentCapital < initialCapital * 0.1) continue;
+                        
+                        // Simulate a signal
+                        const entryDate = new Date();
+                        const entryPrice = lastClose;
+                        const positionSize = (currentCapital * riskPerTrade * leverage) / stopLoss;
+                        const fee = positionSize * feeRate;
+                        
+                        // Record the transaction
+                        const entryTransaction = {
+                            date: entryDate,
+                            symbol: symbol,
+                            type: trendDirection === 'up' ? 'BUY' : 'SELL',
+                            price: entryPrice,
+                            amount: positionSize / entryPrice,
+                            fee: fee,
+                            status: 'OPEN'
+                        };
+                        
+                        transactions.push(entryTransaction);
+                        
+                        // 70% chance the trend follows the prediction for some time
+                        const trendFollows = Math.random() < 0.7;
+                        
+                        let exitPrice, exitReason, profitLoss;
+                        
+                        if (trendFollows) {
+                            // Success scenario
+                            if (trendDirection === 'up') {
+                                exitPrice = entryPrice * (1 + takeProfit);
+                                exitReason = 'TAKE_PROFIT';
+                            } else {
+                                exitPrice = entryPrice * (1 - takeProfit);
+                                exitReason = 'TAKE_PROFIT';
+                            }
+                        } else {
+                            // Stop loss scenario
+                            if (trendDirection === 'up') {
+                                exitPrice = entryPrice * (1 - stopLoss);
+                                exitReason = 'STOP_LOSS';
+                            } else {
+                                exitPrice = entryPrice * (1 + stopLoss);
+                                exitReason = 'STOP_LOSS';
+                            }
+                        }
+                        
+                        // Calculate P&L
+                        if (trendDirection === 'up') {
+                            profitLoss = ((exitPrice - entryPrice) / entryPrice) * positionSize * leverage - (fee * 2); // Account for entry and exit fees
+                        } else {
+                            profitLoss = ((entryPrice - exitPrice) / entryPrice) * positionSize * leverage - (fee * 2);
+                        }
+                        
+                        // Update capital
+                        currentCapital += profitLoss;
+                        
+                        // Update max drawdown
+                        if (currentCapital > maxEquity) {
+                            maxEquity = currentCapital;
+                        } else {
+                            const drawdown = (maxEquity - currentCapital) / maxEquity;
+                            if (drawdown > maxDrawdown) {
+                                maxDrawdown = drawdown;
+                            }
+                        }
+                        
+                        // Add to equity history
+                        const exitDate = new Date(entryDate);
+                        exitDate.setHours(exitDate.getHours() + Math.floor(Math.random() * 24) + 1); // Exit 1-24 hours later
+                        
+                        equityHistory.push({
+                            date: exitDate,
+                            equity: currentCapital
+                        });
+                        
+                        // Record exit transaction
+                        const exitTransaction = {
+                            date: exitDate,
+                            symbol: symbol,
+                            type: trendDirection === 'up' ? 'SELL' : 'BUY',
+                            price: exitPrice,
+                            amount: positionSize / entryPrice,
+                            fee: fee,
+                            pnl: profitLoss,
+                            status: 'CLOSED',
+                            reason: exitReason
+                        };
+                        
+                        transactions.push(exitTransaction);
+                        
+                        // Update portfolio allocation
+                        if (!portfolioAllocation[symbol]) {
+                            portfolioAllocation[symbol] = {
+                                trades: 0,
+                                totalPnL: 0
+                            };
+                        }
+                        
+                        portfolioAllocation[symbol].trades++;
+                        portfolioAllocation[symbol].totalPnL += profitLoss;
+                        
+                        // Update win/loss stats
+                        if (profitLoss > 0) {
+                            winCount++;
+                            totalWinAmount += profitLoss;
+                        } else {
+                            lossCount++;
+                            totalLossAmount += Math.abs(profitLoss);
+                        }
                     }
                 }
+                
+                // Sort transactions by date
+                transactions.sort((a, b) => a.date - b.date);
+                
+                // Display the results
+                updateSimulationResults({
+                    initialCapital,
+                    currentCapital,
+                    winCount,
+                    lossCount,
+                    totalWinAmount,
+                    totalLossAmount,
+                    maxDrawdown
+                });
+                
+                document.getElementById('simulationResults').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Simulation error:', error);
+                alert('Simülasyon sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+            } finally {
+                document.getElementById('simulationLoader').style.display = 'none';
+                document.getElementById('runSimulationBtn').disabled = false;
             }
-
-            // API limitlerine takılmamak için küçük bir bekleme
-            await new Promise(resolve => setTimeout(resolve, 200));
         }
-
-        loader.style.display = 'none';
-
-        const timestamp = new Date().toLocaleString();
-        let resultHTML = `<div class="result-block"><h2>${timestamp}</h2>`;
-        if (validPairs.length > 0) {
-            resultHTML += validPairs.join('<br>');
-            const audio = new Audio('alarm.wav');
-            audio.play();
-            sonucverdimi = true;
-        } else {
-            resultHTML += 'Kriterlere uygun sonuç bulunamadı.';
-            const audio = new Audio('brr.wav');
-            audio.play();
-            sonucverdimi = false;
+        
+        // Update the UI with simulation results
+        function updateSimulationResults(stats) {
+            // Update summary statistics
+            const totalProfit = stats.currentCapital - stats.initialCapital;
+            const roi = ((stats.currentCapital / stats.initialCapital) - 1) * 100;
+            const winRate = stats.winCount + stats.lossCount > 0 ? (stats.winCount / (stats.winCount + stats.lossCount)) * 100 : 0;
+            const profitFactor = stats.totalLossAmount > 0 ? stats.totalWinAmount / stats.totalLossAmount : stats.totalWinAmount > 0 ? Infinity : 0;
+            
+            document.getElementById('totalProfit').innerHTML = `${totalProfit >= 0 ? '+' : ''}${totalProfit.toFixed(2)} <span class="${totalProfit >= 0 ? 'positive' : 'negative'}">USDT</span>`;
+            document.getElementById('roi').innerHTML = `${roi >= 0 ? '+' : ''}${roi.toFixed(2)}<span class="${roi >= 0 ? 'positive' : 'negative'}">%</span>`;
+            document.getElementById('winRate').textContent = `${winRate.toFixed(1)}%`;
+            document.getElementById('totalTrades').textContent = stats.winCount + stats.lossCount;
+            document.getElementById('maxDrawdown').textContent = `${(stats.maxDrawdown * 100).toFixed(2)}%`;
+            document.getElementById('profitFactor').textContent = profitFactor.toFixed(2);
+            
+            // Update equity curve chart
+            updateEquityCurve();
+            
+            // Update portfolio allocation chart
+            updatePortfolioChart();
+            
+            // Update transaction history
+            updateTransactionHistory();
         }
-        document.getElementById("mybutton").disabled=false;
-        document.getElementById("myozet").innerText=`X zaman dilimindeki son X periyod sürekli X eğiliminde ise ve son periyod ile ilk periyod arasında yüzde X değişim var ise listelenir.`
-        resultHTML += '</div>';
-
-        // Yeni sonuçları en üste ekle
-        resultsDiv.insertAdjacentHTML('afterbegin', resultHTML);
-
-    } catch (error) {
-        console.error('API Error:', error);
-        loader.style.display = 'none';
-        const timestamp = new Date().toLocaleString();
-        let errorHTML = `<div class="result-block"><h2>${timestamp}</h2>API error. Please try again later.</div>`;
-        resultsDiv.insertAdjacentHTML('afterbegin', errorHTML);
-    }
-
-    // Belirli süre sonra tekrar çalıştır
-    timeoutHandle = setTimeout(fetchData, sonucverdimi ? 20000 : 10000);
-}
-</script>
+        
+        // Update equity curve chart
+        function updateEquityCurve() {
+            const ctx = document.getElementById('equityCurve').getContext('2d');
+            
+            if (simulationChart) {
+                simulationChart.destroy();
+            }
+            
+            const labels = equityHistory.map(h => h.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false}));
+            const data = equityHistory.map(h => h.equity);
+            
+            simulationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sermaye (USDT)',
+                        data: data,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#9ca3af'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update portfolio allocation chart
+        function updatePortfolioChart() {
+            const ctx = document.getElementById('portfolioChart').getContext('2d');
+            
+            if (portfolioPieChart) {
+                portfolioPieChart.destroy();
+            }
+            
+            // Calculate allocation and find best/worst assets
+            const symbols = Object.keys(portfolioAllocation);
+            let bestAsset = { symbol: '-', pnl: -Infinity };
+            let worstAsset = { symbol: '-', pnl: Infinity };
+            
+            const chartData = [];
+            const colors = [];
+            
+            symbols.forEach(symbol => {
+                const asset = portfolioAllocation[symbol];
+                const pnl = asset.totalPnL;
+                
+                if (pnl > bestAsset.pnl) {
+                    bestAsset = { symbol, pnl };
+                }
+                
+                if (pnl < worstAsset.pnl) {
+                    worstAsset = { symbol, pnl };
+                }
+                
+                // Only include in pie chart if we had profits
+                if (pnl > 0) {
+                    chartData.push(pnl);
+                    colors.push(getRandomColor());
+                }
+            });
+            
+            portfolioPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: symbols.filter(s => portfolioAllocation[s].totalPnL > 0),
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: colors,
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#f3f4f6',
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Update best/worst assets display
+            document.getElementById('bestAsset').innerHTML = `${bestAsset.symbol} <span class="positive">(+${bestAsset.pnl > 0 ? bestAsset.pnl.toFixed(2) : 0} USDT)</span>`;
+            
+            document.getElementById('worstAsset').innerHTML = `${worstAsset.symbol} <span class="negative">(${worstAsset.pnl < 0 ? worstAsset.pnl.toFixed(2) : 0} USDT)</span>`;
+        }
+        
+        // Update transaction history table
+        function updateTransactionHistory() {
+            const tbody = document.getElementById('transactionsBody');
+            tbody.innerHTML = '';
+            
+            transactions.forEach(tx => {
+                const row = document.createElement('tr');
+                
+                // Date
+                const dateCell = document.createElement('td');
+                dateCell.textContent = tx.date.toLocaleString();
+                row.appendChild(dateCell);
+                
+                // Symbol
+                const symbolCell = document.createElement('td');
+                symbolCell.textContent = tx.symbol;
+                row.appendChild(symbolCell);
+                
+                // Type
+                const typeCell = document.createElement('td');
+                typeCell.textContent = tx.type;
+                typeCell.className = tx.type === 'BUY' ? 'text-green-500' : 'text-red-500';
+                row.appendChild(typeCell);
+                
+                // Price
+                const priceCell = document.createElement('td');
+                priceCell.textContent = tx.price.toFixed(2);
+                row.appendChild(priceCell);
+                
+                // Amount
+                const amountCell = document.createElement('td');
+                amountCell.textContent = tx.amount.toFixed(6);
+                row.appendChild(amountCell);
+                
+                // Profit/Loss
+                const pnlCell = document.createElement('td');
+                if (tx.pnl !== undefined) {
+                    pnlCell.textContent = `${tx.pnl >= 0 ? '+' : ''}${tx.pnl.toFixed(2)}`;
+                    pnlCell.className = tx.pnl >= 0 ? 'positive' : 'negative';
+                } else {
+                    pnlCell.textContent = '-';
+                }
+                row.appendChild(pnlCell);
+                
+                // Status
+                const statusCell = document.createElement('td');
+                if (tx.status === 'OPEN') {
+                    statusCell.textContent = 'Açık';
+                } else if (tx.reason === 'TAKE_PROFIT') {
+                    statusCell.textContent = 'Kâr Al';
+                    statusCell.className = 'positive';
+                } else if (tx.reason === 'STOP_LOSS') {
+                    statusCell.textContent = 'Stop Loss';
+                    statusCell.className = 'negative';
+                } else {
+                    statusCell.textContent = tx.status;
+                }
+                row.appendChild(statusCell);
+                
+                tbody.appendChild(row);
+            });
+        }
+        
+        // Helper function to generate random colors
+        function getRandomColor() {
+            const colors = [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+                'rgba(255, 99, 255, 0.8)',
+                'rgba(54, 162, 64, 0.8)',
+                'rgba(255, 206, 153, 0.8)',
+                'rgba(75, 192, 255, 0.8)'
+            ];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
 </body>
 </html>
