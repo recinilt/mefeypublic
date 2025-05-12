@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Tekniği</title>
+    <style>
+        :root {
+            --primary-color: #ff3b30;
+            --secondary-color: #ffcc00;
+            --text-color: #333;
+            --light-color: #fff;
+            --break-color: #4cd964;
+            --long-break-color: #5856d6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            width: 100%;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-right: 10px;
+        }
+        
+        .tomato {
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tomato::after {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: 25px;
+            width: 10px;
+            height: 20px;
+            background-color: #008800;
+            border-radius: 5px;
+        }
+        
+        .timer-container {
+            background-color: var(--light-color);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .timer {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 20px 0;
+        }
+        
+        .timer-status {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--light-color);
+        }
+        
+        .btn-secondary {
+            background-color: #f2f2f7;
+            color: var(--text-color);
+        }
+        
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .step-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        @media (max-width: 768px) {
+            .step-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+        
+        .step {
+            flex: 1;
+            background-color: var(--light-color);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            min-width: 150px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .step:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .step.active {
+            border: 3px solid var(--primary-color);
+            transform: scale(1.05);
+        }
+        
+        .step-number {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .step-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        
+        .step-duration {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .progress-container {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            background-color: #f2f2f7;
+            border-radius: 50px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            position: absolute;
+            height: 100%;
+            width: 0;
+            background-color: var(--primary-color);
+            transition: width 1s linear;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light-color);
+            font-weight: bold;
+        }
+        
+        .cycle-count {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .arrow-container {
+            position: relative;
+            height: 80px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .arrow {
+            width: 80%;
+            height: 15px;
+            background-color: var(--primary-color);
+            position: relative;
+            border-radius: 10px;
+        }
+        
+        .arrow::before {
+            content: '';
+            position: absolute;
+            right: -30px;
+            top: -12.5px;
+            width: 0;
+            height: 0;
+            border-top: 20px solid transparent;
+            border-bottom: 20px solid transparent;
+            border-left: 30px solid var(--primary-color);
+        }
+        
+        .cycle-text {
+            position: absolute;
+            top: -25px;
+            right: 40px;
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .timer {
+                font-size: 3.5rem;
+            }
+            
+            .btn {
+                padding: 10px 20px;
+                min-width: 100px;
+            }
+            
+            .step {
+                padding: 15px;
+            }
+        }
+        
+        .settings-panel {
+            background-color: var(--light-color);
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .settings-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .settings-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 10px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .audio-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .volume-control {
+            flex: 1;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: var(--light-color);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(200%);
+            transition: transform 0.5s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+        
+        .flip-counter {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .digit {
+            position: relative;
+            width: 80px;
+            height: 120px;
+            margin: 0 5px;
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            color: var(--light-color);
+            font-size: 5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .digit::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .colon {
+            font-size: 5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        @media (max-width: 600px) {
+            .digit {
+                width: 50px;
+                height: 80px;
+                font-size: 3rem;
+            }
+            
+            .colon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>Pomodoro Tekniği</h1>
+                <div class="tomato"></div>
+            </div>
+        </header>
+        
+        <div class="timer-container">
+            <div class="timer-status">Çalışma Zamanı</div>
+            <div class="flip-counter">
+                <div class="digit" id="minute-tens">2</div>
+                <div class="digit" id="minute-ones">5</div>
+                <div class="colon">:</div>
+                <div class="digit" id="second-tens">0</div>
+                <div class="digit" id="second-ones">0</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar">0%</div>
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-primary" id="start-btn">Başlat</button>
+                <button class="btn btn-secondary" id="pause-btn" disabled>Duraklat</button>
+                <button class="btn btn-secondary" id="reset-btn">Sıfırla</button>
+                <button class="btn btn-secondary" id="settings-btn">Ayarlar</button>
+            </div>
+        </div>
+        
+        <div class="steps">
+            <div class="step-row">
+                <div class="step" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">📝</div>
+                    <div class="step-title">Plan Yapma</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">⏱️</div>
+                    <div class="step-title">25 Dakika</div>
+                    <div class="step-duration">Kitap Yazma</div>
+                </div>
+            </div>
+            
+            <div class="arrow-container">
+                <div class="arrow">
+                    <div class="cycle-text">x4</div>
+                </div>
+            </div>
+            
+            <div class="step-row">
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">☕</div>
+                    <div class="step-title">5 Dakika</div>
+                    <div class="step-duration">Mola</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">☕</div>
+                    <div class="step-title">30 Dakika</div>
+                    <div class="step-duration">Mola</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-panel" id="settings-panel" style="display: none;">
+            <div class="settings-title">Zamanlayıcı Ayarları</div>
+            <div class="settings-form">
+                <div class="form-group">
+                    <label for="pomodoro-time">Çalışma Süresi (dk)</label>
+                    <input type="number" id="pomodoro-time" min="1" max="60" value="25">
+                </div>
+                <div class="form-group">
+                    <label for="short-break">Kısa Mola (dk)</label>
+                    <input type="number" id="short-break" min="1" max="30" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="long-break">Uzun Mola (dk)</label>
+                    <input type="number" id="long-break" min="5" max="60" value="30">
+                </div>
+                <div class="form-group">
+                    <label for="cycles">Döngü Sayısı</label>
+                    <input type="number" id="cycles" min="1" max="10" value="4">
+                </div>
+            </div>
+            <div class="audio-controls">
+                <label for="volume">Ses Düzeyi:</label>
+                <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5" class="volume-control">
+                <button class="btn btn-secondary" id="test-audio">Sesi Test Et</button>
+            </div>
+            <div class="btn-container" style="margin-top: 20px;">
+                <button class="btn btn-primary" id="save-settings">Kaydet</button>
+                <button class="btn btn-secondary" id="cancel-settings">İptal</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <div class="notification-icon">⏰</div>
+        <div class="notification-message">Süre doldu!</div>
+    </div>
+    
+    <audio id="alarm-sound" src="alarm.wav" preload="auto"></audio>
+    
+    <script>
+        // DOM Elements
+        const timerElement = document.querySelector('.timer');
+        const minuteTens = document.getElementById('minute-tens');
+        const minuteOnes = document.getElementById('minute-ones');
+        const secondTens = document.getElementById('second-tens');
+        const secondOnes = document.getElementById('second-ones');
+        const timerStatus = document.querySelector('.timer-status');
+        const progressBar = document.getElementById('progress-bar');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsPanel = document.getElementById('settings-panel');
+        const saveSettingsBtn = document.getElementById('save-settings');
+        const cancelSettingsBtn = document.getElementById('cancel-settings');
+        const steps = document.querySelectorAll('.step');
+        const notification = document.getElementById('notification');
+        const alarmSound = document.getElementById('alarm-sound');
+        const testAudioBtn = document.getElementById('test-audio');
+        const volumeControl = document.getElementById('volume');
+        
+        // Timer settings
+        let settings = {
+            pomodoroTime: 25 * 60, // 25 minutes in seconds
+            shortBreakTime: 5 * 60, // 5 minutes in seconds
+            longBreakTime: 30 * 60, // 30 minutes in seconds
+            cycles: 4
+        };
+        
+        // Timer variables
+        let timer;
+        let timeLeft = settings.pomodoroTime;
+        let originalTime = settings.pomodoroTime;
+        let isRunning = false;
+        let currentMode = 'pomodoro'; // pomodoro, shortBreak, longBreak
+        let currentCycle = 1;
+        let completedPomodoros = 0;
+        
+        // Update timer display
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            
+            minuteTens.textContent = Math.floor(minutes / 10);
+            minuteOnes.textContent = minutes % 10;
+            secondTens.textContent = Math.floor(seconds / 10);
+            secondOnes.textContent = seconds % 10;
+            
+            // Update progress bar
+            const progress = ((originalTime - timeLeft) / originalTime) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${Math.round(progress)}%`;
+            
+            // Update document title
+            document.title = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} - Pomodoro`;
+        }
+        
+        // Start timer
+        function startTimer() {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        isRunning = false;
+                        playAlarm();
+                        nextMode();
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Pause timer
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+            }
+        }
+        
+        // Reset timer
+        function resetTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            currentMode = 'pomodoro';
+            completedPomodoros = 0;
+            currentCycle = 1;
+            timeLeft = settings.pomodoroTime;
+            originalTime = settings.pomodoroTime;
+            updateTimerDisplay();
+            updateModeDisplay();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            highlightCurrentStep();
+        }
+        
+        // Next timer mode
+        function nextMode() {
+            if (currentMode === 'pomodoro') {
+                completedPomodoros++;
+                
+                if (completedPomodoros % settings.cycles === 0) {
+                    // After completing a set of pomodoros, take a long break
+                    currentMode = 'longBreak';
+                    timeLeft = settings.longBreakTime;
+                    originalTime = settings.longBreakTime;
+                    currentCycle = Math.ceil(completedPomodoros / settings.cycles);
+                } else {
+                    // Otherwise take a short break
+                    currentMode = 'shortBreak';
+                    timeLeft = settings.shortBreakTime;
+                    originalTime = settings.shortBreakTime;
+                }
+            } else {
+                // After a break, start a new pomodoro
+                currentMode = 'pomodoro';
+                timeLeft = settings.pomodoroTime;
+                originalTime = settings.pomodoroTime;
+            }
+            
+            updateTimerDisplay();
+            updateModeDisplay();
+            highlightCurrentStep();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+        
+        // Update the display based on current mode
+        function updateModeDisplay() {
+            if (currentMode === 'pomodoro') {
+                timerStatus.textContent = 'Çalışma Zamanı';
+                progressBar.style.backgroundColor = 'var(--primary-color)';
+            } else if (currentMode === 'shortBreak') {
+                timerStatus.textContent = 'Kısa Mola';
+                progressBar.style.backgroundColor = 'var(--break-color)';
+            } else if (currentMode === 'longBreak') {
+                timerStatus.textContent = 'Uzun Mola';
+                progressBar.style.backgroundColor = 'var(--long-break-color)';
+            }
+        }
+        
+        // Play alarm sound
+        function playAlarm() {
+            alarmSound.volume = parseFloat(volumeControl.value);
+            alarmSound.play();
+            showNotification();
+        }
+        
+        // Show notification
+        function showNotification() {
+            let message = '';
+            
+            if (currentMode === 'pomodoro') {
+                message = 'Çalışma süresi bitti! Mola zamanı.';
+            } else if (currentMode === 'shortBreak') {
+                message = 'Mola bitti! Çalışmaya devam et.';
+            } else if (currentMode === 'longBreak') {
+                message = 'Uzun mola bitti! Yeni bir döngüye başla.';
+            }
+            
+            notification.querySelector('.notification-message').textContent = message;
+            notification.classList.add('show');
+            
+            // Hide notification after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+            
+            // Try to show browser notification
+            if (Notification.permission === 'granted') {
+                new Notification('Pomodoro Tekniği', {
+                    body: message,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="red"/></svg>'
+                });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        }
+        
+        // Highlight current step
+        function highlightCurrentStep() {
+            steps.forEach(step => step.classList.remove('active'));
+            
+            if (currentMode === 'pomodoro') {
+                steps[1].classList.add('active'); // 25 Dakika Kitap Yazma
+            } else if (currentMode === 'shortBreak') {
+                steps[2].classList.add('active'); // 5 Dakika Mola
+            } else if (currentMode === 'longBreak') {
+                steps[3].classList.add('active'); // 30 Dakika Mola
+            }
+        }
+        
+        // Toggle settings panel
+        function toggleSettingsPanel() {
+            const isHidden = settingsPanel.style.display === 'none';
+            settingsPanel.style.display = isHidden ? 'block' : 'none';
+            
+            if (isHidden) {
+                // Populate settings form with current values
+                document.getElementById('pomodoro-time').value = settings.pomodoroTime / 60;
+                document.getElementById('short-break').value = settings.shortBreakTime / 60;
+                document.getElementById('long-break').value = settings.longBreakTime / 60;
+                document.getElementById('cycles').value = settings.cycles;
+            }
+        }
+        
+        // Save settings
+        function saveSettings() {
+            const pomodoroTime = parseInt(document.getElementById('pomodoro-time').value);
+            const shortBreak = parseInt(document.getElementById('short-break').value);
+            const longBreak = parseInt(document.getElementById('long-break').value);
+            const cycles = parseInt(document.getElementById('cycles').value);
+            
+            settings.pomodoroTime = pomodoroTime * 60;
+            settings.shortBreakTime = shortBreak * 60;
+            settings.longBreakTime = longBreak * 60;
+            settings.cycles = cycles;
+            
+            // Update the current timer if needed
+            if (currentMode === 'pomodoro' && !isRunning) {
+                timeLeft = settings.pomodoroTime;
+                originalTime = settings.pomodoroTime;
+            } else if (currentMode === 'shortBreak' && !isRunning) {
+                timeLeft = settings.shortBreakTime;
+                originalTime = settings.shortBreakTime;
+            } else if (currentMode === 'longBreak' && !isRunning) {
+                timeLeft = settings.longBreakTime;
+                originalTime = settings.longBreakTime;
+            }
+            
+            updateTimerDisplay();
+            toggleSettingsPanel();
+            
+            // Save settings to local storage
+            localStorage.setItem('pomodoroSettings', JSON.stringify(settings));
+        }
+        
+        // Load settings from local storage
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('pomodoroSettings');
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+                timeLeft = settings.pomodoroTime;
+                originalTime = settings.pomodoroTime;
+                updateTimerDisplay();
+            }
+        }
+        
+        // Test audio
+        function testAudio() {
+            alarmSound.volume = parseFloat(volumeControl.value);
+            alarmSound.currentTime = 0;
+            alarmSound.play();
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startTimer);
+        pauseBtn.addEventListener('click', pauseTimer);
+        resetBtn.addEventListener('click', resetTimer);
+        settingsBtn.addEventListener('click', toggleSettingsPanel);
+        saveSettingsBtn.addEventListener('click', saveSettings);
+        cancelSettingsBtn.addEventListener('click', toggleSettingsPanel);
+        testAudioBtn.addEventListener('click', testAudio);
+        
+        // Step click handlers
+        steps.forEach(step => {
+            step.addEventListener('click', () => {
+                const stepNumber = parseInt(step.dataset.step);
+                
+                if (!isRunning) {
+                    if (stepNumber === 2) { // 25 Dakika
+                        currentMode = 'pomodoro';
+                        timeLeft = settings.pomodoroTime;
+                        originalTime = settings.pomodoroTime;
+                    } else if (stepNumber === 3) { // 5 Dakika Mola
+                        currentMode = 'shortBreak';
+                        timeLeft = settings.shortBreakTime;
+                        originalTime = settings.shortBreakTime;
+                    } else if (stepNumber === 4) { // 30 Dakika Mola
+                        currentMode = 'longBreak';
+                        timeLeft = settings.longBreakTime;
+                        originalTime = settings.longBreakTime;
+                    }
+                    
+                    updateTimerDisplay();
+                    updateModeDisplay();
+                    highlightCurrentStep();
+                }
+            });
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            updateTimerDisplay();
+            updateModeDisplay();
+            highlightCurrentStep();
+            
+            // Request notification permission
+            if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        });
+    </script>
+</body>
+</html>
