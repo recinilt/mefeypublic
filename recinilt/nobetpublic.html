@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nöbet Oluşturma</title>
+    <style>
+        #nobetTable {
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            border-collapse: collapse;
+        }
+        #nobetTable td, #nobetTable th {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        #nobetTable tbody {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Nöbet Listesi Oluşturucu</h1>
+    <h6>Geliştirici: Recep YENİ (recepyeni@gmail.com) (ChatGpt yardımıyla)</h6>
+    <h6>Bir lahmacun ayran ısmarlamak isterseniz, BSC BNB Smart Chain (BEP20) USDT adresim:</h6>
+    <h6>0x9a9b5b0eccebd2834f77f764364a14bbfc837dc0</h6>
+
+
+    <form id="nobetForm">
+        <label for="year">Hangi Yıl:</label>
+        <input type="number" id="year" name="year" min="1900" max="2100" required><br><br>
+
+        <label for="month">Hangi Ay:</label>
+        <select id="month" name="month" required>
+            <option value="">Seçiniz</option>
+            <option value="1">Ocak</option>
+            <option value="2">Şubat</option>
+            <option value="3">Mart</option>
+            <option value="4">Nisan</option>
+            <option value="5">Mayıs</option>
+            <option value="6">Haziran</option>
+            <option value="7">Temmuz</option>
+            <option value="8">Ağustos</option>
+            <option value="9">Eylül</option>
+            <option value="10">Ekim</option>
+            <option value="11">Kasım</option>
+            <option value="12">Aralık</option>
+        </select><br><br>
+
+        <label for="numPersons">Kaç kişi nöbet tutacak:</label>
+        <input type="number" id="numPersons" name="numPersons" min="1" required><br><br>
+
+        <div id="personDetails"></div>
+
+        <button type="submit">Nöbet Oluştur</button>
+    </form>
+
+    <h2>Oluşturulan Nöbet Listesi</h2>
+    <table id="nobetTable">
+        <thead>
+            <tr>
+                <th>Pazartesi</th>
+                <th>Salı</th>
+                <th>Çarşamba</th>
+                <th>Perşembe</th>
+                <th>Cuma</th>
+                <th>Cumartesi</th>
+                <th>Pazar</th>
+            </tr>
+        </thead>
+        <tbody id="nobetList"></tbody>
+    </table>
+
+    <script>
+        
+        //Nöbet Listesi Oluşturucu
+        //Geliştirici: Recep YENİ (recepyeni@gmail.com) (ChatGpt yardımıyla)
+        //Bir lahmacun ayran ısmarlamak isterseniz, BSC BNB Smart Chain (BEP20) USDT adresim:
+        //0x9a9b5b0eccebd2834f77f764364a14bbfc837dc0
+/*
+        // Sadece belirli bir URL'de çalışmasını sağlamak
+        const allowedURL = "https://www.mefey.tk/recinilt/nobet9super";
+        if (!window.location.href.startsWith(allowedURL)) {
+            document.body.innerHTML = "Bu sayfa yalnızca yetkili bir URL'de çalışabilir.";
+            throw new Error("Yetkisiz erişim.");
+        }
+
+        // Ek güvenlik önlemleri (örneğin: console.log'u devre dışı bırakmak)
+        console.log = function () {};
+        console.warn = function () {};
+        console.error = function () {};
+*/
+        document.getElementById('numPersons').addEventListener('input', function () {
+            const numPersons = parseInt(this.value);
+            const personDetails = document.getElementById('personDetails');
+            personDetails.innerHTML = '';
+
+            for (let i = 0; i < numPersons; i++) {
+                personDetails.innerHTML += `
+                    <fieldset>
+                        <legend>Kişi ${i + 1}</legend>
+                        <label for="name_${i}">Ad (gerekli):</label>
+                        <input type="text" id="name_${i}" name="name_${i}" required><br><br>
+
+                        <label for="notPreferred_${i}">İstemediği Günler (Virgül ile) (opsiyonel):</label>
+                        <input type="text" id="notPreferred_${i}" name="notPreferred_${i}"><br><br>
+
+                        <label for="preferred_${i}">İstediği Günler (Virgül ile) (opsiyonel):</label>
+                        <input type="text" id="preferred_${i}" name="preferred_${i}"><br><br>
+
+                        <label for="blockShifts_${i}">Üst Üste Kaç Gün Nöbet Tutmak İstiyor (Blok Nöbet) (gerekli):</label>
+                        <input type="number" id="blockShifts_${i}" name="blockShifts_${i}" min="1" value="1" required><br><br>
+
+
+                        <label for="maxConsecutive_${i}">En Fazla Üst Üste Nöbet (blok) (Blok tutmamak için 1 giriniz.) (gerekli):</label>
+                        <input type="number" id="maxConsecutive_${i}" name="maxConsecutive_${i}" min="1" value="1" required><br><br>
+
+                        <label for="numShifts_${i}">Kaç Nöbet Tutacak (gerekli):</label>
+                        <input type="number" id="numShifts_${i}" name="numShifts_${i}" min="1" required><br><br>
+                    </fieldset>
+                `;
+            }
+        }); 
+
+        
+        let sira = 0; // Başlangıç noktası
+
+        function shuffleArray2(array) {
+            // Listeyi `sira`dan başlat, sona kadar olan kısmı al
+            const part1 = array.slice(sira);
+            // Listenin başından `sira`ya kadar olan kısmı al
+            const part2 = array.slice(0, sira);
+            // Yeni sıralamayı birleştir
+            const yenisira = [...part1, ...part2];
+
+            // `sira`yı bir sonraki çağrı için güncelle
+            sira = (sira + 1) % array.length; // Mod ile listenin boyutunu aşmayı önler
+
+            return yenisira;
+        }
+
+        
+        /*
+        var sira=2
+        function shuffleArray2(array) {
+            let yenisira=[];
+            let sira2=0
+            for (let i = 0; i < array.length; i++) {
+                if (sira<array.length && sira >i){
+                    yenisira.push(array[i]);
+                } else {
+                    yenisira.push(array[sira2]);
+                    sira2++;
+                }
+            }
+            if (sira<array.length-1){
+                sira++;
+            } else {
+                sira=0;
+            }
+            return yenisira
+        }
+        */
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1)); // 0 ile i arasında bir rastgele indeks seçilir
+                [array[i], array[j]] = [array[j], array[i]]; // Elemanların yerini değiştirir
+            }
+            return array;
+        }
+
+// Örnek kullanım:
+//const isimListesi = ["Ahmet", "Mehmet", "Ayşe", "Fatma", "Ali"];
+//const karistirilmisListe = shuffleArray(isimListesi);
+
+//console.log(karistirilmisListe);
+//console.log(karistirilmisListe[2])
+
+        sira = 0; // Başlangıç noktası
+        let currentBlockCount = 0; // Global değişken olarak tanımlanmalı
+
+        function getNextPersonIndex(persons, currentIndex) {
+            let person = persons[(currentIndex % persons.length)-1];
+            
+            // Eğer kişinin mevcut nöbet sayısı, blockShifts ile uyumluysa sıradaki kişiye geç
+            if (currentBlockCount < person.blockShifts && person.assigned.length < person.numShifts) {
+                currentBlockCount++;
+                return currentIndex;
+            } else {
+                currentBlockCount = 1; // Yeni kişi için blok sayısını sıfırla
+                let nextIndex = (currentIndex + 1) % persons.length; // Sıradaki kişi
+                return nextIndex;
+            }
+        }
+
+        //function getNextPersonIndex(persons, sira) {
+        //    const index = sira % persons.length; // Döngüsel olarak sırayı al
+        //    return index;
+        //}
+
+        document.getElementById('nobetForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            const numPersons = parseInt(document.getElementById('numPersons').value);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            let bloksayisi=0;
+            let istenmeyengunler=[];
+            let persons = [];
+            for (let i = 0; i < numPersons; i++) {
+                const name = document.getElementById(`name_${i}`).value;
+                const notPreferred = document.getElementById(`notPreferred_${i}`).value.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d));
+                const preferred = document.getElementById(`preferred_${i}`).value.split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d));
+                const maxConsecutive = parseInt(document.getElementById(`maxConsecutive_${i}`).value) || daysInMonth;
+                const numShifts = parseInt(document.getElementById(`numShifts_${i}`).value);
+                const blockShifts=parseInt(document.getElementById(`blockShifts_${i}`).value) || 1;
+                if (notPreferred.length>0){
+                    for (let myday of notPreferred){
+                        if (!istenmeyengunler.includes(myday)){
+                            istenmeyengunler.push(myday);
+                        };
+                    }
+                    
+                }
+                bloksayisi+=(blockShifts -1);
+                persons.push({ 
+                    name, 
+                    notPreferred, 
+                    preferred, 
+                    maxConsecutive, 
+                    numShifts, 
+                    blockShifts,   //: parseInt(document.getElementById(`blockShifts_${i}`).value) || 1, 
+                    assigned: [] 
+                });
+                
+
+                //persons.push({ name, notPreferred, preferred, maxConsecutive, numShifts, assigned: [] });
+            }
+            var dongusayisi=persons.length+bloksayisi
+            personindexlist=[]
+            
+            for (let index = 0; index < persons.length; index++) {
+                for (let i = 0; i < persons[index].blockShifts; i++) {
+                    personindexlist.push(index);
+                    
+                }
+                
+            }
+            console.log("persons: ",persons);
+            console.log(istenmeyengunler);
+            persons.sort((a, b) => a.numShifts - b.numShifts); // Kişileri vardiya sayısına göre sırala
+            let schedule = Array(daysInMonth).fill(null);
+            let attempt = 0;
+            let success = false;
+
+            // Birinci while döngüsü
+            while (attempt < 10000) {
+                persons = shuffleArray(persons);
+                schedule = Array(daysInMonth).fill(null);
+                persons.forEach(person => person.assigned = []);
+                
+
+                // İstenen günlere yerleştir
+                persons.forEach(person => {
+                    person.preferred.forEach(day => {
+                        if (schedule[day - 1] === null && person.assigned.length < person.numShifts) {
+                            schedule[day - 1] = person.name;
+                            person.assigned.push(day);
+                        }
+                    });
+                });
+
+                
+                // İstenmeyen günlere yerleştir
+                /*
+                for (let day = 0; day < daysInMonth; day++) {
+                    if (schedule[day] === null) { // Boş olan günleri kontrol et
+                        for (let person of persons) {
+                            if (
+                                person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                person.assigned.length < person.numShifts &&
+                                isConsecutiveAllowed(schedule, day, person)
+                            ) {
+                                schedule[day] = person.name;
+                                person.assigned.push(day + 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                */
+                for (let day = 0; day < daysInMonth; day++) {
+                    if (schedule[day] === null) { // Boş olan günleri kontrol et
+                        for (let person of persons) {
+                            if (
+                                istenmeyengunler.includes(day+1) &&
+                                !person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                person.assigned.length < person.numShifts &&
+                                isConsecutiveAllowed(schedule, day, person)
+                            ) {
+                                schedule[day] = person.name;
+                                person.assigned.push(day + 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Kalan günleri doldur
+                for (let day = 0; day < daysInMonth; day++) {
+                    if (schedule[day] === null) {
+                        for (let i = 0; i < dongusayisi; i++) {
+                            //const personIndex = getNextPersonIndex(persons, sira);
+                            //const person = persons[personIndex];
+                            var person =persons[personindexlist[sira%dongusayisi]];
+                            if (
+                                !person.notPreferred.includes(day + 1) &&
+                                person.assigned.length < person.numShifts &&
+                                isConsecutiveAllowed(schedule, day, person)
+                            ) {
+                                schedule[day] = person.name;
+                                person.assigned.push(day + 1);
+                                sira++;
+                                break;
+                            }
+                            sira++;
+                        }
+                    }
+                }
+
+                if (!schedule.includes(null)) {
+                    success = true;
+                    break;
+                }
+                attempt++;
+            }
+
+            // Eğer birinci döngü başarısız olursa ikinci while döngüsüne geçilir
+            if (!success) {
+                console.log("Birinci döngü başarısız oldu, ikinci döngü başlıyor...");
+                attempt = 0;
+                sira = 2; // İkinci döngü için sırayı başa al
+                while (attempt < 10000) {
+                    persons = shuffleArray2(persons); // İkinci döngüde farklı bir karıştırma algoritması kullanılıyor
+                    schedule = Array(daysInMonth).fill(null);
+                    persons.forEach(person => person.assigned = []);
+
+                    // İstenen günlere yerleştir
+                    persons.forEach(person => {
+                        person.preferred.forEach(day => {
+                            if (schedule[day - 1] === null && person.assigned.length < person.numShifts) {
+                                schedule[day - 1] = person.name;
+                                person.assigned.push(day);
+                            }
+                        });
+                    });
+
+                    // İstenmeyen günlere yerleştir
+                    /*
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) { // Boş olan günleri kontrol et
+                            for (let person of persons) {
+                                if (
+                                    person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    */
+
+                    // İstenmeyen günlere yerleştir
+                    /*
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) { // Boş olan günleri kontrol et
+                            for (let person of persons) {
+                                if (
+                                    person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    */
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) { // Boş olan günleri kontrol et
+                            for (let person of persons) {
+                                if (
+                                    istenmeyengunler.includes(day+1) &&
+                                    !person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+
+                    // Kalan günleri doldur
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) {
+                            for (let person of persons) {
+                                if (
+                                    !person.notPreferred.includes(day + 1) &&
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!schedule.includes(null)) {
+                        success = true;
+                        break;
+                    }
+                    attempt++;
+                }
+            }
+
+            if (schedule.includes(null)) {
+                alert("Tüm günleri doldurmak mümkün olmadı.");
+            } else {
+                console.log("Nöbet başarıyla oluşturuldu!");
+            }
+
+            // Tabloyu güncelleme işlemi
+            const tableBody = document.getElementById('nobetList');
+            tableBody.innerHTML = '';
+            tableBody.style.display = 'table-row-group';
+
+            let row = document.createElement('tr');
+            let currentDay = 0;
+            let firstDay = new Date(year, month - 1, 1).getDay();
+            firstDay = (firstDay === 0) ? 7 : firstDay;
+
+            for (let i = 1; i < firstDay; i++) {
+                const emptyCell = document.createElement('td');
+                row.appendChild(emptyCell);
+                currentDay++;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('td');
+                cell.textContent = `${day} - ${schedule[day - 1] || 'Boş'}`;
+                row.appendChild(cell);
+                currentDay++;
+
+                if (currentDay % 7 === 0 || day === daysInMonth) {
+                    tableBody.appendChild(row);
+                    row = document.createElement('tr');
+                }
+            }
+        });
+
+
+
+        function isConsecutiveAllowed(schedule, day, person) {
+            const maxConsecutive = person.maxConsecutive;
+            let count = 0;
+
+            // Öncesine bak
+            for (let i = day - 1; i >= 0; i--) {
+                if (schedule[i] === person.name) count++;
+                else break;
+            }
+
+            // Sonrasına bak
+            for (let i = day + 1; i < schedule.length; i++) {
+                if (schedule[i] === person.name) count++;
+                else break;
+            }
+
+            return count < maxConsecutive;
+        }
+    </script>
+</body>
+</html>
