@@ -236,7 +236,8 @@
             • Ses duyulmayabilir (ultrasonik)<br>
             • Telefonu karınca geçiş yerlerine yakın tutun<br>
             • Etkililik karınca türüne göre değişir<br>
-            • Kulaklık kullanmayın!
+            • Kulaklık kullanmayın!<br>
+            • <strong>Arka planda sürekli çalar - başka sekmelere geçebilirsiniz</strong>
         </div>
     </div>
 
@@ -347,12 +348,8 @@
         // Sayfa kapanırken sesi durdur
         window.addEventListener('beforeunload', stopSound);
         
-        // Telefon ekranı kapandığında sesi durdur
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden && isPlaying) {
-                stopSound();
-            }
-        });
+        // Arka plan çalıştırma için visibilitychange olayını kaldırdık
+        // Artık başka sekmelere geçerken ses durmayacak
     </script>
 </body>
 </html>
