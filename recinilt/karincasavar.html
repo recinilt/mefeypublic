@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karınca Kovucu Ses Üretici</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .frequency-display {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .frequency-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .frequency-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .slider-container {
+            margin: 25px 0;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+            margin: 15px 0;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        
+        .start-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .stop-btn {
+            background: linear-gradient(45deg, #dc3545, #fd7e14);
+            color: white;
+        }
+        
+        .stop-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .preset-btn {
+            background: linear-gradient(45deg, #17a2b8, #6f42c1);
+            color: white;
+            padding: 10px;
+            font-size: 14px;
+        }
+        
+        .preset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(23, 162, 184, 0.3);
+        }
+        
+        .info {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #004085;
+            text-align: left;
+        }
+        
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        
+        .status.playing {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.stopped {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .volume-control {
+            margin: 20px 0;
+        }
+        
+        .volume-label {
+            display: block;
+            margin-bottom: 10px;
+            color: #495057;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐜 Karınca Kovucu</h1>
+        
+        <div class="frequency-display">
+            <div class="frequency-value" id="frequencyValue">20000</div>
+            <div class="frequency-label">Hz (Hertz)</div>
+        </div>
+        
+        <div class="slider-container">
+            <input type="range" min="1000" max="50000" value="20000" class="slider" id="frequencySlider">
+            <div style="display: flex; justify-content: space-between; font-size: 12px; color: #6c757d;">
+                <span>1 kHz</span>
+                <span>50 kHz</span>
+            </div>
+        </div>
+        
+        <div class="preset-buttons">
+            <button class="preset-btn" onclick="setFrequency(20000)">20 kHz (Önerilen)</button>
+            <button class="preset-btn" onclick="setFrequency(25000)">25 kHz</button>
+            <button class="preset-btn" onclick="setFrequency(30000)">30 kHz</button>
+            <button class="preset-btn" onclick="setFrequency(40000)">40 kHz (Güçlü)</button>
+        </div>
+        
+        <div class="volume-control">
+            <label class="volume-label" for="volumeSlider">Ses Seviyesi</label>
+            <input type="range" min="0" max="100" value="50" class="slider" id="volumeSlider">
+        </div>
+        
+        <div class="status stopped" id="status">
+            ⏹️ Durduruldu
+        </div>
+        
+        <div class="controls">
+            <button class="start-btn" onclick="startSound()">▶️ Başlat</button>
+            <button class="stop-btn" onclick="stopSound()">⏹️ Durdur</button>
+        </div>
+        
+        <div class="info">
+            <strong>💡 Kullanım:</strong><br>
+            • Karıncalar genellikle 20-40 kHz arası seslerden rahatsız olur<br>
+            • Ses duyulmayabilir (ultrasonik)<br>
+            • Telefonu karınca geçiş yerlerine yakın tutun<br>
+            • Etkililik karınca türüne göre değişir<br>
+            • Kulaklık kullanmayın!
+        </div>
+    </div>
+
+    <script>
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let isPlaying = false;
+        
+        const frequencySlider = document.getElementById('frequencySlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const frequencyValue = document.getElementById('frequencyValue');
+        const status = document.getElementById('status');
+        
+        // Frekans slider'ı değiştiğinde
+        frequencySlider.addEventListener('input', function() {
+            const frequency = this.value;
+            frequencyValue.textContent = parseInt(frequency).toLocaleString('tr-TR');
+            
+            if (isPlaying && oscillator) {
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            }
+        });
+        
+        // Ses seviyesi değiştiğinde
+        volumeSlider.addEventListener('input', function() {
+            const volume = this.value / 100;
+            
+            if (isPlaying && gainNode) {
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            }
+        });
+        
+        function setFrequency(freq) {
+            frequencySlider.value = freq;
+            frequencyValue.textContent = parseInt(freq).toLocaleString('tr-TR');
+            
+            if (isPlaying && oscillator) {
+                oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            }
+        }
+        
+        async function startSound() {
+            if (isPlaying) return;
+            
+            try {
+                // Audio context oluştur
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Oscillator oluştur
+                oscillator = audioContext.createOscillator();
+                gainNode = audioContext.createGain();
+                
+                // Bağlantıları kur
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Ayarları uygula
+                const frequency = frequencySlider.value;
+                const volume = volumeSlider.value / 100;
+                
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+                oscillator.type = 'sine'; // Sinüs dalgası (en temiz ses)
+                gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+                
+                // Sesi başlat
+                oscillator.start();
+                isPlaying = true;
+                
+                // UI güncelle
+                status.textContent = '🔊 Çalıyor';
+                status.className = 'status playing';
+                
+                // Oscillator bittiğinde temizle
+                oscillator.onended = function() {
+                    isPlaying = false;
+                    status.textContent = '⏹️ Durduruldu';
+                    status.className = 'status stopped';
+                };
+                
+            } catch (error) {
+                alert('Ses başlatılamadı. Tarayıcı ses iznini kontrol edin.');
+                console.error('Audio error:', error);
+            }
+        }
+        
+        function stopSound() {
+            if (!isPlaying || !oscillator) return;
+            
+            try {
+                oscillator.stop();
+                oscillator = null;
+                gainNode = null;
+                
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                
+                isPlaying = false;
+                status.textContent = '⏹️ Durduruldu';
+                status.className = 'status stopped';
+            } catch (error) {
+                console.error('Stop error:', error);
+            }
+        }
+        
+        // Sayfa kapanırken sesi durdur
+        window.addEventListener('beforeunload', stopSound);
+        
+        // Telefon ekranı kapandığında sesi durdur
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden && isPlaying) {
+                stopSound();
+            }
+        });
+    </script>
+</body>
+</html>
