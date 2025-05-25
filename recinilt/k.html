@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Karınca Kovucu</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    button { padding: 15px 30px; font-size: 1.2em; }
+    .status { margin-top: 20px; font-size: 1.1em; color: #006600; }
+  </style>
+</head>
+<body>
+  <h1>Karınca Kovucu</h1>
+  <p>Bu sayfa, yüksek frekanslı bir ses üreterek karıncaları uzaklaştırmaya yardımcı olabilir.</p>
+  <button id="toggle">Başlat</button>
+  <div class="status" id="status">Durum: Kapalı</div>
+  <script>
+    let audioCtx = null;
+    let oscillator = null;
+    let isPlaying = false;
+
+    const frequency = 18000; // 18 kHz, insan kulağına zor gelir ama böcekler için rahatsız edici olabilir
+
+    document.getElementById('toggle').addEventListener('click', function() {
+      if (!isPlaying) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        oscillator.connect(audioCtx.destination);
+        oscillator.start();
+        isPlaying = true;
+        document.getElementById('toggle').textContent = "Durdur";
+        document.getElementById('status').textContent = "Durum: Çalışıyor (" + frequency + " Hz)";
+      } else {
+        oscillator.stop();
+        audioCtx.close();
+        isPlaying = false;
+        document.getElementById('toggle').textContent = "Başlat";
+        document.getElementById('status').textContent = "Durum: Kapalı";
+      }
+    });
+  </script>
+</body>
+</html>
