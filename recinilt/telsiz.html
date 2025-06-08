@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telsiz Uygulaması</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+
+        .status.idle {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+
+        .status.busy {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #f44336;
+        }
+
+        .status.talking {
+            background: rgba(255, 152, 0, 0.3);
+            border: 2px solid #FF9800;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .talk-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: none;
+            margin: 20px auto;
+            display: block;
+            cursor: pointer;
+            font-size: 1.5em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .talk-button.available {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .talk-button.available:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.6);
+        }
+
+        .talk-button.available:active {
+            transform: scale(0.95);
+        }
+
+        .talk-button.talking {
+            background: linear-gradient(145deg, #FF9800, #F57C00);
+            animation: talking 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes talking {
+            0% { box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4); }
+            100% { box-shadow: 0 5px 30px rgba(255, 152, 0, 0.8); }
+        }
+
+        .talk-button.disabled {
+            background: linear-gradient(145deg, #9E9E9E, #757575);
+            cursor: not-allowed;
+            color: #ddd;
+        }
+
+        .participants {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+        }
+
+        .participants h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .participant-list {
+            list-style: none;
+        }
+
+        .participant {
+            padding: 10px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .participant.talking {
+            background: rgba(255, 152, 0, 0.3);
+            border: 1px solid #FF9800;
+        }
+
+        .participant-name {
+            font-weight: bold;
+        }
+
+        .talking-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+            margin-left: 10px;
+        }
+
+        .participant.talking .talking-indicator {
+            background: #FF9800;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .name-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .name-input input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+        }
+
+        .name-input input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .name-input button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .name-input button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        .audio-visualizer {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            margin: 20px 0;
+        }
+
+        .bar {
+            width: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+            transition: height 0.1s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Telsiz</h1>
+        
+        <div class="name-input" id="nameInputDiv">
+            <input type="text" id="userName" placeholder="Adınızı girin..." maxlength="20">
+            <button onclick="joinChannel()">Katıl</button>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="status idle" id="status">
+                📡 Telsiz Boşta
+            </div>
+
+            <div class="audio-visualizer" id="visualizer">
+                <div class="bar" style="height: 10px;"></div>
+                <div class="bar" style="height: 20px;"></div>
+                <div class="bar" style="height: 15px;"></div>
+                <div class="bar" style="height: 25px;"></div>
+                <div class="bar" style="height: 18px;"></div>
+                <div class="bar" style="height: 22px;"></div>
+                <div class="bar" style="height: 12px;"></div>
+                <div class="bar" style="height: 28px;"></div>
+                <div class="bar" style="height: 16px;"></div>
+                <div class="bar" style="height: 20px;"></div>
+            </div>
+
+            <button class="talk-button available" id="talkButton" onmousedown="startTalking()" onmouseup="stopTalking()" onmouseleave="stopTalking()" ontouchstart="startTalking()" ontouchend="stopTalking()">
+                KONUŞ
+            </button>
+
+            <div class="participants">
+                <h3>👥 Katılımcılar (<span id="participantCount">0</span>)</h3>
+                <ul class="participant-list" id="participantList"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simüle edilmiş veri - gerçek uygulamada WebRTC ve sinyal sunucusu kullanılmalı
+        let participants = [];
+        let myId = null;
+        let myName = '';
+        let channelBusy = false;
+        let currentSpeaker = null;
+        let isTalking = false;
+
+        function joinChannel() {
+            const nameInput = document.getElementById('userName');
+            if (nameInput.value.trim() === '') {
+                alert('Lütfen bir isim girin!');
+                return;
+            }
+
+            myName = nameInput.value.trim();
+            myId = Date.now().toString();
+            
+            // Kendimizi katılımcı listesine ekle
+            participants.push({
+                id: myId,
+                name: myName,
+                talking: false
+            });
+
+            // Simüle edilmiş diğer kullanıcılar
+            setTimeout(() => {
+                participants.push({
+                    id: '123',
+                    name: 'Ahmet',
+                    talking: false
+                });
+                updateParticipantList();
+            }, 1000);
+
+            setTimeout(() => {
+                participants.push({
+                    id: '456',
+                    name: 'Ayşe',
+                    talking: false
+                });
+                updateParticipantList();
+            }, 2000);
+
+            document.getElementById('nameInputDiv').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            
+            updateParticipantList();
+            
+            // Simüle edilmiş konuşmalar
+            simulateOthersTalking();
+        }
+
+        function updateParticipantList() {
+            const list = document.getElementById('participantList');
+            const count = document.getElementById('participantCount');
+            
+            list.innerHTML = '';
+            count.textContent = participants.length;
+
+            participants.forEach(participant => {
+                const li = document.createElement('li');
+                li.className = 'participant' + (participant.talking ? ' talking' : '');
+                li.innerHTML = `
+                    <span class="participant-name">${participant.name}${participant.id === myId ? ' (Sen)' : ''}</span>
+                    <div class="talking-indicator"></div>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function startTalking() {
+            if (channelBusy || !myId) return;
+
+            isTalking = true;
+            channelBusy = true;
+            currentSpeaker = myId;
+
+            const button = document.getElementById('talkButton');
+            const status = document.getElementById('status');
+
+            button.className = 'talk-button talking';
+            button.textContent = 'KONUŞUYOR...';
+            
+            status.className = 'status talking';
+            status.textContent = '🔴 Sen Konuşuyorsun';
+
+            // Kendimizi konuşuyor olarak işaretle
+            participants = participants.map(p => ({
+                ...p,
+                talking: p.id === myId
+            }));
+            updateParticipantList();
+
+            // Görsel efekt
+            animateVisualizer(true);
+        }
+
+        function stopTalking() {
+            if (!isTalking) return;
+
+            isTalking = false;
+            channelBusy = false;
+            currentSpeaker = null;
+
+            const button = document.getElementById('talkButton');
+            const status = document.getElementById('status');
+
+            button.className = 'talk-button available';
+            button.textContent = 'KONUŞ';
+            
+            status.className = 'status idle';
+            status.textContent = '📡 Telsiz Boşta';
+
+            // Konuşma durumunu kaldır
+            participants = participants.map(p => ({
+                ...p,
+                talking: false
+            }));
+            updateParticipantList();
+
+            // Görsel efekti durdur
+            animateVisualizer(false);
+        }
+
+        function simulateOthersTalking() {
+            // Rastgele zamanlarda diğer kullanıcıların konuşmasını simüle et
+            setInterval(() => {
+                if (!channelBusy && participants.length > 1 && Math.random() > 0.7) {
+                    const others = participants.filter(p => p.id !== myId);
+                    const speaker = others[Math.floor(Math.random() * others.length)];
+                    
+                    channelBusy = true;
+                    currentSpeaker = speaker.id;
+
+                    const button = document.getElementById('talkButton');
+                    const status = document.getElementById('status');
+
+                    button.className = 'talk-button disabled';
+                    button.textContent = 'MEŞGUL';
+                    
+                    status.className = 'status busy';
+                    status.textContent = `🔊 ${speaker.name} Konuşuyor`;
+
+                    participants = participants.map(p => ({
+                        ...p,
+                        talking: p.id === speaker.id
+                    }));
+                    updateParticipantList();
+
+                    animateVisualizer(true);
+
+                    // 2-5 saniye sonra konuşmayı bitir
+                    setTimeout(() => {
+                        if (currentSpeaker === speaker.id) {
+                            channelBusy = false;
+                            currentSpeaker = null;
+
+                            button.className = 'talk-button available';
+                            button.textContent = 'KONUŞ';
+                            
+                            status.className = 'status idle';
+                            status.textContent = '📡 Telsiz Boşta';
+
+                            participants = participants.map(p => ({
+                                ...p,
+                                talking: false
+                            }));
+                            updateParticipantList();
+
+                            animateVisualizer(false);
+                        }
+                    }, 2000 + Math.random() * 3000);
+                }
+            }, 5000);
+        }
+
+        function animateVisualizer(active) {
+            const bars = document.querySelectorAll('.bar');
+            
+            if (active) {
+                const animate = () => {
+                    if (channelBusy) {
+                        bars.forEach(bar => {
+                            const height = 10 + Math.random() * 30;
+                            bar.style.height = height + 'px';
+                        });
+                        requestAnimationFrame(animate);
+                    } else {
+                        bars.forEach(bar => {
+                            bar.style.height = '10px';
+                        });
+                    }
+                };
+                animate();
+            } else {
+                bars.forEach(bar => {
+                    bar.style.height = '10px';
+                });
+            }
+        }
+
+        // Klavye desteği
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && !channelBusy && myId) {
+                e.preventDefault();
+                startTalking();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'Space' && isTalking) {
+                e.preventDefault();
+                stopTalking();
+            }
+        });
+    </script>
+</body>
+</html>

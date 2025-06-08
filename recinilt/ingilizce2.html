@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Türkçe-İngilizce Kelime Okuyucu</title>
+    <style>
+        #kelimeGoster {
+            font-size: 2em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Kelime Okuyucu</h1>
+    <h3>2. ETAP:</h3>
+    <button id="turkceIngilizceOku">1. ŞİMDİKİ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
+    <button id="ingilizceTurkceOku">2. GEÇMİŞ ZAMANA DAİR CÜMLE KALIPLARI</button><br>
+    <button id="egzersizoku">EGZERSİZ CÜMLE KALIPLARI</button><br>
+    <button id="etap2fiilcekimleri">2. ETAP FİİL ÇEKİMLERİ VE ANLAMLARI</button>
+
+    <div id="kelimeGoster"></div>
+
+    <script src="ingilizcekaliplar.js"></script>
+    <script src="ingilizcekaliplaregzersiz.js"></script>
+    <script src="ingilizcekaliplargecmisz.js"></script>
+    <script src="ingilizce2etapfiilcekimleri.js"></script>
+
+    <script>
+        const turkceIngilizceButton = document.getElementById('turkceIngilizceOku');
+        const ingilizceTurkceButton = document.getElementById('ingilizceTurkceOku');
+        const egzersizoku = document.getElementById('egzersizoku');
+        const etap2fiilcekimleri = document.getElementById('etap2fiilcekimleri');
+        const kelimeGoster = document.getElementById('kelimeGoster');
+
+        let currentUtterance;
+        let i = 0;
+
+        // DİKKAT: Bu dosyada tanımlı değilse aşağıdaki değişken tanım hatası verir
+        if (typeof turkceingilizce2 === 'undefined') {
+            var turkceingilizce2 = {}; // geçici boş veri, ileride ingilizcekaliplargecmisz.js içinden doldurulmalı
+        }
+
+        turkceIngilizceButton.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            i = 0;
+            oku(turkceingilizce, 'tr-TR');
+        });
+
+        ingilizceTurkceButton.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            i = 0;
+            oku(turkceingilizce2, 'tr-TR');
+        });
+
+        egzersizoku.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            i = 0;
+            oku(turkceingilizce3, 'tr-TR');
+        });
+
+        etap2fiilcekimleri.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            i = 0;
+            oku(ingilizceturkce2etapfiilcekimleri, 'en-US');
+        });
+
+        function oku(kelimeListesi, lang) {
+            let kelimeler = Object.entries(kelimeListesi);
+
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                kelimeGoster.textContent = '';
+                return;
+            }
+
+            const speak = () => {
+                if (i < kelimeler.length) {
+                    let kelime = kelimeler[i][0];
+                    let ceviri = kelimeler[i][1];
+                    kelimeGoster.textContent = `${kelime} - ${ceviri}`;
+
+                    // İlk kelimeyi oku
+                    let first = new SpeechSynthesisUtterance(kelime);
+                    first.lang = lang;
+
+                    first.onend = () => {
+                        // Sonra çeviriyi oku
+                        let second = new SpeechSynthesisUtterance(ceviri);
+                        second.lang = lang === 'tr-TR' ? 'en-US' : 'tr-TR';
+
+                        second.onend = () => {
+                            i++;
+                            speak();
+                        };
+
+                        speechSynthesis.speak(second);
+                    };
+
+                    speechSynthesis.speak(first);
+                } else {
+                    i = 0;
+                    kelimeGoster.textContent = '';
+                }
+            };
+
+            speak();
+        }
+    </script>
+
+</body>
+</html>
