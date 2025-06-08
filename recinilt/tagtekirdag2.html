@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekirdağ Merkez Tag/Taksi Haftalık Fırsat Haritası</title>
+    <link rel="stylesheet" href="tagtekirdag2.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚕 Tekirdağ Merkez Tag/Taksi Haftalık Fırsat Haritası</h1>
+            <p class="subtitle">Günlük Kazanç Fırsatları & Polis Kontrol Risk Analizi</p>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('monday')">📅 Pazartesi</button>
+                <button class="tab" onclick="showTab('tuesday')">📅 Salı</button>
+                <button class="tab" onclick="showTab('wednesday')">📅 Çarşamba</button>
+                <button class="tab" onclick="showTab('thursday')">📅 Perşembe</button>
+                <button class="tab" onclick="showTab('friday')">📅 Cuma</button>
+                <button class="tab" onclick="showTab('saturday')">📅 Cumartesi</button>
+                <button class="tab" onclick="showTab('sunday')">📅 Pazar</button>
+            </div>
+        </div>
+        
+        <!-- Pazartesi -->
+        <div id="monday" class="tab-content active">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Pazartesi Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Sabah Mesai Başlangıcı:</strong> 07:00-09:00 arası hastane ve üniversite çevresinde yoğun talep</li>
+                    <li><strong>Sanayi Bölgesi:</strong> Kapaklı ve çevre sanayi bölgelerinde vardiya değişimleri</li>
+                    <li><strong>Polis Kontrolleri:</strong> 100. Yıl Bulvarı ve E5 üzerinde sık kontrol</li>
+                    <li><strong>Üniversite Trafiği:</strong> Namık Kemal Üniversitesi çevresinde öğrenci yoğunluğu</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Pazartesi Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar (Yüksek Kazanç + Düşük Risk)</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>06:00-08:00:</strong> Hastane çevresi - Sabah vardiyası ve muayene trafiği
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>08:00-10:00:</strong> Üniversite kampüsü - Öğrenci ve personel taşımacılığı
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:00-19:00:</strong> Sanayi bölgesi - İş çıkışı yoğunluğu
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler (Orta Kazanç + Minimal Risk)</div>
+                    <div class="rec-item safe-option">
+                        <strong>10:00-12:00:</strong> Forum AVM çevresi - Alışveriş trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>14:00-16:00:</strong> Süleymanpaşa sahil - Dinlendirici kurslar
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>20:00-22:00:</strong> Merkez meydanı - Akşam sosyal aktiviteleri
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚠️ Kaçınılması Gerekenler</div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>07:00-09:00:</strong> E5 ve 100. Yıl Bulvarı - Yoğun trafik kontrolü
+                    </div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>16:00-18:00:</strong> Çorlu çevre yolu - Sıkı hız kontrolü
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Salı -->
+        <div id="tuesday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tuesday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Salı Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Normal İş Günü:</strong> Pazartesi'den biraz daha rahat, rutin trafik</li>
+                    <li><strong>Hastane Yoğunluğu:</strong> Poliklinik randevuları için artış</li>
+                    <li><strong>Polis Kontrolleri:</strong> Orta seviye, hafta içi rutin</li>
+                    <li><strong>AVM Trafiği:</strong> Öğleden sonra alışveriş yoğunluğu</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Salı Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>09:00-11:00:</strong> Hastane ve üniversite çevresi - Daha az yoğun
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>13:00-15:00:</strong> AVM ve alışveriş merkezleri - Öğleden sonra trafiği
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:00-19:00:</strong> Sanayi bölgesi - İş çıkışı
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>10:00-12:00:</strong> Şehir merkezi - İş trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>15:00-17:00:</strong> Sahil bölgesi - Sakin kurslar
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>19:00-21:00:</strong> Akşam sosyal aktiviteleri
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Çarşamba -->
+        <div id="wednesday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="wednesday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Çarşamba Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Hafta Ortası:</strong> En sakin gün, öngörülebilir trafik desenleri</li>
+                    <li><strong>Pazar Günleri:</strong> Halkın çarşı ve pazar alışverişi</li>
+                    <li><strong>Polis Kontrolleri:</strong> En düşük seviye</li>
+                    <li><strong>İdeal Çalışma Günü:</strong> Stresi en az gün</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Çarşamba Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>08:00-10:00:</strong> En güvenli mesai trafiği
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>11:00-14:00:</strong> Pazar ve alışveriş trafiği
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>16:00-18:00:</strong> En rahat akşam trafiği
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>Tüm Gün:</strong> En öngörülebilir gün - Plan yapın
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>09:00-16:00:</strong> Şehir merkezi turları
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>18:00-22:00:</strong> Sosyal aktiviteler
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Perşembe -->
+        <div id="thursday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="thursday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Perşembe Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Hafta Sonu Öncesi:</strong> Akşam eğlence yerlerinde erken hareketlilik</li>
+                    <li><strong>Üniversite Aktiviteleri:</strong> Perşembe akşamı öğrenci etkinlikleri</li>
+                    <li><strong>Polis Kontrolleri:</strong> Akşam saatlerinde artış</li>
+                    <li><strong>Marina Bölgesi:</strong> Sahil kesiminde akşam yoğunluğu</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Perşembe Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>18:00-21:00:</strong> Eğlence merkezleri - Hafta sonu öncesi
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>19:00-22:00:</strong> Sahil ve marina bölgesi
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>16:00-18:00:</strong> Üniversite çevresi - Öğrenci aktiviteleri
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>08:00-16:00:</strong> Günlük rutinler
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>17:00-19:00:</strong> Erken akşam trafiği
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚠️ Dikkat Edilmesi Gerekenler</div>
+                    <div class="rec-item" style="border-left-color: #f39c12; background: rgba(243, 156, 18, 0.1);">
+                        <strong>21:00-24:00:</strong> Trafik kontrolleri artmaya başlıyor
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cuma -->
+        <div id="friday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="friday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Cuma Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Cuma Namazı:</strong> 12:00-14:00 arası cami çevreleri yoğun</li>
+                    <li><strong>Hafta Sonu Başlangıcı:</strong> 18:00'den sonra yoğun gece hayatı</li>
+                    <li><strong>Polis Kontrolleri:</strong> Gece saatlerinde yüksek, alkol kontrolü</li>
+                    <li><strong>En Karlı Gün:</strong> Yüksek kazanç fakat yüksek risk</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Cuma Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 Altın Fırsatlar (Yüksek Risk = Yüksek Kazanç)</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>19:00-01:00:</strong> Merkez ve sahil - En karlı saatler, riskli
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:00-19:00:</strong> Eğlence merkezleri - Risk henüz düşük
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>12:00-14:00:</strong> Cuma namazı trafiği
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Orta Risk Seçenekleri</div>
+                    <div class="rec-item safe-option">
+                        <strong>08:00-17:00:</strong> Normal mesai saatleri
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>15:00-17:00:</strong> AVM ve alışveriş merkezleri
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚨 Yüksek Risk Alanları</div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>22:00-03:00:</strong> Tüm ana yollar - Çok sıkı alkol kontrolü
+                    </div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>00:00-02:00:</strong> E5 ve çevre yolları - Sürekli çevirme
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cumartesi -->
+        <div id="saturday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="saturday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Cumartesi Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Alışveriş Trafiği:</strong> AVM'ler ve çarşılar çevresinde yoğunluk</li>
+                    <li><strong>Sahil Aktiviteleri:</strong> Marina ve sahil bölgesinde artış</li>
+                    <li><strong>Polis Kontrolleri:</strong> Orta seviye, hafta sonu devriyesi</li>
+                    <li><strong>Aile Gezileri:</strong> Hafta sonu aile taşımacılığı</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Cumartesi Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>10:00-18:00:</strong> AVM'ler - Alışveriş trafiği, aileli yolculuklar
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>14:00-19:00:</strong> Sahil ve marina - Hafta sonu gezileri
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>19:00-23:00:</strong> Eğlence merkezleri - Cumadan daha rahat
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>09:00-11:00:</strong> Kahvaltı mekanları - Aile trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>12:00-14:00:</strong> Öğle yemeği trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>23:00-02:00:</strong> Gece eğlencesi - Orta risk
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pazar -->
+        <div id="sunday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Tekirdağ Merkez - Anıt Meydanı</th>
+                            <th class="region-header">Namık Kemal Üniversitesi Kampüsü</th>
+                            <th class="region-header">100. Yıl Bulvarı - Doğu Mah.</th>
+                            <th class="region-header">Devlet Hastanesi - Özel Hastaneler</th>
+                            <th class="region-header">Otogar - Terminal Çevresi</th>
+                            <th class="region-header">Kapaklı Sanayi Bölgesi</th>
+                            <th class="region-header">Forum AVM - TerraCity</th>
+                            <th class="region-header">Çorlu Çevre Yolu - E5</th>
+                            <th class="region-header">Raki Meydanı - Eski Merkez</th>
+                            <th class="region-header">Gazi Osman Paşa Bulvarı</th>
+                            <th class="region-header">Süleymanpaşa Sahil - Marina</th>
+                            <th class="region-header">Marmaraereğlisi Yolu</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sunday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Pazar Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Aile Trafiği:</strong> Pazar kahvaltısı ve aile gezileri</li>
+                    <li><strong>Dinlendirici Gün:</strong> Genel olarak sakin, sahil hareketli</li>
+                    <li><strong>Polis Kontrolleri:</strong> En düşük seviye</li>
+                    <li><strong>Pazar Dönüşü:</strong> Akşam hafta sonu dönüş trafiği</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Pazar Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>09:00-12:00:</strong> Kahvaltı mekanları - Pazar keyfi
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>13:00-17:00:</strong> Sahil ve marina - Aile gezileri
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:00-20:00:</strong> Dönüş trafiği - Hafta sonu sonu
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>Tüm Gün:</strong> En güvenli gün - Minimal polis riski
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>10:00-19:00:</strong> Turistik alanlar - Sakin ve sürekli
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>19:00-23:00:</strong> Akşam yemekleri - Aile restoranları
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">💡 Pazar Günü Stratejileri</div>
+                    <div class="rec-item" style="border-left-color: #3498db; background: rgba(52, 152, 219, 0.1);">
+                        <strong>Dinlendirici Gün:</strong> Hafta boyunca yorulduysanız rahat çalışın
+                    </div>
+                    <div class="rec-item" style="border-left-color: #3498db; background: rgba(52, 152, 219, 0.1);">
+                        <strong>Çevre İller:</strong> Pazar günü komşu illere kurslar
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="tagtekirdag2.js"></script>
+    
+</body>
+</html>
