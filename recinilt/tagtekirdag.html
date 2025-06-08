@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tekirdağ Tag/Taksi Haftalık Fırsat Haritası</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #2980b9 0%, #6bb6ff 100%);
+            color: #333;
+        }
+        
+        .container {
+            max-width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .subtitle {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .tabs-container {
+            background: #ecf0f1;
+            border-bottom: 2px solid #bdc3c7;
+        }
+        
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 10px;
+            background: #bdc3c7;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-right: 1px solid #95a5a6;
+        }
+        
+        .tab:hover {
+            background: #95a5a6;
+            transform: translateY(-2px);
+        }
+        
+        .tab.active {
+            background: #e74c3c;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            border: 2px solid #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .green { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+        .yellow { background: linear-gradient(135deg, #f39c12, #f1c40f); }
+        .red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            background: white;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #c0392b, #e74c3c);
+            color: white;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-size: 12px;
+        }
+        
+        .time-column {
+            background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+            font-weight: bold;
+            color: #2c3e50;
+            position: sticky;
+            left: 0;
+            z-index: 50;
+            min-width: 60px;
+        }
+        
+        .region-header {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            min-width: 80px;
+            max-width: 80px;
+            padding: 10px 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .high-demand {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .medium-demand {
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .low-demand {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .cell-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .demand-icon {
+            font-size: 16px;
+        }
+        
+        .police-risk {
+            font-size: 9px;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+        
+        .notes {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .notes h3 {
+            margin-top: 0;
+            color: #c0392b;
+            font-size: 18px;
+        }
+        
+        .notes ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        
+        .notes li {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+        
+        .recommendations {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f6f3, #d5f4e6);
+            border-radius: 10px;
+            border-left: 5px solid #27ae60;
+        }
+        
+        .recommendations h3 {
+            margin-top: 0;
+            color: #27ae60;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .rec-section {
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            border-left: 3px solid #f39c12;
+        }
+        
+        .rec-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .rec-item {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            border-left: 2px solid #e74c3c;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .high-opportunity {
+            border-left-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+        
+        .safe-option {
+            border-left-color: #f39c12;
+            background: rgba(243, 156, 18, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .tab {
+                font-size: 12px;
+                padding: 12px 8px;
+            }
+            
+            table {
+                font-size: 9px;
+            }
+            
+            th, td {
+                padding: 4px;
+            }
+            
+            .region-header {
+                min-width: 70px;
+                max-width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚕 Tekirdağ Tag/Taksi Haftalık Fırsat Haritası</h1>
+            <p class="subtitle">Günlük Kazanç Fırsatları & Polis Kontrol Risk Analizi</p>
+        </div>
+        
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('monday')">📅 Pazartesi</button>
+                <button class="tab" onclick="showTab('tuesday')">📅 Salı</button>
+                <button class="tab" onclick="showTab('wednesday')">📅 Çarşamba</button>
+                <button class="tab" onclick="showTab('thursday')">📅 Perşembe</button>
+                <button class="tab" onclick="showTab('friday')">📅 Cuma</button>
+                <button class="tab" onclick="showTab('saturday')">📅 Cumartesi</button>
+                <button class="tab" onclick="showTab('sunday')">📅 Pazar</button>
+            </div>
+        </div>
+        
+        <!-- Pazartesi -->
+        <div id="monday" class="tab-content active">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Süleymanpaşa Merkez - Hükümet Konağı</th>
+                            <th class="region-header">Çorlu Merkez - Otogar Çevresi</th>
+                            <th class="region-header">Çerkezköy Sanayi - OSB Bölgesi</th>
+                            <th class="region-header">Hayrabolu Merkez - Pazar Yeri</th>
+                            <th class="region-header">Saray İlçesi - Merkez Cami</th>
+                            <th class="region-header">Malkara Merkez - Devlet Hastanesi</th>
+                            <th class="region-header">Muratlı Tren Garı - Merkez</th>
+                            <th class="region-header">Marmaraereğlisi Sahil - Liman</th>
+                            <th class="region-header">Şarköy Bağcılık - Sahil Yolu</th>
+                            <th class="region-header">Namık Kemal Üniversitesi</th>
+                            <th class="region-header">Tekirdağ Devlet Hastanesi</th>
+                            <th class="region-header">TEM Otoyolu - Gişeler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Pazartesi Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Sabah Mesai Başlangıcı:</strong> 07:00-09:00 arası Çorlu ve Çerkezköy'de yoğun iş trafiği</li>
+                    <li><strong>Sanayi Bölgesi:</strong> Çerkezköy OSB'de vardiya değişimlerinde fırsat</li>
+                    <li><strong>Polis Kontrolleri:</strong> TEM otoyolu gişelerinde sıkı denetim</li>
+                    <li><strong>Üniversite:</strong> NKÜ'de ders saatlerinde öğrenci trafiği</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Pazartesi Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar (Yüksek Kazanç + Düşük Risk)</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>06:30-08:30:</strong> Çerkezköy OSB - Sabah vardiyası, işçi taşımacılığı
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>12:00-13:00:</strong> Devlet Hastanesi - Öğle yemeği trafiği
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:00-18:30:</strong> Çorlu Merkez - Akşam iş çıkışı
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler (Orta Kazanç + Minimal Risk)</div>
+                    <div class="rec-item safe-option">
+                        <strong>09:00-11:00:</strong> Süleymanpaşa - Devlet dairesi trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>14:00-16:00:</strong> NKÜ Kampüsü - Öğrenci taşımacılığı
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>19:00-21:00:</strong> Merkez ilçeler - Akşam sosyal aktiviteleri
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚠️ Kaçınılması Gerekenler</div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>07:30-09:00:</strong> TEM Otoyolu - Yoğun polis kontrolü
+                    </div>
+                    <div class="rec-item" style="border-left-color: #e74c3c; background: rgba(231, 76, 60, 0.1);">
+                        <strong>12:00-14:00:</strong> Küçük ilçeler - Az talep, çok bekleyiş
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Diğer günler için benzer yapı -->
+        <div id="tuesday" class="tab-content">
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color green"></div>
+                    <span>🟢 Yüksek Fırsat (Az Sürücü, Çok Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color yellow"></div>
+                    <span>🟡 Orta Fırsat (Dengeli Durum)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color red"></div>
+                    <span>🔴 Düşük Fırsat (Çok Sürücü, Az Talep)</span>
+                </div>
+                <div class="legend-item">
+                    <div style="width: 24px; height: 24px; background: #333; border-radius: 6px; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px;">D/O/Y</div>
+                    <span>Polis Riski: D=Düşük, O=Orta, Y=Yüksek</span>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="time-column">Saat</th>
+                            <th class="region-header">Süleymanpaşa Merkez - Hükümet Konağı</th>
+                            <th class="region-header">Çorlu Merkez - Otogar Çevresi</th>
+                            <th class="region-header">Çerkezköy Sanayi - OSB Bölgesi</th>
+                            <th class="region-header">Hayrabolu Merkez - Pazar Yeri</th>
+                            <th class="region-header">Saray İlçesi - Merkez Cami</th>
+                            <th class="region-header">Malkara Merkez - Devlet Hastanesi</th>
+                            <th class="region-header">Muratlı Tren Garı - Merkez</th>
+                            <th class="region-header">Marmaraereğlisi Sahil - Liman</th>
+                            <th class="region-header">Şarköy Bağcılık - Sahil Yolu</th>
+                            <th class="region-header">Namık Kemal Üniversitesi</th>
+                            <th class="region-header">Tekirdağ Devlet Hastanesi</th>
+                            <th class="region-header">TEM Otoyolu - Gişeler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tuesday-table">
+                        <!-- Tablo içeriği JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="notes">
+                <h3>💡 Salı Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Normal İş Günü:</strong> Pazartesi'den daha sakin, rutin trafik</li>
+                    <li><strong>Pazar Günleri:</strong> Hayrabolu ve Malkara'da haftalık pazar</li>
+                    <li><strong>Üniversite:</strong> Salı günleri derse katılım yüksek</li>
+                    <li><strong>Sanayi:</strong> Üretim temposu normale döner</li>
+                </ul>
+            </div>
+            
+            <div class="recommendations">
+                <h3>🎯 Salı Günü Önerilerim</h3>
+                
+                <div class="rec-section">
+                    <div class="rec-title">🚀 En İyi Fırsatlar</div>
+                    <div class="rec-item high-opportunity">
+                        <strong>08:00-09:00:</strong> Çerkezköy - Pazartesi'den daha rahat çalışma ortamı
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>11:00-12:00:</strong> Pazar günleri - Hayrabolu/Malkara
+                    </div>
+                    <div class="rec-item high-opportunity">
+                        <strong>17:30-19:00:</strong> Çorlu merkez - Akşam trafiği
+                    </div>
+                </div>
+                
+                <div class="rec-section">
+                    <div class="rec-title">⚡ Güvenli Seçenekler</div>
+                    <div class="rec-item safe-option">
+                        <strong>10:00-16:00:</strong> NKÜ - Sürekli öğrenci trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>14:00-17:00:</strong> Hastane çevresi - Hasta/ziyaretçi trafiği
+                    </div>
+                    <div class="rec-item safe-option">
+                        <strong>20:00-22:00:</strong> Sahil kasabaları - Akşam gezileri
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Diğer günler benzer şekilde oluşturulacak -->
+        <div id="wednesday" class="tab-content">
+            <div class="notes">
+                <h3>💡 Çarşamba Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Hafta Ortası:</strong> En stabil ve öngörülebilir gün</li>
+                    <li><strong>İş Yemekleri:</strong> Merkez bölgelerde restoran trafiği artışı</li>
+                    <li><strong>Polis Kontrolleri:</strong> Minimal seviye</li>
+                    <li><strong>Üniversite:</strong> Haftanın en yoğun ders günü</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="thursday" class="tab-content">
+            <div class="notes">
+                <h3>💡 Perşembe Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Hafta Sonu Hazırlığı:</strong> Akşam sosyal aktivite artışı</li>
+                    <li><strong>Alışveriş:</strong> Cuma öncesi market/çarşı trafiği</li>
+                    <li><strong>Kafe/Restoran:</strong> Akşam buluşma trafiği başlar</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="friday" class="tab-content">
+            <div class="notes">
+                <h3>💡 Cuma Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Cuma Namazı:</strong> 12:00-14:00 cami çevrelerinde yoğunluk</li>
+                    <li><strong>Hafta Sonu Başlangıcı:</strong> Akşam eğlence mekanlarında artış</li>
+                    <li><strong>Sahil Kasabaları:</strong> Hafta sonu için erken çıkanlar</li>
+                    <li><strong>Polis Kontrolleri:</strong> Akşam saatlerinde artış</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="saturday" class="tab-content">
+            <div class="notes">
+                <h3>💡 Cumartesi Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Sahil Turizmi:</strong> Şarköy ve Marmaraereğlisi'nde yoğunluk</li>
+                    <li><strong>Alışveriş:</strong> Çorlu ve Süleymanpaşa'da AVM trafiği</li>
+                    <li><strong>Bağ Turları:</strong> Şarköy bölgesinde bağcılık turizmi</li>
+                    <li><strong>Aile Gezileri:</strong> Genel olarak aile trafiği yoğun</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div id="sunday" class="tab-content">
+            <div class="notes">
+                <h3>💡 Pazar Günü Özel Notları</h3>
+                <ul>
+                    <li><strong>Sahil Günü:</strong> Tüm sahil kasabalarında yoğunluk</li>
+                    <li><strong>Piknik Alanları:</strong> Doğa gezileri ve piknik trafiği</li>
+                    <li><strong>Dönüş Trafiği:</strong> Akşam İstanbul yönlü yoğunluk</li>
+                    <li><strong>En Güvenli Gün:</strong> Minimal polis kontrol riski</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Tekirdağ'a özgü gerçekçi saatlik veri
+        const tekirdagData = {
+            monday: [
+                ['00:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['01:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['02:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['03:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['04:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['05:00', ['⚡/D', '⚡/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '⚡/D']],
+                ['06:00', ['⚡/O', '✅/O', '✅/O', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '❌/D', '⚡/O', '✅/Y']],
+                ['07:00', ['✅/O', '✅/Y', '✅/Y', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/Y']],
+                ['08:00', ['✅/Y', '✅/Y', '✅/Y', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '✅/Y']],
+                ['09:00', ['✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['10:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['11:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['12:00', ['✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['13:00', ['✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['14:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['15:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['16:00', ['⚡/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['17:00', ['✅/O', '✅/Y', '✅/Y', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '✅/O']],
+                ['18:00', ['✅/O', '✅/Y', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O']],
+                ['19:00', ['✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O']],
+                ['20:00', ['⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['21:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['22:00', ['⚡/O', '⚡/O', '⚡/O', '❌/D', '❌/D', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['23:00', ['⚡/D', '⚡/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '⚡/D', '⚡/D']]
+            ],
+            tuesday: [
+                ['00:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['01:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['02:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['03:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['04:00', ['❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D']],
+                ['05:00', ['⚡/D', '⚡/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '⚡/D']],
+                ['06:00', ['⚡/D', '✅/O', '✅/O', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '⚡/D', '❌/D', '⚡/O', '✅/O']],
+                ['07:00', ['✅/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O']],
+                ['08:00', ['✅/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '✅/O']],
+                ['09:00', ['✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['10:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['11:00', ['⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['12:00', ['✅/O', '✅/O', '⚡/O', '✅/O', '⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['13:00', ['✅/O', '✅/O', '⚡/O', '✅/O', '⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '⚡/O']],
+                ['14:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['15:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['16:00', ['⚡/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O', '⚡/O']],
+                ['17:00', ['✅/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '✅/O', '✅/O']],
+                ['18:00', ['✅/O', '✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O']],
+                ['19:00', ['✅/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '✅/O', '⚡/O']],
+                ['20:00', ['⚡/O', '✅/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['21:00', ['⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['22:00', ['⚡/O', '⚡/O', '⚡/O', '❌/D', '❌/D', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O', '⚡/O']],
+                ['23:00', ['⚡/D', '⚡/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '❌/D', '⚡/D', '⚡/D']]
+            ],
+            // Diğer günler için benzer veri yapısı...
+            wednesday: [], thursday: [], friday: [], saturday: [], sunday: []
+        };
+        
+        function showTab(day) {
+            // Tüm sekmeleri gizle
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Seçilen sekmeyi göster
+            event.target.classList.add('active');
+            document.getElementById(day).classList.add('active');
+            
+            // Tablo verilerini doldur
+            fillTable(day);
+        }
+        
+        function fillTable(day) {
+            const tableBody = document.getElementById(day + '-table');
+            if (!tableBody) return;
+            
+            let html = '';
+            const dayData = tekirdagData[day];
+            
+            if (dayData && dayData.length > 0) {
+                // Mevcut veri varsa kullan
+                dayData.forEach(([time, regions]) => {
+                    html += `<tr><td class="time-column">${time}</td>`;
+                    regions.forEach(cellData => {
+                        const [icon, risk] = cellData.split('/');
+                        const cellClass = getCellClass(icon);
+                        html += `<td class="${cellClass}">
+                            <div class="cell-content">
+                                <span class="demand-icon">${icon}</span>
+                                <span class="police-risk">${risk}</span>
+                            </div>
+                        </td>`;
+                    });
+                    html += '</tr>';
+                });
+            } else {
+                // Fallback - dinamik veri üret (Tekirdağ'a özgü)
+                for (let hour = 0; hour < 24; hour++) {
+                    const timeStr = hour.toString().padStart(2, '0') + ':00';
+                    html += `<tr><td class="time-column">${timeStr}</td>`;
+                    
+                    for (let region = 0; region < 12; region++) { // Tekirdağ 12 bölge
+                        const cellData = generateTekirdagCellData(day, hour, region);
+                        const cellClass = getCellClass(cellData.demand);
+                        
+                        html += `<td class="${cellClass}">
+                            <div class="cell-content">
+                                <span class="demand-icon">${cellData.icon}</span>
+                                <span class="police-risk">${cellData.police}</span>
+                            </div>
+                        </td>`;
+                    }
+                    html += '</tr>';
+                }
+            }
+            
+            tableBody.innerHTML = html;
+        }
+        
+        function generateTekirdagCellData(day, hour, region) {
+            // Tekirdağ'a özgü mantıklı veri üretimi
+            let demand, police, icon;
+            
+            // Bölge bazlı özellikler
+            const isMainCenter = region <= 2; // Süleymanpaşa, Çorlu, Çerkezköy
+            const isUniversity = region === 9; // NKÜ
+            const isHospital = region === 10; // Hastane
+            const isHighway = region === 11; // TEM
+            const isSmallTown = region >= 3 && region <= 8;
+            
+            // Saatlik mantık
+            if ((hour >= 6 && hour <= 8) || (hour >= 17 && hour <= 18)) {
+                // Mesai saatleri
+                if (isMainCenter) demand = 'high';
+                else if (isUniversity || isHospital) demand = 'medium';
+                else demand = 'low';
+            } else if (hour >= 12 && hour <= 13) {
+                // Öğle saatleri
+                if (isMainCenter || isHospital) demand = 'high';
+                else demand = 'medium';
+            } else if (hour >= 9 && hour <= 16) {
+                // Gündüz saatleri
+                if (isUniversity) demand = 'high';
+                else if (isMainCenter) demand = 'medium';
+                else demand = 'low';
+            } else if (hour >= 19 && hour <= 22) {
+                // Akşam saatleri
+                if (isMainCenter) demand = 'medium';
+                else demand = 'low';
+            } else {
+                // Gece/sabah erken
+                demand = 'low';
+            }
+            
+            // Gün bazlı ayarlamalar
+            if (day === 'friday' && hour >= 12 && hour <= 14) {
+                demand = 'high'; // Cuma namazı
+            }
+            if ((day === 'saturday' || day === 'sunday') && region >= 7 && region <= 8) {
+                demand = 'high'; // Hafta sonu sahil
+            }
+            
+            // Polis riski
+            if (isHighway && hour >= 7 && hour <= 19) {
+                police = 'Y';
+            } else if (isMainCenter && (hour >= 8 && hour <= 17)) {
+                police = 'O';
+            } else {
+                police = 'D';
+            }
+            
+            // İkon belirleme
+            if (demand === 'high') icon = '✅';
+            else if (demand === 'medium') icon = '⚡';
+            else icon = '❌';
+            
+            return { demand, police, icon };
+        }
+        
+        function getCellClass(iconOrDemand) {
+            if (iconOrDemand === 'high' || iconOrDemand === '✅') return 'high-demand';
+            if (iconOrDemand === 'medium' || iconOrDemand === '⚡') return 'medium-demand';
+            return 'low-demand';
+        }
+        
+        // Sayfa yüklendiğinde Pazartesi tablosunu doldur
+        document.addEventListener('DOMContentLoaded', function() {
+            fillTable('monday');
+        });
+    </script>
+</body>
+</html>
