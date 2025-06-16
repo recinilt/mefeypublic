@@ -5,455 +5,426 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Çocuk İlaç Dozaj Hesaplayıcısı</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            padding: 30px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 2.2em;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            opacity: 0.9;
-            font-size: 1.1em;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid #4CAF50;
-        }
-        
-        .form-group h3 {
-            color: #333;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .input-group input, .input-group select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .input-group input:focus, .input-group select:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-        }
-        
-        .result-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-top: 30px;
-            text-align: center;
-        }
-        
-        .result-main {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .result-details {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-        
-        .detail-card {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .detail-card h4 {
-            font-size: 0.9em;
-            opacity: 0.8;
-            margin-bottom: 5px;
-        }
-        
-        .detail-card .value {
-            font-size: 1.4em;
-            font-weight: bold;
-        }
-        
-        .warning {
-            background: #fff3cd;
-            color: #856404;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 5px solid #ffc107;
-        }
-        
-        .timer-display {
-            font-size: 3em;
-            font-weight: bold;
-            color: #4CAF50;
-            margin: 15px 0;
-        }
-        
-        .timer-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-        
-        @media (max-width: 768px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .result-details {
-                grid-template-columns: 1fr;
-            }
-            
-            .timer-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px;}
+        .container{max-width:800px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.1);overflow:hidden;}
+        .header{background:linear-gradient(45deg,#4CAF50,#45a049);color:white;padding:30px;text-align:center;}
+        .header h1{font-size:2.2em;margin-bottom:10px;}
+        .header p{opacity:0.9;font-size:1.1em;}
+        .content{padding:40px;}
+        .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:30px;margin-bottom:30px;}
+        .form-group{background:#f8f9fa;padding:25px;border-radius:15px;border-left:5px solid #4CAF50;}
+        .form-group h3{color:#333;margin-bottom:20px;font-size:1.3em;}
+        .input-group{margin-bottom:20px;}
+        .input-group label{display:block;margin-bottom:8px;font-weight:600;color:#555;}
+        .input-group input,.input-group select{width:100%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:10px;font-size:16px;transition:all 0.3s;}
+        .input-group input:focus,.input-group select:focus{outline:none;border-color:#4CAF50;box-shadow:0 0 0 3px rgba(76,175,80,0.1);}
+        .result-section{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:30px;border-radius:15px;margin-top:30px;text-align:center;}
+        .result-main{font-size:2.5em;font-weight:bold;margin:20px 0;text-shadow:2px 2px 4px rgba(0,0,0,0.3);}
+        .result-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-top:25px;}
+        .detail-card{background:rgba(255,255,255,0.1);padding:20px;border-radius:10px;backdrop-filter:blur(10px);}
+        .detail-card h4{font-size:.9em;opacity:.8;margin-bottom:5px;}
+        .detail-card .value{font-size:1.4em;font-weight:bold;}
+        .warning{background:#fff3cd;color:#856404;padding:20px;border-radius:10px;margin:20px 0;border-left:5px solid #ffc107;}
+        .records-section{margin-top:35px;}
+        .records-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+        .records-header h2{font-size:1.2em;}
+        .records-actions{display:flex;gap:10px;}
+        .records-list{display:grid;gap:17px;}
+        .record-card{background:#fafbfc;border-radius:13px;box-shadow:0 2px 8px rgba(50,50,50,0.08);padding:17px 18px;display:flex;flex-direction:column;gap:7px;position:relative;border:2.5px solid transparent;transition:border 0.2s;}
+        .record-card.new{border-color:orange;}
+        .record-title{font-weight:600;font-size:1.1em;}
+        .record-badges{display:flex;gap:6px;}
+        .badge{display:inline-block;background:orange;color:#fff;font-size:.8em;font-weight:700;padding:2px 8px;border-radius:9px;}
+        .record-info{font-size:0.98em;color:#444;display:flex;gap:13px;flex-wrap:wrap;}
+        .record-date{font-size:.87em;color:#888;}
+        .record-actions{position:absolute;top:12px;right:16px;}
+        .record-actions button{background:none;border:none;cursor:pointer;font-size:1.15em;opacity:.7;transition:opacity .2s;}
+        .record-actions button:hover{opacity:1;}
+        .btn{padding:11px 22px;border:none;border-radius:25px;cursor:pointer;font-size:16px;font-weight:600;transition:all .2s;}
+        .btn-primary{background:#4CAF50;color:white;}
+        .btn-primary:hover{background:#45a049;}
+        .btn-secondary{background:#6c757d;color:white;}
+        .btn-secondary:hover{background:#5a6268;}
+        .btn-danger{background:#e74c3c;color:white;}
+        .btn-danger:hover{background:#c0392b;}
+        .btn-json{background:#f7b731;color:white;}
+        .btn-json:hover{background:#f6ad55;}
+        .json-input{display:none;}
+        @media (max-width:768px){
+            .form-grid{grid-template-columns:1fr;}
+            .result-details{grid-template-columns:1fr;}
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🧸 Çocuk İlaç Dozaj Hesaplayıcısı</h1>
-            <p>Güvenli ve doğru dozaj hesaplaması için</p>
+<div class="container">
+    <div class="header">
+        <h1>🧸 Çocuk İlaç Dozaj Hesaplayıcısı</h1>
+        <p>Güvenli ve doğru dozaj hesaplaması için</p>
+    </div>
+    <div class="content">
+        <div class="form-grid">
+            <div class="form-group">
+                <h3>👶 Çocuk Bilgileri</h3>
+                <div class="input-group">
+                    <label>Bilgi Türü Seçin</label>
+                    <div style="display:flex;gap:10px;margin-bottom:15px;">
+                        <button type="button" class="btn btn-primary" id="ageBtn" onclick="selectInfoType('age')">Yaş</button>
+                        <button type="button" class="btn btn-secondary" id="weightBtn" onclick="selectInfoType('weight')">Kilo</button>
+                    </div>
+                    <div id="ageInput">
+                        <label for="age">Yaş (ay)</label>
+                        <input type="number" id="age" min="1" max="216" placeholder="Örn: 24">
+                    </div>
+                    <div id="weightInput" style="display:none">
+                        <label for="weight">Kilo (kg)</label>
+                        <input type="number" id="weight" min="2" max="80" step="0.1" placeholder="Örn: 12.5">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <h3>💊 İlaç Bilgileri</h3>
+                <div class="input-group">
+                    <label>Dozaj Türü Seçin</label>
+                    <div style="display:flex;gap:10px;margin-bottom:15px;">
+                        <button type="button" class="btn btn-primary" id="singleDoseBtn" onclick="selectDosageType('single')">Tek Doz</button>
+                        <button type="button" class="btn btn-secondary" id="dailyDoseBtn" onclick="selectDosageType('daily')">Günlük Dozaj</button>
+                    </div>
+                    <div id="singleDoseInput">
+                        <label for="singleMgPerKg">Tek doz mg/kg</label>
+                        <input type="number" id="singleMgPerKg" min="0.1" step="0.1" placeholder="Örn: 5">
+                    </div>
+                    <div id="dailyDoseInput" style="display:none">
+                        <label for="dailyMgPerKg">Günlük mg/kg</label>
+                        <input type="number" id="dailyMgPerKg" min="0.1" step="0.1" placeholder="Örn: 10">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="timesPerDay">Günde kaç kez</label>
+                    <select id="timesPerDay">
+                        <option value="1">1 kez</option>
+                        <option value="2" selected>2 kez</option>
+                        <option value="3">3 kez</option>
+                        <option value="4">4 kez</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="mgPerMl">1 ölçekte kaç mg var</label>
+                    <input type="number" id="mgPerMl" min="0.1" step="0.1" placeholder="Örn: 100">
+                </div>
+            </div>
         </div>
-        
-        <div class="content">
-            <div class="form-grid">
-                <div class="form-group">
-                    <h3>👶 Çocuk Bilgileri</h3>
-                    <div class="input-group">
-                        <label>Bilgi Türü Seçin</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button type="button" class="btn btn-primary" id="ageBtn" onclick="selectInfoType('age')">Yaş</button>
-                            <button type="button" class="btn btn-secondary" id="weightBtn" onclick="selectInfoType('weight')">Kilo</button>
-                        </div>
-                        <div id="ageInput" style="display: none;">
-                            <label for="age">Yaş (ay)</label>
-                            <input type="number" id="age" min="1" max="216" placeholder="Örn: 24">
-                        </div>
-                        <div id="weightInput" style="display: none;">
-                            <label for="weight">Kilo (kg)</label>
-                            <input type="number" id="weight" min="2" max="80" step="0.1" placeholder="Örn: 12.5">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <h3>💊 İlaç Bilgileri</h3>
-                    <div class="input-group">
-                        <label>Dozaj Türü Seçin</label>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button type="button" class="btn btn-primary" id="singleDoseBtn" onclick="selectDosageType('single')">Tek Doz</button>
-                            <button type="button" class="btn btn-secondary" id="dailyDoseBtn" onclick="selectDosageType('daily')">Günlük Dozaj</button>
-                        </div>
-                        <div id="singleDoseInput" style="display: none;">
-                            <label for="singleMgPerKg">Tek doz mg/kg</label>
-                            <input type="number" id="singleMgPerKg" min="0.1" step="0.1" placeholder="Örn: 5">
-                        </div>
-                        <div id="dailyDoseInput" style="display: none;">
-                            <label for="dailyMgPerKg">Günlük mg/kg</label>
-                            <input type="number" id="dailyMgPerKg" min="0.1" step="0.1" placeholder="Örn: 10">
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="timesPerDay">Günde kaç kez</label>
-                        <select id="timesPerDay">
-                            <option value="1">1 kez</option>
-                            <option value="2" selected>2 kez</option>
-                            <option value="3">3 kez</option>
-                            <option value="4">4 kez</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label for="mgPerMl">1 ölçekte kaç mg var</label>
-                        <input type="number" id="mgPerMl" min="0.1" step="0.1" placeholder="Örn: 100">
-                    </div>
+        <!-- Sonuçlar -->
+        <div class="result-section" id="results" style="display:none;">
+            <h2>📊 Hesaplama Sonuçları</h2>
+            <div class="result-main" id="dosage">-</div>
+            <div class="result-details">
+                <div class="detail-card"><h4>Kullanılan Kilo</h4><div class="value" id="usedWeight">-</div></div>
+                <div class="detail-card"><h4>Günlük Toplam Doz</h4><div class="value" id="totalDaily">-</div></div>
+                <div class="detail-card"><h4>Tek Seferde</h4><div class="value" id="singleDose">-</div></div>
+                <div class="detail-card"><h4>Maksimum Günlük</h4><div class="value" id="maxDaily">-</div></div>
+            </div>
+            <!-- Kayıt etme -->
+            <div style="margin-top:25px;">
+                <input type="text" id="saveName" placeholder="Kayıt adı (örn: Ahmet - Ateş İlacı)" style="padding:10px 14px;border-radius:8px;border:1.5px solid #bbb;width:260px;max-width:90%">
+                <button class="btn btn-primary" onclick="saveRecord()">Kaydet</button>
+            </div>
+        </div>
+        <div class="warning">
+            <strong>⚠️ Önemli Uyarı:</strong> Bu hesaplama sadece bilgilendirme amaçlıdır. Mutlaka doktorunuza danışın ve reçetedeki talimatları takip edin.
+        </div>
+        <!-- Kayıtlar -->
+        <div class="records-section">
+            <div class="records-header">
+                <h2>Kayıtlar</h2>
+                <div class="records-actions">
+                    <button class="btn btn-danger" onclick="deleteAllRecords()" title="Tümünü Sil">Tümünü Sil</button>
+                    <button class="btn btn-json" onclick="exportJSON()" title="JSON Dışa Aktar">JSON Dışa Aktar</button>
+                    <label class="btn btn-json" style="margin:0" title="JSON İçe Aktar">
+                        JSON İçe Aktar
+                        <input type="file" id="jsonInput" class="json-input" accept=".json" onchange="importJSON(event)">
+                    </label>
                 </div>
             </div>
-            
-            <div class="result-section" id="results" style="display: none;">
-                <h2>📊 Hesaplama Sonuçları</h2>
-                <div class="result-main" id="dosage">-</div>
-                <div class="result-details">
-                    <div class="detail-card">
-                        <h4>Kullanılan Kilo</h4>
-                        <div class="value" id="usedWeight">-</div>
-                    </div>
-                    <div class="detail-card">
-                        <h4>Günlük Toplam Doz</h4>
-                        <div class="value" id="totalDaily">-</div>
-                    </div>
-                    <div class="detail-card">
-                        <h4>Tek Seferde</h4>
-                        <div class="value" id="singleDose">-</div>
-                    </div>
-                    <div class="detail-card">
-                        <h4>Maksimum Günlük</h4>
-                        <div class="value" id="maxDaily">-</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="warning">
-                <strong>⚠️ Önemli Uyarı:</strong> Bu hesaplama sadece bilgilendirme amaçlıdır. Mutlaka doktorunuza danışın ve reçetedeki talimatları takip edin.
-            </div>
+            <div class="records-list" id="recordsList"></div>
         </div>
     </div>
+</div>
+<script>
+const weightByAge={1:3.5,2:4.5,3:5.5,6:7.5,9:9,12:10,15:11,18:12,24:13,30:14.5,36:16,42:17.5,48:19,54:20.5,60:22,72:25,84:28,96:32,108:36,120:40,132:44,144:48,156:52,168:56,180:60,192:64,204:68,216:72};
+function getWeightByAge(age){
+    if(weightByAge[age])return weightByAge[age];
+    let ages=Object.keys(weightByAge).map(Number).sort((a,b)=>a-b);
+    if(age<ages[0])return weightByAge[ages[0]];
+    if(age>ages[ages.length-1])return weightByAge[ages[ages.length-1]];
+    for(let i=0;i<ages.length-1;i++)
+        if(age>=ages[i]&&age<=ages[i+1]){
+            let r=(age-ages[i])/(ages[i+1]-ages[i]);
+            return weightByAge[ages[i]]+r*(weightByAge[ages[i+1]]-weightByAge[ages[i]]);
+        }
+    return 10;
+}
 
-    <script>
-        // Yaşa göre ortalama kilo tablosu (ay cinsinden)
-        const weightByAge = {
-            1: 3.5, 2: 4.5, 3: 5.5, 6: 7.5, 9: 9, 12: 10,
-            15: 11, 18: 12, 24: 13, 30: 14.5, 36: 16, 42: 17.5,
-            48: 19, 54: 20.5, 60: 22, 72: 25, 84: 28, 96: 32,
-            108: 36, 120: 40, 132: 44, 144: 48, 156: 52, 168: 56,
-            180: 60, 192: 64, 204: 68, 216: 72
-        };
-        
-        function getWeightByAge(ageInMonths) {
-            if (weightByAge[ageInMonths]) {
-                return weightByAge[ageInMonths];
-            }
-            
-            // Interpolasyon ile ara değerleri hesapla
-            const ages = Object.keys(weightByAge).map(Number).sort((a, b) => a - b);
-            
-            if (ageInMonths < ages[0]) return weightByAge[ages[0]];
-            if (ageInMonths > ages[ages.length - 1]) return weightByAge[ages[ages.length - 1]];
-            
-            for (let i = 0; i < ages.length - 1; i++) {
-                if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
-                    const ratio = (ageInMonths - ages[i]) / (ages[i + 1] - ages[i]);
-                    return weightByAge[ages[i]] + ratio * (weightByAge[ages[i + 1]] - weightByAge[ages[i]]);
-                }
-            }
-            
-            return 10; // Varsayılan değer
-        }
-        
-        function calculate() {
-            const age = parseFloat(document.getElementById('age').value);
-            const inputWeight = parseFloat(document.getElementById('weight').value);
-            const singleMgPerKg = parseFloat(document.getElementById('singleMgPerKg').value);
-            const dailyMgPerKg = parseFloat(document.getElementById('dailyMgPerKg').value);
-            const timesPerDay = parseInt(document.getElementById('timesPerDay').value);
-            const mgPerMl = parseFloat(document.getElementById('mgPerMl').value);
-            
-            // Hangi bilgi türü seçilmiş kontrol et
-            const ageSelected = document.getElementById('ageInput').style.display !== 'none';
-            const weightSelected = document.getElementById('weightInput').style.display !== 'none';
-            
-            // Hangi dozaj türü seçilmiş kontrol et
-            const singleDoseSelected = document.getElementById('singleDoseInput').style.display !== 'none';
-            const dailyDoseSelected = document.getElementById('dailyDoseInput').style.display !== 'none';
-            
-            // Gerekli alanlar dolu mu kontrol et
-            let weight, mgPerKg;
-            
-            if (ageSelected && !age) {
-                document.getElementById('results').style.display = 'none';
-                return;
-            }
-            
-            if (weightSelected && !inputWeight) {
-                document.getElementById('results').style.display = 'none';
-                return;
-            }
-            
-            if (!mgPerMl) {
-                document.getElementById('results').style.display = 'none';
-                return;
-            }
-            
-            if (singleDoseSelected && !singleMgPerKg) {
-                document.getElementById('results').style.display = 'none';
-                return;
-            }
-            
-            if (dailyDoseSelected && !dailyMgPerKg) {
-                document.getElementById('results').style.display = 'none';
-                return;
-            }
-            
-            // Kilo hesaplama
-            if (ageSelected) {
-                weight = getWeightByAge(age);
-            } else {
-                weight = inputWeight;
-            }
-            
-            // Dozaj hesaplama
-            if (singleDoseSelected) {
-                mgPerKg = singleMgPerKg * timesPerDay; // Tek doz * günde kaç kez = günlük
-            } else {
-                mgPerKg = dailyMgPerKg; // Zaten günlük dozaj
-            }
-            
-            // Dozaj hesaplamaları
-            const totalDailyMg = weight * mgPerKg;
-            const singleDoseMg = totalDailyMg / timesPerDay;
-            const singleDoseMl = singleDoseMg / mgPerMl;
-            const maxDailyMg = totalDailyMg * 1.2; // %20 güvenlik marjı
-            
-            // Sonuçları göster
-            document.getElementById('results').style.display = 'block';
-            document.getElementById('dosage').textContent = singleDoseMl.toFixed(2) + ' ölçek';
-            document.getElementById('usedWeight').textContent = weight.toFixed(1) + ' kg';
-            document.getElementById('totalDaily').textContent = totalDailyMg.toFixed(1) + ' mg';
-            document.getElementById('singleDose').textContent = singleDoseMg.toFixed(1) + ' mg';
-            document.getElementById('maxDaily').textContent = maxDailyMg.toFixed(1) + ' mg';
-        }
-        
-        function selectInfoType(type) {
-            const ageBtn = document.getElementById('ageBtn');
-            const weightBtn = document.getElementById('weightBtn');
-            const ageInput = document.getElementById('ageInput');
-            const weightInput = document.getElementById('weightInput');
-            
-            if (type === 'age') {
-                ageBtn.className = 'btn btn-primary';
-                weightBtn.className = 'btn btn-secondary';
-                ageInput.style.display = 'block';
-                weightInput.style.display = 'none';
-                document.getElementById('weight').value = '';
-            } else {
-                ageBtn.className = 'btn btn-secondary';
-                weightBtn.className = 'btn btn-primary';
-                ageInput.style.display = 'none';
-                weightInput.style.display = 'block';
-                document.getElementById('age').value = '';
-            }
-            calculate();
-        }
-        
-        function selectDosageType(type) {
-            const singleBtn = document.getElementById('singleDoseBtn');
-            const dailyBtn = document.getElementById('dailyDoseBtn');
-            const singleInput = document.getElementById('singleDoseInput');
-            const dailyInput = document.getElementById('dailyDoseInput');
-            
-            if (type === 'single') {
-                singleBtn.className = 'btn btn-primary';
-                dailyBtn.className = 'btn btn-secondary';
-                singleInput.style.display = 'block';
-                dailyInput.style.display = 'none';
-                document.getElementById('dailyMgPerKg').value = '';
-            } else {
-                singleBtn.className = 'btn btn-secondary';
-                dailyBtn.className = 'btn btn-primary';
-                singleInput.style.display = 'none';
-                dailyInput.style.display = 'block';
-                document.getElementById('singleMgPerKg').value = '';
-            }
-            calculate();
-        }
-        
-        // Event listeners
-        document.getElementById('age').addEventListener('input', calculate);
-        document.getElementById('weight').addEventListener('input', calculate);
-        document.getElementById('singleMgPerKg').addEventListener('input', calculate);
-        document.getElementById('dailyMgPerKg').addEventListener('input', calculate);
-        document.getElementById('timesPerDay').addEventListener('change', calculate);
-        document.getElementById('mgPerMl').addEventListener('input', calculate);
-        
-        // Sayfa yüklendiğinde varsayılan seçimleri yap
-        window.addEventListener('load', function() {
-            selectInfoType('age');
-            selectDosageType('daily');
+function selectInfoType(type){
+    let ageBtn=document.getElementById('ageBtn'),
+        weightBtn=document.getElementById('weightBtn'),
+        ageInput=document.getElementById('ageInput'),
+        weightInput=document.getElementById('weightInput');
+    if(type==='age'){
+        ageBtn.className='btn btn-primary';
+        weightBtn.className='btn btn-secondary';
+        ageInput.style.display='block';
+        weightInput.style.display='none';
+        document.getElementById('weight').value='';
+    }else{
+        ageBtn.className='btn btn-secondary';
+        weightBtn.className='btn btn-primary';
+        ageInput.style.display='none';
+        weightInput.style.display='block';
+        document.getElementById('age').value='';
+    }
+    calculate();
+}
+function selectDosageType(type){
+    let singleBtn=document.getElementById('singleDoseBtn'),
+        dailyBtn=document.getElementById('dailyDoseBtn'),
+        singleInput=document.getElementById('singleDoseInput'),
+        dailyInput=document.getElementById('dailyDoseInput');
+    if(type==='single'){
+        singleBtn.className='btn btn-primary';
+        dailyBtn.className='btn btn-secondary';
+        singleInput.style.display='block';
+        dailyInput.style.display='none';
+        document.getElementById('dailyMgPerKg').value='';
+    }else{
+        singleBtn.className='btn btn-secondary';
+        dailyBtn.className='btn btn-primary';
+        singleInput.style.display='none';
+        dailyInput.style.display='block';
+        document.getElementById('singleMgPerKg').value='';
+    }
+    calculate();
+}
+
+function calculate(autoFillData){
+    let age=parseFloat(document.getElementById('age').value),
+        inputWeight=parseFloat(document.getElementById('weight').value),
+        singleMgPerKg=parseFloat(document.getElementById('singleMgPerKg').value),
+        dailyMgPerKg=parseFloat(document.getElementById('dailyMgPerKg').value),
+        timesPerDay=parseInt(document.getElementById('timesPerDay').value),
+        mgPerMl=parseFloat(document.getElementById('mgPerMl').value),
+        ageSelected=document.getElementById('ageInput').style.display!=='none',
+        weightSelected=document.getElementById('weightInput').style.display!=='none',
+        singleDoseSelected=document.getElementById('singleDoseInput').style.display!=='none',
+        dailyDoseSelected=document.getElementById('dailyDoseInput').style.display!=='none';
+    let weight,mgPerKg;
+    if(autoFillData){// Otomatik doldurma için
+        ({age,inputWeight,singleMgPerKg,dailyMgPerKg,timesPerDay,mgPerMl,ageSelected,weightSelected,singleDoseSelected,dailyDoseSelected}=autoFillData);
+        if(ageSelected)document.getElementById('age').value=age??'';
+        if(weightSelected)document.getElementById('weight').value=inputWeight??'';
+        if(singleDoseSelected)document.getElementById('singleMgPerKg').value=singleMgPerKg??'';
+        if(dailyDoseSelected)document.getElementById('dailyMgPerKg').value=dailyMgPerKg??'';
+        document.getElementById('timesPerDay').value=timesPerDay??1;
+        document.getElementById('mgPerMl').value=mgPerMl??'';
+    }
+    if(ageSelected){if(!age){document.getElementById('results').style.display='none';return;}}
+    if(weightSelected){if(!inputWeight){document.getElementById('results').style.display='none';return;}}
+    if(!mgPerMl){document.getElementById('results').style.display='none';return;}
+    if(singleDoseSelected&&!singleMgPerKg){document.getElementById('results').style.display='none';return;}
+    if(dailyDoseSelected&&!dailyMgPerKg){document.getElementById('results').style.display='none';return;}
+    // Kilo hesapla
+    weight=ageSelected?getWeightByAge(age):inputWeight;
+    mgPerKg=singleDoseSelected?singleMgPerKg*timesPerDay:dailyMgPerKg;
+    let totalDailyMg=weight*mgPerKg,
+        singleDoseMg=totalDailyMg/timesPerDay,
+        singleDoseMl=singleDoseMg/mgPerMl,
+        maxDailyMg=totalDailyMg*1.2;
+    document.getElementById('results').style.display='block';
+    document.getElementById('dosage').textContent=singleDoseMl.toFixed(2)+' ölçek';
+    document.getElementById('usedWeight').textContent=weight.toFixed(1)+' kg';
+    document.getElementById('totalDaily').textContent=totalDailyMg.toFixed(1)+' mg';
+    document.getElementById('singleDose').textContent=singleDoseMg.toFixed(1)+' mg';
+    document.getElementById('maxDaily').textContent=maxDailyMg.toFixed(1)+' mg';
+}
+
+function getFormData(){
+    let ageSelected=document.getElementById('ageInput').style.display!=='none',
+        weightSelected=document.getElementById('weightInput').style.display!=='none',
+        singleDoseSelected=document.getElementById('singleDoseInput').style.display!=='none',
+        dailyDoseSelected=document.getElementById('dailyDoseInput').style.display!=='none';
+    return {
+        age:ageSelected?parseFloat(document.getElementById('age').value):null,
+        inputWeight:weightSelected?parseFloat(document.getElementById('weight').value):null,
+        singleMgPerKg:singleDoseSelected?parseFloat(document.getElementById('singleMgPerKg').value):null,
+        dailyMgPerKg:dailyDoseSelected?parseFloat(document.getElementById('dailyMgPerKg').value):null,
+        timesPerDay:parseInt(document.getElementById('timesPerDay').value),
+        mgPerMl:parseFloat(document.getElementById('mgPerMl').value),
+        ageSelected,singleDoseSelected,weightSelected,dailyDoseSelected
+    };
+}
+
+function saveRecord(){
+    let name=(document.getElementById('saveName').value||'').trim();
+    if(!name){alert("Kayıt adı giriniz.");return;}
+    let form=getFormData();
+    // Hesaplama yapılmış mı kontrol et
+    if((form.ageSelected&&!form.age)||(form.weightSelected&&!form.inputWeight)||(form.singleDoseSelected&&!form.singleMgPerKg)||(form.dailyDoseSelected&&!form.dailyMgPerKg)||!form.mgPerMl){
+        alert("Tüm gerekli alanları doldurup hesaplama yapınız.");return;
+    }
+    // Sonuçları tekrar hesapla
+    let weight=form.ageSelected?getWeightByAge(form.age):form.inputWeight,
+        mgPerKg=form.singleDoseSelected?form.singleMgPerKg*form.timesPerDay:form.dailyMgPerKg,
+        totalDailyMg=weight*mgPerKg,
+        singleDoseMg=totalDailyMg/form.timesPerDay,
+        singleDoseMl=singleDoseMg/form.mgPerMl,
+        maxDailyMg=totalDailyMg*1.2;
+    let newRecord={
+        name,
+        date:new Date().toISOString(),
+        age:form.ageSelected?form.age:null,
+        inputWeight:form.weightSelected?form.inputWeight:null,
+        usedWeight:weight,
+        singleMgPerKg:form.singleDoseSelected?form.singleMgPerKg:null,
+        dailyMgPerKg:form.dailyDoseSelected?form.dailyMgPerKg:null,
+        timesPerDay:form.timesPerDay,
+        mgPerMl:form.mgPerMl,
+        singleDoseSelected:form.singleDoseSelected,
+        dailyDoseSelected:form.dailyDoseSelected,
+        dosage:singleDoseMl,
+        totalDailyMg:totalDailyMg,
+        singleDoseMg:singleDoseMg,
+        maxDailyMg:maxDailyMg
+    };
+    // Mevcut kayıtlarla aynı mı? (isim+veri aynıysa yinelenmesin)
+    let records=getRecords();
+    let exists=records.some(r=>
+        r.name===newRecord.name &&
+        r.usedWeight===newRecord.usedWeight &&
+        r.timesPerDay===newRecord.timesPerDay &&
+        ((r.singleMgPerKg??0)===(newRecord.singleMgPerKg??0)) &&
+        ((r.dailyMgPerKg??0)===(newRecord.dailyMgPerKg??0)) &&
+        r.mgPerMl===newRecord.mgPerMl
+    );
+    if(exists){alert("Bu kayıt zaten mevcut.");return;}
+    records.unshift(newRecord);
+    localStorage.setItem('ilac_records',JSON.stringify(records));
+    document.getElementById('saveName').value='';
+    renderRecords();
+}
+
+function getRecords(){
+    try{
+        return JSON.parse(localStorage.getItem('ilac_records')||'[]');
+    }catch{ return []; }
+}
+function setRecords(records){
+    localStorage.setItem('ilac_records',JSON.stringify(records));
+}
+function deleteRecord(idx){
+    let records=getRecords();
+    records.splice(idx,1);
+    setRecords(records);
+    renderRecords();
+}
+function deleteAllRecords(){
+    if(confirm("Tüm kayıtlar silinsin mi?")){
+        localStorage.removeItem('ilac_records');
+        renderRecords();
+    }
+}
+function renderRecords(){
+    let records=getRecords();
+    let now=Date.now();
+    let list=document.getElementById('recordsList');
+    list.innerHTML='';
+    records.forEach((rec,idx)=>{
+        let isNew=(now-new Date(rec.date).getTime())<86400000;// 24 saat
+        let card=document.createElement('div');
+        card.className='record-card'+(isNew?' new':'');
+        card.onclick=()=>{fillFormFromRecord(rec)};
+        card.innerHTML=`
+            <div class="record-title">
+                ${rec.name}
+                <span class="record-badges">${isNew?'<span class="badge">Yeni</span>':''}</span>
+            </div>
+            <div class="record-info">
+                <span>Kilo: <b>${rec.usedWeight?.toFixed(1)||'-'} kg</b></span>
+                <span>Doz: <b>${rec.singleDoseMg?.toFixed(1)||'-'} mg x ${rec.timesPerDay}</b></span>
+                <span>Ölçek: <b>${rec.dosage?.toFixed(2)||'-'} ölçek</b></span>
+            </div>
+            <div class="record-date">Tarih: ${rec.date.replace('T',' ').substring(0,16)}</div>
+            <div class="record-actions" onclick="event.stopPropagation();">
+                <button onclick="deleteRecord(${idx})" title="Sil">🗑️</button>
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+function fillFormFromRecord(rec){
+    // Hangi tipler seçili
+    selectInfoType(rec.age!=null?'age':'weight');
+    selectDosageType(rec.singleMgPerKg!=null?'single':'daily');
+    setTimeout(()=>{
+        calculate({
+            age:rec.age, inputWeight:rec.inputWeight,
+            singleMgPerKg:rec.singleMgPerKg, dailyMgPerKg:rec.dailyMgPerKg,
+            timesPerDay:rec.timesPerDay, mgPerMl:rec.mgPerMl,
+            ageSelected:rec.age!=null, weightSelected:rec.inputWeight!=null,
+            singleDoseSelected:rec.singleMgPerKg!=null, dailyDoseSelected:rec.dailyMgPerKg!=null
         });
-    </script>
+    },80);
+}
+// JSON Aktar/Al
+function exportJSON(){
+    let data=getRecords();
+    let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    let url=URL.createObjectURL(blob);
+    let a=document.createElement('a');
+    a.href=url; a.download='ilac_kayitlari.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+function importJSON(e){
+    let file=e.target.files[0];
+    if(!file)return;
+    let reader=new FileReader();
+    reader.onload=function(evt){
+        try{
+            let newRecords=JSON.parse(evt.target.result);
+            if(!Array.isArray(newRecords)){alert("Geçersiz dosya!");return;}
+            let records=getRecords();
+            // Yinelenenleri at
+            let all=[...newRecords,...records];
+            let unique=[];
+            all.forEach(r=>{
+                if(!unique.some(u=>
+                    u.name===r.name &&
+                    u.usedWeight===r.usedWeight &&
+                    u.timesPerDay===r.timesPerDay &&
+                    ((u.singleMgPerKg??0)===(r.singleMgPerKg??0)) &&
+                    ((u.dailyMgPerKg??0)===(r.dailyMgPerKg??0)) &&
+                    u.mgPerMl===r.mgPerMl
+                )) unique.push(r);
+            });
+            setRecords(unique);
+            renderRecords();
+            alert("Kayıtlar başarıyla yüklendi!");
+        }catch{
+            alert("Dosya okunamadı!");
+        }
+    };
+    reader.readAsText(file);
+    e.target.value=''; // aynı dosya tekrar yüklenebilsin
+}
+// Event listeners
+['age','weight','singleMgPerKg','dailyMgPerKg','mgPerMl'].forEach(id=>{
+    document.getElementById(id).addEventListener('input',()=>calculate());
+});
+document.getElementById('timesPerDay').addEventListener('change',()=>calculate());
+window.addEventListener('load',()=>{
+    selectInfoType('age');selectDosageType('daily');
+    renderRecords();
+});
+</script>
 </body>
 </html>
