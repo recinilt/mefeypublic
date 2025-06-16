@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binance EMA Analizi + Portföy</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .controls { margin-bottom: 20px; }
+        .portfolio { background: #f5f5f5; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .profit { color: green; font-weight: bold; }
+        .loss { color: red; font-weight: bold; }
+        .signal { background: #e7f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .market-status { font-size: 18px; font-weight: bold; margin: 15px 0; }
+        .up { color: green; }
+        .down { color: red; }
+        .total-summary { background: #e8f5e8; padding: 10px; margin: 10px 0; border-radius: 5px; border: 2px solid #4CAF50; }
+        .total-summary.loss { background: #ffe8e8; border-color: #f44336; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <label>Kısa EMA: <input type="number" id="shortEma" value="12"></label>
+        <label>Uzun EMA: <input type="number" id="longEma" value="50"></label>
+        <label>Zaman: 
+            <select id="interval">
+                <option value="5m" selected>5 Dakika</option>
+                <option value="15m">15 Dakika</option>
+                <option value="1h">1 Saat</option>
+            </select>
+        </label>
+        <button onclick="startAnalysis()">Başlat</button>
+        <button onclick="stopAnalysis()">Durdur</button>
+    </div>
+
+    <div id="status">Hazır...</div>
+    
+    <div class="portfolio">
+        <h3>Sanal Portföy (Toplam: $<span id="totalValue">0</span>) <button onclick="clearPortfolio()" style="margin-left: 10px; background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer;">Portföyü Temizle</button></h3>
+        <div id="totalProfitLoss" class="total-summary"></div>
+        <div id="portfolio"></div>
+    </div>
+
+    <div id="signals"></div>
+
+    <script>
+        let analysisInterval;
+        let portfolio = JSON.parse(localStorage.getItem('portfolio') || '[]');
+        let currentPrices = {};
+
+        async function startAnalysis() {
+            document.getElementById('status').textContent = 'Analiz başlatılıyor...';
+            await runAnalysis();
+            analysisInterval = setInterval(runAnalysis, 300000); // 5 dakika
+        }
+
+        function stopAnalysis() {
+            clearInterval(analysisInterval);
+            document.getElementById('status').textContent = 'Analiz durduruldu.';
+        }
+
+        async function runAnalysis() {
+            try {
+                document.getElementById('status').textContent = 'Tarama yapılıyor...';
+                
+                const shortEma = parseInt(document.getElementById('shortEma').value);
+                const longEma = parseInt(document.getElementById('longEma').value);
+                const interval = document.getElementById('interval').value;
+                
+                const symbols = await getSymbols();
+                const data = await getHistoricalData(symbols, interval, longEma + 5);
+                const signals = findEMASignals(data, shortEma, longEma);
+                const marketDirection = getMarketDirection(data);
+                
+                updateCurrentPrices(data);
+                displaySignals(signals, marketDirection);
+                
+                if (signals.length > 0) {
+                    addToPortfolio(signals);
+                    playAlarm(marketDirection);
+                }
+                
+                updatePortfolioDisplay();
+                document.getElementById('status').textContent = `Son tarama: ${new Date().toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Analiz hatası:', error);
+                document.getElementById('status').textContent = 'Hata oluştu!';
+            }
+        }
+
+        async function getSymbols() {
+            const response = await axios.get('https://fapi.binance.com/fapi/v1/exchangeInfo');
+            return response.data.symbols
+                .filter(s => s.quoteAsset === 'USDT' && s.contractType === 'PERPETUAL')
+                .map(s => s.symbol);
+        }
+
+        async function getHistoricalData(symbols, interval, limit) {
+            const data = {};
+            const promises = symbols.map(async symbol => {
+                try {
+                    const response = await axios.get(`https://fapi.binance.com/fapi/v1/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`);
+                    data[symbol] = response.data.map(k => ({
+                        time: k[0],
+                        close: parseFloat(k[4]),
+                        volume: parseFloat(k[5])
+                    }));
+                } catch (error) {
+                    console.error(`${symbol} veri hatası:`, error);
+                }
+            });
+            
+            await Promise.all(promises);
+            return data;
+        }
+
+        function calculateEMA(data, period) {
+            const k = 2 / (period + 1);
+            const ema = [data[0]];
+            for (let i = 1; i < data.length; i++) {
+                ema.push(data[i] * k + ema[i - 1] * (1 - k));
+            }
+            return ema;
+        }
+
+        function findEMASignals(data, shortPeriod, longPeriod) {
+            const signals = [];
+            let totalVolume = 0;
+            
+            // Toplam hacim hesapla
+            Object.values(data).forEach(candles => {
+                if (candles.length > 0) totalVolume += candles[candles.length - 1].volume;
+            });
+            
+            for (const symbol in data) {
+                const candles = data[symbol];
+                if (candles.length < longPeriod + 3) continue;
+                
+                const closes = candles.map(c => c.close);
+                const shortEma = calculateEMA(closes, shortPeriod);
+                const longEma = calculateEMA(closes, longPeriod);
+                const volume = candles[candles.length - 1].volume;
+                const volumeRatio = (volume / totalVolume * 100);
+                
+                // EMA kesişim kontrolü (son 2 periyot)
+                const len = shortEma.length;
+                const isSignal = (shortEma[len-1] > longEma[len-1] && shortEma[len-2] <= longEma[len-2]) ||
+                                (shortEma[len-2] > longEma[len-2] && shortEma[len-3] <= longEma[len-3]);
+                
+                if (isSignal && volumeRatio > 0.02) {
+                    signals.push({
+                        symbol,
+                        price: closes[closes.length - 1],
+                        volumeRatio: volumeRatio.toFixed(3)
+                    });
+                }
+            }
+            
+            return signals.sort((a, b) => b.volumeRatio - a.volumeRatio);
+        }
+
+        function getMarketDirection(data) {
+            const totalPrices = [];
+            const timestamps = Object.values(data)[0]?.map(c => c.time) || [];
+            
+            timestamps.forEach(time => {
+                let total = 0;
+                let count = 0;
+                Object.values(data).forEach(candles => {
+                    const candle = candles.find(c => c.time === time);
+                    if (candle) {
+                        total += candle.close;
+                        count++;
+                    }
+                });
+                if (count > 0) totalPrices.push(total / count);
+            });
+            
+            const shortEma = calculateEMA(totalPrices, 9);
+            const longEma = calculateEMA(totalPrices, 26);
+            
+            return shortEma[shortEma.length - 1] > longEma[longEma.length - 1] ? 'up' : 'down';
+        }
+
+        function updateCurrentPrices(data) {
+            for (const symbol in data) {
+                const candles = data[symbol];
+                if (candles.length > 0) {
+                    currentPrices[symbol] = candles[candles.length - 1].close;
+                }
+            }
+        }
+
+        function addToPortfolio(signals) {
+            const timestamp = Date.now();
+            signals.forEach(signal => {
+                // Aynı coin'den zaten var mı kontrol et
+                const existing = portfolio.find(p => p.symbol === signal.symbol && !p.sold);
+                if (!existing) {
+                    portfolio.push({
+                        symbol: signal.symbol,
+                        buyPrice: signal.price,
+                        buyTime: timestamp,
+                        amount: 100 / signal.price, // $100 değerinde
+                        sold: false
+                    });
+                }
+            });
+            
+            localStorage.setItem('portfolio', JSON.stringify(portfolio));
+        }
+
+        function updatePortfolioDisplay() {
+            const portfolioDiv = document.getElementById('portfolio');
+            const totalProfitLossDiv = document.getElementById('totalProfitLoss');
+            const activePositions = portfolio.filter(p => !p.sold);
+            
+            if (activePositions.length === 0) {
+                portfolioDiv.innerHTML = '<p>Henüz pozisyon yok.</p>';
+                totalProfitLossDiv.innerHTML = '';
+                document.getElementById('totalValue').textContent = '0';
+                return;
+            }
+            
+            let totalValue = 0;
+            let totalInvested = 0;
+            let totalProfit = 0;
+            let html = '<table style="width:100%; border-collapse: collapse;">';
+            html += '<tr><th>Coin</th><th>Alış</th><th>Güncel</th><th>Kar/Zarar</th><th>Süre</th></tr>';
+            
+            activePositions.forEach(pos => {
+                const currentPrice = currentPrices[pos.symbol] || pos.buyPrice;
+                const currentValue = pos.amount * currentPrice;
+                const profit = currentValue - 100;
+                const profitPercent = ((currentPrice - pos.buyPrice) / pos.buyPrice * 100).toFixed(2);
+                const duration = Math.floor((Date.now() - pos.buyTime) / (1000 * 60)); // dakika
+                
+                totalValue += currentValue;
+                totalInvested += 100;
+                totalProfit += profit;
+                
+                const profitClass = profit >= 0 ? 'profit' : 'loss';
+                html += `<tr>
+                    <td>${pos.symbol}</td>
+                    <td>$${pos.buyPrice.toFixed(4)}</td>
+                    <td>$${currentPrice.toFixed(4)}</td>
+                    <td class="${profitClass}">$${profit.toFixed(2)} (${profitPercent}%)</td>
+                    <td>${duration}dk</td>
+                </tr>`;
+            });
+            
+            html += '</table>';
+            portfolioDiv.innerHTML = html;
+            document.getElementById('totalValue').textContent = totalValue.toFixed(2);
+            
+            // Toplam kar/zarar durumu
+            const totalProfitPercent = totalInvested > 0 ? ((totalProfit / totalInvested) * 100).toFixed(2) : '0.00';
+            const profitClass = totalProfit >= 0 ? 'profit' : 'loss';
+            const summaryClass = totalProfit >= 0 ? '' : 'loss';
+            
+            totalProfitLossDiv.className = `total-summary ${summaryClass}`;
+            totalProfitLossDiv.innerHTML = `
+                <strong>TOPLAM KAR/ZARAR:</strong> 
+                <span class="${profitClass}">$${totalProfit.toFixed(2)} (${totalProfitPercent}%)</span>
+                <br>
+                <small>Toplam Yatırım: $${totalInvested.toFixed(2)} | Güncel Değer: $${totalValue.toFixed(2)}</small>
+            `;
+        }
+
+        function displaySignals(signals, marketDirection) {
+            const signalsDiv = document.getElementById('signals');
+            
+            let html = `<div class="market-status ${marketDirection}">
+                Piyasa: ${marketDirection === 'up' ? 'YUKARI' : 'AŞAĞI'} yönlü
+            </div>`;
+            
+            if (signals.length === 0) {
+                html += '<p>Yeni sinyal bulunamadı.</p>';
+            } else {
+                html += '<h3>Yeni Sinyaller:</h3>';
+                signals.forEach(signal => {
+                    const cleanSymbol = signal.symbol.replace('1000', '');
+                    html += `<div class="signal">
+                        <strong>${signal.symbol}</strong> - 
+                        Fiyat: $${signal.price.toFixed(4)} - 
+                        Hacim: %${signal.volumeRatio} - 
+                        <a href="https://www.tradingview.com/chart/?symbol=BINANCE:${cleanSymbol}&interval=5" target="_blank">Grafik</a>
+                    </div>`;
+                });
+            }
+            
+            signalsDiv.innerHTML = html;
+        }
+
+        function playAlarm(direction) {
+            const audio = new Audio(direction === 'up' ? 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoLFQ==' : 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoUXrTp66hVFApGn+D0xWghBCVC1+G5bSYGK3vK7ueEOQoLFQ==');
+            audio.play().catch(e => console.log('Ses çalınamadı:', e));
+        }
+
+        function clearPortfolio() {
+            if (confirm('Portföyü temizlemek istediğinizden emin misiniz?')) {
+                portfolio = [];
+                localStorage.setItem('portfolio', JSON.stringify(portfolio));
+                updatePortfolioDisplay();
+            }
+        }
+
+        // Sayfa yüklendiğinde portföyü göster
+        window.onload = function() {
+            updatePortfolioDisplay();
+        };
+    </script>
+</body>
+</html>

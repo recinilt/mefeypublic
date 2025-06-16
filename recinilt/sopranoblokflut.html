@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soprano Blok Flüt Parmak Pozisyonları</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .note-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .octave-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .note-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .note-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        
+        .note-button.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            transform: scale(1.1);
+        }
+        
+        .fingering-display {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-height: 400px;
+            text-align: center;
+        }
+        
+        .selected-note {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .recorder-diagram {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.2;
+            white-space: pre;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: inline-block;
+            text-align: left;
+        }
+        
+        .instructions {
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .closed { color: #ff6b6b; font-weight: bold; }
+        .open { color: #4ecdc4; }
+        .half { color: #feca57; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Soprano Blok Flüt Parmak Pozisyonları 🎵</h1>
+        <h6>A:La B:si C:Do D:Re E:Mi F:Fa G:Sol </h6>
+        
+        <div class="note-section">
+            <div class="octave-title">🎶 Alt Oktav</div>
+            <div class="notes-grid">
+                <button class="note-button" onclick="showFingering('C1')">C</button>
+                <button class="note-button" onclick="showFingering('C#1')">C#</button>
+                <button class="note-button" onclick="showFingering('D1')">D</button>
+                <button class="note-button" onclick="showFingering('D#1')">D#</button>
+                <button class="note-button" onclick="showFingering('E1')">E</button>
+                <button class="note-button" onclick="showFingering('F1')">F</button>
+                <button class="note-button" onclick="showFingering('F#1')">F#</button>
+                <button class="note-button" onclick="showFingering('G1')">G</button>
+                <button class="note-button" onclick="showFingering('G#1')">G#</button>
+                <button class="note-button" onclick="showFingering('A1')">A</button>
+                <button class="note-button" onclick="showFingering('A#1')">A#</button>
+                <button class="note-button" onclick="showFingering('B1')">B</button>
+            </div>
+        </div>
+        
+        <div class="note-section">
+            <div class="octave-title">🎵 Orta Oktav</div>
+            <div class="notes-grid">
+                <button class="note-button" onclick="showFingering('C2')">C</button>
+                <button class="note-button" onclick="showFingering('C#2')">C#</button>
+                <button class="note-button" onclick="showFingering('D2')">D</button>
+                <button class="note-button" onclick="showFingering('D#2')">D#</button>
+                <button class="note-button" onclick="showFingering('E2')">E</button>
+                <button class="note-button" onclick="showFingering('F2')">F</button>
+                <button class="note-button" onclick="showFingering('F#2')">F#</button>
+                <button class="note-button" onclick="showFingering('G2')">G</button>
+                <button class="note-button" onclick="showFingering('G#2')">G#</button>
+                <button class="note-button" onclick="showFingering('A2')">A</button>
+                <button class="note-button" onclick="showFingering('A#2')">A#</button>
+                <button class="note-button" onclick="showFingering('B2')">B</button>
+            </div>
+        </div>
+        
+        <div class="note-section">
+            <div class="octave-title">🎼 Üst Oktav</div>
+            <div class="notes-grid">
+                <button class="note-button" onclick="showFingering('C3')">C</button>
+                <button class="note-button" onclick="showFingering('C#3')">C#</button>
+                <button class="note-button" onclick="showFingering('D3')">D</button>
+                <button class="note-button" onclick="showFingering('D#3')">D#</button>
+                <button class="note-button" onclick="showFingering('E3')">E</button>
+                <button class="note-button" onclick="showFingering('F3')">F</button>
+            </div>
+        </div>
+        
+        <div class="fingering-display" id="fingeringDisplay">
+            <div class="selected-note">Bir nota seçin</div>
+            <p>Yukarıdaki notalardan birini seçerek parmak pozisyonunu görün</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎯 Nasıl Kullanılır:</h3>
+            <p><strong>●</strong> Kapalı delik (parmağınızı tamamen kapatın)</p>
+            <p><strong>○</strong> Açık delik (parmağınızı kaldırın)</p>
+            <p><strong>◐</strong> Yarı kapalı (parmağınızı hafifçe kaydırın)</p>
+            <p><strong>👍</strong> Başparmak arkada</p>
+        </div>
+    </div>
+
+    <script>
+        const fingerings = {
+            'C1': {
+                name: 'C (Alt)',
+                pattern: `
+        🎵 C (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        🤙 ●    (Serçe parmak)
+                `
+            },
+            'C#1': {
+                name: 'C# (Alt)',
+                pattern: `
+        🎵 C# (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D1': {
+                name: 'D (Alt)',
+                pattern: `
+        🎵 D (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D#1': {
+                name: 'D# (Alt)',
+                pattern: `
+        🎵 D# (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ◐    (Orta parmak - Yarı kapalı)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'E1': {
+                name: 'E (Alt)',
+                pattern: `
+        🎵 E (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'F1': {
+                name: 'F (Alt)',
+                pattern: `
+        🎵 F (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'F#1': {
+                name: 'F# (Alt)',
+                pattern: `
+        🎵 F# (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'G1': {
+                name: 'G (Alt)',
+                pattern: `
+        🎵 G (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'G#1': {
+                name: 'G# (Alt)',
+                pattern: `
+        🎵 G# (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'A1': {
+                name: 'A (Alt)',
+                pattern: `
+        🎵 A (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'A#1': {
+                name: 'A# (Alt)',
+                pattern: `
+        🎵 A# (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'B1': {
+                name: 'B (Alt)',
+                pattern: `
+        🎵 B (Alt Oktav) 🎵
+        
+        Sol El:
+        👍 ●    (Başparmak - Arka delik)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'C2': {
+                name: 'C (Orta)',
+                pattern: `
+        🎵 C (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        🤙 ●    (Serçe parmak)
+                `
+            },
+            'C#2': {
+                name: 'C# (Orta)',
+                pattern: `
+        🎵 C# (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D2': {
+                name: 'D (Orta)',
+                pattern: `
+        🎵 D (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D#2': {
+                name: 'D# (Orta)',
+                pattern: `
+        🎵 D# (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ◐    (Orta parmak - Yarı kapalı)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'E2': {
+                name: 'E (Orta)',
+                pattern: `
+        🎵 E (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'F2': {
+                name: 'F (Orta)',
+                pattern: `
+        🎵 F (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'F#2': {
+                name: 'F# (Orta)',
+                pattern: `
+        🎵 F# (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'G2': {
+                name: 'G (Orta)',
+                pattern: `
+        🎵 G (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'G#2': {
+                name: 'G# (Orta)',
+                pattern: `
+        🎵 G# (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'A2': {
+                name: 'A (Orta)',
+                pattern: `
+        🎵 A (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'A#2': {
+                name: 'A# (Orta)',
+                pattern: `
+        🎵 A# (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'B2': {
+                name: 'B (Orta)',
+                pattern: `
+        🎵 B (Orta Oktav) 🎵
+        
+        Sol El:
+        👍 ◐    (Başparmak - Yarı kapalı)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'C3': {
+                name: 'C (Üst)',
+                pattern: `
+        🎵 C (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'C#3': {
+                name: 'C# (Üst)',
+                pattern: `
+        🎵 C# (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D3': {
+                name: 'D (Üst)',
+                pattern: `
+        🎵 D (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'D#3': {
+                name: 'D# (Üst)',
+                pattern: `
+        🎵 D# (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'E3': {
+                name: 'E (Üst)',
+                pattern: `
+        🎵 E (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ●    (İşaret parmağı)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        
+        Sağ El:
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ○    (Orta parmak - Açık)
+        💍 ○    (Yüzük parmağı - Açık)
+        🤙 ○    (Serçe parmak - Açık)
+                `
+            },
+            'F3': {
+                name: 'F (Üst)',
+                pattern: `
+        🎵 F (Üst Oktav) 🎵
+        
+        Sol El:
+        👍 ○    (Başparmak - Açık)
+        ☝️ ○    (İşaret parmağı - Açık)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        
+        Sağ El:
+        ☝️ ●    (İşaret parmağı)
+        🖕 ●    (Orta parmak)
+        💍 ●    (Yüzük parmağı)
+        🤙 ●    (Serçe parmak)
+                `
+            }
+        };
+        
+        function showFingering(noteId) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.note-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            const fingering = fingerings[noteId];
+            const display = document.getElementById('fingeringDisplay');
+            
+            display.innerHTML = `
+                <div class="selected-note">${fingering.name}</div>
+                <div class="recorder-diagram">${fingering.pattern}</div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çocuk İlaç Dozaj Hesaplayıcısı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .form-group h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+        }
+        
+        .result-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .result-main {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .result-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 25px;
+        }
+        
+        .detail-card {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .detail-card h4 {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .detail-card .value {
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin: 15px 0;
+        }
+        
+        .timer-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧸 Çocuk İlaç Dozaj Hesaplayıcısı</h1>
+            <p>Güvenli ve doğru dozaj hesaplaması için</p>
+        </div>
+        
+        <div class="content">
+            <div class="form-grid">
+                <div class="form-group">
+                    <h3>👶 Çocuk Bilgileri</h3>
+                    <div class="input-group">
+                        <label>Bilgi Türü Seçin</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="btn btn-primary" id="ageBtn" onclick="selectInfoType('age')">Yaş</button>
+                            <button type="button" class="btn btn-secondary" id="weightBtn" onclick="selectInfoType('weight')">Kilo</button>
+                        </div>
+                        <div id="ageInput" style="display: none;">
+                            <label for="age">Yaş (ay)</label>
+                            <input type="number" id="age" min="1" max="216" placeholder="Örn: 24">
+                        </div>
+                        <div id="weightInput" style="display: none;">
+                            <label for="weight">Kilo (kg)</label>
+                            <input type="number" id="weight" min="2" max="80" step="0.1" placeholder="Örn: 12.5">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <h3>💊 İlaç Bilgileri</h3>
+                    <div class="input-group">
+                        <label>Dozaj Türü Seçin</label>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button type="button" class="btn btn-primary" id="singleDoseBtn" onclick="selectDosageType('single')">Tek Doz</button>
+                            <button type="button" class="btn btn-secondary" id="dailyDoseBtn" onclick="selectDosageType('daily')">Günlük Dozaj</button>
+                        </div>
+                        <div id="singleDoseInput" style="display: none;">
+                            <label for="singleMgPerKg">Tek doz mg/kg</label>
+                            <input type="number" id="singleMgPerKg" min="0.1" step="0.1" placeholder="Örn: 5">
+                        </div>
+                        <div id="dailyDoseInput" style="display: none;">
+                            <label for="dailyMgPerKg">Günlük mg/kg</label>
+                            <input type="number" id="dailyMgPerKg" min="0.1" step="0.1" placeholder="Örn: 10">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="timesPerDay">Günde kaç kez</label>
+                        <select id="timesPerDay">
+                            <option value="1">1 kez</option>
+                            <option value="2" selected>2 kez</option>
+                            <option value="3">3 kez</option>
+                            <option value="4">4 kez</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="mgPerMl">1 ölçekte kaç mg var</label>
+                        <input type="number" id="mgPerMl" min="0.1" step="0.1" placeholder="Örn: 100">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="result-section" id="results" style="display: none;">
+                <h2>📊 Hesaplama Sonuçları</h2>
+                <div class="result-main" id="dosage">-</div>
+                <div class="result-details">
+                    <div class="detail-card">
+                        <h4>Kullanılan Kilo</h4>
+                        <div class="value" id="usedWeight">-</div>
+                    </div>
+                    <div class="detail-card">
+                        <h4>Günlük Toplam Doz</h4>
+                        <div class="value" id="totalDaily">-</div>
+                    </div>
+                    <div class="detail-card">
+                        <h4>Tek Seferde</h4>
+                        <div class="value" id="singleDose">-</div>
+                    </div>
+                    <div class="detail-card">
+                        <h4>Maksimum Günlük</h4>
+                        <div class="value" id="maxDaily">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="warning">
+                <strong>⚠️ Önemli Uyarı:</strong> Bu hesaplama sadece bilgilendirme amaçlıdır. Mutlaka doktorunuza danışın ve reçetedeki talimatları takip edin.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Yaşa göre ortalama kilo tablosu (ay cinsinden)
+        const weightByAge = {
+            1: 3.5, 2: 4.5, 3: 5.5, 6: 7.5, 9: 9, 12: 10,
+            15: 11, 18: 12, 24: 13, 30: 14.5, 36: 16, 42: 17.5,
+            48: 19, 54: 20.5, 60: 22, 72: 25, 84: 28, 96: 32,
+            108: 36, 120: 40, 132: 44, 144: 48, 156: 52, 168: 56,
+            180: 60, 192: 64, 204: 68, 216: 72
+        };
+        
+        function getWeightByAge(ageInMonths) {
+            if (weightByAge[ageInMonths]) {
+                return weightByAge[ageInMonths];
+            }
+            
+            // Interpolasyon ile ara değerleri hesapla
+            const ages = Object.keys(weightByAge).map(Number).sort((a, b) => a - b);
+            
+            if (ageInMonths < ages[0]) return weightByAge[ages[0]];
+            if (ageInMonths > ages[ages.length - 1]) return weightByAge[ages[ages.length - 1]];
+            
+            for (let i = 0; i < ages.length - 1; i++) {
+                if (ageInMonths >= ages[i] && ageInMonths <= ages[i + 1]) {
+                    const ratio = (ageInMonths - ages[i]) / (ages[i + 1] - ages[i]);
+                    return weightByAge[ages[i]] + ratio * (weightByAge[ages[i + 1]] - weightByAge[ages[i]]);
+                }
+            }
+            
+            return 10; // Varsayılan değer
+        }
+        
+        function calculate() {
+            const age = parseFloat(document.getElementById('age').value);
+            const inputWeight = parseFloat(document.getElementById('weight').value);
+            const singleMgPerKg = parseFloat(document.getElementById('singleMgPerKg').value);
+            const dailyMgPerKg = parseFloat(document.getElementById('dailyMgPerKg').value);
+            const timesPerDay = parseInt(document.getElementById('timesPerDay').value);
+            const mgPerMl = parseFloat(document.getElementById('mgPerMl').value);
+            
+            // Hangi bilgi türü seçilmiş kontrol et
+            const ageSelected = document.getElementById('ageInput').style.display !== 'none';
+            const weightSelected = document.getElementById('weightInput').style.display !== 'none';
+            
+            // Hangi dozaj türü seçilmiş kontrol et
+            const singleDoseSelected = document.getElementById('singleDoseInput').style.display !== 'none';
+            const dailyDoseSelected = document.getElementById('dailyDoseInput').style.display !== 'none';
+            
+            // Gerekli alanlar dolu mu kontrol et
+            let weight, mgPerKg;
+            
+            if (ageSelected && !age) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            
+            if (weightSelected && !inputWeight) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            
+            if (!mgPerMl) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            
+            if (singleDoseSelected && !singleMgPerKg) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            
+            if (dailyDoseSelected && !dailyMgPerKg) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+            
+            // Kilo hesaplama
+            if (ageSelected) {
+                weight = getWeightByAge(age);
+            } else {
+                weight = inputWeight;
+            }
+            
+            // Dozaj hesaplama
+            if (singleDoseSelected) {
+                mgPerKg = singleMgPerKg * timesPerDay; // Tek doz * günde kaç kez = günlük
+            } else {
+                mgPerKg = dailyMgPerKg; // Zaten günlük dozaj
+            }
+            
+            // Dozaj hesaplamaları
+            const totalDailyMg = weight * mgPerKg;
+            const singleDoseMg = totalDailyMg / timesPerDay;
+            const singleDoseMl = singleDoseMg / mgPerMl;
+            const maxDailyMg = totalDailyMg * 1.2; // %20 güvenlik marjı
+            
+            // Sonuçları göster
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('dosage').textContent = singleDoseMl.toFixed(2) + ' ölçek';
+            document.getElementById('usedWeight').textContent = weight.toFixed(1) + ' kg';
+            document.getElementById('totalDaily').textContent = totalDailyMg.toFixed(1) + ' mg';
+            document.getElementById('singleDose').textContent = singleDoseMg.toFixed(1) + ' mg';
+            document.getElementById('maxDaily').textContent = maxDailyMg.toFixed(1) + ' mg';
+        }
+        
+        function selectInfoType(type) {
+            const ageBtn = document.getElementById('ageBtn');
+            const weightBtn = document.getElementById('weightBtn');
+            const ageInput = document.getElementById('ageInput');
+            const weightInput = document.getElementById('weightInput');
+            
+            if (type === 'age') {
+                ageBtn.className = 'btn btn-primary';
+                weightBtn.className = 'btn btn-secondary';
+                ageInput.style.display = 'block';
+                weightInput.style.display = 'none';
+                document.getElementById('weight').value = '';
+            } else {
+                ageBtn.className = 'btn btn-secondary';
+                weightBtn.className = 'btn btn-primary';
+                ageInput.style.display = 'none';
+                weightInput.style.display = 'block';
+                document.getElementById('age').value = '';
+            }
+            calculate();
+        }
+        
+        function selectDosageType(type) {
+            const singleBtn = document.getElementById('singleDoseBtn');
+            const dailyBtn = document.getElementById('dailyDoseBtn');
+            const singleInput = document.getElementById('singleDoseInput');
+            const dailyInput = document.getElementById('dailyDoseInput');
+            
+            if (type === 'single') {
+                singleBtn.className = 'btn btn-primary';
+                dailyBtn.className = 'btn btn-secondary';
+                singleInput.style.display = 'block';
+                dailyInput.style.display = 'none';
+                document.getElementById('dailyMgPerKg').value = '';
+            } else {
+                singleBtn.className = 'btn btn-secondary';
+                dailyBtn.className = 'btn btn-primary';
+                singleInput.style.display = 'none';
+                dailyInput.style.display = 'block';
+                document.getElementById('singleMgPerKg').value = '';
+            }
+            calculate();
+        }
+        
+        // Event listeners
+        document.getElementById('age').addEventListener('input', calculate);
+        document.getElementById('weight').addEventListener('input', calculate);
+        document.getElementById('singleMgPerKg').addEventListener('input', calculate);
+        document.getElementById('dailyMgPerKg').addEventListener('input', calculate);
+        document.getElementById('timesPerDay').addEventListener('change', calculate);
+        document.getElementById('mgPerMl').addEventListener('input', calculate);
+        
+        // Sayfa yüklendiğinde varsayılan seçimleri yap
+        window.addEventListener('load', function() {
+            selectInfoType('age');
+            selectDosageType('daily');
+        });
+    </script>
+</body>
+</html>

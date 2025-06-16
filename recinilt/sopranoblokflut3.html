@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soprano Blok Flüt Profesyonel Nota Editörü</title>
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .main-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .note-selection {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .composition-area {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 5px solid #764ba2;
+        }
+        
+        .duration-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #e6fffa;
+            border-radius: 10px;
+            border-left: 4px solid #38b2ac;
+        }
+        
+        .duration-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .duration-button {
+            background: #38b2ac;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .duration-button:hover {
+            background: #319795;
+            transform: translateY(-2px);
+        }
+        
+        .duration-button.active {
+            background: #2c7a7b;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        /* NOTA SEÇİM DİZEĞİ */
+        .note-selection-staff {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .selection-staff {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.0;
+            white-space: pre;
+            background: #fdfdfd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            display: inline-block;
+            text-align: left;
+        }
+        
+        .selection-staff-line {
+            margin: 0;
+            padding: 0;
+            height: 16px;
+            position: relative;
+        }
+        
+        .selection-main-line {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .selection-helper-line {
+            font-weight: normal;
+            color: #a0aec0;
+        }
+        
+        .selectable-note {
+            cursor: pointer;
+            background: rgba(102, 126, 234, 0.2);
+            padding: 1px 3px;
+            border-radius: 3px;
+            border: 1px solid #667eea;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .selectable-note:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.3);
+        }
+        
+        /* PARMAK POZİSYONU GÖSTERME - TÜMÜ AYNI ANDA */
+        .all-fingerings {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .fingering-grid {
+            display: flex;
+            gap: 15px;
+            min-width: 1200px;
+            padding: 10px;
+        }
+        
+        .single-fingering {
+            text-align: center;
+            min-width: 60px;
+        }
+        
+        .note-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .finger-pattern {
+            font-family: monospace;
+            font-size: 18px;
+            line-height: 1.1;
+        }
+        
+        .thumb-hole {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .front-hole {
+            color: #1f2937;
+            font-weight: bold;
+        }
+        
+        .staff-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        
+        .professional-staff {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            line-height: 1.0;
+            white-space: pre;
+            background: #fdfdfd;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            overflow-x: auto;
+            min-height: 400px;
+        }
+        
+        .staff-line {
+            margin: 0;
+            padding: 0;
+            height: 18px;
+            position: relative;
+        }
+        
+        .main-line {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .helper-line {
+            font-weight: normal;
+            color: #a0aec0;
+        }
+        
+        .note-symbol {
+            cursor: pointer;
+            background: rgba(255, 243, 205, 0.8);
+            padding: 1px 3px;
+            border-radius: 3px;
+            border: 1px solid #ffeaa7;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+        
+        .note-symbol:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.2);
+        }
+        
+        .composition-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .control-button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .control-button.danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+        
+        .piece-input {
+            padding: 8px 15px;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            min-width: 200px;
+        }
+        
+        .saved-pieces {
+            margin-top: 20px;
+        }
+        
+        .piece-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .instructions {
+            background: #e6fffa;
+            border-left: 4px solid #38b2ac;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .main-sections {
+                grid-template-columns: 1fr;
+            }
+            
+            .composition-controls {
+                flex-direction: column;
+            }
+            
+            .fingering-grid {
+                flex-wrap: wrap;
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Soprano Blok Flüt Profesyonel Nota Editörü 🎵</h1>
+        
+        <div class="main-sections">
+            <div class="note-selection">
+                <h2>🎼 Nota Seçim Dizeci</h2>
+                
+                <div class="duration-section">
+                    <h3>🎵 Nota Süreleri</h3>
+                    <div class="duration-buttons">
+                        <button class="duration-button" onclick="selectDuration('whole')">⚪ Birlik</button>
+                        <button class="duration-button" onclick="selectDuration('half')">♩ İkilik</button>
+                        <button class="duration-button active" onclick="selectDuration('quarter')">♪ Dörtlük</button>
+                        <button class="duration-button" onclick="selectDuration('eighth')">♫ Sekizlik</button>
+                        <button class="duration-button" onclick="selectDuration('sixteenth')">♬ Onaltılık</button>
+                    </div>
+                </div>
+                
+                <div class="note-selection-staff">
+                    <h3>🎹 Notaları Seçin</h3>
+                    <div class="selection-staff" id="selectionStaff"></div>
+                    <p><small>Notaları seçmek için üzerlerine tıklayın</small></p>
+                </div>
+            </div>
+            
+            <div class="composition-area">
+                <h2>🎼 Profesyonel Nota Yazımı</h2>
+                
+                <div class="composition-controls">
+                    <input type="text" id="pieceNameInput" class="piece-input" placeholder="Parça adı...">
+                    <button class="control-button" onclick="savePiece()">💾 Kaydet</button>
+                    <button class="control-button danger" onclick="clearStaff()">🗑️ Temizle</button>
+                    <button class="control-button" onclick="undoLastNote()">↩️ Geri Al</button>
+                </div>
+                
+                <div class="staff-container">
+                    <div class="professional-staff" id="professionalStaff"></div>
+                </div>
+                
+                <div class="saved-pieces">
+                    <h3>💿 Kaydedilmiş Parçalar</h3>
+                    <div id="savedPiecesList"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TÜM PARMAK POZİSYONLARI AYNI ANDA -->
+        <div class="all-fingerings">
+            <h3 style="text-align: center; color: #4a5568; margin-bottom: 20px;">🎯 Tüm Notalar İçin Parmak Pozisyonları</h3>
+            <div class="fingering-grid" id="allFingeringsGrid"></div>
+            <div style="text-align: center; font-size: 12px; color: #666; margin-top: 15px;">
+                <p><span style="color: #dc2626;">🔴</span> Arka delik kapalı | <span style="color: #dc2626;">🟥</span> Arka delik yarım açık | <span style="color: #1f2937;">○</span> Arka delik açık</p>
+                <p><span style="color: #1f2937;">●○◐</span> Ön delikler 1-7: <strong>●</strong> Kapalı | <strong>○</strong> Açık | <strong>◐</strong> Yarı kapalı</p>
+                <p><strong>Barok Sistemli</strong> Soprano Blok Flüt Parmak Pozisyonları</p>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎯 Profesyonel Nota Editörü - Nasıl Kullanılır:</h3>
+            <p><strong>🎵 Nota Süreleri:</strong> Birlik, ikilik, dörtlük, sekizlik, onaltılık notalar</p>
+            <p><strong>🔴</strong> Arka delik kapalı, <strong>🟥</strong> Arka delik yarım açık, <strong>○</strong> Arka delik açık</p>
+            <p><strong>●</strong> Kapalı delik, <strong>○</strong> Açık delik, <strong>◐</strong> Yarı kapalı delik</p>
+            <p><strong>🎼</strong> Sol taraftaki dizekten notaları seçin, sağ tarafa eklenir</p>
+            <p><strong>🎯</strong> Barok sistemli soprano blok flüt için doğru parmak pozisyonları</p>
+            <p><strong>💾</strong> Kompozisyonlarınızı kaydedin ve paylaşın</p>
+        </div>
+    </div>
+
+    <script>
+        // Barok sistemli soprano blok flüt parmak pozisyonları
+        // 0: arka delik, 1-7: ön delikler
+        // 0 = açık, 1 = kapalı, 0.5 = yarı kapalı (yarım açık)
+        const fingeringPatterns = {
+            'Do1': [1, 1, 1, 1, 1, 1, 1, 1],     // Do Alt - 🔴 ● ● ● ● ● ● ●
+            'Do#1': [1, 1, 1, 1, 1, 1, 1, 0],    // Do# Alt (eklendi)
+            'Re1': [1, 1, 1, 1, 1, 1, 1, 0],     // Re Alt - 🔴 ● ● ● ● ● ● ○
+            'Re#1': [1, 1, 1, 1, 1, 0.5, 0, 0],  // Re# Alt (eklendi)
+            'Mi1': [1, 1, 1, 1, 1, 1, 0, 0],     // Mi Alt - 🔴 ● ● ● ● ● ○ ○
+            'Fa1': [1, 1, 1, 1, 1, 0, 0, 0],     // Fa Alt - 🔴 ● ● ● ● ○ ○ ○
+            'Fa#1': [1, 1, 1, 0, 0, 0, 0, 0],    // Fa# Alt (eklendi)
+            'Sol1': [1, 1, 1, 1, 0, 0, 0, 0],    // Sol Alt - 🔴 ● ● ● ○ ○ ○ ○
+            'Sol#1': [1, 0, 0, 0, 1, 0, 0, 0],   // Sol# Alt (eklendi)
+            'La1': [1, 1, 1, 0, 0, 0, 0, 0],     // La Alt - 🔴 ● ● ○ ○ ○ ○ ○
+            'La#1': [1, 0, 1, 0, 0, 0, 0, 0],    // La# Alt (eklendi)
+            'Si1': [1, 1, 0, 0, 0, 0, 0, 0],     // Si Alt - 🔴 ● ○ ○ ○ ○ ○ ○
+            'Do2': [1, 0, 1, 0, 0, 0, 0, 0],     // Do2 - 🔴 ○ ● ○ ○ ○ ○ ○
+            'Do#2': [0.5, 1, 1, 1, 1, 1, 1, 0],  // Do# Orta (eklendi)
+            'Re2': [0.5, 1, 1, 1, 0, 0, 0, 0],   // Re2 - 🟥 ● ● ● ○ ○ ○ ○
+            'Re#2': [0.5, 1, 1, 1, 1, 0.5, 0, 0], // Re# Orta (eklendi)
+            'Mi2': [0.5, 1, 1, 0, 0, 0, 0, 0],   // Mi2 - 🟥 ● ● ○ ○ ○ ○ ○
+            'Fa2': [0.5, 1, 0, 0, 0, 0, 0, 0],   // Fa2 - 🟥 ● ○ ○ ○ ○ ○ ○
+            'Fa#2': [0.5, 1, 1, 0, 0, 0, 0, 0],  // Fa# Orta (eklendi)
+            'Sol2': [0.5, 0, 1, 1, 0, 0, 0, 0],  // Sol2 - 🟥 ○ ● ● ○ ○ ○ ○
+            'Sol#2': [0.5, 0, 0, 0, 1, 0, 0, 0], // Sol# Orta (eklendi)
+            'La2': [0.5, 0, 1, 0, 0, 0, 0, 0],   // La2 - 🟥 ○ ● ○ ○ ○ ○ ○
+            'La#2': [0.5, 0, 1, 0, 0, 0, 0, 0],  // La# Orta (eklendi)
+            'Si2': [0.5, 0, 0, 0, 0, 0, 0, 0],   // Si2 - 🟥 ○ ○ ○ ○ ○ ○ ○
+            'Do3': [0, 1, 1, 1, 0, 1, 0, 0],     // Do3 - ○ ● ● ● ○ ● ○ ○
+            'Do#3': [0, 1, 0, 0, 1, 1, 0, 0],    // Do# Üst (eklendi)
+            'Re3': [0, 1, 1, 0, 0, 1, 0, 0],     // Re3 - ○ ● ● ○ ○ ● ○ ○
+            'Re#3': [0, 1, 0, 0, 1, 0, 0, 0],    // Re# Üst (eklendi)
+            'Mi3': [0, 1, 0, 0, 0, 1, 0, 0],     // Mi3 - ○ ● ○ ○ ○ ● ○ ○
+            'Fa3': [0, 0, 1, 1, 0, 1, 0, 0]      // Fa3 - ○ ○ ● ● ○ ● ○ ○
+        };
+
+        // DOĞRU SİSTEM: Kalın çizgiler 4,6,8,10,12 - üzerindeki notalar FA,RE,SI,SOL,MI
+        const noteStaffPositions = {
+            // Üst ek çizgiler
+            'Fa3': { line: 0, onLine: true, pos: 'high' },      // Fa - üst ek çizgi
+            'Mi3': { line: 1, onLine: false, pos: 'high' },     // Mi - üst ek arası
+            'Re3': { line: 2, onLine: true, pos: 'high' },      // Re - üst ek çizgi
+            'Do3': { line: 3, onLine: false, pos: 'high' },     // Do - üst arası
+            
+            // Ana dizek - DOĞRU POZİSYONLAR
+            'Si2': { line: 4, onLine: true, pos: 'staff' },     // Si - 1. kalın çizgi (line 4)
+            'La2': { line: 5, onLine: false, pos: 'staff' },    // La - 1-2 kalın arası (line 5)
+            'Sol2': { line: 6, onLine: true, pos: 'staff' },    // Sol - 2. kalın çizgi (line 6)
+            'Fa2': { line: 7, onLine: false, pos: 'staff' },    // Fa - 2-3 kalın arası (line 7)
+            'Mi2': { line: 8, onLine: true, pos: 'staff' },     // Mi - 3. kalın çizgi (line 8)
+            'Re2': { line: 9, onLine: false, pos: 'staff' },    // Re - 3-4 kalın arası (line 9)
+            'Do2': { line: 10, onLine: true, pos: 'staff' },    // Do - 4. kalın çizgi (line 10)
+            'Si1': { line: 11, onLine: false, pos: 'staff' },   // Si - 4-5 kalın arası (line 11)
+            'La1': { line: 12, onLine: true, pos: 'staff' },    // La - 5. kalın çizgi (line 12)
+            
+            // Alt ek çizgiler
+            'Sol1': { line: 13, onLine: false, pos: 'low' },    // Sol - alt arası
+            'Fa1': { line: 14, onLine: true, pos: 'low' },      // Fa - alt ek çizgi
+            'Mi1': { line: 15, onLine: false, pos: 'low' },     // Mi - alt ek arası
+            'Re1': { line: 16, onLine: true, pos: 'low' },      // Re - alt ek çizgi
+            'Do1': { line: 17, onLine: false, pos: 'low' },     // Do - en alt arası
+            
+            // Sharp notalar aynı pozisyonlarda
+            'Do#1': { line: 17, onLine: false, pos: 'low' },
+            'Re#1': { line: 16, onLine: true, pos: 'low' },
+            'Fa#1': { line: 14, onLine: true, pos: 'low' },
+            'Sol#1': { line: 13, onLine: false, pos: 'low' },
+            'La#1': { line: 12, onLine: true, pos: 'staff' },
+            'Do#2': { line: 10, onLine: true, pos: 'staff' },
+            'Re#2': { line: 9, onLine: false, pos: 'staff' },
+            'Fa#2': { line: 7, onLine: false, pos: 'staff' },
+            'Sol#2': { line: 6, onLine: true, pos: 'staff' },
+            'La#2': { line: 5, onLine: false, pos: 'staff' },
+            'Do#3': { line: 3, onLine: false, pos: 'high' },
+            'Re#3': { line: 2, onLine: true, pos: 'high' }
+        };
+
+        // Nota süre sembolleri
+        const noteDurations = {
+            'whole': { symbol: '○', name: 'Birlik' },
+            'half': { symbol: '♩', name: 'İkilik' },
+            'quarter': { symbol: '♪', name: 'Dörtlük' },
+            'eighth': { symbol: '♫', name: 'Sekizlik' },
+            'sixteenth': { symbol: '♬', name: 'Onaltılık' }
+        };
+
+        let currentDuration = 'quarter';
+        let currentComposition = [];
+        let savedPieces = {};
+        let staffLines = [];
+        let selectionStaffLines = [];
+        let notePosition = 4;
+
+        function initializeStaff() {
+            staffLines = [];
+            for (let i = 0; i < 18; i++) {
+                if ((i >= 4 && i <= 12 && i % 2 === 0) || 
+                    (i < 4 && i % 2 === 0) ||
+                    (i > 12 && i % 2 === 0)) {
+                    if (i >= 4 && i <= 12) {
+                        staffLines[i] = '═══════════════════════════════════════════════════════════════════════════════════';
+                    } else {
+                        staffLines[i] = '───────────────────────────────────────────────────────────────────────────────────';
+                    }
+                } else {
+                    staffLines[i] = '                                                                                   ';
+                }
+            }
+            staffLines[8] = '𝄞═══════════════════════════════════════════════════════════════════════════════════';
+            notePosition = 4;
+        }
+
+        function initializeSelectionStaff() {
+            selectionStaffLines = [];
+            for (let i = 0; i < 18; i++) {
+                if ((i >= 4 && i <= 12 && i % 2 === 0) || 
+                    (i < 4 && i % 2 === 0) ||
+                    (i > 12 && i % 2 === 0)) {
+                    if (i >= 4 && i <= 12) {
+                        selectionStaffLines[i] = '═══════════════════════════════════════════════════════════════';
+                    } else {
+                        selectionStaffLines[i] = '───────────────────────────────────────────────────────────────';
+                    }
+                } else {
+                    selectionStaffLines[i] = '                                                                   ';
+                }
+            }
+            selectionStaffLines[8] = '𝄞═══════════════════════════════════════════════════════════════';
+            
+            // Tüm notaları seçim dizeğine yerleştir
+            const notesToPlace = ['Do1', 'Re1', 'Mi1', 'Fa1', 'Sol1', 'La1', 'Si1', 'Do2', 'Re2', 'Mi2', 'Fa2', 'Sol2', 'La2', 'Si2', 'Do3', 'Re3', 'Mi3', 'Fa3'];
+            
+            notesToPlace.forEach((noteId, index) => {
+                const notePos = noteStaffPositions[noteId];
+                if (notePos) {
+                    let noteSymbol = '♪';
+                    let position = 4 + (index * 3);
+                    
+                    if (notePos.onLine) {
+                        noteSymbol = '♪̲';
+                    }
+                    
+                    let lineIndex = notePos.line;
+                    let line = selectionStaffLines[lineIndex];
+                    
+                    if (position < line.length - 2) {
+                        let newLine = line.substring(0, position) + noteSymbol + line.substring(position + noteSymbol.length);
+                        selectionStaffLines[lineIndex] = newLine;
+                    }
+                }
+            });
+        }
+
+        function initializeAllFingerings() {
+            const grid = document.getElementById('allFingeringsGrid');
+            const allNotes = ['Do1', 'Re1', 'Mi1', 'Fa1', 'Sol1', 'La1', 'Si1', 'Do2', 'Re2', 'Mi2', 'Fa2', 'Sol2', 'La2', 'Si2', 'Do3', 'Re3', 'Mi3', 'Fa3'];
+            
+            grid.innerHTML = '';
+            
+            allNotes.forEach(noteId => {
+                const pattern = fingeringPatterns[noteId];
+                if (pattern) {
+                    const fingeringDiv = document.createElement('div');
+                    fingeringDiv.className = 'single-fingering';
+                    
+                    let fingeringHTML = `<div class="note-name">${noteId}</div><div class="finger-pattern">`;
+                    
+                    // Arka delik (başparmak) - renkli gösterim
+                    const thumbState = pattern[0];
+                    let thumbSymbol = '○'; // Açık - beyaz daire
+                    let thumbColor = '#1f2937'; // Varsayılan siyah
+                    
+                    if (thumbState === 1) {
+                        thumbSymbol = '🔴'; // Kapalı - kırmızı dolu daire
+                        thumbColor = '#dc2626';
+                    } else if (thumbState === 0.5) {
+                        thumbSymbol = '🟥'; // Yarım açık - kırmızı kare
+                        thumbColor = '#dc2626';
+                    }
+                    
+                    fingeringHTML += `<div class="thumb-hole" style="color: ${thumbColor}">${thumbSymbol}</div>`;
+                    
+                    // Ön delikler (1-7) - siyah
+                    for (let i = 1; i < 8; i++) {
+                        const holeState = pattern[i];
+                        let holeSymbol = '○';
+                        if (holeState === 1) holeSymbol = '●';
+                        else if (holeState === 0.5) holeSymbol = '◐';
+                        
+                        fingeringHTML += `<div class="front-hole">${holeSymbol}</div>`;
+                    }
+                    
+                    fingeringHTML += '</div>';
+                    fingeringDiv.innerHTML = fingeringHTML;
+                    grid.appendChild(fingeringDiv);
+                }
+            });
+        }
+
+        function selectDuration(duration) {
+            currentDuration = duration;
+            document.querySelectorAll('.duration-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function selectNoteFromStaff(noteId) {
+            addNote(noteId);
+        }
+
+        function addNote(noteId) {
+            const notePos = noteStaffPositions[noteId];
+            if (!notePos) return;
+            
+            let noteSymbol = noteDurations[currentDuration].symbol;
+            let sharpSymbol = noteId.includes('#') ? '♯' : '';
+            let fullNoteSymbol = sharpSymbol + noteSymbol;
+            
+            if (notePos.onLine) {
+                fullNoteSymbol = sharpSymbol + noteSymbol + '̲';
+            }
+            
+            let lineIndex = notePos.line;
+            let line = staffLines[lineIndex];
+            
+            if (notePosition + fullNoteSymbol.length < line.length) {
+                let newLine = line.substring(0, notePosition) + fullNoteSymbol + line.substring(notePosition + fullNoteSymbol.length);
+                staffLines[lineIndex] = newLine;
+                
+                notePosition += fullNoteSymbol.length + 2;
+                
+                if (notePosition > 75) {
+                    for (let i = 0; i < staffLines.length; i++) {
+                        if ((i >= 4 && i <= 12 && i % 2 === 0) || 
+                            (i < 4 && i % 2 === 0) || 
+                            (i > 12 && i % 2 === 0)) {
+                            if (i >= 4 && i <= 12) {
+                                staffLines[i] += '═══════════════════════════════';
+                            } else {
+                                staffLines[i] += '───────────────────────────────';
+                            }
+                        } else {
+                            staffLines[i] += '                               ';
+                        }
+                    }
+                }
+                
+                currentComposition.push({
+                    noteId: noteId,
+                    duration: currentDuration,
+                    position: notePosition - fullNoteSymbol.length - 2
+                });
+                
+                updateStaffDisplay();
+            }
+        }
+
+        function updateStaffDisplay() {
+            const staffElement = document.getElementById('professionalStaff');
+            staffElement.innerHTML = '';
+            
+            staffLines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'staff-line';
+                
+                if ((index >= 4 && index <= 12 && index % 2 === 0)) {
+                    lineDiv.classList.add('main-line');
+                } else if ((index < 4 && index % 2 === 0) || (index > 12 && index % 2 === 0)) {
+                    lineDiv.classList.add('helper-line');
+                }
+                
+                lineDiv.textContent = line;
+                lineDiv.innerHTML = lineDiv.innerHTML.replace(/(♯?[○♩♪♫♬]̲?)/g, 
+                    '<span class="note-symbol" onclick="handleNoteClick(this)">$1</span>');
+                
+                staffElement.appendChild(lineDiv);
+            });
+        }
+
+        function updateSelectionStaffDisplay() {
+            const staffElement = document.getElementById('selectionStaff');
+            staffElement.innerHTML = '';
+            
+            selectionStaffLines.forEach((line, index) => {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = 'selection-staff-line';
+                
+                if ((index >= 4 && index <= 12 && index % 2 === 0)) {
+                    lineDiv.classList.add('selection-main-line');
+                } else if ((index < 4 && index % 2 === 0) || (index > 12 && index % 2 === 0)) {
+                    lineDiv.classList.add('selection-helper-line');
+                }
+                
+                lineDiv.textContent = line;
+                
+                // Notalara click event ekle
+                const notesToPlace = ['Do1', 'Re1', 'Mi1', 'Fa1', 'Sol1', 'La1', 'Si1', 'Do2', 'Re2', 'Mi2', 'Fa2', 'Sol2', 'La2', 'Si2', 'Do3', 'Re3', 'Mi3', 'Fa3'];
+                notesToPlace.forEach((noteId, noteIndex) => {
+                    const notePos = noteStaffPositions[noteId];
+                    if (notePos && notePos.line === index) {
+                        lineDiv.innerHTML = lineDiv.innerHTML.replace(/(♪̲?)/,
+                            `<span class="selectable-note" onclick="selectNoteFromStaff('${noteId}')" title="${noteId}">$1</span>`);
+                    }
+                });
+                
+                staffElement.appendChild(lineDiv);
+            });
+        }
+
+        function handleNoteClick(noteElement) {
+            // Dizekteki notalara tıklandığında bir şey yapmayabilir
+        }
+
+        function clearStaff() {
+            initializeStaff();
+            currentComposition = [];
+            updateStaffDisplay();
+        }
+
+        function undoLastNote() {
+            if (currentComposition.length > 0) {
+                const lastNote = currentComposition.pop();
+                
+                initializeStaff();
+                
+                const tempComposition = [...currentComposition];
+                currentComposition = [];
+                
+                tempComposition.forEach(item => {
+                    const previousDuration = currentDuration;
+                    currentDuration = item.duration;
+                    addNote(item.noteId);
+                    currentDuration = previousDuration;
+                });
+                
+                updateStaffDisplay();
+            }
+        }
+
+        function savePiece() {
+            const pieceNameInput = document.getElementById('pieceNameInput');
+            const pieceName = pieceNameInput.value.trim();
+            
+            if (!pieceName) {
+                alert('Lütfen parça adı girin!');
+                return;
+            }
+            
+            if (currentComposition.length === 0) {
+                alert('Kaydedilecek nota yok!');
+                return;
+            }
+            
+            savedPieces[pieceName] = [...currentComposition];
+            pieceNameInput.value = '';
+            
+            alert(`"${pieceName}" başarıyla kaydedildi!`);
+            updateSavedPiecesList();
+        }
+
+        function loadPiece(pieceName) {
+            if (savedPieces[pieceName]) {
+                clearStaff();
+                savedPieces[pieceName].forEach(item => {
+                    currentDuration = item.duration;
+                    addNote(item.noteId);
+                });
+            }
+        }
+
+        function deletePiece(pieceName) {
+            if (confirm(`"${pieceName}" parçasını silmek istediğinizden emin misiniz?`)) {
+                delete savedPieces[pieceName];
+                updateSavedPiecesList();
+            }
+        }
+
+        function updateSavedPiecesList() {
+            const listElement = document.getElementById('savedPiecesList');
+            listElement.innerHTML = '';
+            
+            for (const pieceName in savedPieces) {
+                const pieceItem = document.createElement('div');
+                pieceItem.className = 'piece-item';
+                pieceItem.innerHTML = `
+                    <span>${pieceName} (${savedPieces[pieceName].length} nota)</span>
+                    <div>
+                        <button class="control-button" onclick="loadPiece('${pieceName}')">📂 Aç</button>
+                        <button class="control-button danger" onclick="deletePiece('${pieceName}')">🗑️ Sil</button>
+                    </div>
+                `;
+                listElement.appendChild(pieceItem);
+            }
+            
+            if (Object.keys(savedPieces).length === 0) {
+                listElement.innerHTML = '<p style="color: #666;">Henüz kaydedilmiş parça yok.</p>';
+            }
+        }
+
+        // Sayfa yüklendiğinde başlat
+        initializeStaff();
+        initializeSelectionStaff();
+        initializeAllFingerings(); // TÜM PARMAK POZİSYONLARINI GÖSTER
+        updateStaffDisplay();
+        updateSelectionStaffDisplay();
+        updateSavedPiecesList();
+    </script>
+</body>
+</html>
