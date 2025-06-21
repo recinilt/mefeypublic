@@ -499,6 +499,9 @@
                     <p><strong>İşlemler:</strong> ${visit.procedures || 'Kayıtsız'}</p>
                     <p><strong>Malzemeler:</strong> ${Object.entries(visit.materials || {}).map(([name, qty]) => `${name} (${qty})`).join(', ') || 'Kayıtsız'}</p>
                     <p><strong>Maliyet:</strong> ${visit.totalCost || 0} TL</p>
+                    <p><strong>Hasta Durumu:</strong> ${visit.patientCondition || 'Kayıtsız'}</p>
+                    <p><strong>Sonraki Ziyaret:</strong> ${visit.nextVisit ? new Date(visit.nextVisit).toLocaleDateString('tr-TR') : 'Kayıtsız'}</p>
+                    <p><strong>Notlar:</strong> ${visit.notes || 'Kayıtsız'}</p>
                 `;
                 container.appendChild(div);
             });
