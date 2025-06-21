@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hazır Reçete Yönetim Sistemi</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0; }
+        .btn { padding: 8px 16px; margin: 5px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn:hover { opacity: 0.8; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .form-row input { flex: 1; }
+        .prescriptions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .prescription-card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; background: #f9f9f9; }
+        .prescription-header { display: flex; justify-content: between; align-items: center; margin-bottom: 10px; }
+        .prescription-title { font-weight: bold; color: #333; }
+        .prescription-disease { color: #666; font-size: 12px; margin-bottom: 10px; }
+        .medication-list { list-style: none; }
+        .medication-item { background: #e9ecef; padding: 8px; margin: 5px 0; border-radius: 4px; font-size: 13px; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; cursor: pointer; border: 1px solid #ddd; background: #f8f9fa; }
+        .tab.active { background: #007bff; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .notification { position: fixed; top: 20px; right: 20px; padding: 15px; border-radius: 5px; color: white; z-index: 1000; }
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        .github-section { background: #f8f9fa; padding: 15px; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hazır Reçete Yönetim Sistemi</h1>
+            <div>
+                <button class="btn btn-success" onclick="exportJSON()">JSON Dışa Aktar</button>
+                <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON()">
+                <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">JSON İçe Aktar</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('create')">Reçete Oluştur</div>
+            <div class="tab" onclick="showTab('list')">Reçete Listesi</div>
+            <div class="tab" onclick="showTab('data')">Veri Yönetimi</div>
+        </div>
+
+        <div id="create-tab" class="tab-content active">
+            <div class="form-group">
+                <label>Kısa Ad:</label>
+                <input type="text" id="shortName" placeholder="Örn: Grip Reçetesi">
+            </div>
+            
+            <div class="form-group">
+                <label>ICD Kodu:</label>
+                <input type="text" id="icdCode" placeholder="Örn: J06.9">
+            </div>
+            
+            <div class="form-group">
+                <label>Hastalık Adı:</label>
+                <input type="text" id="diseaseName" placeholder="Örn: Akut üst solunum yolu enfeksiyonu">
+            </div>
+
+            <div class="form-group">
+                <label>İlaçlar:</label>
+                <div id="medications">
+                    <div class="form-row">
+                        <input type="text" placeholder="İlaç Adı" class="med-name">
+                        <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
+                        <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
+                        <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                        <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
+                    </div>
+                </div>
+                <button class="btn btn-info" onclick="addMedication()">İlaç Ekle</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="savePrescription()">Reçeteyi Kaydet</button>
+        </div>
+
+        <div id="list-tab" class="tab-content">
+            <div id="prescriptions-list" class="prescriptions-grid"></div>
+        </div>
+
+        <div id="data-tab" class="tab-content">
+            <div class="github-section">
+                <h3>GitHub Veri Yönetimi</h3>
+                <p>GitHub deposu: recinilt/gng</p>
+                <div class="form-group">
+                    <label>GitHub Token:</label>
+                    <input type="password" id="githubToken" placeholder="GitHub Personal Access Token girin">
+                    <small style="color: #666; font-size: 12px;">Token'ınız güvenlik için kayıt edilmez, her seferinde girmeniz gerekir.</small>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-success" onclick="syncToGitHub()">GitHub'a Gönder</button>
+                    <button class="btn btn-info" onclick="syncFromGitHub()">GitHub'dan Çek</button>
+                </div>
+                <div id="sync-status" style="margin-top: 10px; padding: 10px; background: #e9ecef; border-radius: 5px; display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GitHub ayarları
+        const kullaniciAdi = "recinilt";
+        const repoAdi = "gng";
+        const fileName = "prescriptions.json";
+
+        let prescriptions = {};
+
+        // Sayfa yüklendiğinde verileri yükle
+        window.onload = function() {
+            loadPrescriptions();
+            displayPrescriptions();
+        };
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'list') {
+                displayPrescriptions();
+            }
+        }
+
+        function addMedication() {
+            const medicationsDiv = document.getElementById('medications');
+            const newMedRow = document.createElement('div');
+            newMedRow.className = 'form-row';
+            newMedRow.innerHTML = `
+                <input type="text" placeholder="İlaç Adı" class="med-name">
+                <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
+                <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
+                <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
+            `;
+            medicationsDiv.appendChild(newMedRow);
+        }
+
+        function removeMedication(btn) {
+            btn.parentElement.remove();
+        }
+
+        function savePrescription() {
+            const shortName = document.getElementById('shortName').value.trim();
+            const icdCode = document.getElementById('icdCode').value.trim();
+            const diseaseName = document.getElementById('diseaseName').value.trim();
+            
+            if (!shortName || !icdCode || !diseaseName) {
+                showNotification('Lütfen tüm alanları doldurun!', 'error');
+                return;
+            }
+
+            const medications = [];
+            document.querySelectorAll('#medications .form-row').forEach(row => {
+                const name = row.querySelector('.med-name').value.trim();
+                const daily = parseInt(row.querySelector('.med-daily').value);
+                const dose = parseInt(row.querySelector('.med-dose').value);
+                const days = parseInt(row.querySelector('.med-days').value);
+                
+                if (name && daily && dose && days) {
+                    medications.push({ name, daily, dose, days });
+                }
+            });
+
+            if (medications.length === 0) {
+                showNotification('En az bir ilaç ekleyin!', 'error');
+                return;
+            }
+
+            const prescription = {
+                shortName,
+                icdCode,
+                diseaseName,
+                medications,
+                createdAt: new Date().toISOString()
+            };
+
+            const prescriptionKey = Date.now().toString();
+            prescriptions[prescriptionKey] = prescription;
+            
+            // State'e kaydet
+            savePrescriptions();
+            
+            // Formu temizle
+            clearForm();
+            
+            showNotification('Reçete başarıyla kaydedildi!', 'success');
+        }
+
+        function clearForm() {
+            document.getElementById('shortName').value = '';
+            document.getElementById('icdCode').value = '';
+            document.getElementById('diseaseName').value = '';
+            
+            const medicationsDiv = document.getElementById('medications');
+            medicationsDiv.innerHTML = `
+                <div class="form-row">
+                    <input type="text" placeholder="İlaç Adı" class="med-name">
+                    <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
+                    <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
+                    <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                    <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
+                </div>
+            `;
+        }
+
+        function displayPrescriptions() {
+            const listDiv = document.getElementById('prescriptions-list');
+            listDiv.innerHTML = '';
+
+            if (Object.keys(prescriptions).length === 0) {
+                listDiv.innerHTML = '<p>Henüz reçete eklenmemiş.</p>';
+                return;
+            }
+
+            Object.entries(prescriptions).forEach(([key, prescription]) => {
+                const card = document.createElement('div');
+                card.className = 'prescription-card';
+                
+                const medicationsHTML = prescription.medications.map(med => 
+                    `<li class="medication-item">
+                        <strong>${med.name}</strong><br>
+                        Günde ${med.daily} kez, ${med.dose} adet, ${med.days} gün
+                    </li>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="prescription-header">
+                        <div class="prescription-title">${prescription.shortName}</div>
+                        <button class="btn btn-danger" onclick="deletePrescription('${key}')">Sil</button>
+                    </div>
+                    <div class="prescription-disease">
+                        <strong>ICD:</strong> ${prescription.icdCode} - ${prescription.diseaseName}
+                    </div>
+                    <ul class="medication-list">${medicationsHTML}</ul>
+                `;
+                
+                listDiv.appendChild(card);
+            });
+        }
+
+        function deletePrescription(key) {
+            if (confirm('Bu reçeteyi silmek istediğinizden emin misiniz?')) {
+                delete prescriptions[key];
+                savePrescriptions();
+                displayPrescriptions();
+                showNotification('Reçete silindi!', 'success');
+            }
+        }
+
+        function savePrescriptions() {
+            // localStorage'a kaydet
+            localStorage.setItem('prescriptions', JSON.stringify(prescriptions));
+        }
+
+        function loadPrescriptions() {
+            // localStorage'dan yükle
+            const savedData = localStorage.getItem('prescriptions');
+            if (savedData) {
+                try {
+                    prescriptions = JSON.parse(savedData);
+                } catch (error) {
+                    console.error('localStorage verisi okunamadı:', error);
+                    prescriptions = {};
+                }
+            }
+        }
+
+        function exportJSON() {
+            const dataStr = JSON.stringify(prescriptions, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'receteler.json';
+            link.click();
+            URL.revokeObjectURL(url);
+            showNotification('JSON dosyası indirildi!', 'success');
+        }
+
+        function importJSON() {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    prescriptions = { ...prescriptions, ...importedData };
+                    savePrescriptions();
+                    displayPrescriptions();
+                    showNotification('JSON dosyası başarıyla içe aktarıldı!', 'success');
+                } catch (error) {
+                    showNotification('Geçersiz JSON dosyası!', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        async function syncToGitHub() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showNotification('GitHub token giriniz!', 'error');
+                return;
+            }
+
+            try {
+                showSyncStatus('GitHub\'a gönderiliyor...', 'info');
+                
+                // Mevcut dosyayı kontrol et
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${fileName}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        sha = data.sha;
+                        
+                        // Mevcut veriyi al ve birleştir
+                        const existingContent = atob(data.content);
+                        const existingData = JSON.parse(existingContent);
+                        
+                        // Lokaldeki fazlalıkları ekle
+                        const mergedData = { ...existingData, ...prescriptions };
+                        prescriptions = mergedData;
+                        savePrescriptions();
+                    }
+                } catch (err) {
+                    // Dosya yoksa yeni oluşturulacak
+                }
+
+                // Veriyi GitHub'a gönder
+                const content = JSON.stringify(prescriptions, null, 2);
+                const encodedContent = btoa(unescape(encodeURIComponent(content)));
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${fileName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Reçete verileri güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    showSyncStatus('GitHub\'a başarıyla gönderildi!', 'success');
+                } else {
+                    throw new Error('GitHub güncellenirken hata oluştu');
+                }
+            } catch (error) {
+                showSyncStatus('GitHub\'a gönderilirken hata: ' + error.message, 'error');
+            }
+        }
+
+        async function syncFromGitHub() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showNotification('GitHub token giriniz!', 'error');
+                return;
+            }
+
+            try {
+                showSyncStatus('GitHub\'dan çekiliyor...', 'info');
+                
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${fileName}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const content = atob(data.content);
+                    const githubData = JSON.parse(decodeURIComponent(escape(content)));
+                    
+                    // GitHub'daki fazlalıkları lokale ekle
+                    prescriptions = { ...prescriptions, ...githubData };
+                    savePrescriptions();
+                    displayPrescriptions();
+                    
+                    showSyncStatus('GitHub\'dan başarıyla çekildi!', 'success');
+                } else {
+                    throw new Error('GitHub\'da dosya bulunamadı');
+                }
+            } catch (error) {
+                showSyncStatus('GitHub\'dan çekilirken hata: ' + error.message, 'error');
+            }
+        }
+
+        function showSyncStatus(message, type) {
+            const statusDiv = document.getElementById('sync-status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = message;
+            statusDiv.className = `sync-status ${type}`;
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
