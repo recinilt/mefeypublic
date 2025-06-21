@@ -80,6 +80,7 @@
                         <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
                         <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
                         <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                        <input type="text" placeholder="Not (opsiyonel)" class="med-note">
                         <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
                     </div>
                 </div>
@@ -146,6 +147,7 @@
                 <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
                 <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
                 <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                <input type="text" placeholder="Not (opsiyonel)" class="med-note">
                 <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
             `;
             medicationsDiv.appendChild(newMedRow);
@@ -171,9 +173,10 @@
                 const daily = parseInt(row.querySelector('.med-daily').value);
                 const dose = parseInt(row.querySelector('.med-dose').value);
                 const days = parseInt(row.querySelector('.med-days').value);
+                const note = row.querySelector('.med-note').value.trim();
                 
                 if (name && daily && dose && days) {
-                    medications.push({ name, daily, dose, days });
+                    medications.push({ name, daily, dose, days, note });
                 }
             });
 
@@ -214,6 +217,7 @@
                     <input type="number" placeholder="Günde" class="med-daily" min="1" max="10">
                     <input type="number" placeholder="Doz" class="med-dose" min="1" max="10">
                     <input type="number" placeholder="Gün" class="med-days" min="1" max="365">
+                    <input type="text" placeholder="Not (opsiyonel)" class="med-note">
                     <button class="btn btn-danger" onclick="removeMedication(this)">Sil</button>
                 </div>
             `;
@@ -236,6 +240,7 @@
                     `<li class="medication-item">
                         <strong>${med.name}</strong><br>
                         Günde ${med.daily} kez, ${med.dose} adet, ${med.days} gün
+                        ${med.note ? `<br><em style="color: #666; font-size: 12px;">Not: ${med.note}</em>` : ''}
                     </li>`
                 ).join('');
 
