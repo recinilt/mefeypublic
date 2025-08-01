@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basit Martingale Hesaplayıcı - Çarpan Sistemi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            background: linear-gradient(45deg, #4ade80, #06d6a0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .params-section {
+            background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.1));
+            border: 2px solid rgba(74, 222, 128, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: inset 0 2px 10px rgba(74, 222, 128, 0.1);
+        }
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .param-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .param-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-color: rgba(74, 222, 128, 0.5);
+        }
+        .calculator-section {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.1);
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin: 25px 0;
+        }
+        .calc-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .calc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        .calc-result {
+            font-size: 28px;
+            font-weight: bold;
+            color: #4ade80;
+            text-align: center;
+            margin: 20px 0;
+            padding: 25px;
+            background: linear-gradient(45deg, rgba(74, 222, 128, 0.2), rgba(34, 197, 94, 0.1));
+            border-radius: 12px;
+            border: 2px solid rgba(74, 222, 128, 0.4);
+            text-shadow: 0 2px 10px rgba(74, 222, 128, 0.3);
+        }
+        .formula-box {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border-left: 4px solid #fbbf24;
+            line-height: 1.6;
+        }
+        .scenario-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 13px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .scenario-table th, .scenario-table td {
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .scenario-table th {
+            background: linear-gradient(45deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.2));
+            font-weight: bold;
+            color: #93c5fd;
+        }
+        .scenario-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .scenario-table tr:hover {
+            background: rgba(74, 222, 128, 0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        .stat-value {
+            font-size: 26px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .positive { color: #4ade80; }
+        .negative { color: #f87171; }
+        .neutral { color: #fbbf24; }
+        .trades-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            max-height: 600px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .trade-row {
+            display: grid;
+            grid-template-columns: 50px 120px 100px 100px 100px 120px 100px;
+            gap: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 13px;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+        .trade-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+        .trade-header {
+            background: linear-gradient(45deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.2));
+            font-weight: bold;
+            border-bottom: 3px solid rgba(59, 130, 246, 0.5);
+            color: #93c5fd;
+        }
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(45deg, #5a67d8, #6b46c1);
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 10px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(74, 222, 128, 0.6);
+            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+        .info-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(37, 99, 235, 0.1));
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #93c5fd;
+            line-height: 1.6;
+        }
+        .warning-box {
+            background: linear-gradient(135deg, rgba(248, 113, 113, 0.15), rgba(239, 68, 68, 0.1));
+            border: 2px solid rgba(248, 113, 113, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #fca5a5;
+        }
+        label {
+            font-weight: 600;
+            color: #e5e7eb;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Basit Martingale Hesaplayıcı</h1>
+            <p style="font-size: 1.2em; margin: 10px 0;">⚡ Çarpan Sistemi - Komisyonsuz</p>
+            <p style="font-size: 14px; opacity: 0.8;">Her kayıpta bahsi çarpanla çarp • Kazanınca başa dön</p>
+        </div>
+
+        <div class="params-section">
+            <h2>🎛️ Strateji Parametreleri</h2>
+            <p style="opacity: 0.9; margin-bottom: 20px;">Bu parametreler tüm hesaplamaları belirler</p>
+            
+            <div class="param-grid">
+                <div class="param-card">
+                    <label>💰 İlk Bahis (USDT):</label>
+                    <input type="number" id="initialBet" value="1" step="0.01" min="0.01">
+                </div>
+                <div class="param-card">
+                    <label>⚡ Kaldıraç:</label>
+                    <input type="number" id="leverage" value="75" min="1" max="125">
+                </div>
+                <div class="param-card">
+                    <label>📈 Kar/Zarar (%):</label>
+                    <input type="number" id="profitPercent" value="4" step="0.1" min="0.1">
+                </div>
+                <div class="param-card" style="border: 3px solid #4ade80;">
+                    <label><strong>🚀 Bahis Çarpanı:</strong></label>
+                    <input type="number" id="multiplier" value="4" step="0.1" min="1.1">
+                </div>
+                <div class="param-card">
+                    <label>💹 Kazanma İhtimali (%):</label>
+                    <input type="number" id="winChance" value="50" min="10" max="90">
+                </div>
+                <div class="param-card">
+                    <label>🎯 Maksimum Tur:</label>
+                    <input type="number" id="maxRounds" value="10" min="3" max="20">
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>🎯 Sistem Mantığı:</strong><br>
+                • <strong>Kazanç:</strong> Bahis × Kaldıraç × (Kar% / 100)<br>
+                • <strong>Kayıp:</strong> Sonraki bahis = Önceki bahis × Çarpan<br>
+                • <strong>Kazanç:</strong> Bahis = İlk bahise dön<br>
+                <span style="color: #fbbf24;">⚠️ Komisyon hesaba katılmaz!</span>
+            </div>
+        </div>
+
+        <div class="calculator-section">
+            <h2>🧮 Hesaplama Sonuçları</h2>
+            
+            <div class="calc-grid">
+                <div class="calc-card">
+                    <h3>📊 Temel Hesaplamalar</h3>
+                    <div class="calc-result">
+                        <div>Kazanç Çarpanı: <span id="winMultiplier">3.00x</span></div>
+                        <div style="font-size: 20px; margin-top: 10px;">İlk Tur Kazanç: <span id="firstWin">2.00 USDT</span></div>
+                        <div style="font-size: 18px; margin-top: 8px;">İlk Tur Kar: <span id="firstProfit">1.00 USDT</span></div>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <strong>🔍 Hesaplama Detayları:</strong><br>
+                        • İlk Bahis: <span id="calcBet">1.00 USDT</span><br>
+                        • Kaldıraç: <span id="calcLeverage">75x</span><br>
+                        • Kar Oranı: <span id="calcProfit">%4</span><br>
+                        • <span style="color: #4ade80;">Kazanç = Bahis × Kaldıraç × (Kar% / 100)</span>
+                    </div>
+                </div>
+
+                <div class="calc-card">
+                    <h3>🎯 Martingale Sıralaması</h3>
+                    <div class="calc-result">
+                        <div>Çarpan: <span id="currentMultiplier">4.0x</span></div>
+                        <div style="font-size: 22px; margin-top: 15px;">İkinci Bahis: <span id="secondBet">4.00 USDT</span></div>
+                    </div>
+                    
+                    <div class="formula-box">
+                        <strong>📊 Bahis Sıralaması:</strong><br>
+                        <div id="betSequence" style="font-size: 13px; line-height: 1.5;">
+                            <!-- Bahis sıralaması burada gösterilecek -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>⚠️ Risk Analizi - Ardışık Kayıp Senaryosu</h3>
+            <div style="overflow-x: auto;">
+                <table class="scenario-table" id="scenarioTable">
+                    <thead>
+                        <tr>
+                            <th>Tur</th>
+                            <th>Bahis (USDT)</th>
+                            <th>Toplam Kazanç</th>
+                            <th>Toplam Kayıp</th>
+                            <th>Net Kar</th>
+                            <th>Kayıp Olasılığı</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scenarioTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="params-section">
+            <h3>⚙️ Simülasyon Ayarları</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 15px 0;">
+                <div class="param-card">
+                    <label>💰 Başlangıç Sermayesi (USDT):</label>
+                    <input type="number" id="initialBalance" value="1000" step="10">
+                </div>
+                <div class="param-card">
+                    <label>🎯 Maksimum İşlem Sayısı:</label>
+                    <input type="number" id="maxTrades" value="100" min="10" max="500">
+                </div>
+            </div>
+        </div>
+
+        <div class="params-section">
+            <h3>📊 Gerçek Veri Testi</h3>
+            <p style="opacity: 0.9; margin-bottom: 20px;">Binance'den gerçek fiyat verilerini çekerek backtest yapın</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin: 15px 0;">
+                <div class="param-card">
+                    <label>🪙 Coin Çifti:</label>
+                    <input type="text" id="coinPair" value="BTCUSDT" placeholder="BTCUSDT, ETHUSDT, ENAUSDT..." style="text-transform: uppercase;">
+                </div>
+                <div class="param-card">
+                    <label>📈 Veri Sayısı (Mum):</label>
+                    <input type="number" id="candleCount" value="1000" min="100" max="1000" step="100">
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>📋 Gerçek Veri Test Bilgileri:</strong><br>
+                • 5 dakikalık mum verileri kullanılır<br>
+                • Her mumda kar/zarar hedefine göre sonuç belirlenir<br>
+                • 1000 mum = yaklaşık 3.5 günlük veri<br>
+                • Binance API üzerinden güncel veriler çekilir
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <button class="btn" onclick="runRealDataTest()" id="realDataBtn">📊 Gerçek Veri ile Test Et</button>
+                <div id="loadingIndicator" style="display: none; margin: 15px 0;">
+                    <div style="color: #4ade80;">⏳ Veriler çekiliyor...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="balance">1000.00</div>
+                <div>Güncel Bakiye (USDT)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTrades">0</div>
+                <div>Toplam İşlem</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="winRate">0%</div>
+                <div>Kazanma Oranı</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalPnL">0.00</div>
+                <div>Net P&L (USDT)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="maxLoss">0</div>
+                <div>Max Ard. Kayıp</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="currentBet">1.00</div>
+                <div>Sonraki Bahis (USDT)</div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="runSimulation()">🚀 Monte Carlo Simülasyon</button>
+        <button class="btn" onclick="resetSimulation()">🔄 Sıfırla</button>
+
+        <div class="trades-container">
+            <div class="trade-row trade-header">
+                <div>#</div>
+                <div>Sonuç</div>
+                <div>Bahis</div>
+                <div>Kazanç</div>
+                <div>Net P&L</div>
+                <div>Ard. Kayıp</div>
+                <div>Bakiye</div>
+            </div>
+            <div id="tradesList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let balance = 1000;
+        let initialBalance = 1000;
+        let initialBetAmount = 1;
+        let leverage = 75;
+        let profitPercent = 4;
+        let multiplier = 4;
+        let winChance = 50;
+        let maxRounds = 10;
+        let maxTrades = 100;
+
+        // Simülasyon değişkenleri
+        let totalTrades = 0;
+        let wins = 0;
+        let losses = 0;
+        let totalPnL = 0;
+        let consecutiveLosses = 0;
+        let maxConsecutiveLosses = 0;
+        let currentBet = 1;
+
+        // Gerçek veri testi için
+        let isRealDataMode = false;
+        let realDataResults = [];
+        let currentRealDataIndex = 0;
+
+        function updateCalculations() {
+            // Parametreleri al
+            initialBetAmount = parseFloat(document.getElementById('initialBet').value);
+            leverage = parseFloat(document.getElementById('leverage').value);
+            profitPercent = parseFloat(document.getElementById('profitPercent').value);
+            multiplier = parseFloat(document.getElementById('multiplier').value);
+            winChance = parseFloat(document.getElementById('winChance').value);
+            maxRounds = parseInt(document.getElementById('maxRounds').value);
+
+            // Kazanç çarpanı hesaplama
+            const winMultiplierValue = 1 + (leverage * (profitPercent / 100));
+            const firstWinAmount = initialBetAmount * winMultiplierValue;
+            const firstNetProfit = firstWinAmount - initialBetAmount;
+
+            // Sonuçları güncelle
+            document.getElementById('winMultiplier').textContent = `${winMultiplierValue.toFixed(2)}x`;
+            document.getElementById('firstWin').textContent = `${firstWinAmount.toFixed(2)} USDT`;
+            document.getElementById('firstProfit').textContent = `${firstNetProfit.toFixed(2)} USDT`;
+            document.getElementById('calcBet').textContent = `${initialBetAmount.toFixed(2)} USDT`;
+            document.getElementById('calcLeverage').textContent = `${leverage}x`;
+            document.getElementById('calcProfit').textContent = `%${profitPercent}`;
+            document.getElementById('currentMultiplier').textContent = `${multiplier.toFixed(1)}x`;
+            document.getElementById('secondBet').textContent = `${(initialBetAmount * multiplier).toFixed(2)} USDT`;
+
+            // Bahis sıralaması
+            updateBetSequence();
+            
+            // Risk analizi tablosu
+            updateScenarioTable();
+        }
+
+        function updateBetSequence() {
+            let sequence = '';
+            let bet = initialBetAmount;
+            
+            for (let i = 1; i <= Math.min(maxRounds, 8); i++) {
+                sequence += `${i}. tur: ${bet.toFixed(2)} USDT<br>`;
+                bet *= multiplier;
+            }
+            
+            if (maxRounds > 8) {
+                sequence += `...<br>${maxRounds}. tur: ${(initialBetAmount * Math.pow(multiplier, maxRounds - 1)).toFixed(2)} USDT`;
+            }
+            
+            document.getElementById('betSequence').innerHTML = sequence;
+        }
+
+        function updateScenarioTable() {
+            const tableBody = document.getElementById('scenarioTableBody');
+            tableBody.innerHTML = '';
+            
+            let bet = initialBetAmount;
+            let totalLossAccumulated = 0;
+            const winMultiplierValue = 1 + (leverage * (profitPercent / 100));
+            
+            for (let round = 1; round <= maxRounds; round++) {
+                const totalWin = bet * winMultiplierValue;
+                totalLossAccumulated += bet;
+                const netProfit = totalWin - totalLossAccumulated;
+                const lossChance = Math.pow((100 - winChance) / 100, round) * 100;
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${round}</td>
+                    <td>${bet.toFixed(2)}</td>
+                    <td class="positive">${totalWin.toFixed(2)}</td>
+                    <td class="negative">${totalLossAccumulated.toFixed(2)}</td>
+                    <td class="${netProfit >= 0 ? 'positive' : 'negative'}">${netProfit.toFixed(2)}</td>
+                    <td class="${lossChance > 50 ? 'negative' : lossChance > 20 ? 'neutral' : 'positive'}">${lossChance.toFixed(1)}%</td>
+                `;
+                tableBody.appendChild(row);
+                
+                bet *= multiplier;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('balance').textContent = balance.toFixed(2);
+            document.getElementById('totalTrades').textContent = totalTrades;
+            document.getElementById('winRate').textContent = totalTrades > 0 ? `${((wins / totalTrades) * 100).toFixed(1)}%` : '0%';
+            document.getElementById('totalPnL').textContent = totalPnL.toFixed(2);
+            document.getElementById('totalPnL').className = `stat-value ${totalPnL >= 0 ? 'positive' : 'negative'}`;
+            document.getElementById('maxLoss').textContent = maxConsecutiveLosses;
+            document.getElementById('currentBet').textContent = currentBet.toFixed(2);
+        }
+
+        function addTrade(result, betAmount, winAmount, netPnL, consecLosses) {
+            const tradesList = document.getElementById('tradesList');
+            const tradeRow = document.createElement('div');
+            tradeRow.className = 'trade-row';
+            
+            const resultClass = result === 'KAZANÇ' ? 'positive' : 'negative';
+            const pnlClass = netPnL > 0 ? 'positive' : netPnL < 0 ? 'negative' : 'neutral';
+            
+            tradeRow.innerHTML = `
+                <div>${totalTrades}</div>
+                <div class="${resultClass}">${result}</div>
+                <div>${betAmount.toFixed(2)}</div>
+                <div class="${resultClass}">${winAmount.toFixed(2)}</div>
+                <div class="${pnlClass}">${netPnL.toFixed(2)}</div>
+                <div>${consecLosses}</div>
+                <div>${balance.toFixed(2)}</div>
+            `;
+            
+            tradesList.appendChild(tradeRow);
+            tradesList.scrollTop = tradesList.scrollHeight;
+        }
+
+        function simulateTrade() {
+            if (balance < currentBet) {
+                return false; // Yetersiz bakiye
+            }
+
+            totalTrades++;
+            const winMultiplierValue = 1 + (leverage * (profitPercent / 100));
+            let isWin;
+
+            if (isRealDataMode && currentRealDataIndex < realDataResults.length) {
+                // Gerçek veri modunda
+                isWin = realDataResults[currentRealDataIndex];
+                currentRealDataIndex++;
+            } else {
+                // Monte Carlo simülasyonu
+                isWin = Math.random() * 100 < winChance;
+            }
+            
+            if (isWin) {
+                // Kazanç
+                const grossWin = currentBet * winMultiplierValue;
+                const netPnL = grossWin - currentBet; // Net kar
+                
+                balance += netPnL;
+                totalPnL += netPnL;
+                wins++;
+                consecutiveLosses = 0;
+                
+                addTrade('KAZANÇ', currentBet, grossWin, netPnL, consecutiveLosses);
+                
+                // Kazanınca başa dön
+                currentBet = initialBetAmount;
+            } else {
+                // Kayıp
+                balance -= currentBet;
+                totalPnL -= currentBet;
+                losses++;
+                consecutiveLosses++;
+                maxConsecutiveLosses = Math.max(maxConsecutiveLosses, consecutiveLosses);
+                
+                addTrade('KAYIP', currentBet, 0, -currentBet, consecutiveLosses);
+                
+                // Sonraki bahisi çarpanla artır
+                currentBet *= multiplier;
+            }
+            
+            return true;
+        }
+
+        function runSimulation() {
+            loadParameters();
+            isRealDataMode = false; // Monte Carlo modu
+            
+            let simulationSteps = 0;
+            const maxSteps = maxTrades;
+            
+            const interval = setInterval(() => {
+                if (simulationSteps >= maxSteps || balance < currentBet) {
+                    clearInterval(interval);
+                    updateStats();
+                    return;
+                }
+                
+                if (simulateTrade()) {
+                    simulationSteps++;
+                    updateStats();
+                }
+            }, 200);
+        }
+
+        async function runRealDataTest() {
+            try {
+                document.getElementById('loadingIndicator').style.display = 'block';
+                document.getElementById('realDataBtn').disabled = true;
+                document.getElementById('realDataBtn').textContent = '⏳ Yükleniyor...';
+                
+                loadParameters();
+                
+                const coinPair = document.getElementById('coinPair').value.toUpperCase();
+                const candleCount = parseInt(document.getElementById('candleCount').value);
+                
+                // Binance API'den veri çek
+                const klineData = await fetchBinanceData(coinPair, candleCount);
+                
+                if (!klineData || klineData.length === 0) {
+                    throw new Error('Veri çekilemedi');
+                }
+                
+                // Fiyat hareketlerini analiz et
+                realDataResults = analyzePriceMovements(klineData);
+                currentRealDataIndex = 0;
+                isRealDataMode = true;
+                
+                // Gerçek veri ile test başlat
+                let testSteps = 0;
+                const maxSteps = Math.min(realDataResults.length, maxTrades);
+                
+                const interval = setInterval(() => {
+                    if (testSteps >= maxSteps || balance < currentBet || currentRealDataIndex >= realDataResults.length) {
+                        clearInterval(interval);
+                        updateStats();
+                        document.getElementById('loadingIndicator').style.display = 'none';
+                        document.getElementById('realDataBtn').disabled = false;
+                        document.getElementById('realDataBtn').textContent = '📊 Gerçek Veri ile Test Et';
+                        return;
+                    }
+                    
+                    if (simulateTrade()) {
+                        testSteps++;
+                        updateStats();
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('Gerçek veri testi hatası:', error);
+                alert('Veri çekme hatası: ' + error.message);
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('realDataBtn').disabled = false;
+                document.getElementById('realDataBtn').textContent = '📊 Gerçek Veri ile Test Et';
+            }
+        }
+
+
+
+        async function fetchBinanceData(symbol, limit) {
+            const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=5m&limit=${limit}`;
+            
+            // 🔄 Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://crossorigin.me/'
+            ];
+            
+            for (let proxy of proxies) {
+                try {
+                    const response = await fetch(proxy + encodeURIComponent(binanceUrl));
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (error) {
+                    console.log(`${proxy} başarısız, sonrakini deniyor...`);
+                }
+            }
+            
+            throw new Error('Tüm proxy servisleri başarısız');
+        }
+
+
+        /*
+        async function fetchBinanceData(symbol, limit) {
+            const proxyUrl = 'https://api.allorigins.win/raw?url=';
+            const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=5m&limit=${limit}`;
+            
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(binanceUrl));
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                // Alternatif proxy dene
+                try {
+                    const altResponse = await fetch(`https://cors-anywhere.herokuapp.com/${binanceUrl}`);
+                    if (!altResponse.ok) {
+                        throw new Error(`HTTP ${altResponse.status}`);
+                    }
+                    return await altResponse.json();
+                } catch (altError) {
+                    throw new Error('Binance API erişim hatası. CORS proxy sorunu olabilir.');
+                }
+            }
+        }
+        
+        */
+
+
+        function analyzePriceMovements(klineData) {
+            const results = [];
+            
+            for (let i = 0; i < klineData.length; i++) {
+                const candle = klineData[i];
+                const open = parseFloat(candle[1]);
+                const high = parseFloat(candle[2]);
+                const low = parseFloat(candle[3]);
+                const close = parseFloat(candle[4]);
+                
+                // Mum içindeki fiyat hareketi analizi
+                const highChangePercent = ((high - open) / open) * 100;
+                const lowChangePercent = ((low - open) / open) * 100;
+                
+                // Kar hedefine göre kazanç/kayıp belirleme
+                let isWin = false;
+                
+                if (profitPercent > 0) {
+                    // Long pozisyon simülasyonu
+                    if (highChangePercent >= profitPercent) {
+                        isWin = true; // Kar hedefine ulaştı
+                    } else if (Math.abs(lowChangePercent) >= profitPercent) {
+                        isWin = false; // Stop loss'a takıldı
+                    } else {
+                        // Kapanış fiyatına göre karar ver
+                        const closeChangePercent = ((close - open) / open) * 100;
+                        isWin = closeChangePercent > 0;
+                    }
+                }
+                
+                results.push(isWin);
+            }
+            
+            return results;
+        }
+
+        function resetSimulation() {
+            loadParameters();
+            
+            balance = initialBalance;
+            totalTrades = 0;
+            wins = 0;
+            losses = 0;
+            totalPnL = 0;
+            consecutiveLosses = 0;
+            maxConsecutiveLosses = 0;
+            currentBet = initialBetAmount;
+            
+            // Gerçek veri modu sıfırla
+            isRealDataMode = false;
+            realDataResults = [];
+            currentRealDataIndex = 0;
+            
+            document.getElementById('tradesList').innerHTML = '';
+            updateStats();
+        }
+
+        function loadParameters() {
+            initialBalance = parseFloat(document.getElementById('initialBalance').value);
+            maxTrades = parseInt(document.getElementById('maxTrades').value);
+            
+            updateCalculations();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalculations();
+            loadParameters();
+            updateStats();
+            
+            // Parametreleri dinle
+            const inputs = [
+                'initialBet', 'leverage', 'profitPercent', 
+                'multiplier', 'winChance', 'maxRounds'
+            ];
+            
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', updateCalculations);
+            });
+
+            // Simülasyon parametreleri
+            document.getElementById('initialBalance').addEventListener('input', loadParameters);
+            document.getElementById('maxTrades').addEventListener('input', loadParameters);
+            
+            // Coin pair input için büyük harf dönüşümü
+            document.getElementById('coinPair').addEventListener('input', function(e) {
+                e.target.value = e.target.value.toUpperCase();
+            });
+        });
+    </script>
+</body>
+</html>
