@@ -486,12 +486,9 @@
                 // Kar hedefi kontrolü (HIGH ile)
                 if (high >= profitTarget) {
                     // KAZANÇ!
-                    //const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    //state.balance += profit;
-                    //state.totalPnL += profit;
                     const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    state.balance += state.currentBet + profit; // Teminatı geri ver + kar
-                    state.totalPnL += profit; // Net kar aynı kalır
+                    state.balance += profit;
+                    state.totalPnL += profit;
                     state.wins++;
                     state.consecutiveLosses = 0;
                     
@@ -507,10 +504,7 @@
                 // Likidite kontrolü (LOW ile)
                 if (low <= liquidationPrice) {
                     // LİKİDİTE!
-                    //const loss = -state.currentBet;
-                    //state.totalPnL += loss;
                     const loss = -state.currentBet;
-                    // state.balance değişmez (teminat zaten düşülmüştü)
                     state.totalPnL += loss;
                     state.losses++;
                     state.consecutiveLosses++;
@@ -531,12 +525,9 @@
                 // Kar hedefi kontrolü (LOW ile)
                 if (low <= profitTarget) {
                     // KAZANÇ!
-                    //const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    //state.balance += profit;
-                    //state.totalPnL += profit;
                     const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    state.balance += state.currentBet + profit; // Teminatı geri ver + kar
-                    state.totalPnL += profit; // Net kar aynı kalır
+                    state.balance += profit;
+                    state.totalPnL += profit;
                     state.wins++;
                     state.consecutiveLosses = 0;
                     
@@ -552,10 +543,7 @@
                 // Likidite kontrolü (HIGH ile)
                 if (high >= liquidationPrice) {
                     // LİKİDİTE!
-                    //const loss = -state.currentBet;
-                    //state.totalPnL += loss;
                     const loss = -state.currentBet;
-                    // state.balance değişmez (teminat zaten düşülmüştü)
                     state.totalPnL += loss;
                     state.losses++;
                     state.consecutiveLosses++;
@@ -575,50 +563,56 @@
         }
 
         async function fetchBinanceData(symbol, interval, limit) {
-            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+            const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
             
-            try {
-                const response = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
-                if (response.ok) {
-                    return await response.json();
-                }
-                throw new Error('Proxy 1 failed');
-            } catch (error) {
+            // 🔄 Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://crossorigin.me/'
+            ];
+            
+            for (let proxy of proxies) {
                 try {
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                    const response = await fetch(proxy + encodeURIComponent(binanceUrl));
                     if (response.ok) {
                         return await response.json();
                     }
-                    throw new Error('All proxies failed');
-                } catch (finalError) {
-                    throw new Error('Veri çekilemedi: ' + finalError.message);
+                } catch (error) {
+                    console.log(`${proxy} başarısız, sonrakini deniyor...`);
                 }
             }
+            
+            throw new Error('Tüm proxy servisleri başarısız');
         }
 
         async function fetchBinanceDataWithTime(symbol, interval, limit, endTime = null) {
-            let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+            let binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
             if (endTime) {
-                url += `&endTime=${endTime}`;
+                binanceUrl += `&endTime=${endTime}`;
             }
             
-            try {
-                const response = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
-                if (response.ok) {
-                    return await response.json();
-                }
-                throw new Error('Proxy 1 failed');
-            } catch (error) {
+            // 🔄 Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://crossorigin.me/'
+            ];
+            
+            for (let proxy of proxies) {
                 try {
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                    const response = await fetch(proxy + encodeURIComponent(binanceUrl));
                     if (response.ok) {
                         return await response.json();
                     }
-                    throw new Error('All proxies failed');
-                } catch (finalError) {
-                    throw new Error('Veri çekilemedi: ' + finalError.message);
+                } catch (error) {
+                    console.log(`${proxy} başarısız, sonrakini deniyor...`);
                 }
             }
+            
+            throw new Error('Tüm proxy servisleri başarısız');
         }
 
         async function fetchLargeDataset(symbol, interval, totalCandles) {

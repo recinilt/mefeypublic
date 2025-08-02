@@ -60,19 +60,19 @@
             <div class="grid">
                 <div class="card">
                     <label>💰 İlk Bahis (USDT):</label>
-                    <input type="number" id="initialBet" value="1" step="0.01" min="0.01">
+                    <input type="number" id="initialBet" value="0.14" step="0.01" min="0.01">
                 </div>
                 <div class="card">
                     <label>⚡ Kaldıraç:</label>
-                    <input type="number" id="leverage" value="75" min="1" max="125">
+                    <input type="number" id="leverage" value="45" min="1" max="125">
                 </div>
                 <div class="card">
                     <label>📈 Kar/Zarar (%):</label>
-                    <input type="number" id="profitPercent" value="4" step="0.1" min="0.1">
+                    <input type="number" id="profitPercent" value="15" step="0.1" min="0.1">
                 </div>
                 <div class="card" style="border: 3px solid #4ade80;">
                     <label><strong>🚀 Bahis Çarpanı:</strong></label>
-                    <input type="number" id="multiplier" value="4" step="0.1" min="1.1">
+                    <input type="number" id="multiplier" value="1.2" step="0.1" min="1.1">
                 </div>
                 <div class="card">
                     <label>💹 Kazanma İhtimali (%):</label>
@@ -80,7 +80,7 @@
                 </div>
                 <div class="card">
                     <label>🎯 Maksimum Tur:</label>
-                    <input type="number" id="maxRounds" value="10" min="3" max="20">
+                    <input type="number" id="maxRounds" value="25" min="3" max="50">
                 </div>
                 <div class="card">
                     <label>📊 Pozisyon Yönü:</label>
@@ -168,7 +168,7 @@
                 </div>
                 <div class="card">
                     <label>🎯 Maksimum İşlem Sayısı:</label>
-                    <input type="number" id="maxTrades" value="100" min="10" max="500">
+                    <input type="number" id="maxTrades" value="5000" min="10" max="10000">
                 </div>
             </div>
         </div>
@@ -197,7 +197,7 @@
                 </div>
                 <div class="card">
                     <label>📈 Toplam Veri Sayısı (Mum):</label>
-                    <input type="number" id="candleCount" value="500" min="100" max="1000000" step="1000">
+                    <input type="number" id="candleCount" value="10000" min="100" max="1000000" step="1000">
                     <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;">
                         Max 1M veri • 1000'er çekilir
                     </div>
@@ -278,13 +278,13 @@
         let state = {
             balance: 1000,
             initialBalance: 1000,
-            initialBet: 1,
-            leverage: 75,
-            profitPercent: 4,
-            multiplier: 4,
+            initialBet: 0.14,
+            leverage: 45,
+            profitPercent: 15,
+            multiplier: 1.2,
             winChance: 50,
-            maxRounds: 10,
-            maxTrades: 100,
+            maxRounds: 25,
+            maxTrades: 5000,
             direction: 'long',
             totalTrades: 0,
             wins: 0,
@@ -292,7 +292,7 @@
             totalPnL: 0,
             consecutiveLosses: 0,
             maxConsecutiveLosses: 0,
-            currentBet: 1,
+            currentBet: 0.14,
             isRealDataMode: false,
             position: {
                 isOpen: false,
@@ -486,12 +486,9 @@
                 // Kar hedefi kontrolü (HIGH ile)
                 if (high >= profitTarget) {
                     // KAZANÇ!
-                    //const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    //state.balance += profit;
-                    //state.totalPnL += profit;
                     const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    state.balance += state.currentBet + profit; // Teminatı geri ver + kar
-                    state.totalPnL += profit; // Net kar aynı kalır
+                    state.balance += profit;
+                    state.totalPnL += profit;
                     state.wins++;
                     state.consecutiveLosses = 0;
                     
@@ -507,10 +504,7 @@
                 // Likidite kontrolü (LOW ile)
                 if (low <= liquidationPrice) {
                     // LİKİDİTE!
-                    //const loss = -state.currentBet;
-                    //state.totalPnL += loss;
                     const loss = -state.currentBet;
-                    // state.balance değişmez (teminat zaten düşülmüştü)
                     state.totalPnL += loss;
                     state.losses++;
                     state.consecutiveLosses++;
@@ -531,12 +525,9 @@
                 // Kar hedefi kontrolü (LOW ile)
                 if (low <= profitTarget) {
                     // KAZANÇ!
-                    //const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    //state.balance += profit;
-                    //state.totalPnL += profit;
                     const profit = state.currentBet * state.leverage * (state.profitPercent / 100);
-                    state.balance += state.currentBet + profit; // Teminatı geri ver + kar
-                    state.totalPnL += profit; // Net kar aynı kalır
+                    state.balance += profit;
+                    state.totalPnL += profit;
                     state.wins++;
                     state.consecutiveLosses = 0;
                     
@@ -552,10 +543,7 @@
                 // Likidite kontrolü (HIGH ile)
                 if (high >= liquidationPrice) {
                     // LİKİDİTE!
-                    //const loss = -state.currentBet;
-                    //state.totalPnL += loss;
                     const loss = -state.currentBet;
-                    // state.balance değişmez (teminat zaten düşülmüştü)
                     state.totalPnL += loss;
                     state.losses++;
                     state.consecutiveLosses++;
@@ -575,50 +563,56 @@
         }
 
         async function fetchBinanceData(symbol, interval, limit) {
-            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+            const binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
             
-            try {
-                const response = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
-                if (response.ok) {
-                    return await response.json();
-                }
-                throw new Error('Proxy 1 failed');
-            } catch (error) {
+            // 🔄 Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://crossorigin.me/'
+            ];
+            
+            for (let proxy of proxies) {
                 try {
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                    const response = await fetch(proxy + encodeURIComponent(binanceUrl));
                     if (response.ok) {
                         return await response.json();
                     }
-                    throw new Error('All proxies failed');
-                } catch (finalError) {
-                    throw new Error('Veri çekilemedi: ' + finalError.message);
+                } catch (error) {
+                    console.log(`${proxy} başarısız, sonrakini deniyor...`);
                 }
             }
+            
+            throw new Error('Tüm proxy servisleri başarısız');
         }
 
         async function fetchBinanceDataWithTime(symbol, interval, limit, endTime = null) {
-            let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+            let binanceUrl = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
             if (endTime) {
-                url += `&endTime=${endTime}`;
+                binanceUrl += `&endTime=${endTime}`;
             }
             
-            try {
-                const response = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
-                if (response.ok) {
-                    return await response.json();
-                }
-                throw new Error('Proxy 1 failed');
-            } catch (error) {
+            // 🔄 Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://api.codetabs.com/v1/proxy?quest=',
+                'https://thingproxy.freeboard.io/fetch/',
+                'https://api.allorigins.win/raw?url=',
+                'https://crossorigin.me/'
+            ];
+            
+            for (let proxy of proxies) {
                 try {
-                    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
+                    const response = await fetch(proxy + encodeURIComponent(binanceUrl));
                     if (response.ok) {
                         return await response.json();
                     }
-                    throw new Error('All proxies failed');
-                } catch (finalError) {
-                    throw new Error('Veri çekilemedi: ' + finalError.message);
+                } catch (error) {
+                    console.log(`${proxy} başarısız, sonrakini deniyor...`);
                 }
             }
+            
+            throw new Error('Tüm proxy servisleri başarısız');
         }
 
         async function fetchLargeDataset(symbol, interval, totalCandles) {
