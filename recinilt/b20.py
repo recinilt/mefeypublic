@@ -657,7 +657,7 @@ class BinanceFuturesBot:
 
 if __name__ == "__main__":
     print("🔐 API Bilgileri (Demo modda da gerçek fiyat için gerekli)")
-    api_key = input("API Key: ")
+    api_key = input("Binance API Key: ")
     api_secret = input("API Secret: ")
     
     if not api_key or not api_secret:
