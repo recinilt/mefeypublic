@@ -842,40 +842,60 @@
                
                progressText.textContent = `0 / ${totalCombinations} kombinasyon test ediliyor...`;
                
+               //////////////////////////////////////////////////
+
                let combinationIndex = 0;
+                const BATCH_SIZE = 50; // Her batch'te 50 kombinasyon test et
+                let currentBatch = [];
+
+                for (const leverage of leverageValues) {
+                    for (const profitPercent of profitValues) {
+                        for (const multiplier of multiplierValues) {
+                            for (const direction of directions) {
+                                combinationIndex++;
+                                
+                                const initialBet = calculateInitialBet(minBetSize, leverage);
+                                
+                                // Batch'e ekle
+                                currentBatch.push({
+                                    leverage, profitPercent, multiplier, direction,
+                                    initialBalance, initialBet, maxTrades, minBetSize, coins,
+                                    index: combinationIndex
+                                });
+                                
+                                // Batch doldu mu veya son kombinasyon mu?
+                                if (currentBatch.length >= BATCH_SIZE || combinationIndex === totalCombinations) {
+                                    // Batch'i işle
+                                    for (const params of currentBatch) {
+                                        const result = await testMultiCoinCombination(params);
+                                        if (result) opt.trainingResults.push(result);
+                                        opt.processed++;
+                                    }
+                                    
+                                    // Progress güncelle
+                                    const progress = (combinationIndex / totalCombinations) * 100;
+                                    progressBar.style.width = `${progress}%`;
+                                    progressText.textContent = `${combinationIndex} / ${totalCombinations} kombinasyon test edildi (${progress.toFixed(1)}%)`;
+                                    
+                                    console.log(`📊 Batch tamamlandı: ${combinationIndex}/${totalCombinations} - ${progress.toFixed(1)}%`);
+                                    
+                                    // Memory cleanup
+                                    currentBatch = [];
+                                    
+                                    // Browser'a nefes aldır
+                                    await new Promise(resolve => setTimeout(resolve, 100));
+                                    
+                                    // Garbage collection'a yardım et
+                                    if (window.gc) {
+                                        window.gc();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
                
-               for (const leverage of leverageValues) {
-                   for (const profitPercent of profitValues) {
-                       for (const multiplier of multiplierValues) {
-                           for (const direction of directions) {
-                               combinationIndex++;
-                               
-                               const initialBet = calculateInitialBet(minBetSize, leverage);
-                               
-                               const result = await testMultiCoinCombination({
-                                   leverage, profitPercent, multiplier, direction,
-                                   initialBalance, initialBet, maxTrades, minBetSize, coins
-                               });
-                               
-                               if (result) opt.trainingResults.push(result);
-                               opt.processed++;
-                               
-                               const progress = (combinationIndex / totalCombinations) * 100;
-                               progressBar.style.width = `${progress}%`;
-                               progressText.textContent = `${combinationIndex} / ${totalCombinations} kombinasyon test edildi (${progress.toFixed(1)}%)`;
-                               
-                               if (combinationIndex % 50 === 0) {
-                                   console.log(`📊 İlerleme: ${combinationIndex}/${totalCombinations} - ${progress.toFixed(1)}%`);
-                               }
-                               
-                               if (combinationIndex % 10 === 0) {
-                                   await new Promise(resolve => setTimeout(resolve, 1));
-                               }
-                           }
-                       }
-                   }
-               }
-               
+
                opt.trainingResults.sort((a, b) => (b.roi || 0) - (a.roi || 0));
                console.log(`🎯 Training sonuçları: ${opt.trainingResults.length} sonuç (Training ROI)`);
                
@@ -1044,82 +1064,108 @@
                let validationScores = [];
                let sharpeRatios = [];
                
+               //////////////////////////////////
                if (method === 'simple') {
-                   // Simple 75/25 split
-                   const validationData = {};
-                   for (const coin of coins) {
-                       const split = splitDataForValidation(opt.originalData[coin] || opt.data[coin], 0.75);
-                       opt.data[coin] = split.training;
-                       validationData[coin] = split.validation;
-                   }
-                   
-                   const tempData = opt.data;
-                   opt.data = validationData;
-                   
-                   const validationResult = await testMultiCoinCombination({
-                       leverage: result.leverage,
-                       profitPercent: result.profitPercent,
-                       multiplier: result.multiplier,
-                       direction: result.direction,
-                       initialBalance: params.initialBalance,
-                       initialBet: result.initialBet,
-                       maxTrades: params.maxTrades,
-                       minBetSize: params.minBetSize,
-                       coins: coins
-                   });
-                   
-                   opt.data = tempData;
-                   
+                    // Simple 75/25 split - Memory efficient
+                    const validationData = {};
+                    const originalDataBackup = {};
+                    
+                    for (const coin of coins) {
+                        const sourceData = opt.originalData[coin] || opt.data[coin];
+                        const split = splitDataForValidation(sourceData, 0.75);
+                        
+                        // Backup sadece ihtiyaç olan kısmı
+                        originalDataBackup[coin] = opt.data[coin];
+                        
+                        // Validation data'yı geçici olarak ata
+                        validationData[coin] = split.validation;
+                    }
+                    
+                    // opt.data'yı değiştir (kopyalama yapmadan)
+                    opt.data = validationData;
+                    
+                    const validationResult = await testMultiCoinCombination({
+                        leverage: result.leverage,
+                        profitPercent: result.profitPercent,
+                        multiplier: result.multiplier,
+                        direction: result.direction,
+                        initialBalance: params.initialBalance,
+                        initialBet: result.initialBet,
+                        maxTrades: params.maxTrades,
+                        minBetSize: params.minBetSize,
+                        coins: coins
+                    });
+                    
+                    // Geri yükle ve hafızayı temizle
+                    opt.data = originalDataBackup;
+                    
+                    // Geçici veriyi temizle
+                    for (const coin of coins) {
+                        validationData[coin] = null;
+                        delete validationData[coin];
+                    }
+               
                    if (validationResult) {
                        validationScores.push(validationResult.roi);
                        sharpeRatios.push(calculateSharpeRatio(validationResult.returns || []));
                    }
-                   
-               } else if (method === 'walkforward') {
-                   // Walk-Forward Analysis
-                   const windowSize = parseFloat(document.getElementById('windowSize').value) / 100;
-                   const stepSize = parseFloat(document.getElementById('stepSize').value) / 100;
-                   
-                   for (const coin of coins) {
-                       const data = opt.originalData[coin] || opt.data[coin];
-                       const dataLength = data.length;
-                       const windowLength = Math.floor(dataLength * windowSize);
-                       const stepLength = Math.floor(dataLength * stepSize);
-                       
-                       for (let start = 0; start + windowLength < dataLength; start += stepLength) {
-                           const end = start + windowLength;
-                           const trainEnd = start + Math.floor(windowLength * 0.8);
-                           
-                           const trainingWindow = data.slice(start, trainEnd);
-                           const validationWindow = data.slice(trainEnd, end);
-                           
-                           if (validationWindow.length < 10) continue; // Skip if too small
-                           
-                           const tempData = { [coin]: validationWindow };
-                           const tempOriginal = opt.data;
-                           opt.data = tempData;
-                           
-                           const windowResult = await testMultiCoinCombination({
-                               leverage: result.leverage,
-                               profitPercent: result.profitPercent,
-                               multiplier: result.multiplier,
-                               direction: result.direction,
-                               initialBalance: params.initialBalance,
-                               initialBet: result.initialBet,
-                               maxTrades: params.maxTrades,
-                               minBetSize: params.minBetSize,
-                               coins: [coin]
-                           });
-                           
-                           opt.data = tempOriginal;
-                           
-                           if (windowResult) {
-                               validationScores.push(windowResult.roi);
-                               sharpeRatios.push(calculateSharpeRatio(windowResult.returns || []));
-                           }
-                       }
-                   }
-                   
+               
+                /////////////////////////////////////////////////////
+                } else if (method === 'walkforward') {
+                    // Walk-Forward Analysis - Memory optimized
+                    const windowSize = parseFloat(document.getElementById('windowSize').value) / 100;
+                    const stepSize = parseFloat(document.getElementById('stepSize').value) / 100;
+                    
+                    for (const coin of coins) {
+                        const sourceData = opt.originalData[coin] || opt.data[coin];
+                        const dataLength = sourceData.length;
+                        const windowLength = Math.floor(dataLength * windowSize);
+                        const stepLength = Math.floor(dataLength * stepSize);
+                        
+                        let windowCount = 0;
+                        const maxWindows = 10; // Maksimum 10 pencere test et, fazlası hafızayı yorar
+                        
+                        for (let start = 0; start + windowLength < dataLength && windowCount < maxWindows; start += stepLength) {
+                            const end = start + windowLength;
+                            const trainEnd = start + Math.floor(windowLength * 0.8);
+                            
+                            const validationWindow = sourceData.slice(trainEnd, end);
+                            
+                            if (validationWindow.length < 10) continue;
+                            
+                            // Hafıza dostu geçici atama
+                            const originalCoinData = opt.data[coin];
+                            opt.data[coin] = validationWindow;
+                            
+                            const windowResult = await testMultiCoinCombination({
+                                leverage: result.leverage,
+                                profitPercent: result.profitPercent,
+                                multiplier: result.multiplier,
+                                direction: result.direction,
+                                initialBalance: params.initialBalance,
+                                initialBet: result.initialBet,
+                                maxTrades: params.maxTrades,
+                                minBetSize: params.minBetSize,
+                                coins: [coin]
+                            });
+                            
+                            // Hemen geri yükle
+                            opt.data[coin] = originalCoinData;
+                            
+                            if (windowResult) {
+                                validationScores.push(windowResult.roi);
+                                sharpeRatios.push(calculateSharpeRatio(windowResult.returns || []));
+                            }
+                            
+                            windowCount++;
+                            
+                            // Her 3 pencerede hafızayı temizle
+                            if (windowCount % 3 === 0) {
+                                await new Promise(resolve => setTimeout(resolve, 50));
+                                if (window.gc) window.gc();
+                            }
+                        }
+                    }   
                } else if (method === 'crossval') {
                    // 3-Fold Cross Validation
                    for (let fold = 0; fold < 3; fold++) {
@@ -1182,14 +1228,14 @@
                    consistencyScore: validationScores.length > 1 ? 
                        1 / (1 + calculateStandardDeviation(validationScores)) : 1
                });
-
-               if (i % 10 === 0) {
-                   const progress = (i / topResults.length) * 100;
-                   document.getElementById('validationProgressBar').style.width = `${progress}%`;
-                   document.getElementById('validationProgressText').textContent = 
-                       `${method}: ${i}/${topResults.length} (${progress.toFixed(1)}%)`;
-                   await new Promise(resolve => setTimeout(resolve, 1));
-               }
+               //////////////////////////
+               if (i % 25 === 0) { // Her 25 sonuçta bir güncelle (10 yerine)
+                    const progress = (i / topResults.length) * 100;
+                    document.getElementById('validationProgressBar').style.width = `${progress}%`;
+                    document.getElementById('validationProgressText').textContent = 
+                        `${method}: ${i}/${topResults.length} (${progress.toFixed(1)}%)`;
+                    await new Promise(resolve => setTimeout(resolve, 50)); // 50ms nefes al (1ms yerine)
+                }
            }
 
            return validatedResults;
@@ -1347,9 +1393,21 @@
                overfittingWarning.style.display = 'none';
            }
            
-           const top1000 = opt.results.slice(0, 1000);
-           
-           top1000.forEach((result, index) => {
+           ////////////////////////////////////
+           // Virtual scrolling - Sadece ilk 200 sonucu göster
+            const VISIBLE_RESULTS = 200;
+            const top200 = opt.results.slice(0, VISIBLE_RESULTS);
+
+            // Toplam sonuç sayısını göster
+            if (opt.results.length > VISIBLE_RESULTS) {
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'info-box';
+                infoDiv.style.marginBottom = '15px';
+                infoDiv.innerHTML = `<strong>📊 Toplam ${opt.results.length} sonuç bulundu. Performans için ilk ${VISIBLE_RESULTS} tanesi gösteriliyor.</strong>`;
+                resultsList.parentNode.insertBefore(infoDiv, resultsList);
+            }
+
+            top200.forEach((result, index) => {
                const row = document.createElement('div');
                row.className = 'optimizer-row';
                
