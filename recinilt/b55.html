@@ -211,6 +211,11 @@
            </div>
 
            <h3 style="margin-top: 20px;">📈 Parametre Aralıkları</h3>
+           
+            <div class="info-box" id="combinationInfo" style="display: none; margin-bottom: 15px;">
+                <strong>🔢 Toplam Kombinasyon:</strong> <span id="totalCombinations">0</span>
+                <br><span id="combinationDetails"></span>
+            </div>
            <div class="grid">
                <div class="card">
                    <label>⚡ Kaldıraç (Min-Max-Adım):</label>
@@ -463,6 +468,32 @@
           if (parts.length !== 3 || parts.some(isNaN)) throw new Error(`Geçersiz format: ${str}`);
           return { min: parts[0], max: parts[1], step: parts[2] };
       };
+
+      const calculateTotalCombinations = () => {
+            try {
+                const leverageRange = parseRange(document.getElementById('leverageRange').value);
+                const profitRange = parseRange(document.getElementById('profitRange').value);
+                const multiplierRange = parseRange(document.getElementById('multiplierRange').value);
+                const directionOptions = document.getElementById('directionOptions').value;
+                
+                const leverageCount = generateValues(leverageRange).length;
+                const profitCount = generateValues(profitRange).length;
+                const multiplierCount = generateValues(multiplierRange).length;
+                const directionCount = directionOptions === 'both' ? 2 : 1;
+                
+                const total = leverageCount * profitCount * multiplierCount * directionCount;
+                
+                document.getElementById('totalCombinations').textContent = total.toLocaleString();
+                document.getElementById('combinationDetails').textContent = 
+                    `${leverageCount} kaldıraç × ${profitCount} kar% × ${multiplierCount} çarpan × ${directionCount} yön = ${total.toLocaleString()}`;
+                document.getElementById('combinationInfo').style.display = 'block';
+                
+                return total;
+            } catch (error) {
+                document.getElementById('combinationInfo').style.display = 'none';
+                return 0;
+            }
+        };
 
       const generateValues = (range) => {
           const values = [];
@@ -1356,7 +1387,7 @@
           const tStat = calculateTStat(returns);
           const df = returns.length - 1;
           const rawPValue = calculatePValue(tStat, df);
-          const bonferroniPValue = applyBonferroniCorrection(rawPValue, Math.min(totalCombinations, 100));
+          const bonferroniPValue = applyBonferroniCorrection(rawPValue, Math.min(totalCombinations, 50));
           const correctedAlpha = alpha / Math.min(totalCombinations, 100);
 
           
@@ -1929,7 +1960,11 @@
          document.getElementById('optTimeframe').addEventListener('change', estimateCandles);
          
          document.getElementById('validationMethod').addEventListener('change', updateValidationDescription);
-         
+         // Parametre değişikliklerini dinle
+        document.getElementById('leverageRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('profitRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('multiplierRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('directionOptions').addEventListener('change', calculateTotalCombinations);
          updateCoinCount();
          updateValidationDescription();
          
@@ -1944,6 +1979,10 @@
          console.log('   • İstatistiksel anlamlılık testi (Bonferroni düzeltmeli)');
          console.log('   • Single-coin optimizasyon - Daha hızlı ve kararlı');
      });
+     
+     // İlk yüklemede kombinasyon sayısını hesapla
+    calculateTotalCombinations();
+ 
  </script>
 </body>
 </html>

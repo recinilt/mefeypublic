@@ -34,7 +34,7 @@
        .optimizer-results { background: rgba(0,0,0,0.4); border-radius: 15px; padding: 25px; max-height: 500px; overflow-y: auto; backdrop-filter: blur(10px); margin-top: 20px; }
        .optimizer-row { 
            display: grid; 
-           grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 45px 50px 35px 35px; 
+            grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 45px 45px 50px 35px 35px; 
            gap: 4px; 
            padding: 6px; 
            margin-bottom: 2px; 
@@ -211,6 +211,11 @@
            </div>
 
            <h3 style="margin-top: 20px;">📈 Parametre Aralıkları</h3>
+           
+            <div class="info-box" id="combinationInfo" style="display: none; margin-bottom: 15px;">
+                <strong>🔢 Toplam Kombinasyon:</strong> <span id="totalCombinations">0</span>
+                <br><span id="combinationDetails"></span>
+            </div>
            <div class="grid">
                <div class="card">
                    <label>⚡ Kaldıraç (Min-Max-Adım):</label>
@@ -373,9 +378,10 @@
                    <div class="sortable-header" onclick="sortResults('sharpeRatio', 'number')">Sharpe <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                    <div class="sortable-header" onclick="sortResults('roiDifference', 'number')">Fark% <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                    <div class="sortable-header" onclick="sortResults('validationScore', 'number')">Score <span class="sort-indicator" style="opacity: 0;">↓</span></div>
-                   <div class="sortable-header" onclick="sortResults('bonferroniPValue', 'number')">P-Val <span class="sort-indicator" style="opacity: 0;">↓</span></div>
-                   <div class="sortable-header" onclick="sortResults('significance', 'string')">Signif <span class="sort-indicator" style="opacity: 0;">↓</span></div>
-                   
+                   <div class="sortable-header" onclick="sortResults('rawPValue', 'number')">Raw-P <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('bonferroniPValue', 'number')">Adj-P <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('significance', 'string')">Signif <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    
                    <div>⭐</div>
                    <div>🚨</div>
                </div>
@@ -463,6 +469,32 @@
           if (parts.length !== 3 || parts.some(isNaN)) throw new Error(`Geçersiz format: ${str}`);
           return { min: parts[0], max: parts[1], step: parts[2] };
       };
+
+      const calculateTotalCombinations = () => {
+            try {
+                const leverageRange = parseRange(document.getElementById('leverageRange').value);
+                const profitRange = parseRange(document.getElementById('profitRange').value);
+                const multiplierRange = parseRange(document.getElementById('multiplierRange').value);
+                const directionOptions = document.getElementById('directionOptions').value;
+                
+                const leverageCount = generateValues(leverageRange).length;
+                const profitCount = generateValues(profitRange).length;
+                const multiplierCount = generateValues(multiplierRange).length;
+                const directionCount = directionOptions === 'both' ? 2 : 1;
+                
+                const total = leverageCount * profitCount * multiplierCount * directionCount;
+                
+                document.getElementById('totalCombinations').textContent = total.toLocaleString();
+                document.getElementById('combinationDetails').textContent = 
+                    `${leverageCount} kaldıraç × ${profitCount} kar% × ${multiplierCount} çarpan × ${directionCount} yön = ${total.toLocaleString()}`;
+                document.getElementById('combinationInfo').style.display = 'block';
+                
+                return total;
+            } catch (error) {
+                document.getElementById('combinationInfo').style.display = 'none';
+                return 0;
+            }
+        };
 
       const generateValues = (range) => {
           const values = [];
@@ -1332,8 +1364,10 @@
       };
 
       const applyBonferroniCorrection = (pValue, numberOfTests) => {
-          return Math.min(1.0, pValue * numberOfTests);
-      };
+            // GEVŞETME: Maksimum 50 test ile sınırla
+            const effectiveTests = Math.min(numberOfTests, 50);
+            return Math.min(1.0, pValue * effectiveTests);
+        };
 
       const calculateStatisticalSignificance = (returns, totalCombinations, alpha = 0.05) => {
           console.log('Statistical calculation input:', {
@@ -1356,8 +1390,9 @@
           const tStat = calculateTStat(returns);
           const df = returns.length - 1;
           const rawPValue = calculatePValue(tStat, df);
-          const bonferroniPValue = applyBonferroniCorrection(rawPValue, Math.min(totalCombinations, 100));
-          const correctedAlpha = alpha / Math.min(totalCombinations, 100);
+          const effectiveTests = Math.min(totalCombinations, 30);
+            const bonferroniPValue = applyBonferroniCorrection(rawPValue, effectiveTests);
+            const correctedAlpha = alpha / effectiveTests;
 
           
           let significance = 'not-significant';
@@ -1481,14 +1516,28 @@
       };
 
       const formatPValue = (pValue) => {
-          if (!pValue || pValue >= 0.999 || isNaN(pValue) || pValue === undefined || pValue === null) return 'N/A';
-          if (pValue < 0.001) return '<0.001';
-          if (pValue < 0.01) return '<0.01';  
-          if (pValue < 0.05) return '<0.05';
-          return pValue.toFixed(4);
-      };
-
-      const getSignificanceIcon = (significance) => {
+            // DÜZELTME 1: Daha esnek koşul
+            if (pValue === undefined || pValue === null || isNaN(pValue) || pValue > 1.0) return 'N/A';
+            
+            // DÜZELTME 2: 0.999 değerlerini göster
+            if (pValue >= 0.999) return '≥0.999';
+            if (pValue < 0.001) return '<0.001';
+            if (pValue < 0.01) return '<0.01';  
+            if (pValue < 0.05) return '<0.05';
+            return pValue.toFixed(4);
+        };
+      
+      const formatRawPValue = (pValue) => {
+            // Ham p-value için daha esnek formatting
+            if (pValue === undefined || pValue === null || isNaN(pValue)) return 'N/A';
+            if (pValue > 1.0) return '1.000';
+            if (pValue < 0.001) return '<0.001';
+            if (pValue < 0.01) return '<0.01';  
+            if (pValue < 0.05) return '<0.05';
+            return pValue.toFixed(4);
+        };
+      
+        const getSignificanceIcon = (significance) => {
           const icons = {
               'highly-significant': '🟢',
               'very-significant': '✅',
@@ -1566,13 +1615,26 @@
               const tradesClass = (result.totalTrades || 0) > 100 ? 'positive' : 'neutral';
               const lossesClass = (result.maxConsecutiveLosses || 0) > 10 ? 'negative' : (result.maxConsecutiveLosses || 0) > 5 ? 'neutral' : 'positive';
               
+
+              // Raw P-Value class'ı ekle
+                const rawPValueClass = (result.pValue !== undefined && 
+                                        result.pValue !== null && 
+                                        !isNaN(result.pValue)) ? 
+                    ((result.pValue < 0.001) ? 'positive' : 
+                    (result.pValue < 0.01) ? 'neutral' : 
+                    (result.pValue < 0.05) ? 'neutral' : 'negative') : 'negative';
+                    
               // GÜÇLENDİRİLMİŞ P-VALUE CLASS
+        
               const pValueClass = (result.bonferroniPValue !== undefined && 
                                    result.bonferroniPValue !== null && 
                                    result.bonferroniPValue !== 1 &&
                                    !isNaN(result.bonferroniPValue)) ? 
                   ((result.bonferroniPValue < 0.001) ? 'positive' : 
                    (result.bonferroniPValue < 0.01) ? 'neutral' : 'negative') : 'negative';
+
+
+            
               const significanceIcon = getSignificanceIcon(result.significance);
               const significanceClass = result.isSignificant ? 'positive' : 'negative';
 
@@ -1601,8 +1663,10 @@
                   <div class="${sharpeClass}">${sharpeDisplay}</div>
                   <div class="${roiDiffClass}">${result.roiDifference !== null ? result.roiDifference.toFixed(1) + '%' : 'N/A'}</div>
                   <div class="positive">${(result.validationScore || 0).toFixed(3)}</div>
-                  <div class="${pValueClass}">${formatPValue(result.bonferroniPValue)}</div>
-                  <div class="${significanceClass}" title="${getSignificanceTooltip(result.significance)}" style="cursor: help;">${significanceIcon}</div>
+                  <div class="${rawPValueClass}" title="Ham P-Value (düzeltmesiz)" style="cursor: help;">${formatRawPValue(result.pValue)}</div>
+                    <div class="${pValueClass}" title="Bonferroni düzeltmeli P-Value" style="cursor: help;">${formatPValue(result.bonferroniPValue)}</div>
+                    <div class="${significanceClass}" title="${getSignificanceTooltip(result.significance)}" style="cursor: help;">${significanceIcon}</div>
+                    
                   <div style="font-size: 12px;">${overfittingIcon}</div>
                   <div class="${result.exceedsInitialBalance ? 'bet-warning' :'positive'}" 
                       title="${result.exceedsInitialBalance ? 'Bahis miktarı başlangıç sermayesini aştı!' : 'Bahis sermaye sınırları içinde'}" 
@@ -1929,7 +1993,11 @@
          document.getElementById('optTimeframe').addEventListener('change', estimateCandles);
          
          document.getElementById('validationMethod').addEventListener('change', updateValidationDescription);
-         
+         // Parametre değişikliklerini dinle
+        document.getElementById('leverageRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('profitRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('multiplierRange').addEventListener('input', calculateTotalCombinations);
+        document.getElementById('directionOptions').addEventListener('change', calculateTotalCombinations);
          updateCoinCount();
          updateValidationDescription();
          
@@ -1944,6 +2012,10 @@
          console.log('   • İstatistiksel anlamlılık testi (Bonferroni düzeltmeli)');
          console.log('   • Single-coin optimizasyon - Daha hızlı ve kararlı');
      });
+     
+     // İlk yüklemede kombinasyon sayısını hesapla
+    calculateTotalCombinations();
+ 
  </script>
 </body>
 </html>
