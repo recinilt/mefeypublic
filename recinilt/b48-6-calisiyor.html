@@ -1144,7 +1144,7 @@
                
                    if (validationResult) {
                        validationScores.push(validationResult.roi);
-                       sharpeRatios.push(calculateSharpeRatio(validationResult.returns || []));
+                       sharpeRatios.push(calculateSharpeRatio(validationResult.returns || [], 0.02, params.timeframe));
                    }
                
                 /////////////////////////////////////////////////////
@@ -1191,7 +1191,7 @@
                             
                             if (windowResult) {
                                 validationScores.push(windowResult.roi);
-                                sharpeRatios.push(calculateSharpeRatio(windowResult.returns || []));
+                                sharpeRatios.push(calculateSharpeRatio(windowResult.returns || [], 0.02, params.timeframe));
                             }
                             
                             windowCount++;
@@ -1286,18 +1286,35 @@
            };
        };
 
-       const calculateSharpeRatio = (returns, riskFreeRate = 0.02) => {
-           if (!returns || returns.length < 2) return 0;
-           
-           const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
-           const annualizedReturn = avgReturn * 252; // Assuming daily returns
-           const excessReturn = annualizedReturn - riskFreeRate;
-           
-           const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length;
-           const volatility = Math.sqrt(variance * 252);
-           
-           return volatility > 0 ? excessReturn / volatility : 0;
-       };
+       const getAnnualizationFactor = (timeframe) => {
+            const factors = {
+                '1m': 365 * 24 * 60,      // 525,600 (dakika/yıl)
+                '5m': 365 * 24 * 12,      // 105,120 (5dk blok/yıl)
+                '15m': 365 * 24 * 4,      // 35,040 (15dk blok/yıl)
+                '30m': 365 * 24 * 2,      // 17,520 (30dk blok/yıl)
+                '1h': 365 * 24,           // 8,760 (saat/yıl)
+                '4h': 365 * 6,            // 2,190 (4saat blok/yıl)
+                '12h': 365 * 2,           // 730 (12saat blok/yıl)
+                '1d': 365                 // 365 (gün/yıl)
+            };
+            
+            return factors[timeframe] || 252; // Varsayılan olarak günlük trading days
+        };
+
+        const calculateSharpeRatio = (returns, riskFreeRate = 0.02, timeframe = '5m') => {
+            if (!returns || returns.length < 2) return 0;
+            
+            const annualizationFactor = getAnnualizationFactor(timeframe);
+            
+            const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+            const annualizedReturn = avgReturn * annualizationFactor; // ✅ DÜZELTİLDİ
+            const excessReturn = annualizedReturn - riskFreeRate;
+            
+            const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length;
+            const volatility = Math.sqrt(variance * annualizationFactor); // ✅ DÜZELTİLDİ
+            
+            return volatility > 0 ? excessReturn / volatility : 0;
+        };
 
        const calculateStandardDeviation = (values) => {
            if (values.length < 2) return 0;
@@ -1330,13 +1347,13 @@
            const lossPercent = params.profitPercent;
            
            if (!state.position.isOpen) {
-               if (state.currentBet > state.initialBalance) {
-                   state.betExceededCapital = true;
-               }
-               
-               if (state.balance < state.currentBet || state.currentBet > state.balance * 0.95) {
-                   return false;
-               }
+                if (state.currentBet > state.initialBalance) {
+                    state.betExceededCapital = true;
+                }
+                
+                if (state.balance < state.currentBet) {
+                    return false;
+                }
                
                state.position.isOpen = true;
                state.position.entryPrice = open;
@@ -1367,7 +1384,7 @@
                    state.totalLoss += state.currentBet;
                    state.consecutiveLosses++;
                    state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
-                   state.currentBet = Math.min(state.currentBet * params.multiplier, state.balance * 0.95);
+                   state.currentBet = state.currentBet * params.multiplier;
                    state.position.isOpen = false;
                    return true;
                }
@@ -1390,7 +1407,7 @@
                    state.totalLoss += state.currentBet;
                    state.consecutiveLosses++;
                    state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
-                   state.currentBet = Math.min(state.currentBet * params.multiplier, state.balance * 0.95);
+                   state.currentBet = state.currentBet * params.multiplier;
                    state.position.isOpen = false;
                    return true;
                }
@@ -1440,7 +1457,7 @@
                 const infoDiv = document.createElement('div');
                 infoDiv.className = 'info-box';
                 infoDiv.style.marginBottom = '15px';
-                infoDiv.innerHTML = `<strong>📊 Toplam ${opt.results.length} sonuç bulundu. Performans için ilk ${VISIBLE_RESULTS} tanesi gösteriliyor.</strong>`;
+                //infoDiv.innerHTML = `<strong>📊 Toplam ${opt.results.length} sonuç bulundu. Performans için ilk ${VISIBLE_RESULTS} tanesi gösteriliyor.</strong>`;
                 resultsList.parentNode.insertBefore(infoDiv, resultsList);
             }
 
