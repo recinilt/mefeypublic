@@ -32,7 +32,18 @@
         .progress-bar { background: linear-gradient(45deg, #f59e0b, #d97706); height: 100%; width: 0%; transition: width 0.3s; }
         .progress-text { font-size: 12px; margin-top: 5px; color: #fbbf24; text-align: center; }
         .optimizer-results { background: rgba(0,0,0,0.4); border-radius: 15px; padding: 25px; max-height: 500px; overflow-y: auto; backdrop-filter: blur(10px); margin-top: 20px; }
-        .optimizer-row { display: grid; grid-template-columns: 25px 50px 50px 50px 45px 45px 70px 70px 60px 60px 60px 35px 35px; gap: 4px; padding: 6px; margin-bottom: 2px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 10px; align-items: center; min-height: 35px; }
+        .optimizer-row { 
+            display: grid; 
+            grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 35px 35px; 
+            gap: 4px; 
+            padding: 6px; 
+            margin-bottom: 2px; 
+            background: rgba(255,255,255,0.05); 
+            border-radius: 8px; 
+            font-size: 10px; 
+            align-items: center; 
+            min-height: 35px; 
+        }
         .optimizer-row:hover { background: rgba(255,255,255,0.1); }
         .optimizer-header { background: linear-gradient(45deg, rgba(245,158,11,0.3), rgba(217,119,6,0.2)); font-weight: bold; color: #fbbf24; }
         .sortable-header { cursor: pointer; transition: all 0.3s; position: relative; user-select: none; }
@@ -320,12 +331,17 @@
 
             <div class="optimizer-results" id="optimizerResults" style="display: none;">
                 <h3>🏆 Gelişmiş Validation ile En İyi Kombinasyonlar</h3>
+                
                 <div class="info-box" style="font-size: 12px;">
                     <strong>💡 Validation Açıklaması:</strong><br>
                     • <span style="color: #4ade80;">Training ROI:</span> İlk eğitim verisi ile test<br>
                     • <span style="color: #fbbf24;">Validation ROI:</span> Validation verisi ile test<br>
                     • <span style="color: #93c5fd;">Sharpe Ratio:</span> Risk-ayarlı performans<br>
                     • <span style="color: #f87171;">ROI Farkı:</span> %50+ ise overfitting riski<br>
+                    • <span style="color: #06d6a0;">MaxBal:</span> Ulaşılan en yüksek bakiye<br>
+                    • <span style="color: #06d6a0;">SonBal:</span> Son bakiye (USDT)<br>
+                    • <span style="color: #06d6a0;">İşlem:</span> Toplam işlem sayısı<br>
+                    • <span style="color: #f87171;">MaxKyp:</span> Ard arda max kayıp sayısı<br>
                     • <span style="color: #f87171;">🚨:</span> Bahis miktarı başlangıç sermayesini aştı<br>
                     • <strong>Final Sıralama:</strong> Seçilen kritere göre
                 </div>
@@ -333,6 +349,7 @@
                     <strong>⚠️ Overfitting ve Risk Uyarıları!</strong>
                     <div id="overfittingDetails"></div>
                 </div>
+                
                 <div class="optimizer-row optimizer-header">
                     <div class="sortable-header" onclick="sortResults('index', 'number')"># <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('leverage', 'number')">Kald. <span class="sort-indicator" style="opacity: 0;">↓</span></div>
@@ -340,6 +357,12 @@
                     <div class="sortable-header" onclick="sortResults('multiplier', 'number')">Çarp. <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('direction', 'string')">Yön <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('initialBet', 'number')">İlkBet <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <!-- YENİ SÜTUNLAR BURAYA EKLENİYOR -->
+                    <div class="sortable-header" onclick="sortResults('maxBalance', 'number')">MaxBal <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('finalBalance', 'number')">SonBal <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('totalTrades', 'number')">İşlem <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('maxConsecutiveLosses', 'number')">MaxKyp <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <!-- MEVCUT SÜTUNLAR DEVAM EDİYOR -->
                     <div class="sortable-header" onclick="sortResults('trainingROI', 'number')">TrainROI <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('validationROI', 'number')">ValROI <span class="sort-indicator">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('sharpeRatio', 'number')">Sharpe <span class="sort-indicator" style="opacity: 0;">↓</span></div>
@@ -348,6 +371,7 @@
                     <div>⭐</div>
                     <div>🚨</div>
                 </div>
+
                 <div id="optimizerResultsList"></div>
             </div>
         </div>
@@ -978,82 +1002,95 @@
        };
 
        const testMultiCoinCombination = async (params) => {
-           try {
-               let totalInitialBalance = 0, totalFinalBalance = 0, totalTrades = 0, totalWins = 0;
-               let totalProfit = 0, totalLoss = 0, maxConsecutiveLosses = 0, maxDrawdown = 0;
-               let exceedsInitialBalance = false;
-               let allReturns = []; // For Sharpe calculation
-               
-               for (const coin of params.coins) {
-                   const state = {
-                       balance: params.initialBalance,
-                       initialBalance: params.initialBalance,
-                       currentBet: params.initialBet,
-                       peakBalance: params.initialBalance,
-                       maxDrawdown: 0,
-                       totalTrades: 0,
-                       winTrades: 0,
-                       consecutiveLosses: 0,
-                       maxConsecutiveLosses: 0,
-                       totalProfit: 0,
-                       totalLoss: 0,
-                       position: { isOpen: false, entryPrice: 0, betAmount: 0 },
-                       betExceededCapital: false,
-                       returns: [] // Track returns for this coin
-                   };
-                   
-                   let lastBalance = params.initialBalance;
-                   
-                   for (let i = 0; i < opt.data[coin].length && state.totalTrades < params.maxTrades; i++) {
-                       if (!processCandle(opt.data[coin][i], state, params)) break;
-                       updateDrawdown(state);
-                       
-                       // Calculate return for Sharpe ratio
-                       if (i > 0 && lastBalance > 0) {
-                           const return_ = (state.balance - lastBalance) / lastBalance;
-                           state.returns.push(return_);
-                       }
-                       lastBalance = state.balance;
-                   }
-                   
-                   totalInitialBalance += params.initialBalance;
-                   totalFinalBalance += state.balance;
-                   totalTrades += state.totalTrades;
-                   totalWins += state.winTrades;
-                   totalProfit += state.totalProfit;
-                   totalLoss += state.totalLoss;
-                   maxConsecutiveLosses = Math.max(maxConsecutiveLosses, state.maxConsecutiveLosses);
-                   maxDrawdown = Math.max(maxDrawdown, state.maxDrawdown);
-                   
-                   if (state.betExceededCapital) {
-                       exceedsInitialBalance = true;
-                   }
-                   
-                   allReturns.push(...state.returns);
-               }
-               
-               const roi = totalFinalBalance / totalInitialBalance;
-               const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
-               const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
-               
-               return {
-                   leverage: params.leverage,
-                   profitPercent: params.profitPercent,
-                   multiplier: params.multiplier,
-                   direction: params.direction,
-                   initialBet: params.initialBet,
-                   roi, finalBalance: totalFinalBalance, maxConsecutiveLosses,
-                   totalTrades, maxDrawdown, winRate, profitFactor,
-                   coins: params.coins.length,
-                   exceedsInitialBalance,
-                   returns: allReturns // For Sharpe calculation
-               };
-           } catch (error) {
-               console.error('❌ Multi-coin test hatası:', error);
-               return null;
-           }
-       };
-
+            try {
+                let totalInitialBalance = 0, totalFinalBalance = 0, totalTrades = 0, totalWins = 0;
+                let totalProfit = 0, totalLoss = 0, maxConsecutiveLosses = 0, maxDrawdown = 0;
+                let exceedsInitialBalance = false;
+                let allReturns = [];
+                let totalMaxBalance = 0; // YENİ: Toplam max bakiye takibi
+                
+                for (const coin of params.coins) {
+                    const state = {
+                        balance: params.initialBalance,
+                        initialBalance: params.initialBalance,
+                        currentBet: params.initialBet,
+                        peakBalance: params.initialBalance,
+                        maxBalance: params.initialBalance, // YENİ: Bu coin için max bakiye
+                        maxDrawdown: 0,
+                        totalTrades: 0,
+                        winTrades: 0,
+                        consecutiveLosses: 0,
+                        maxConsecutiveLosses: 0,
+                        totalProfit: 0,
+                        totalLoss: 0,
+                        position: { isOpen: false, entryPrice: 0, betAmount: 0 },
+                        betExceededCapital: false,
+                        returns: []
+                    };
+                    
+                    let lastBalance = params.initialBalance;
+                    
+                    for (let i = 0; i < opt.data[coin].length && state.totalTrades < params.maxTrades; i++) {
+                        if (!processCandle(opt.data[coin][i], state, params)) break;
+                        
+                        // YENİ: Max bakiye takibi
+                        if (state.balance > state.maxBalance) {
+                            state.maxBalance = state.balance;
+                        }
+                        
+                        updateDrawdown(state);
+                        
+                        if (i > 0 && lastBalance > 0) {
+                            const return_ = (state.balance - lastBalance) / lastBalance;
+                            state.returns.push(return_);
+                        }
+                        lastBalance = state.balance;
+                    }
+                    
+                    totalInitialBalance += params.initialBalance;
+                    totalFinalBalance += state.balance;
+                    totalTrades += state.totalTrades;
+                    totalWins += state.winTrades;
+                    totalProfit += state.totalProfit;
+                    totalLoss += state.totalLoss;
+                    maxConsecutiveLosses = Math.max(maxConsecutiveLosses, state.maxConsecutiveLosses);
+                    maxDrawdown = Math.max(maxDrawdown, state.maxDrawdown);
+                    totalMaxBalance += state.maxBalance; // YENİ: Toplam max bakiye
+                    
+                    if (state.betExceededCapital) {
+                        exceedsInitialBalance = true;
+                    }
+                    
+                    allReturns.push(...state.returns);
+                }
+                
+                const roi = totalFinalBalance / totalInitialBalance;
+                const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
+                const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
+                
+                return {
+                    leverage: params.leverage,
+                    profitPercent: params.profitPercent,
+                    multiplier: params.multiplier,
+                    direction: params.direction,
+                    initialBet: params.initialBet,
+                    roi, 
+                    finalBalance: totalFinalBalance, 
+                    maxBalance: totalMaxBalance, // YENİ: Max bakiye eklendi
+                    maxConsecutiveLosses,
+                    totalTrades, 
+                    maxDrawdown, 
+                    winRate, 
+                    profitFactor,
+                    coins: params.coins.length,
+                    exceedsInitialBalance,
+                    returns: allReturns
+                };
+            } catch (error) {
+                console.error('❌ Multi-coin test hatası:', error);
+                return null;
+            }
+        };
        // ADVANCED VALIDATION METHODS
        const runAdvancedValidation = async (topResults, coins, params, method) => {
            const criteria = document.getElementById('validationCriteria').value;
@@ -1408,41 +1445,53 @@
             }
 
             top200.forEach((result, index) => {
-               const row = document.createElement('div');
-               row.className = 'optimizer-row';
-               
-               const trainingROIClass = (result.trainingROI || 0) >= 2 ? 'positive' : (result.trainingROI || 0) >= 1 ? 'neutral' : 'negative';
-               const validationROIClass = (result.validationROI || 0) >= 2 ? 'positive' : (result.validationROI || 0) >= 1 ? 'neutral' : 'negative';
-               const sharpeClass = (result.sharpeRatio || 0) > 1 ? 'positive' : (result.sharpeRatio || 0) > 0 ? 'neutral' : 'negative';
-               const roiDiffClass = (result.roiDifference || 0) > 50 ? 'negative' : (result.roiDifference || 0) > 25 ? 'neutral' : 'positive';
-               
-               const directionIcon = result.direction === 'long' ? '📈' : '📉';
-               const overfittingIcon = result.overfitting ? '⚠️' : (result.validationROI || 0) > (result.trainingROI || 0) ? '🎯' : '✅';
-               const betWarningIcon = result.exceedsInitialBalance ? '🚨' : '✅';
-               
-               const validationROIDisplay = result.validationROI !== null ? 
-                   `${result.validationROI.toFixed(3)}x` : 'N/A';
-               const sharpeDisplay = result.sharpeRatio !== null ? 
-                   result.sharpeRatio.toFixed(2) : 'N/A';
-               
-               row.innerHTML = `
-                   <div>${index + 1}</div>
-                   <div>${result.leverage}x</div>
-                   <div>%${result.profitPercent}</div>
-                   <div>${result.multiplier}x</div>
-                   <div>${directionIcon}</div>
-                   <div class="neutral">${result.initialBet.toFixed(2)}</div>
-                   <div class="${trainingROIClass}">${(result.trainingROI || 0).toFixed(3)}x</div>
-                   <div class="${validationROIClass}">${validationROIDisplay}</div>
-                   <div class="${sharpeClass}">${sharpeDisplay}</div>
-                   <div class="${roiDiffClass}">${result.roiDifference !== null ? result.roiDifference.toFixed(1) + '%' : 'N/A'}</div>
-                   <div class="positive">${(result.validationScore || 0).toFixed(3)}</div>
-                   <div style="font-size: 12px;">${overfittingIcon}</div>
-                   <div class="${result.exceedsInitialBalance ? 'bet-warning' : 'positive'}" 
+                const row = document.createElement('div');
+                row.className = 'optimizer-row';
+                
+                const trainingROIClass = (result.trainingROI || 0) >= 2 ? 'positive' : (result.trainingROI || 0) >= 1 ? 'neutral' : 'negative';
+                const validationROIClass = (result.validationROI || 0) >= 2 ? 'positive' : (result.validationROI || 0) >= 1 ? 'neutral' : 'negative';
+                const sharpeClass = (result.sharpeRatio || 0) > 1 ? 'positive' : (result.sharpeRatio || 0) > 0 ? 'neutral' : 'negative';
+                const roiDiffClass = (result.roiDifference || 0) > 50 ? 'negative' : (result.roiDifference || 0) > 25 ? 'neutral' : 'positive';
+                
+                // YENİ: Yeni sütunlar için CSS sınıfları
+                const maxBalanceClass = (result.maxBalance || 0) > (result.initialBalance * 2) ? 'positive' : 'neutral';
+                const finalBalanceClass = (result.finalBalance || 0) > result.initialBalance ? 'positive' : 'negative';
+                const tradesClass = (result.totalTrades || 0) > 100 ? 'positive' : 'neutral';
+                const lossesClass = (result.maxConsecutiveLosses || 0) > 10 ? 'negative' : (result.maxConsecutiveLosses || 0) > 5 ? 'neutral' : 'positive';
+                
+                const directionIcon = result.direction === 'long' ? '📈' : '📉';
+                const overfittingIcon = result.overfitting ? '⚠️' : (result.validationROI || 0) > (result.trainingROI || 0) ? '🎯' : '✅';
+                const betWarningIcon = result.exceedsInitialBalance ? '🚨' : '✅';
+                
+                const validationROIDisplay = result.validationROI !== null ? 
+                    `${result.validationROI.toFixed(3)}x` : 'N/A';
+                const sharpeDisplay = result.sharpeRatio !== null ? 
+                    result.sharpeRatio.toFixed(2) : 'N/A';
+                
+                row.innerHTML = `
+                    <div>${index + 1}</div>
+                    <div>${result.leverage}x</div>
+                    <div>%${result.profitPercent}</div>
+                    <div>${result.multiplier}x</div>
+                    <div>${directionIcon}</div>
+                    <div class="neutral">${result.initialBet.toFixed(2)}</div>
+                    <!-- YENİ SÜTUNLAR -->
+                    <div class="${maxBalanceClass}">${(result.maxBalance || 0).toFixed(0)}</div>
+                    <div class="${finalBalanceClass}">${(result.finalBalance || 0).toFixed(0)}</div>
+                    <div class="${tradesClass}">${result.totalTrades || 0}</div>
+                    <div class="${lossesClass}">${result.maxConsecutiveLosses || 0}</div>
+                    <!-- MEVCUT SÜTUNLAR -->
+                    <div class="${trainingROIClass}">${(result.trainingROI || 0).toFixed(3)}x</div>
+                    <div class="${validationROIClass}">${validationROIDisplay}</div>
+                    <div class="${sharpeClass}">${sharpeDisplay}</div>
+                    <div class="${roiDiffClass}">${result.roiDifference !== null ? result.roiDifference.toFixed(1) + '%' : 'N/A'}</div>
+                    <div class="positive">${(result.validationScore || 0).toFixed(3)}</div>
+                    <div style="font-size: 12px;">${overfittingIcon}</div>
+                    <div class="${result.exceedsInitialBalance ? 'bet-warning' : 'positive'}" 
                         title="${result.exceedsInitialBalance ? 'Bahis miktarı başlangıç sermayesini aştı!' : 'Bahis sermaye sınırları içinde'}" 
                         style="font-size: 12px; cursor: help;">${betWarningIcon}</div>
-               `;
-               
+                `;
+                
                if (result.overfitting) {
                    row.style.background = 'linear-gradient(45deg, rgba(248,113,113,0.2), rgba(239,68,68,0.1))';
                    row.style.border = '1px solid rgba(248,113,113,0.3)';
