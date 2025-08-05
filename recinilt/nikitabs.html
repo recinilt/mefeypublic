@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nikitabs İlaç Hatırlatıcısı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .progress-bar {
+            background: #ecf0f1;
+            height: 6px;
+            margin-top: 20px;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .days-container {
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .day-card.current-day {
+            border-color: #27ae60;
+            background: #d5f4e6;
+            box-shadow: 0 5px 20px rgba(39, 174, 96, 0.2);
+        }
+
+        .day-card.past-day {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+
+        .day-card.future-day {
+            opacity: 0.5;
+            background: #ecf0f1;
+        }
+
+        .day-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .day-card:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.1);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .day-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .day-info {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            background: #ecf0f1;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .tablets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .tablet-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .tablet-item.taken {
+            background: #d5f4e6;
+            border-color: #27ae60;
+        }
+
+        .tablet-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transform: scale(1.2);
+        }
+
+        .tablet-label {
+            display: block;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 5px;
+            min-height: 25px;
+        }
+
+        .timer.active {
+            color: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .completed {
+            background: #d5f4e6 !important;
+            border-color: #27ae60 !important;
+        }
+
+        .alarm-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: none;
+            animation: shake 0.8s infinite;
+            z-index: 1000;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚭 Nikitabs İlaç Hatırlatıcısı</h1>
+            <p>Sigarayı bırakma yolculuğunuzda yanınızdayız</p>
+            <div class="start-date-section" id="startDateSection">
+                <label for="startDate" style="display: block; margin-bottom: 10px; font-size: 1.1em;">İlaca Başlama Tarihi:</label>
+                <input type="date" id="startDate" style="padding: 10px; border-radius: 8px; border: none; font-size: 1.1em; margin-right: 10px;">
+                <button onclick="nikitabsApp.setStartDate()" style="padding: 10px 20px; background: #27ae60; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1em;">Kaydet</button>
+            </div>
+            <div class="date-info" id="dateInfo" style="margin-top: 15px; display: none;">
+                <p>Başlama Tarihi: <span id="displayStartDate"></span></p>
+                <p>Bugünkü Gün: <span id="displayCurrentDay"></span></p>
+                <div style="margin-top: 10px;">
+                    <button onclick="nikitabsApp.resetStartDate()" style="padding: 5px 15px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em; margin-right: 10px;">Tarihi Değiştir</button>
+                    <button onclick="nikitabsApp.resetAll()" style="padding: 5px 15px; background: #8e44ad; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em;">🔄 Tümünü Sıfırla</button>
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="alarm-status" id="alarmStatus">
+            🔔 İlaç Zamanı! Bir sonraki dozunuzu alın.
+        </div>
+
+        <div class="days-container" id="daysContainer">
+            <!-- Günler buraya JavaScript ile eklenecek -->
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalTaken">0</div>
+                <div class="stat-label">Alınan Tablet</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalRemaining">100</div>
+                <div class="stat-label">Kalan Tablet</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="currentDay">1</div>
+                <div class="stat-label">Güncel Gün</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="completionRate">0%</div>
+                <div class="stat-label">Tamamlanma</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NikitabsReminder {
+            constructor() {
+                this.schedule = [
+                    { days: [1, 2, 3], interval: 2, tabletsPerDay: 6, info: "2 saatte 1, günde 6 tablet" },
+                    { days: [4, 5, 6, 7, 8, 9, 10, 11, 12], interval: 2.5, tabletsPerDay: 5, info: "2.5 saatte 1, günde 5 tablet" },
+                    { days: [13, 14, 15, 16], interval: 3, tabletsPerDay: 4, info: "3 saatte 1, günde 4 tablet" },
+                    { days: [17, 18, 19, 20], interval: 5, tabletsPerDay: 3, info: "5 saatte 1, günde 3 tablet" },
+                    { days: [21, 22, 23, 24, 25], interval: 6, tabletsPerDay: 2, info: "6 saatte 1, günde 2 tablet" }
+                ];
+                
+                this.timers = {};
+                this.takenTablets = this.loadProgress();
+                this.startDate = this.loadStartDate();
+                this.totalTablets = 100;
+                
+                this.init();
+            }
+
+            init() {
+                this.checkStartDate();
+                this.renderDays();
+                this.updateStats();
+                this.updateProgress();
+            }
+
+            loadProgress() {
+                const saved = localStorage.getItem('nikitabs-progress');
+                return saved ? JSON.parse(saved) : {};
+            }
+
+            loadStartDate() {
+                return localStorage.getItem('nikitabs-start-date');
+            }
+
+            saveProgress() {
+                localStorage.setItem('nikitabs-progress', JSON.stringify(this.takenTablets));
+            }
+
+            saveStartDate(date) {
+                localStorage.setItem('nikitabs-start-date', date);
+                this.startDate = date;
+            }
+
+            checkStartDate() {
+                const startDateSection = document.getElementById('startDateSection');
+                const dateInfo = document.getElementById('dateInfo');
+                
+                if (this.startDate) {
+                    startDateSection.style.display = 'none';
+                    dateInfo.style.display = 'block';
+                    this.updateDateInfo();
+                } else {
+                    startDateSection.style.display = 'block';
+                    dateInfo.style.display = 'none';
+                    // Bugünün tarihi varsayılan olarak gelsin
+                    document.getElementById('startDate').value = new Date().toISOString().split('T')[0];
+                }
+            }
+
+            setStartDate() {
+                const dateInput = document.getElementById('startDate');
+                const selectedDate = dateInput.value;
+                
+                if (selectedDate) {
+                    this.saveStartDate(selectedDate);
+                    this.checkStartDate();
+                } else {
+                    alert('Lütfen bir tarih seçin!');
+                }
+            }
+
+            resetStartDate() {
+                if (confirm('Başlama tarihini değiştirmek istediğinizden emin misiniz? Bu işlem mevcut ilerlemenizi etkilemeyecek.')) {
+                    localStorage.removeItem('nikitabs-start-date');
+                    this.startDate = null;
+                    this.checkStartDate();
+                }
+            }
+
+            resetAll() {
+                const confirmMessage = `
+🚨 DİKKAT: TÜMÜNÜ SIFIRLA 🚨
+
+Bu işlem şunları silecek:
+• Tüm tablet kayıtlarınız
+• Başlama tarihiniz
+• Aktif zamanlayıcılar
+• İlerleme verileriniz
+
+Bu işlem GERİ ALINMAZ!
+
+Devam etmek istediğinizden emin misiniz?`;
+
+                if (confirm(confirmMessage)) {
+                    // Tüm zamanlayıcıları durdur
+                    Object.values(this.timers).forEach(timer => clearInterval(timer));
+                    this.timers = {};
+                    
+                    // Local storage'ı temizle
+                    localStorage.removeItem('nikitabs-progress');
+                    localStorage.removeItem('nikitabs-start-date');
+                    
+                    // Değişkenleri sıfırla
+                    this.takenTablets = {};
+                    this.startDate = null;
+                    
+                    // Görsel alarmı gizle
+                    document.getElementById('alarmStatus').style.display = 'none';
+                    
+                    // Sayfayı yenile
+                    this.init();
+                    
+                    alert('✅ Tüm veriler başarıyla sıfırlandı!');
+                }
+            }
+
+            updateDateInfo() {
+                const displayStartDate = document.getElementById('displayStartDate');
+                const displayCurrentDay = document.getElementById('displayCurrentDay');
+                
+                if (this.startDate) {
+                    const startDateObj = new Date(this.startDate);
+                    const today = new Date();
+                    const diffTime = today - startDateObj;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 çünkü 1. gün başlama günü
+                    
+                    displayStartDate.textContent = startDateObj.toLocaleDateString('tr-TR');
+                    displayCurrentDay.textContent = `Gün ${Math.max(1, Math.min(25, diffDays))}`;
+                }
+            }
+
+            getCurrentDay() {
+                if (!this.startDate) return 1;
+                
+                const startDateObj = new Date(this.startDate);
+                const today = new Date();
+                const diffTime = today - startDateObj;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                
+                return Math.max(1, Math.min(25, diffDays));
+            }
+
+            getScheduleForDay(day) {
+                return this.schedule.find(s => s.days.includes(day));
+            }
+
+            renderDays() {
+                const container = document.getElementById('daysContainer');
+                container.innerHTML = '';
+
+                for (let day = 1; day <= 25; day++) {
+                    const scheduleInfo = this.getScheduleForDay(day);
+                    const dayCard = this.createDayCard(day, scheduleInfo);
+                    container.appendChild(dayCard);
+                }
+            }
+
+            createDayCard(day, scheduleInfo) {
+                const currentDay = this.getCurrentDay();
+                const isPastDay = day < currentDay;
+                const isCurrentDay = day === currentDay;
+                const isFutureDay = day > currentDay;
+                
+                let dayClass = 'day-card';
+                if (isPastDay) dayClass += ' past-day';
+                if (isCurrentDay) dayClass += ' current-day';
+                if (isFutureDay) dayClass += ' future-day';
+                
+                const card = document.createElement('div');
+                card.className = dayClass;
+                
+                let dayStatus = '';
+                if (isCurrentDay) dayStatus = ' <span style="color: #27ae60; font-weight: bold;">• BUGÜN</span>';
+                else if (isPastDay) dayStatus = ' <span style="color: #95a5a6;">• GEÇMİŞ</span>';
+                else dayStatus = ' <span style="color: #3498db;">• GELECEK</span>';
+                
+                card.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-title">Gün ${day}${dayStatus}</div>
+                        <div class="day-info">${scheduleInfo.info}</div>
+                    </div>
+                    <div class="tablets-grid" id="tablets-day-${day}">
+                        ${this.createTabletsForDay(day, scheduleInfo)}
+                    </div>
+                `;
+                return card;
+            }
+
+            createTabletsForDay(day, scheduleInfo) {
+                let html = '';
+                for (let tablet = 1; tablet <= scheduleInfo.tabletsPerDay; tablet++) {
+                    const tabletId = `day-${day}-tablet-${tablet}`;
+                    const isChecked = this.takenTablets[tabletId] || false;
+                    
+                    html += `
+                        <div class="tablet-item ${isChecked ? 'taken' : ''}">
+                            <input type="checkbox" 
+                                   class="tablet-checkbox" 
+                                   id="${tabletId}"
+                                   ${isChecked ? 'checked' : ''}
+                                   onchange="nikitabsApp.onTabletTaken('${tabletId}', ${scheduleInfo.interval})">
+                            <label for="${tabletId}" class="tablet-label">Tablet ${tablet}</label>
+                            <div class="timer" id="timer-${tabletId}"></div>
+                        </div>
+                    `;
+                }
+                return html;
+            }
+
+            onTabletTaken(tabletId, intervalHours) {
+                const checkbox = document.getElementById(tabletId);
+                const tabletItem = checkbox.parentElement;
+                
+                if (checkbox.checked) {
+                    this.takenTablets[tabletId] = true;
+                    tabletItem.classList.add('taken');
+                    
+                    // Aynı gündeki diğer tüm zamanlayıcıları temizle
+                    const dayNumber = this.extractDayFromTabletId(tabletId);
+                    this.clearAllTimersForDay(dayNumber);
+                    
+                    // Yeni zamanlayıcı başlat
+                    this.startTimer(tabletId, intervalHours);
+                } else {
+                    this.takenTablets[tabletId] = false;
+                    tabletItem.classList.remove('taken');
+                    this.clearTimer(tabletId);
+                }
+                
+                this.saveProgress();
+                this.updateStats();
+                this.updateProgress();
+            }
+
+            extractDayFromTabletId(tabletId) {
+                // "day-1-tablet-2" formatından gün numarasını çıkar
+                const match = tabletId.match(/day-(\d+)-tablet-\d+/);
+                return match ? parseInt(match[1]) : null;
+            }
+
+            clearAllTimersForDay(dayNumber) {
+                // Bu günün tüm tablet zamanlayıcılarını temizle
+                Object.keys(this.timers).forEach(tabletId => {
+                    const timerDayNumber = this.extractDayFromTabletId(tabletId);
+                    if (timerDayNumber === dayNumber) {
+                        this.clearTimer(tabletId);
+                    }
+                });
+            }
+
+            startTimer(tabletId, intervalHours) {
+                this.clearTimer(tabletId);
+                
+                const intervalMs = intervalHours * 60 * 60 * 1000;
+                const endTime = Date.now() + intervalMs;
+                const timerElement = document.getElementById(`timer-${tabletId}`);
+                
+                const updateTimer = () => {
+                    const remaining = endTime - Date.now();
+                    
+                    if (remaining <= 0) {
+                        this.playAlarm();
+                        timerElement.textContent = '⏰ Zaman doldu!';
+                        timerElement.classList.remove('active');
+                        delete this.timers[tabletId];
+                        return;
+                    }
+                    
+                    const hours = Math.floor(remaining / (1000 * 60 * 60));
+                    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                    
+                    timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    timerElement.classList.add('active');
+                };
+                
+                updateTimer();
+                this.timers[tabletId] = setInterval(updateTimer, 1000);
+            }
+
+            clearTimer(tabletId) {
+                if (this.timers[tabletId]) {
+                    clearInterval(this.timers[tabletId]);
+                    delete this.timers[tabletId];
+                }
+                
+                const timerElement = document.getElementById(`timer-${tabletId}`);
+                if (timerElement) {
+                    timerElement.textContent = '';
+                    timerElement.classList.remove('active');
+                }
+            }
+
+            playAlarm() {
+                // Alarm sesi çalma
+                const audio = new Audio('alarm.wav');
+                audio.play().catch(e => {
+                    console.log('Alarm sesi çalınamadı:', e);
+                    // Ses çalmazsa görsel alarm göster
+                    this.showVisualAlarm();
+                });
+                
+                this.showVisualAlarm();
+            }
+
+            showVisualAlarm() {
+                const alarmStatus = document.getElementById('alarmStatus');
+                alarmStatus.style.display = 'block';
+                
+                setTimeout(() => {
+                    alarmStatus.style.display = 'none';
+                }, 10000); // 10 saniye sonra gizle
+            }
+
+            updateStats() {
+                const totalTakenCount = Object.values(this.takenTablets).filter(taken => taken).length;
+                const totalRemainingCount = this.totalTablets - totalTakenCount;
+                const completionRate = Math.round((totalTakenCount / this.totalTablets) * 100);
+                
+                // Güncel günü hesapla - tarih bazlı veya ilerleme bazlı
+                let currentDay = this.getCurrentDay();
+                
+                document.getElementById('totalTaken').textContent = totalTakenCount;
+                document.getElementById('totalRemaining').textContent = totalRemainingCount;
+                document.getElementById('currentDay').textContent = currentDay;
+                document.getElementById('completionRate').textContent = completionRate + '%';
+                
+                // Tarih bilgilerini güncelle
+                this.updateDateInfo();
+            }
+
+            updateProgress() {
+                const totalTakenCount = Object.values(this.takenTablets).filter(taken => taken).length;
+                const progressPercentage = (totalTakenCount / this.totalTablets) * 100;
+                document.getElementById('progressFill').style.width = progressPercentage + '%';
+            }
+        }
+
+        // Uygulamayı başlat
+        const nikitabsApp = new NikitabsReminder();
+
+        // Sayfa kapatılırken zamanlayıcıları temizle
+        window.addEventListener('beforeunload', () => {
+            Object.values(nikitabsApp.timers).forEach(timer => clearInterval(timer));
+        });
+    </script>
+</body>
+</html>
