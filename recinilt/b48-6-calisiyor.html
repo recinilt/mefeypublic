@@ -34,7 +34,8 @@
         .optimizer-results { background: rgba(0,0,0,0.4); border-radius: 15px; padding: 25px; max-height: 500px; overflow-y: auto; backdrop-filter: blur(10px); margin-top: 20px; }
         .optimizer-row { 
             display: grid; 
-            grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 35px 35px; 
+            grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 45px 50px 35px 35px; 
+            /* ↑ 45px 50px eklendi P-Value ve Significant için */
             gap: 4px; 
             padding: 6px; 
             margin-bottom: 2px; 
@@ -333,7 +334,7 @@
                 <h3>🏆 Gelişmiş Validation ile En İyi Kombinasyonlar</h3>
                 
                 <div class="info-box" style="font-size: 12px;">
-                    <strong>💡 Validation Açıklaması:</strong><br>
+                    <strong>💡 Validation + Statistical Significance Açıklaması:</strong><br>
                     • <span style="color: #4ade80;">Training ROI:</span> İlk eğitim verisi ile test<br>
                     • <span style="color: #fbbf24;">Validation ROI:</span> Validation verisi ile test<br>
                     • <span style="color: #93c5fd;">Sharpe Ratio:</span> Risk-ayarlı performans<br>
@@ -343,6 +344,13 @@
                     • <span style="color: #06d6a0;">İşlem:</span> Toplam işlem sayısı<br>
                     • <span style="color: #f87171;">MaxKyp:</span> Ard arda max kayıp sayısı<br>
                     • <span style="color: #f87171;">🚨:</span> Bahis miktarı başlangıç sermayesini aştı<br>
+                    • <span style="color: #4ade80;">P-Val:</span> Bonferroni düzeltmeli p-value<br>
+                    • <span style="color: #4ade80;">🟢:</span> Yüksek anlamlılık (p&lt;0.001)<br>
+                    • <span style="color: #4ade80;">✅:</span> Çok anlamlı (p&lt;0.01)<br>
+                    • <span style="color: #93c5fd;">🔵:</span> Anlamlı (Bonferroni geçti)<br>
+                    • <span style="color: #fbbf24;">🟡:</span> Düzeltmesiz anlamlı (dikkatli kullan)<br>
+                    • <span style="color: #f87171;">❌:</span> İstatistiksel olarak anlamsız<br>
+                    • <strong>Bonferroni Correction:</strong> α = 0.05 ÷ toplam test = 0.000125<br>
                     • <strong>Final Sıralama:</strong> Seçilen kritere göre
                 </div>
                 <div id="overfittingWarning" class="warning-box" style="display: none;">
@@ -368,6 +376,9 @@
                     <div class="sortable-header" onclick="sortResults('sharpeRatio', 'number')">Sharpe <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('roiDifference', 'number')">Fark% <span class="sort-indicator" style="opacity: 0;">↓</span></div>
                     <div class="sortable-header" onclick="sortResults('validationScore', 'number')">Score <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('bonferroniPValue', 'number')">P-Val <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    <div class="sortable-header" onclick="sortResults('significance', 'string')">Signif <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                    
                     <div>⭐</div>
                     <div>🚨</div>
                 </div>
@@ -891,7 +902,7 @@
                                 if (currentBatch.length >= BATCH_SIZE || combinationIndex === totalCombinations) {
                                     // Batch'i işle
                                     for (const params of currentBatch) {
-                                        const result = await testMultiCoinCombination(params);
+                                        const result = testMultiCoinCombination(params);
                                         if (result) opt.trainingResults.push(result);
                                         opt.processed++;
                                     }
@@ -1001,7 +1012,7 @@
            return filtered;
        };
 
-       const testMultiCoinCombination = async (params) => {
+       const testMultiCoinCombination = (params) => {
             try {
                 let totalInitialBalance = 0, totalFinalBalance = 0, totalTrades = 0, totalWins = 0;
                 let totalProfit = 0, totalLoss = 0, maxConsecutiveLosses = 0, maxDrawdown = 0;
@@ -1067,7 +1078,11 @@
                 const roi = totalFinalBalance / totalInitialBalance;
                 const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
                 const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
-                
+                // İstatistiksel anlamlılık hesapla
+                const stats = calculateStatisticalSignificance(allReturns, opt.total || 400);
+                // Debug için
+                console.log('Returns length:', allReturns.length);
+                console.log('Statistical calc:', stats);
                 return {
                     leverage: params.leverage,
                     profitPercent: params.profitPercent,
@@ -1076,7 +1091,7 @@
                     initialBet: params.initialBet,
                     roi, 
                     finalBalance: totalFinalBalance, 
-                    maxBalance: totalMaxBalance, // YENİ: Max bakiye eklendi
+                    maxBalance: totalMaxBalance,
                     maxConsecutiveLosses,
                     totalTrades, 
                     maxDrawdown, 
@@ -1084,7 +1099,13 @@
                     profitFactor,
                     coins: params.coins.length,
                     exceedsInitialBalance,
-                    returns: allReturns
+                    returns: allReturns,
+                    // YENİ: İstatistiksel anlamlılık verileri
+                    tStat: stats.tStat,
+                    pValue: stats.pValue,
+                    bonferroniPValue: stats.bonferroniPValue,
+                    isSignificant: stats.isSignificant,
+                    significance: stats.significance
                 };
             } catch (error) {
                 console.error('❌ Multi-coin test hatası:', error);
@@ -1121,7 +1142,7 @@
                     // opt.data'yı değiştir (kopyalama yapmadan)
                     opt.data = validationData;
                     
-                    const validationResult = await testMultiCoinCombination({
+                    const validationResult = testMultiCoinCombination({
                         leverage: result.leverage,
                         profitPercent: result.profitPercent,
                         multiplier: result.multiplier,
@@ -1145,6 +1166,9 @@
                    if (validationResult) {
                        validationScores.push(validationResult.roi);
                        sharpeRatios.push(calculateSharpeRatio(validationResult.returns || [], 0.02, params.timeframe));
+                       // YENİ: Validation statistical significance
+                        const valStats = calculateStatisticalSignificance(validationResult.returns || [], opt.total || 400);
+
                    }
                
                 /////////////////////////////////////////////////////
@@ -1235,9 +1259,9 @@
                        opt.data = tempData;
                        
                        if (foldResult) {
-                           validationScores.push(foldResult.roi);
-                           sharpeRatios.push(calculateSharpeRatio(foldResult.returns || []));
-                       }
+                            validationScores.push(foldResult.roi);
+                            sharpeRatios.push(calculateSharpeRatio(foldResult.returns || [], 0.02, params.timeframe));
+                        }
                    }
                }
                
@@ -1314,6 +1338,65 @@
             const volatility = Math.sqrt(variance * annualizationFactor); // ✅ DÜZELTİLDİ
             
             return volatility > 0 ? excessReturn / volatility : 0;
+        };
+
+        ////////////////////////
+        // İstatistiksel Anlamlılık Test Fonksiyonları
+        const calculateTStat = (returns, expectedReturn = 0) => {
+            if (!returns || returns.length < 2) return 0;
+            const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+            const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / (returns.length - 1);
+            const stdError = Math.sqrt(variance / returns.length);
+            return stdError > 0 ? (mean - expectedReturn) / stdError : 0;
+        };
+
+        const calculatePValue = (tStat, degreesOfFreedom) => {
+            // Basitleştirilmiş t-distribution p-value hesaplama
+            const t = Math.abs(tStat);
+            if (degreesOfFreedom < 1) return 1;
+            if (t < 0.674) return 1 - (0.25 * t);
+            if (t < 1.282) return 1 - (0.4 * t - 0.08);
+            if (t < 1.645) return 1 - (0.5 * t - 0.2);
+            if (t < 1.960) return Math.max(0.05, 1 - (0.6 * t - 0.35));
+            if (t < 2.576) return Math.max(0.01, 1 - (0.7 * t - 0.5));
+            if (t < 3.291) return Math.max(0.001, 1 - (0.8 * t - 0.7));
+            return Math.max(0.0001, 1 - (0.9 * t - 0.9));
+        };
+
+        const applyBonferroniCorrection = (pValue, numberOfTests) => {
+            return Math.min(1.0, pValue * numberOfTests);
+        };
+
+        const calculateStatisticalSignificance = (returns, totalCombinations, alpha = 0.05) => {
+            if (!returns || returns.length < 10) {
+                return {
+                    tStat: 0,
+                    pValue: 1,
+                    bonferroniPValue: 1,
+                    isSignificant: false,
+                    significance: 'insufficient-data'
+                };
+            }
+            
+            const tStat = calculateTStat(returns);
+            const df = returns.length - 1;
+            const rawPValue = calculatePValue(tStat, df);
+            const bonferroniPValue = applyBonferroniCorrection(rawPValue, totalCombinations);
+            const correctedAlpha = alpha / totalCombinations; // Bonferroni threshold
+            
+            let significance = 'not-significant';
+            if (bonferroniPValue < 0.001) significance = 'highly-significant';
+            else if (bonferroniPValue < 0.01) significance = 'very-significant';  
+            else if (bonferroniPValue < correctedAlpha) significance = 'significant';
+            else if (rawPValue < alpha) significance = 'uncorrected-significant';
+            
+            return {
+                tStat: tStat,
+                pValue: rawPValue,
+                bonferroniPValue: bonferroniPValue,
+                isSignificant: bonferroniPValue < correctedAlpha,
+                significance: significance
+            };
         };
 
        const calculateStandardDeviation = (values) => {
@@ -1421,6 +1504,39 @@
            state.maxDrawdown = Math.max(state.maxDrawdown, currentDrawdown);
        };
 
+
+       const formatPValue = (pValue) => {
+            if (!pValue || pValue >= 1) return 'N/A';
+            if (pValue < 0.001) return '<0.001';
+            if (pValue < 0.01) return '<0.01';
+            if (pValue < 0.05) return '<0.05';
+            return pValue.toFixed(3);
+        };
+
+        const getSignificanceIcon = (significance) => {
+            const icons = {
+                'highly-significant': '🟢',      // p < 0.001
+                'very-significant': '✅',        // p < 0.01  
+                'significant': '🔵',            // p < corrected alpha
+                'uncorrected-significant': '🟡', // p < 0.05 but not after correction
+                'not-significant': '❌',         // p >= 0.05
+                'insufficient-data': '⚪'        // < 10 trades
+            };
+            return icons[significance] || '❓';
+        };
+
+        const getSignificanceTooltip = (significance) => {
+            const tooltips = {
+                'highly-significant': 'Yüksek anlamlılık (p<0.001) - Güçlü kanıt',
+                'very-significant': 'Çok anlamlı (p<0.01) - İyi kanıt',
+                'significant': 'Anlamlı (Bonferroni düzeltmesi geçti)',
+                'uncorrected-significant': 'Sadece düzeltmesiz anlamlı - Dikkatli kullan',
+                'not-significant': 'İstatistiksel olarak anlamsız - Şans eseri olabilir',
+                'insufficient-data': 'Yetersiz veri - En az 10 işlem gerekli'
+            };
+            return tooltips[significance] || 'Bilinmeyen durum';
+        };
+
        const displayResults = () => {
            const resultsContainer = document.getElementById('optimizerResults');
            const resultsList = document.getElementById('optimizerResultsList');
@@ -1434,16 +1550,20 @@
            const exceedsCapitalCount = opt.results.filter(r => r.exceedsInitialBalance).length;
            const validationMethod = document.getElementById('validationMethod').value;
            
-           if ((overfittedCount > 0 || exceedsCapitalCount > 0) && validationMethod !== 'none') {
-               overfittingWarning.style.display = 'block';
-               overfittingDetails.innerHTML = `
-                   <br>• <strong>${overfittedCount}</strong> kombinasyon overfitting riski taşıyor
-                   <br>• <strong>${exceedsCapitalCount}</strong> kombinasyon bahis-sermaye aşımı yaşıyor
-                   <br>• <strong>Validation Yöntemi:</strong> ${getValidationMethodName(validationMethod)}
-                   <br>• Training ve Validation ROI farkı >${document.getElementById('overfittingThreshold').value}%
-                   <br>• <strong>Tavsiye:</strong> Yüksek validation score, düşük overfitting riski olan kombinasyonları tercih edin
-               `;
-           } else {
+           const significantCount = opt.results.filter(r => r.isSignificant).length;
+            const randomlySignificantCount = opt.results.filter(r => r.significance === 'uncorrected-significant').length;
+
+            if ((overfittedCount > 0 || exceedsCapitalCount > 0 || randomlySignificantCount > 0) && validationMethod !== 'none') {
+                overfittingWarning.style.display = 'block';
+                overfittingDetails.innerHTML = `
+                    <br>• <strong>${overfittedCount}</strong> kombinasyon overfitting riski taşıyor
+                    <br>• <strong>${exceedsCapitalCount}</strong> kombinasyon bahis-sermaye aşımı yaşıyor
+                    <br>• <strong>${significantCount}</strong> kombinasyon gerçekten istatistiksel anlamlı
+                    <br>• <strong>${randomlySignificantCount}</strong> kombinasyon sadece rastgele anlamlı
+                    <br>• <strong>Bonferroni Threshold:</strong> p < ${((0.05 / (opt.total || 400)) * 1000).toFixed(6)}
+                    <br>• <strong>Tavsiye:</strong> Sadece 🟢 ve ✅ işaretli kombinasyonları kullanın
+                `;
+            } else {
                overfittingWarning.style.display = 'none';
            }
            
@@ -1476,6 +1596,14 @@
                 const tradesClass = (result.totalTrades || 0) > 100 ? 'positive' : 'neutral';
                 const lossesClass = (result.maxConsecutiveLosses || 0) > 10 ? 'negative' : (result.maxConsecutiveLosses || 0) > 5 ? 'neutral' : 'positive';
                 
+                // YENİ: Statistical significance sınıfları
+                console.log('Display result:', result.bonferroniPValue, result.significance);
+
+                const pValueClass = (result.bonferroniPValue || 1) < 0.001 ? 'positive' : 
+                                (result.bonferroniPValue || 1) < 0.01 ? 'neutral' : 'negative';
+                const significanceIcon = getSignificanceIcon(result.significance);
+                const significanceClass = result.isSignificant ? 'positive' : 'negative';
+
                 const directionIcon = result.direction === 'long' ? '📈' : '📉';
                 const overfittingIcon = result.overfitting ? '⚠️' : (result.validationROI || 0) > (result.trainingROI || 0) ? '🎯' : '✅';
                 const betWarningIcon = result.exceedsInitialBalance ? '🚨' : '✅';
@@ -1503,10 +1631,13 @@
                     <div class="${sharpeClass}">${sharpeDisplay}</div>
                     <div class="${roiDiffClass}">${result.roiDifference !== null ? result.roiDifference.toFixed(1) + '%' : 'N/A'}</div>
                     <div class="positive">${(result.validationScore || 0).toFixed(3)}</div>
+                    <div class="${pValueClass}">${formatPValue(result.bonferroniPValue)}</div>
+                    <div class="${significanceClass}" title="${getSignificanceTooltip(result.significance)}" style="cursor: help;">${significanceIcon}</div>
                     <div style="font-size: 12px;">${overfittingIcon}</div>
                     <div class="${result.exceedsInitialBalance ? 'bet-warning' : 'positive'}" 
                         title="${result.exceedsInitialBalance ? 'Bahis miktarı başlangıç sermayesini aştı!' : 'Bahis sermaye sınırları içinde'}" 
                         style="font-size: 12px; cursor: help;">${betWarningIcon}</div>
+                    
                 `;
                 
                if (result.overfitting) {

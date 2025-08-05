@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Single-Coin Martingale Optimizasyonu</title>
+   <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+       body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; min-height: 100vh; }
+       .container { max-width: 1200px; margin: 0 auto; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; backdrop-filter: blur(15px); }
+       .header { text-align: center; margin-bottom: 30px; }
+       .header h1 { font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(45deg, #4ade80, #06d6a0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+       .section { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); border: 2px solid rgba(245,158,11,0.3); border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+       .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0; }
+       .card { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); }
+       .btn { background: linear-gradient(45deg, #f59e0b, #d97706); color: white; border: none; padding: 15px 30px; border-radius: 30px; cursor: pointer; font-size: 16px; font-weight: bold; margin: 10px; transition: all 0.3s; }
+       .btn:hover:not(:disabled) { transform: translateY(-3px); }
+       .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+       .btn-success { background: linear-gradient(45deg, #10b981, #059669); }
+       .btn-info { background: linear-gradient(45deg, #3b82f6, #2563eb); }
+       .btn-reopt { background: linear-gradient(45deg, #8b5cf6, #7c3aed); }
+       .btn-data { background: linear-gradient(45deg, #06d6a0, #059669); }
+       .btn-validation { background: linear-gradient(45deg, #ec4899, #be185d); }
+       input, select { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-size: 14px; }
+       input:focus, select:focus { outline: none; border-color: rgba(74,222,128,0.6); }
+       select option { background: #444; color: white; }
+       label { font-weight: 600; color: #e5e7eb; display: block; margin-bottom: 5px; }
+       .info-box { background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.1)); border: 2px solid rgba(59,130,246,0.3); border-radius: 15px; padding: 20px; margin: 20px 0; color: #93c5fd; }
+       .loading { display: none; margin: 15px 0; color: #4ade80; text-align: center; }
+       .progress-container { margin: 15px 0; }
+       .progress-bar-bg { background: rgba(0,0,0,0.3); border-radius: 10px; overflow: hidden; height: 8px; }
+       .progress-bar { background: linear-gradient(45df, #f59e0b, #d97706); height: 100%; width: 0%; transition: width 0.3s; }
+       .progress-text { font-size: 12px; margin-top: 5px; color: #fbbf24; text-align: center; }
+       .optimizer-results { background: rgba(0,0,0,0.4); border-radius: 15px; padding: 25px; max-height: 500px; overflow-y: auto; backdrop-filter: blur(10px); margin-top: 20px; }
+       .optimizer-row { 
+           display: grid; 
+           grid-template-columns: 25px 50px 50px 50px 45px 45px 60px 60px 50px 45px 70px 70px 60px 60px 60px 45px 50px 35px 35px; 
+           gap: 4px; 
+           padding: 6px; 
+           margin-bottom: 2px; 
+           background: rgba(255,255,255,0.05); 
+           border-radius: 8px; 
+           font-size: 10px; 
+           align-items: center; 
+           min-height: 35px; 
+       }
+       .optimizer-row:hover { background: rgba(255,255,255,0.1); }
+       .optimizer-header { background: linear-gradient(45deg, rgba(245,158,11,0.3), rgba(217,119,6,0.2)); font-weight: bold; color: #fbbf24; }
+       .sortable-header { cursor: pointer; transition: all 0.3s; position: relative; user-select: none; }
+       .sortable-header:hover { background: rgba(245,158,11,0.4); transform: scale(1.05); }
+       .sort-indicator { font-size: 8px; margin-left: 2px; opacity: 0.7; }
+       .positive { color: #4ade80; }
+       .negative { color: #f87171; }
+       .neutral { color: #fbbf24; }
+       .file-upload-area { background: rgba(0,0,0,0.3); border: 2px dashed rgba(255,255,255,0.3); border-radius: 15px; padding: 20px; text-align: center; margin: 20px 0; transition: all 0.3s; cursor: pointer; }
+       .file-upload-area:hover, .file-upload-area.dragover { border-color: rgba(74,222,128,0.6); background: rgba(0,0,0,0.4); }
+       .json-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+       .results-info, .coin-info, .warning-box, .data-info { border-radius: 15px; padding: 15px; margin: 15px 0; font-size: 14px; }
+       .results-info { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(22,163,74,0.1)); border: 2px solid rgba(34,197,94,0.3); color: #86efac; }
+       .coin-info { background: rgba(16,185,129,0.15); border: 2px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+       .warning-box { background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(217,119,6,0.1)); border: 2px solid rgba(245,158,11,0.3); color: #fbbf24; }
+       .data-info { background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(124,58,237,0.1)); border: 2px solid rgba(139,92,246,0.3); color: #c4b5fd; }
+       #fileInput, #dataFileInput { display: none; }
+       .date-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+       .data-section { background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(22,163,74,0.1)); border: 2px solid rgba(34,197,94,0.3); }
+       .validation-section { background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(190,24,93,0.1)); border: 2px solid rgba(236,72,153,0.3); margin-top: 20px; }
+       .bet-warning { color: #f87171; font-size: 12px; cursor: help; }
+       .bet-warning:hover { color: #fca5a5; }
+       .validation-details { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 15px; margin: 10px 0; font-size: 12px; }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="header">
+           <h1>🎯 Single-Coin Martingale Optimizasyonu</h1>
+           <p style="font-size: 1.2em;">⚡ Tam Özellikli Validation Sistemi - Walk-Forward, Cross-Validation, İstatistiksel Anlamlılık</p>
+       </div>
+
+       <div class="section data-section">
+           <h2>📊 Veri Yönetimi</h2>
+           <div class="info-box">
+               <strong>🚀 Akıllı Veri Sistemi:</strong><br>
+               • Büyük veri setlerini bir kez çekin ve kaydedin<br>
+               • Kaydedilen verilerden tarih aralığına göre otomatik filtreleme<br>
+               • Binance API çağrılarını azaltın ve hızlı optimizasyon yapın
+           </div>
+           
+           <div class="grid">
+               <div class="card">
+                   <label>🪙 Veri Çekilecek Coin Çifti:</label>
+                   <input type="text" id="dataCoinPair" value="BTCUSDT" placeholder="BTCUSDT" style="text-transform: uppercase;">
+               </div>
+               <div class="card">
+                   <label>⏰ Zaman Dilimi:</label>
+                   <select id="dataTimeframe">
+                       <option value="1m">1 Dakika</option>
+                       <option value="5m" selected>5 Dakika</option>
+                       <option value="15m">15 Dakika</option>
+                       <option value="30m">30 Dakika</option>
+                       <option value="1h">1 Saat</option>
+                       <option value="4h">4 Saat</option>
+                       <option value="12h">12 Saat</option>
+                       <option value="1d">1 Gün</option>
+                   </select>
+               </div>
+               <div class="card">
+                   <label>📅 Veri Tarih Aralığı:</label>
+                   <div class="date-grid">
+                       <div>
+                           <label style="font-size: 12px; margin-bottom: 2px;">Başlangıç</label>
+                           <input type="date" id="dataStartDate">
+                       </div>
+                       <div>
+                           <label style="font-size: 12px; margin-bottom: 2px;">Bitiş</label>
+                           <input type="date" id="dataEndDate">
+                       </div>
+                   </div>
+               </div>
+           </div>
+
+           <div style="text-align: center; margin: 20px 0;">
+               <button class="btn btn-data" onclick="fetchAndSaveData()" id="fetchDataBtn">💾 Verileri Çek ve Kaydet</button>
+               <button class="btn btn-info" onclick="document.getElementById('dataFileInput').click()">📂 Veri Dosyasından Yükle</button>
+               <div class="loading" id="dataLoading">⏳ Veriler çekiliyor ve kaydediliyor...</div>
+               <div id="dataProgressContainer" class="progress-container" style="display: none;">
+                   <div class="progress-bar-bg">
+                       <div id="dataProgressBar" class="progress-bar"></div>
+                   </div>
+                   <div id="dataProgressText" class="progress-text">Veri çekiliyor...</div>
+               </div>
+           </div>
+
+           <div class="file-upload-area" onclick="document.getElementById('dataFileInput').click()" ondrop="handleDataFileDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+               <p>📁 Veri JSON dosyasını buraya sürükleyin veya tıklayın</p>
+               <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Desteklenen format: .json (veri dosyası)</p>
+           </div>
+           
+           <input type="file" id="dataFileInput" accept=".json" onchange="handleDataFileSelect(event)">
+           
+           <div class="data-info" id="loadedDataInfo" style="display: none;">
+               <strong>📊 Yüklenen Veri Bilgileri:</strong>
+               <div id="loadedDataDetails"></div>
+           </div>
+       </div>
+
+       <div class="section">
+           <h2>🎯 Parametre Optimizasyonu</h2>
+           <div class="info-box">
+               <strong>🚀 Single-Coin Otomatik Optimizasyon:</strong><br>
+               • Tek coin çifti ile optimize backtest<br>
+               • ROI: Son Bakiye / İlk Bakiye<br>
+               • İlk bahis tutarı otomatik hesaplanır: Bahis Alt Sınırı ÷ Kaldıraç<br>
+               • 🆕 Tam özellikli validation: Walk-Forward, Cross-Validation, İstatistiksel Anlamlılık
+           </div>
+           
+           <div class="grid">
+               <div class="card">
+                   <label>🪙 Coin Çifti:</label>
+                   <input type="text" id="optCoinPair" value="BTCUSDT" placeholder="BTCUSDT" style="text-transform: uppercase;">
+                   <div id="coinCount" class="coin-info" style="margin-top: 10px; font-size: 12px; display: none;"></div>
+               </div>
+               <div class="card">
+                   <label>⏰ Zaman Dilimi:</label>
+                   <select id="optTimeframe">
+                       <option value="1m">1 Dakika</option>
+                       <option value="5m" selected>5 Dakika</option>
+                       <option value="15m">15 Dakika</option>
+                       <option value="30m">30 Dakika</option>
+                       <option value="1h">1 Saat</option>
+                       <option value="4h">4 Saat</option>
+                       <option value="12h">12 Saat</option>
+                       <option value="1d">1 Gün</option>
+                   </select>
+               </div>
+               <div class="card">
+                   <label>📅 Optimizasyon Tarih Aralığı:</label>
+                   <div class="date-grid">
+                       <div>
+                           <label style="font-size: 12px; margin-bottom: 2px;">Başlangıç</label>
+                           <input type="date" id="optStartDate">
+                       </div>
+                       <div>
+                           <label style="font-size: 12px; margin-bottom: 2px;">Bitiş</label>
+                           <input type="date" id="optEndDate">
+                       </div>
+                   </div>
+                   <div style="font-size: 12px; opacity: 0.7; margin-top: 5px;" id="estimatedCandles">
+                       Tahmini mum sayısı hesaplanıyor...
+                   </div>
+               </div>
+               <div class="card">
+                   <label>💰 Başlangıç Bakiyesi (USDT):</label>
+                   <input type="number" id="optInitialBalance" value="200" min="50" max="10000" step="50">
+               </div>
+           </div>
+
+           <h3 style="margin-top: 20px;">📊 Sabit Parametreler</h3>
+           <div class="grid">
+               <div class="card">
+                   <label>⚖️ Bahis Alt Sınırı (USDT):</label>
+                   <input type="number" id="optMinBetSize" value="10" step="0.1" min="0.1">
+                   <div class="warning-box" style="margin-top: 10px; font-size: 12px;">
+                       <strong>🔄 Otomatik İlk Bahis Hesaplama:</strong><br>
+                       İlk Bahis = Bahis Alt Sınırı ÷ Kaldıraç (Min: 0.1 USDT)
+                   </div>
+               </div>
+               <div class="card">
+                   <label>🎯 Maksimum İşlem Sayısı:</label>
+                   <input type="number" id="optMaxTrades" value="1000000" min="1000" step="1000">
+               </div>
+           </div>
+
+           <h3 style="margin-top: 20px;">📈 Parametre Aralıkları</h3>
+           <div class="grid">
+               <div class="card">
+                   <label>⚡ Kaldıraç (Min-Max-Adım):</label>
+                   <input type="text" id="leverageRange" value="5-55-5" placeholder="5-55-5">
+               </div>
+               <div class="card">
+                   <label>💹 Kar/Zarar % (Min-Max-Adım):</label>
+                   <input type="text" id="profitRange" value="1-20-1" placeholder="1-20-1">
+               </div>
+               <div class="card">
+                   <label>🚀 Bahis Çarpanı (Min-Max-Adım):</label>
+                   <input type="text" id="multiplierRange" value="1.2-5-0.1" placeholder="1.2-5-0.1">
+               </div>
+               <div class="card">
+                   <label>📊 Test Edilecek Yönler:</label>
+                   <select id="directionOptions">
+                       <option value="both">Her İkisi (LONG + SHORT)</option>
+                       <option value="long">Sadece LONG</option>
+                       <option value="short">Sadece SHORT</option>
+                   </select>
+               </div>
+           </div>
+
+           <div style="text-align: center; margin: 20px 0;">
+               <button class="btn" onclick="startOptimization()" id="optimizeBtn">🎯 Optimizasyonu Başlat</button>
+               <button class="btn btn-reopt" onclick="reOptimize()" id="reOptBtn" style="display: none;">🔄 Mevcut Veriler ile Yeniden Optimizasyon</button>
+               <div class="loading" id="optimizeLoading">⏳ Veriler çekiliyor ve optimizasyon yapılıyor...</div>
+               <div id="optimizeProgressContainer" class="progress-container" style="display: none;">
+                   <div class="progress-bar-bg">
+                       <div id="optimizeProgressBar" class="progress-bar"></div>
+                   </div>
+                   <div id="optimizeProgressText" class="progress-text">0 / 0 kombinasyon test edildi</div>
+               </div>
+           </div>
+
+           <div class="section validation-section" id="validationSection" style="display: none;">
+               <h2>🧠 Gelişmiş Validation Sistemi</h2>
+               <div class="info-box">
+                   <strong>💡 Tam Özellikli Validation:</strong><br>
+                   • <strong>Walk-Forward:</strong> Zaman bazlı pencerelerle gerçekçi test<br>
+                   • <strong>Cross-Validation:</strong> 3-fold çapraz doğrulama<br>
+                   • <strong>Gerçek Sharpe:</strong> Risk-ayarlı performans analizi<br>
+                   • Training sonuçları hafızada - hızlı yeniden analiz!
+               </div>
+               
+               <div class="grid">
+                   <div class="card">
+                       <label>🔬 Validasyon Yöntemi:</label>
+                       <select id="validationMethod" onchange="updateValidationDescription()">
+                           <option value="none">Validasyon Yok (Hızlı)</option>
+                           <option value="simple" selected>Basit Train/Test Split (%75/%25)</option>
+                           <option value="walkforward">Walk-Forward Analysis</option>
+                           <option value="crossval">Cross-Validation (3-Fold)</option>
+                       </select>
+                       <div class="validation-details" id="validationDescription"></div>
+                   </div>
+                   <div class="card">
+                       <label>📊 Validasyon Başarı Kriteri:</label>
+                       <select id="validationCriteria">
+                           <option value="roi" selected>ROI (Return on Investment)</option>
+                           <option value="sharpe">Sharpe Ratio (Risk-Adjusted)</option>
+                           <option value="composite">Kompozit Skor (ROI + Sharpe)</option>
+                           <option value="consistency">Tutarlılık (Low Variance)</option>
+                       </select>
+                   </div>
+                   <div class="card">
+                       <label>🎯 En İyi N Kombinasyon Test Et:</label>
+                       <input type="number" id="topCombinations" value="100" min="10" max="500" step="10">
+                   </div>
+                   <div class="card">
+                       <label>⚖️ Overfitting Uyarı Eşiği (%):</label>
+                       <input type="number" id="overfittingThreshold" value="50" min="10" max="100" step="5">
+                   </div>
+               </div>
+
+               <div class="grid" id="walkforwardSettings" style="display: none;">
+                   <div class="card">
+                       <label>📊 Walk-Forward Pencere Boyutu (%):</label>
+                       <input type="number" id="windowSize" value="25" min="10" max="50" step="5">
+                   </div>
+                   <div class="card">
+                       <label>⏩ Pencere Kaydırma Adımı (%):</label>
+                       <input type="number" id="stepSize" value="10" min="5" max="20" step="5">
+                   </div>
+               </div>
+
+               <div style="text-align: center; margin: 20px 0;">
+                   <button class="btn btn-validation" onclick="reRunValidation()" id="reValidationBtn">🧪 Sadece Validation'ı Yeniden Çalıştır</button>
+                   <div class="loading" id="validationLoading">⏳ Validation yapılıyor...</div>
+                   <div id="validationProgressContainer" class="progress-container" style="display: none;">
+                       <div class="progress-bar-bg">
+                           <div id="validationProgressBar" class="progress-bar"></div>
+                       </div>
+                       <div id="validationProgressText" class="progress-text">Validation: 0 / 0</div>
+                   </div>
+               </div>
+           </div>
+
+           <div id="jsonControls" style="display: none;">
+               <h3 style="margin: 20px 0;">📁 Sonuçları Kaydet/Yükle</h3>
+               <div class="json-controls">
+                   <button class="btn btn-success" onclick="exportResults()">💾 Sonuçları JSON Olarak Kaydet</button>
+                   <button class="btn btn-info" onclick="document.getElementById('fileInput').click()">📂 JSON Dosyasından Yükle</button>
+               </div>
+               
+               <div class="file-upload-area" onclick="document.getElementById('fileInput').click()" ondrop="handleFileDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                   <p>📁 JSON dosyasını buraya sürükleyin veya tıklayın</p>
+                   <p style="font-size: 12px; opacity: 0.7; margin-top: 10px;">Desteklenen format: .json (sonuç dosyası)</p>
+               </div>
+               
+               <input type="file" id="fileInput" accept=".json" onchange="handleFileSelect(event)">
+               
+               <div class="results-info" id="loadedResultsInfo" style="display: none;">
+                   <strong>📊 Yüklenen Sonuç Bilgileri:</strong>
+                   <div id="loadedResultsDetails"></div>
+               </div>
+           </div>
+
+           <div class="optimizer-results" id="optimizerResults" style="display: none;">
+               <h3>🏆 Gelişmiş Validation ile En İyi Kombinasyonlar</h3>
+               
+               <div class="info-box" style="font-size: 12px;">
+                   <strong>💡 Validation + Statistical Significance Açıklaması:</strong><br>
+                   • <span style="color: #4ade80;">Training ROI:</span> İlk eğitim verisi ile test<br>
+                   • <span style="color: #fbbf24;">Validation ROI:</span> Validation verisi ile test<br>
+                   • <span style="color: #93c5fd;">Sharpe Ratio:</span> Risk-ayarlı performans<br>
+                   • <span style="color: #f87171;">ROI Farkı:</span> %50+ ise overfitting riski<br>
+                   • <span style="color: #06d6a0;">MaxBal:</span> Ulaşılan en yüksek bakiye<br>
+                   • <span style="color: #06d6a0;">SonBal:</span> Son bakiye (USDT)<br>
+                   • <span style="color: #06d6a0;">İşlem:</span> Toplam işlem sayısı<br>
+                   • <span style="color: #f87171;">MaxKyp:</span> Ard arda max kayıp sayısı<br>
+                   • <span style="color: #f87171;">🚨:</span> Bahis miktarı başlangıç sermayesini aştı<br>
+                   • <span style="color: #4ade80;">P-Val:</span> Bonferroni düzeltmeli p-value<br>
+                   • <span style="color: #4ade80;">🟢:</span> Yüksek anlamlılık (p&lt;0.001)<br>
+                   • <span style="color: #4ade80;">✅:</span> Çok anlamlı (p&lt;0.01)<br>
+                   • <span style="color: #93c5fd;">🔵:</span> Anlamlı (Bonferroni geçti)<br>
+                   • <span style="color: #fbbf24;">🟡:</span> Düzeltmesiz anlamlı (dikkatli kullan)<br>
+                   • <span style="color: #f87171;">❌:</span> İstatistiksel olarak anlamsız<br>
+                   • <strong>Bonferroni Correction:</strong> α = 0.05 ÷ toplam test = 0.000125<br>
+                   • <strong>Final Sıralama:</strong> Seçilen kritere göre
+               </div>
+               <div id="overfittingWarning" class="warning-box" style="display: none;">
+                   <strong>⚠️ Overfitting ve Risk Uyarıları!</strong>
+                   <div id="overfittingDetails"></div>
+               </div>
+               
+               <div class="optimizer-row optimizer-header">
+                   <div class="sortable-header" onclick="sortResults('index', 'number')"># <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('leverage', 'number')">Kald. <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('profitPercent', 'number')">Kar% <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('multiplier', 'number')">Çarp. <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('direction', 'string')">Yön <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('initialBet', 'number')">İlkBet <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('maxBalance', 'number')">MaxBal <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('finalBalance', 'number')">SonBal <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('totalTrades', 'number')">İşlem <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('maxConsecutiveLosses', 'number')">MaxKyp <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('trainingROI', 'number')">TrainROI <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('validationROI', 'number')">ValROI <span class="sort-indicator">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('sharpeRatio', 'number')">Sharpe <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('roiDifference', 'number')">Fark% <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('validationScore', 'number')">Score <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('bonferroniPValue', 'number')">P-Val <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   <div class="sortable-header" onclick="sortResults('significance', 'string')">Signif <span class="sort-indicator" style="opacity: 0;">↓</span></div>
+                   
+                   <div>⭐</div>
+                   <div>🚨</div>
+               </div>
+
+               <div id="optimizerResultsList"></div>
+           </div>
+       </div>
+   </div>
+
+   <script>
+       let opt = {
+           data: {},
+           savedData: {},
+           originalData: {},
+           trainingResults: [],
+           running: false,
+           runningLock: false,
+           results: [],
+           total: 0,
+           processed: 0,
+           params: null,
+           meta: null,
+           sort: { column: 'validationScore', direction: 'desc' }
+       };
+
+       const updateCoinCount = () => {
+           const input = document.getElementById('optCoinPair').value.trim().toUpperCase();
+           const countDiv = document.getElementById('coinCount');
+           
+           if (input) {
+               countDiv.style.display = 'block';
+               countDiv.innerHTML = `📊 Seçilen coin: ${input}<br>Başlangıç bakiye: ${parseFloat(document.getElementById('optInitialBalance').value)} USDT`;
+           } else {
+               countDiv.style.display = 'none';
+           }
+       };
+
+       const updateValidationDescription = () => {
+           const method = document.getElementById('validationMethod').value;
+           const desc = document.getElementById('validationDescription');
+           const walkforwardSettings = document.getElementById('walkforwardSettings');
+           
+           const descriptions = {
+               'none': 'Validation yapılmaz, sadece training sonuçları gösterilir. En hızlı seçenek.',
+              'simple': 'Veri %75 training, %25 validation olarak bölünür. Basit ama etkili.',
+              'walkforward': 'Zaman bazlı pencereler ile gerçek dünya koşullarını simüle eder. En gerçekçi.',
+              'crossval': '3 farklı train/validation kombinasyonu ile ortalama performans hesaplanır.'
+          };
+          
+          desc.textContent = descriptions[method] || '';
+          walkforwardSettings.style.display = method === 'walkforward' ? 'grid' : 'none';
+      };
+
+      const estimateCandles = () => {
+          const start = document.getElementById('optStartDate').value;
+          const end = document.getElementById('optEndDate').value;
+          if (!start || !end) return;
+          
+          const tf = document.getElementById('optTimeframe').value;
+          const diffDays = (new Date(end) - new Date(start)) / (1000 * 60 * 60 * 24);
+          const candlesPerDay = { '1m': 1440, '5m': 288, '15m': 96, '30m': 48, '1h': 24, '4h': 6, '12h': 2, '1d': 1 };
+          const estimated = Math.floor(diffDays * (candlesPerDay[tf] || 288));
+          document.getElementById('estimatedCandles').textContent = `Tahmini: ${estimated.toLocaleString()} mum (${diffDays.toFixed(1)} gün)`;
+      };
+
+      const setDefaultDates = () => {
+          const end = new Date();
+          const start = new Date();
+          start.setDate(start.getDate() - 30);
+          
+          document.getElementById('optEndDate').value = end.toISOString().split('T')[0];
+          document.getElementById('optStartDate').value = start.toISOString().split('T')[0];
+          
+          const dataStart = new Date();
+          dataStart.setFullYear(dataStart.getFullYear() - 2);
+          document.getElementById('dataEndDate').value = end.toISOString().split('T')[0];
+          document.getElementById('dataStartDate').value = dataStart.toISOString().split('T')[0];
+          
+          estimateCandles();
+          updateValidationDescription();
+      };
+
+      const parseRange = (str) => {
+          const parts = str.split('-').map(p => parseFloat(p.trim()));
+          if (parts.length !== 3 || parts.some(isNaN)) throw new Error(`Geçersiz format: ${str}`);
+          return { min: parts[0], max: parts[1], step: parts[2] };
+      };
+
+      const generateValues = (range) => {
+          const values = [];
+          for (let val = range.min; val <= range.max; val = Math.round((val + range.step) * 1000) / 1000) {
+              values.push(val);
+          }
+          return values;
+      };
+
+      const calculateInitialBet = (minBetSize, leverage) => Math.max(minBetSize / leverage, 0.1);
+
+      // VERİ YÖNETİMİ
+      const fetchAndSaveData = async () => {
+          try {
+              const coinInput = document.getElementById('dataCoinPair').value.trim().toUpperCase();
+              
+              if (!coinInput) throw new Error('Coin çifti girin!');
+              
+              const timeframe = document.getElementById('dataTimeframe').value;
+              const startDate = document.getElementById('dataStartDate').value;
+              const endDate = document.getElementById('dataEndDate').value;
+              
+              if (!startDate || !endDate) throw new Error('Tarihler seçilmeli!');
+              
+              const btn = document.getElementById('fetchDataBtn');
+              const loading = document.getElementById('dataLoading');
+              const progressContainer = document.getElementById('dataProgressContainer');
+              const progressBar = document.getElementById('dataProgressBar');
+              const progressText = document.getElementById('dataProgressText');
+              
+              btn.disabled = true;
+              btn.textContent = '⏳ Veriler Çekiliyor...';
+              loading.style.display = 'block';
+              progressContainer.style.display = 'block';
+              
+              const fetchedData = {};
+              
+              try {
+                  progressText.textContent = `${coinInput} verisi çekiliyor...`;
+                 
+                  const data = await fetchDataByDateRange(coinInput, timeframe, startDate, endDate, true);
+                  if (!data || data.length === 0) throw new Error(`${coinInput} verisi çekilemedi`);
+                 
+                  fetchedData[coinInput] = data;
+                 
+                  progressBar.style.width = '100%';
+                  progressText.textContent = 'Veri çekme tamamlandı';
+                 
+              } catch (error) {
+                  console.error(`${coinInput} hatası:`, error);
+                  alert(`${coinInput} verisi çekilemedi: ${error.message}`);
+                  return;
+              }
+             
+              const dataPackage = {
+                  metadata: {
+                      coin: coinInput,
+                      timeframe: timeframe,
+                      startDate: startDate,
+                      endDate: endDate,
+                      dataStartTime: new Date(parseInt(fetchedData[coinInput][0][0])).toISOString(),
+                      dataEndTime: new Date(parseInt(fetchedData[coinInput][fetchedData[coinInput].length - 1][0])).toISOString(),
+                      totalCandles: fetchedData[coinInput].length,
+                      fetchDate: new Date().toISOString(),
+                      version: "5.0-single"
+                  },
+                  data: fetchedData
+              };
+             
+              const jsonString = JSON.stringify(dataPackage, null, 2);
+              const blob = new Blob([jsonString], { type: 'application/json' });
+              const fileName = `market_data_${coinInput}_${timeframe}_${startDate}_${endDate}_${new Date().toISOString().slice(0, 10)}.json`;
+             
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(url);
+             
+              opt.savedData = null;
+              opt.savedData = fetchedData;
+              showLoadedDataInfo(dataPackage.metadata);
+             
+              alert(`✅ Veriler kaydedildi: ${fileName}\n${fetchedData[coinInput].length} mum`);
+             
+          } catch (error) {
+              console.error('❌ Veri çekme hatası:', error);
+              alert('Veri çekme hatası: ' + error.message);
+          } finally {
+              const btn = document.getElementById('fetchDataBtn');
+              const loading = document.getElementById('dataLoading');
+              const progressContainer = document.getElementById('dataProgressContainer');
+             
+              btn.disabled = false;
+              btn.textContent = '💾 Verileri Çek ve Kaydet';
+              loading.style.display = 'none';
+              progressContainer.style.display = 'none';
+          }
+      };
+
+      const handleDataFileSelect = (event) => {
+          const file = event.target.files[0];
+          if (file) loadDataFile(file);
+      };
+
+      const handleDataFileDrop = (event) => {
+          event.preventDefault();
+          event.currentTarget.classList.remove('dragover');
+          
+          const files = event.dataTransfer.files;
+          if (files.length > 0) {
+              const file = files[0];
+              if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                  loadDataFile(file);
+              } else {
+                  alert('⚠️ Geçerli JSON dosyası seçin!');
+              }
+          }
+      };
+
+      const loadDataFile = (file) => {
+          const reader = new FileReader();
+          
+          reader.onload = function(e) {
+              try {
+                  const jsonData = JSON.parse(e.target.result);
+                  
+                  if (!jsonData.data || !jsonData.metadata) {
+                      throw new Error('Geçersiz veri dosyası formatı!');
+                  }
+
+                  opt.savedData = null;
+                  opt.savedData = jsonData.data;
+                  showLoadedDataInfo(jsonData.metadata);
+                  
+                  if (jsonData.metadata.coin) {
+                      document.getElementById('dataCoinPair').value = jsonData.metadata.coin;
+                      document.getElementById('optCoinPair').value = jsonData.metadata.coin;
+                  } else if (jsonData.metadata.coins && jsonData.metadata.coins.length > 0) {
+                      document.getElementById('dataCoinPair').value = jsonData.metadata.coins[0];
+                      document.getElementById('optCoinPair').value = jsonData.metadata.coins[0];
+                  }
+                  
+                  if (jsonData.metadata.timeframe) {
+                      document.getElementById('dataTimeframe').value = jsonData.metadata.timeframe;
+                      document.getElementById('optTimeframe').value = jsonData.metadata.timeframe;
+                  }
+                  
+                  updateCoinCount();
+                  estimateCandles();
+
+                  const coinCount = Object.keys(jsonData.data).length;
+                  const candleCount = Object.values(jsonData.data)[0]?.length || 0;
+                  alert(`✅ Veri dosyası yüklendi: ${coinCount} coin, ${candleCount} mum`);
+
+              } catch (error) {
+                  console.error('❌ Veri dosyası yükleme hatası:', error);
+                  alert('Veri dosyası yükleme hatası: ' + error.message);
+              }
+          };
+          
+          reader.onerror = () => alert('❌ Dosya okuma hatası!');
+          reader.readAsText(file);
+      };
+
+      const showLoadedDataInfo = (metadata) => {
+          const infoContainer = document.getElementById('loadedDataInfo');
+          const detailsContainer = document.getElementById('loadedDataDetails');
+          
+          const fetchDate = metadata.fetchDate 
+              ? new Date(metadata.fetchDate).toLocaleString('tr-TR')
+              : 'Bilinmiyor';
+          
+          const dataRange = metadata.dataStartTime && metadata.dataEndTime
+              ? `${new Date(metadata.dataStartTime).toLocaleDateString('tr-TR')} - ${new Date(metadata.dataEndTime).toLocaleDateString('tr-TR')}`
+              : 'Bilinmiyor';
+
+          const coin = metadata.coin || (metadata.coins && metadata.coins[0]) || 'Bilinmiyor';
+
+          detailsContainer.innerHTML = `
+              <br>• <strong>Coin Çifti:</strong> ${coin}
+              <br>• <strong>Zaman Dilimi:</strong> ${metadata.timeframe || 'Bilinmiyor'}
+              <br>• <strong>Veri Tarih Aralığı:</strong> ${metadata.startDate || 'Bilinmiyor'} - ${metadata.endDate || 'Bilinmiyor'}
+              <br>• <strong>Gerçek Veri Aralığı:</strong> ${dataRange}
+              <br>• <strong>Toplam Mum:</strong> ${metadata.totalCandles?.toLocaleString() || 'Bilinmiyor'}
+              <br>• <strong>Veri Çekilme Tarihi:</strong> ${fetchDate}
+          `;
+          
+          infoContainer.style.display = 'block';
+      };
+
+      // OPTIMIZASYON
+      const startOptimization = async () => {
+          if (opt.running || opt.runningLock) return alert('⚠️ Optimizasyon zaten çalışıyor!');
+          
+          try {
+              const coinInput = document.getElementById('optCoinPair').value.trim().toUpperCase();
+              
+              if (!coinInput) throw new Error('Coin çifti girin!');
+              
+              const timeframe = document.getElementById('optTimeframe').value;
+              const startDate = document.getElementById('optStartDate').value;
+              const endDate = document.getElementById('optEndDate').value;
+              
+              const hasSavedData = opt.savedData && Object.keys(opt.savedData).length > 0;
+              const hasCurrentData = opt.data && Object.keys(opt.data).length > 0;
+              
+              let useSavedData = hasSavedData;
+              let fetchData = !hasSavedData && !hasCurrentData;
+              
+              await runOptimization(coinInput, fetchData, useSavedData);
+          } catch (error) {
+              console.error('❌ Optimizasyon hatası:', error);
+              alert('Optimizasyon hatası: ' + error.message);
+          }
+      };
+
+      const reOptimize = async () => {
+          if (opt.running || opt.runningLock) return alert('⚠️ Optimizasyon zaten çalışıyor!');
+          
+          try {
+              const coinInput = document.getElementById('optCoinPair').value.trim().toUpperCase();
+              
+              if (!coinInput) throw new Error('Coin çifti girin!');
+              
+              if (Object.keys(opt.savedData).length > 0) {
+                  await runOptimization(coinInput, false, true);
+              } else if (Object.keys(opt.data).length > 0) {
+                  await runOptimization(coinInput, false, false);
+              } else {
+                  throw new Error('Mevcut veri yok! Önce veri çekin veya yükleyin.');
+              }
+          } catch (error) {
+              console.error('❌ Re-optimizasyon hatası:', error);
+              alert('Re-optimizasyon hatası: ' + error.message);
+          }
+      };
+
+      // ADVANCED VALIDATION - Re-run validation only
+      const reRunValidation = async () => {
+          if (opt.running || opt.runningLock) return alert('⚠️ İşlem zaten çalışıyor!');
+          if (!opt.trainingResults || opt.trainingResults.length === 0) {
+              return alert('⚠️ Önce kombinasyon testlerini çalıştırın!');
+          }
+
+          opt.running = true;
+          opt.runningLock = true;
+
+          const btn = document.getElementById('reValidationBtn');
+          const loading = document.getElementById('validationLoading');
+          const progressContainer = document.getElementById('validationProgressContainer');
+
+          btn.disabled = true;
+          btn.textContent = '⏳ Validation Çalışıyor...';
+          loading.style.display = 'block';
+          progressContainer.style.display = 'block';
+
+          try {
+              console.log(`🧪 Hafızadaki ${opt.trainingResults.length} training sonucu ile validation başlatılıyor`);
+              
+              const validationMethod = document.getElementById('validationMethod').value;
+              if (validationMethod === 'none') {
+                  opt.results = opt.trainingResults.map(result => ({
+                      ...result,
+                      trainingROI: result.roi,
+                      validationROI: result.roi,
+                      sharpeRatio: 0,
+                      roiDifference: 0,
+                      validationScore: result.roi,
+                      overfitting: false
+                  }));
+              } else {
+                  const topN = parseInt(document.getElementById('topCombinations').value);
+                  const topResults = opt.trainingResults.slice(0, topN);
+                  
+                  console.log(`🧪 En iyi ${topN} kombinasyon ${validationMethod} validation'a gönderiliyor`);
+                  
+                  const validatedResults = await runAdvancedValidation(topResults, opt.params.coin, opt.params, validationMethod);
+                  validatedResults.sort((a, b) => (b.validationScore || 0) - (a.validationScore || 0));
+                  
+                  const remainingResults = opt.trainingResults.slice(topN).map(result => ({
+                      ...result,
+                      trainingROI: result.roi,
+                      validationROI: null,
+                      sharpeRatio: null,
+                      roiDifference: null,
+                      validationScore: 0,
+                      overfitting: false
+                  }));
+                  
+                  opt.results = [...validatedResults, ...remainingResults];
+              }
+
+              if (opt.originalData) {
+                  opt.data = JSON.parse(JSON.stringify(opt.originalData));
+              }
+              
+              opt.sort = { column: 'validationScore', direction: 'desc' };
+              displayResults();
+              
+              console.log(`✅ ${validationMethod} validation tamamlandı. ${opt.results.length} sonuç gösteriliyor.`);
+
+          } catch (error) {
+              console.error('❌ Validation hatası:', error);
+              alert('Validation hatası: ' + error.message);
+          } finally {
+              opt.running = false;
+              opt.runningLock = false;
+              btn.disabled = false;
+              btn.textContent = '🧪 Sadece Validation\'ı Yeniden Çalıştır';
+              loading.style.display = 'none';
+              progressContainer.style.display = 'none';
+          }
+      };
+
+      const runOptimization = async (coin, fetchData, useSavedData = false) => {
+          opt.running = true;
+          opt.runningLock = true;
+          
+          const btn = document.getElementById('optimizeBtn');
+          const reOptBtn = document.getElementById('reOptBtn');
+          const loading = document.getElementById('optimizeLoading');
+          const progressContainer = document.getElementById('optimizeProgressContainer');
+          const progressBar = document.getElementById('optimizeProgressBar');
+          const progressText = document.getElementById('optimizeProgressText');
+          
+          btn.disabled = true;
+          reOptBtn.disabled = true;
+          btn.textContent = '⏳ Optimizasyon Çalışıyor...';
+          loading.style.display = 'block';
+          progressContainer.style.display = 'block';
+          
+          try {
+              const timeframe = document.getElementById('optTimeframe').value;
+              const startDate = document.getElementById('optStartDate').value;
+              const endDate = document.getElementById('optEndDate').value;
+              const initialBalance = parseFloat(document.getElementById('optInitialBalance').value);
+              const maxTrades = parseInt(document.getElementById('optMaxTrades').value);
+              const minBetSize = parseFloat(document.getElementById('optMinBetSize').value);
+              
+              if (!startDate || !endDate) throw new Error('Tarihler seçilmeli!');
+              if (minBetSize < 0.1) throw new Error('Bahis alt sınırı en az 0.1 USDT olmalı!');
+              
+              const leverageRange = parseRange(document.getElementById('leverageRange').value);
+              const profitRange = parseRange(document.getElementById('profitRange').value);
+              const multiplierRange = parseRange(document.getElementById('multiplierRange').value);
+              const directionOptions = document.getElementById('directionOptions').value;
+              
+              opt.params = { coin, timeframe, startDate, endDate, initialBalance, maxTrades, minBetSize, leverageRange, profitRange, multiplierRange, directionOptions };
+              
+              // Data management with backup
+              if (useSavedData && opt.savedData) {
+                  loading.textContent = '⏳ Kaydedilen veriler filtreleniyor...';
+                  progressText.textContent = 'Veriler filtreleniyor...';
+                  opt.data = filterDataByDateRange(opt.savedData, startDate, endDate);
+                  opt.originalData = JSON.parse(JSON.stringify(opt.data));
+              } else if (fetchData) {
+                  loading.textContent = '⏳ Veriler çekiliyor...';
+                  progressText.textContent = 'API\'den veriler çekiliyor...';
+                  opt.data = {};
+                  opt.data[coin] = await fetchDataByDateRange(coin, timeframe, startDate, endDate, false);
+                  if (!opt.data[coin] || opt.data[coin].length === 0) throw new Error(`${coin} verisi çekilemedi`);
+                  opt.originalData = JSON.parse(JSON.stringify(opt.data));
+              } else {
+                  loading.textContent = '⏳ Mevcut veriler filtreleniyor...';
+                  progressText.textContent = 'Mevcut veriler filtreleniyor...';
+                  opt.data = filterDataByDateRange(opt.data, startDate, endDate);
+                  opt.originalData = JSON.parse(JSON.stringify(opt.data));
+              }
+              
+              // Validate data
+              if (!opt.data[coin] || opt.data[coin].length === 0) {
+                  throw new Error(`${coin} için uygun veri bulunamadı. Tarih aralığını kontrol edin.`);
+              }
+              
+              if (fetchData || !opt.meta) {
+                  opt.meta = {
+                      coin: coin,
+                      dataStartTime: new Date(parseInt(opt.data[coin][0][0])).toISOString(),
+                      dataEndTime: new Date(parseInt(opt.data[coin][opt.data[coin].length - 1][0])).toISOString(),
+                      actualCandleCount: opt.data[coin].length,
+                      optimizationDate: new Date().toISOString(),
+                      version: "5.0-single",
+                      dynamicBetSystem: true,
+                      betExceedsCapitalTracking: true,
+                      advancedValidation: true,
+                      statisticalSignificance: true
+                  };
+              }
+              
+              loading.textContent = '⏳ Kombinasyonlar test ediliyor...';
+              progressBar.style.width = '0%';
+              
+              const leverageValues = generateValues(leverageRange);
+              const profitValues = generateValues(profitRange);
+              const multiplierValues = generateValues(multiplierRange);
+              const directions = directionOptions === 'both' ? ['long', 'short'] : [directionOptions];
+              
+              const totalCombinations = leverageValues.length * profitValues.length * multiplierValues.length * directions.length;
+              opt.total = totalCombinations;
+              opt.processed = 0;
+              opt.trainingResults = [];
+              
+              progressText.textContent = `0 / ${totalCombinations} kombinasyon test ediliyor...`;
+              
+              let combinationIndex = 0;
+              const BATCH_SIZE = 25;
+              let currentBatch = [];
+
+              for (const leverage of leverageValues) {
+                  for (const profitPercent of profitValues) {
+                      for (const multiplier of multiplierValues) {
+                          for (const direction of directions) {
+                              combinationIndex++;
+                              
+                              const initialBet = calculateInitialBet(minBetSize, leverage);
+                              
+                              currentBatch.push({
+                                  leverage, profitPercent, multiplier, direction,
+                                  initialBalance, initialBet, maxTrades, minBetSize, coin,
+                                  index: combinationIndex
+                              });
+                              
+                              if (currentBatch.length >= BATCH_SIZE || combinationIndex === totalCombinations) {
+                                  for (const params of currentBatch) {
+                                      const result = testSingleCoinCombination(params);
+                                      if (result) opt.trainingResults.push(result);
+                                      opt.processed++;
+                                  }
+                                  
+                                  const progress = (combinationIndex / totalCombinations) * 100;
+                                  progressBar.style.width = `${progress}%`;
+                                  progressText.textContent = `${combinationIndex} / ${totalCombinations} kombinasyon test edildi (${progress.toFixed(1)}%)`;
+                                  
+                                  console.log(`📊 Batch tamamlandı: ${combinationIndex}/${totalCombinations} - ${progress.toFixed(1)}%`);
+                                  
+                                  currentBatch = [];
+                                  
+                                  await new Promise(resolve => setTimeout(resolve, 100));
+                                  
+                                  if (combinationIndex % 100 === 0) {
+                                      if (window.gc) window.gc();
+                                  }
+                              }
+                          }
+                      }
+                  }
+              }
+              
+              opt.trainingResults.sort((a, b) => (b.roi || 0) - (a.roi || 0));
+              console.log(`🎯 Training sonuçları: ${opt.trainingResults.length} sonuç (Training ROI)`);
+              
+              // ADVANCED VALIDATION
+              const validationMethod = document.getElementById('validationMethod').value;
+              if (validationMethod !== 'none') {
+                  const topN = parseInt(document.getElementById('topCombinations').value);
+                  const topResults = opt.trainingResults.slice(0, topN);
+                  
+                  console.log(`🧪 En iyi ${topN} kombinasyon ${validationMethod} validation'a gönderiliyor`);
+                  loading.textContent = `⏳ ${validationMethod} validation yapılıyor...`;
+                  
+                  const validatedResults = await runAdvancedValidation(topResults, coin, opt.params, validationMethod);
+                  validatedResults.sort((a, b) => (b.validationScore || 0) - (a.validationScore || 0));
+                  
+                  const remainingResults = opt.trainingResults.slice(topN).map(result => ({
+                      ...result,
+                      trainingROI: result.roi,
+                      validationROI: null,
+                      sharpeRatio: null,
+                      roiDifference: null,
+                      validationScore: 0,
+                      overfitting: false
+                  }));
+                  
+                  opt.results = [...validatedResults, ...remainingResults];
+                  console.log(`✅ ${validationMethod} validation tamamlandı. Final sıralama: Validation Score`);
+              } else {
+                  opt.results = opt.trainingResults.map(result => ({
+                      ...result,
+                      trainingROI: result.roi,
+                      validationROI: result.roi,
+                      sharpeRatio: 0,
+                      roiDifference: 0,
+                      validationScore: result.roi,
+                      overfitting: false
+                  }));
+              }
+              
+              if (opt.originalData) {
+                  opt.data = JSON.parse(JSON.stringify(opt.originalData));
+              }
+              
+              opt.sort = { column: 'validationScore', direction: 'desc' };
+              displayResults();
+              
+              document.getElementById('jsonControls').style.display = 'block';
+              document.getElementById('reOptBtn').style.display = 'inline-block';
+              document.getElementById('validationSection').style.display = 'block';
+              
+              if (opt.meta) {
+                  opt.meta.totalPossibleCombinations = totalCombinations;
+                  opt.meta.actualTestedCombinations = opt.trainingResults.length;
+                  opt.meta.validationMethod = validationMethod;
+              }
+          } finally {
+              opt.running = false;
+              opt.runningLock = false;
+              btn.disabled = false;
+              reOptBtn.disabled = false;
+              btn.textContent = '🎯 Optimizasyonu Başlat';
+              loading.style.display = 'none';
+              progressContainer.style.display = 'none';
+          }
+      };
+
+      const filterDataByDateRange = (dataSource, startDate, endDate) => {
+          const filtered = {};
+          const startTime = new Date(startDate + 'T00:00:00Z').getTime();
+          const endTime = new Date(endDate + 'T23:59:59Z').getTime();
+          
+          for (const [coin, data] of Object.entries(dataSource)) {
+              if (!data || !Array.isArray(data)) continue;
+              filtered[coin] = data.filter(candle => {
+                  const candleTime = parseInt(candle[0]);
+                  return candleTime >= startTime && candleTime <= endTime;
+              });
+          }
+          return filtered;
+      };
+
+      const testSingleCoinCombination = (params) => {
+          try {
+              const coin = params.coin;
+              let totalInitialBalance = params.initialBalance;
+              let totalFinalBalance = 0;
+              let totalTrades = 0;
+              let totalWins = 0;
+              let totalProfit = 0;
+              let totalLoss = 0;
+              let maxConsecutiveLosses = 0;
+              let maxDrawdown = 0;
+              let exceedsInitialBalance = false;
+              let allReturns = [];
+              let totalMaxBalance = 0;
+              
+              const state = {balance: params.initialBalance,
+                  initialBalance: params.initialBalance,
+                  currentBet: params.initialBet,
+                  peakBalance: params.initialBalance,
+                  maxBalance: params.initialBalance,
+                  maxDrawdown: 0,
+                  totalTrades: 0,
+                  winTrades: 0,
+                  consecutiveLosses: 0,
+                  maxConsecutiveLosses: 0,
+                  totalProfit: 0,
+                  totalLoss: 0,
+                  position: { isOpen: false, entryPrice: 0, betAmount: 0 },
+                  betExceededCapital: false,
+                  returns: []
+              };
+              
+              let lastBalance = params.initialBalance;
+              
+              // TEK COIN İÇİN DÖNGÜ - STACK OVERFLOW ÖNLEME
+              const maxIterations = Math.min(opt.data[coin].length, params.maxTrades * 2);
+              
+              for (let i = 0; i < maxIterations && state.totalTrades < params.maxTrades; i++) {
+                  try {
+                      if (!processCandle(opt.data[coin][i], state, params)) break;
+                      
+                      // Hafıza temizliği
+                      if (i % 500 === 0) {
+                          if (window.gc) window.gc();
+                      }
+                  } catch (error) {
+                      console.error(`Candle processing error for ${coin}:`, error);
+                      break;
+                  }
+                  
+                  if (state.balance > state.maxBalance) {
+                      state.maxBalance = state.balance;
+                  }
+                  
+                  updateDrawdown(state);
+                  
+                  if (i > 0 && lastBalance > 0) {
+                      const return_ = (state.balance - lastBalance) / lastBalance;
+                      if (isFinite(return_) && !isNaN(return_)) {
+                          state.returns.push(return_);
+                      }
+                  }
+                  lastBalance = state.balance;
+              }
+              
+              totalFinalBalance = state.balance;
+              totalTrades = state.totalTrades;
+              totalWins = state.winTrades;
+              totalProfit = state.totalProfit;
+              totalLoss = state.totalLoss;
+              maxConsecutiveLosses = state.maxConsecutiveLosses;
+              maxDrawdown = state.maxDrawdown;
+              totalMaxBalance = state.maxBalance;
+              exceedsInitialBalance = state.betExceededCapital;
+              allReturns = state.returns;
+              
+              const roi = totalFinalBalance / totalInitialBalance;
+              const winRate = totalTrades > 0 ? (totalWins / totalTrades) * 100 : 0;
+              const profitFactor = totalLoss > 0 ? totalProfit / totalLoss : 0;
+              
+              // İstatistiksel anlamlılık hesapla
+              const stats = calculateStatisticalSignificance(allReturns, opt.total || 400);
+              
+              // Debug log
+              console.log(`${coin} - Returns: ${allReturns.length}, tStat: ${stats.tStat?.toFixed(3)}, pValue: ${stats.pValue?.toFixed(6)}, bonferroni: ${stats.bonferroniPValue?.toFixed(6)}, sig: ${stats.significance}`);
+              
+              return {
+                  leverage: params.leverage,
+                  profitPercent: params.profitPercent,
+                  multiplier: params.multiplier,
+                  direction: params.direction,
+                  initialBet: params.initialBet,
+                  coin: coin,
+                  roi, 
+                  finalBalance: totalFinalBalance, 
+                  maxBalance: totalMaxBalance,
+                  maxConsecutiveLosses,
+                  totalTrades, 
+                  maxDrawdown, 
+                  winRate, 
+                  profitFactor,
+                  exceedsInitialBalance,
+                  returns: allReturns,
+                  // İstatistiksel anlamlılık verileri - KORUMAYA DİKKAT!
+                  tStat: stats.tStat,
+                  pValue: stats.pValue,
+                  bonferroniPValue: stats.bonferroniPValue,
+                  isSignificant: stats.isSignificant,
+                  significance: stats.significance
+              };
+          } catch (error) {
+              console.error('❌ Single-coin test hatası:', error);
+              return null;
+          }
+      };
+
+      // ADVANCED VALIDATION METHODS
+      const runAdvancedValidation = async (topResults, coin, params, method) => {
+          const criteria = document.getElementById('validationCriteria').value;
+          const validatedResults = [];
+          
+          for (let i = 0; i < topResults.length; i++) {
+              const result = topResults[i];
+              let validationScores = [];
+              let sharpeRatios = [];
+              
+              if (method === 'simple') {
+                  const sourceData = opt.originalData[coin] || opt.data[coin];
+                  const split = splitDataForValidation(sourceData, 0.75);
+                  
+                  const originalCoinData = opt.data[coin];
+                  opt.data[coin] = split.validation;
+                  
+                  const validationResult = testSingleCoinCombination({
+                      leverage: result.leverage,
+                      profitPercent: result.profitPercent,
+                      multiplier: result.multiplier,
+                      direction: result.direction,
+                      initialBalance: params.initialBalance,
+                      initialBet: result.initialBet,
+                      maxTrades: params.maxTrades,
+                      minBetSize: params.minBetSize,
+                      coin: coin
+                  });
+                  
+                  opt.data[coin] = originalCoinData;
+                  
+                  if (validationResult) {
+                      validationScores.push(validationResult.roi);
+                      sharpeRatios.push(calculateSharpeRatio(validationResult.returns || [], 0.02, params.timeframe));
+                  }
+              
+              } else if (method === 'walkforward') {
+                  const windowSize = parseFloat(document.getElementById('windowSize').value) / 100;
+                  const stepSize = parseFloat(document.getElementById('stepSize').value) / 100;
+                  
+                  const sourceData = opt.originalData[coin] || opt.data[coin];
+                  const dataLength = sourceData.length;
+                  const windowLength = Math.floor(dataLength * windowSize);
+                  const stepLength = Math.floor(dataLength * stepSize);
+                  
+                  let windowCount = 0;
+                  const maxWindows = 10;
+                  
+                  for (let start = 0; start + windowLength < dataLength && windowCount < maxWindows; start += stepLength) {
+                      const end = start + windowLength;
+                      const trainEnd = start + Math.floor(windowLength * 0.8);
+                      
+                      const validationWindow = sourceData.slice(trainEnd, end);
+                      
+                      if (validationWindow.length < 10) continue;
+                      
+                      const originalCoinData = opt.data[coin];
+                      opt.data[coin] = validationWindow;
+                      
+                      const windowResult = await testSingleCoinCombination({
+                          leverage: result.leverage,
+                          profitPercent: result.profitPercent,
+                          multiplier: result.multiplier,
+                          direction: result.direction,
+                          initialBalance: params.initialBalance,
+                          initialBet: result.initialBet,
+                          maxTrades: params.maxTrades,
+                          minBetSize: params.minBetSize,
+                          coin: coin
+                      });
+                      
+                      opt.data[coin] = originalCoinData;
+                      
+                      if (windowResult) {
+                          validationScores.push(windowResult.roi);
+                          sharpeRatios.push(calculateSharpeRatio(windowResult.returns || [], 0.02, params.timeframe));
+                      }
+                      
+                      windowCount++;
+                      
+                      if (windowCount % 3 === 0) {
+                          await new Promise(resolve => setTimeout(resolve, 50));
+                          if (window.gc) window.gc();
+                      }
+                  }
+              } else if (method === 'crossval') {
+                  const data = opt.originalData[coin] || opt.data[coin];
+                  
+                  for (let fold = 0; fold < 3; fold++) {
+                      const foldSize = Math.floor(data.length / 3);
+                      const testStart = fold * foldSize;
+                      const testEnd = fold === 2 ? data.length : (fold + 1) * foldSize;
+                      
+                      const foldData = data.slice(testStart, testEnd);
+                      
+                      const tempData = opt.data[coin];
+                      opt.data[coin] = foldData;
+                      
+                      const foldResult = await testSingleCoinCombination({
+                          leverage: result.leverage,
+                          profitPercent: result.profitPercent,
+                          multiplier: result.multiplier,
+                          direction: result.direction,
+                          initialBalance: params.initialBalance,
+                          initialBet: result.initialBet,
+                          maxTrades: params.maxTrades,
+                          minBetSize: params.minBetSize,
+                          coin: coin
+                      });
+                      
+                      opt.data[coin] = tempData;
+                      
+                      if (foldResult) {
+                          validationScores.push(foldResult.roi);
+                          sharpeRatios.push(calculateSharpeRatio(foldResult.returns || [], 0.02, params.timeframe));
+                      }
+                  }
+              }
+              
+              const avgValidationROI = validationScores.length > 0 ? 
+                  validationScores.reduce((a, b) => a + b, 0) / validationScores.length : 0;
+              const avgSharpeRatio = sharpeRatios.length > 0 ? 
+                  sharpeRatios.reduce((a, b) => a + b, 0) / sharpeRatios.length : 0;
+              
+              const roiDifference = result.roi > 0 ? 
+                  Math.abs(result.roi - avgValidationROI) / result.roi * 100 : 0;
+              const validationScore = calculateAdvancedValidationScore(
+                  result.roi, avgValidationROI, avgSharpeRatio, validationScores, criteria
+              );
+              const overfittingThreshold = parseFloat(document.getElementById('overfittingThreshold').value);
+              
+              validatedResults.push({
+                  ...result,
+                  trainingROI: result.roi,
+                  validationROI: avgValidationROI,
+                  sharpeRatio: avgSharpeRatio,
+                  roiDifference: roiDifference,
+                  validationScore: validationScore,
+                  overfitting: roiDifference > overfittingThreshold,
+                  consistencyScore: validationScores.length > 1 ? 
+                      1 / (1 + calculateStandardDeviation(validationScores)) : 1,
+                  // P-VALUE VERİLERİNİ KORU - ÖNEMLİ!
+                  tStat: result.tStat,
+                  pValue: result.pValue,
+                  bonferroniPValue: result.bonferroniPValue,
+                  isSignificant: result.isSignificant,
+                  significance: result.significance
+              });
+
+              if (i % 25 === 0) {
+                  const progress = (i / topResults.length) * 100;
+                  document.getElementById('validationProgressBar').style.width = `${progress}%`;
+                  document.getElementById('validationProgressText').textContent = 
+                      `${method}: ${i}/${topResults.length} (${progress.toFixed(1)}%)`;
+                  await new Promise(resolve => setTimeout(resolve, 50));
+              }
+          }
+
+          return validatedResults;
+      };
+
+      const splitDataForValidation = (data, splitRatio = 0.75) => {
+          const splitIndex = Math.floor(data.length * splitRatio);
+          return {
+              training: data.slice(0, splitIndex),
+              validation: data.slice(splitIndex)
+          };
+      };
+
+      const getAnnualizationFactor = (timeframe) => {
+          const factors = {
+              '1m': 365 * 24 * 60,
+              '5m': 365 * 24 * 12,
+              '15m': 365 * 24 * 4,
+              '30m': 365 * 24 * 2,
+              '1h': 365 * 24,
+              '4h': 365 * 6,
+              '12h': 365 * 2,
+              '1d': 365
+          };
+          
+          return factors[timeframe] || 252;
+      };
+
+      const calculateSharpeRatio = (returns, riskFreeRate = 0.02, timeframe = '5m') => {
+          if (!returns || returns.length < 2) return 0;
+          
+          const annualizationFactor = getAnnualizationFactor(timeframe);
+          
+          const avgReturn = returns.reduce((a, b) => a + b, 0) / returns.length;
+          const annualizedReturn = avgReturn * annualizationFactor;
+          const excessReturn = annualizedReturn - riskFreeRate;
+          
+          const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - avgReturn, 2), 0) / returns.length;
+          const volatility = Math.sqrt(variance * annualizationFactor);
+          
+          return volatility > 0 ? excessReturn / volatility : 0;
+      };
+
+      const calculateTStat = (returns, expectedReturn = 0) => {
+          if (!returns || returns.length < 2) return 0;
+          const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+          const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / (returns.length - 1);
+          const stdError = Math.sqrt(variance / returns.length);
+          return stdError > 0 ? (mean - expectedReturn) / stdError : 0;
+      };
+
+      const calculatePValue = (tStat, degreesOfFreedom) => {
+          const t = Math.abs(tStat);
+          if (degreesOfFreedom < 1) return 1;
+          if (t < 0.674) return 1 - (0.25 * t);
+          if (t < 1.282) return 1 - (0.4 * t - 0.08);
+          if (t < 1.645) return 1 - (0.5 * t - 0.2);
+          if (t < 1.960) return Math.max(0.05, 1 - (0.6 * t - 0.35));
+          if (t < 2.576) return Math.max(0.01, 1 - (0.7 * t - 0.5));
+          if (t < 3.291) return Math.max(0.001, 1 - (0.8 * t - 0.7));
+          return Math.max(0.0001, 1 - (0.9 * t - 0.9));
+      };
+
+      const applyBonferroniCorrection = (pValue, numberOfTests) => {
+          return Math.min(1.0, pValue * numberOfTests);
+      };
+
+      const calculateStatisticalSignificance = (returns, totalCombinations, alpha = 0.05) => {
+          console.log('Statistical calculation input:', {
+              returnsLength: returns?.length,
+              totalCombinations,
+              firstFewReturns: returns?.slice(0, 5)
+          });
+          
+          if (!returns || returns.length < 10) {
+              console.log('Insufficient data for statistics');
+              return {
+                  tStat: 0,
+                  pValue: 1,
+                  bonferroniPValue: 1,
+                  isSignificant: false,
+                  significance: 'insufficient-data'
+              };
+          }
+          
+          const tStat = calculateTStat(returns);
+          const df = returns.length - 1;
+          const rawPValue = calculatePValue(tStat, df);
+          const bonferroniPValue = applyBonferroniCorrection(rawPValue, Math.min(totalCombinations, 100));
+          const correctedAlpha = alpha / Math.min(totalCombinations, 100);
+
+          
+          let significance = 'not-significant';
+          if (bonferroniPValue < 0.001) significance = 'highly-significant';
+          else if (bonferroniPValue < 0.01) significance = 'very-significant';  
+          else if (bonferroniPValue < correctedAlpha) significance = 'significant';
+          else if (rawPValue < alpha) significance = 'uncorrected-significant';
+          
+          return {
+              tStat: tStat,
+              pValue: rawPValue,
+              bonferroniPValue: bonferroniPValue,
+              isSignificant: bonferroniPValue < correctedAlpha,
+              significance: significance
+          };
+      };
+
+      const calculateStandardDeviation = (values) => {
+          if (values.length < 2) return 0;
+          const mean = values.reduce((a, b) => a + b, 0) / values.length;
+          const variance = values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / values.length;
+          return Math.sqrt(variance);
+      };
+
+      const calculateAdvancedValidationScore = (trainingROI, validationROI, sharpeRatio, validationScores, criteria) => {
+          const consistency = validationScores.length > 1 ? 
+              1 / (1 + calculateStandardDeviation(validationScores)) : 1;
+          
+          switch (criteria) {
+              case 'roi': 
+                  return validationROI || 0;
+              case 'sharpe': 
+                  return sharpeRatio || 0;
+              case 'composite': 
+                  return (validationROI || 0) * 0.5 + (sharpeRatio || 0) * 0.3 + consistency * 0.2;
+              case 'consistency': 
+                  return (validationROI || 0) * consistency;
+              default: 
+                  return validationROI || 0;
+          }
+      };
+
+      const processCandle = (candle, state, params) => {
+          const [, open, high, low] = candle.map((val, i) => i === 0 ? parseInt(val) : parseFloat(val));
+          
+          const lossPercent = params.profitPercent;
+          
+          if (!state.position.isOpen) {
+              if (state.currentBet > state.initialBalance) {
+                  state.betExceededCapital = true;
+              }
+              
+              if (state.balance < state.currentBet) {
+                  return false;
+              }
+             
+              state.position.isOpen = true;
+              state.position.entryPrice = open;
+              state.position.betAmount = state.currentBet;
+              state.balance -= state.currentBet;
+              state.totalTrades++;
+              return true;
+          }
+          
+          let profitTarget, stopLossPrice;
+          
+          if (params.direction === 'long') {
+              profitTarget = state.position.entryPrice * (1 + params.profitPercent / 100);
+              stopLossPrice = state.position.entryPrice * (1 - lossPercent / 100);
+              
+              if (high >= profitTarget) {
+                  const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
+                  state.balance += state.currentBet + profit;
+                  state.totalProfit += profit;
+                  state.winTrades++;
+                  state.consecutiveLosses = 0;
+                  state.currentBet = params.initialBet;
+                  state.position.isOpen = false;
+                  return true;
+              }
+              
+              if (low <= stopLossPrice) {
+                  state.totalLoss += state.currentBet;
+                  state.consecutiveLosses++;
+                  state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
+                  state.currentBet = state.currentBet * params.multiplier;
+                  state.position.isOpen = false;
+                  return true;
+              }
+          } else {
+              profitTarget = state.position.entryPrice * (1 - params.profitPercent / 100);
+              stopLossPrice = state.position.entryPrice * (1 + lossPercent / 100);
+              
+              if (low <= profitTarget) {
+                  const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
+                  state.balance += state.currentBet + profit;
+                  state.totalProfit += profit;
+                  state.winTrades++;
+                  state.consecutiveLosses = 0;
+                  state.currentBet = params.initialBet;
+                  state.position.isOpen = false;
+                  return true;
+              }
+              
+              if (high >= stopLossPrice) {
+                  state.totalLoss += state.currentBet;
+                  state.consecutiveLosses++;
+                  state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
+                  state.currentBet = state.currentBet * params.multiplier;
+                  state.position.isOpen = false;
+                  return true;
+              }
+          }
+          return true;
+      };
+
+      const updateDrawdown = (state) => {
+          if (state.balance > state.peakBalance) state.peakBalance = state.balance;
+          const currentDrawdown = state.peakBalance > 0 ? (state.peakBalance - state.balance) / state.peakBalance * 100 : 0;
+          state.maxDrawdown = Math.max(state.maxDrawdown, currentDrawdown);
+      };
+
+      const formatPValue = (pValue) => {
+          if (!pValue || pValue >= 0.999 || isNaN(pValue) || pValue === undefined || pValue === null) return 'N/A';
+          if (pValue < 0.001) return '<0.001';
+          if (pValue < 0.01) return '<0.01';  
+          if (pValue < 0.05) return '<0.05';
+          return pValue.toFixed(4);
+      };
+
+      const getSignificanceIcon = (significance) => {
+          const icons = {
+              'highly-significant': '🟢',
+              'very-significant': '✅',
+              'significant': '🔵',
+              'uncorrected-significant': '🟡',
+              'not-significant': '❌',
+              'insufficient-data': '⚪'
+          };
+          return icons[significance] || '❓';
+      };
+
+      const getSignificanceTooltip = (significance) => {
+          const tooltips = {
+              'highly-significant': 'Yüksek anlamlılık (p<0.001) - Güçlü kanıt',
+              'very-significant': 'Çok anlamlı (p<0.01) - İyi kanıt',
+              'significant': 'Anlamlı (Bonferroni düzeltmesi geçti)',
+              'uncorrected-significant': 'Sadece düzeltmesiz anlamlı - Dikkatli kullan',
+              'not-significant': 'İstatistiksel olarak anlamsız - Şans eseri olabilir',
+              'insufficient-data': 'Yetersiz veri - En az 10 işlem gerekli'
+          };
+          return tooltips[significance] || 'Bilinmeyen durum';
+      };
+
+      const displayResults = () => {
+          const resultsContainer = document.getElementById('optimizerResults');
+          const resultsList = document.getElementById('optimizerResultsList');
+          const overfittingWarning = document.getElementById('overfittingWarning');
+          const overfittingDetails = document.getElementById('overfittingDetails');
+          
+          resultsContainer.style.display = 'block';
+          resultsList.innerHTML = '';
+          
+          const overfittedCount = opt.results.filter(r => r.overfitting).length;
+          const exceedsCapitalCount = opt.results.filter(r => r.exceedsInitialBalance).length;
+          const validationMethod = document.getElementById('validationMethod').value;
+          
+          const significantCount = opt.results.filter(r => r.isSignificant).length;
+          const randomlySignificantCount = opt.results.filter(r => r.significance === 'uncorrected-significant').length;
+
+          if ((overfittedCount > 0 || exceedsCapitalCount > 0 || randomlySignificantCount > 0) && validationMethod !== 'none') {
+              overfittingWarning.style.display = 'block';
+              overfittingDetails.innerHTML = `
+                  <br>• <strong>${overfittedCount}</strong> kombinasyon overfitting riski taşıyor
+                  <br>• <strong>${exceedsCapitalCount}</strong> kombinasyon bahis-sermaye aşımı yaşıyor
+                  <br>• <strong>${significantCount}</strong> kombinasyon gerçekten istatistiksel anlamlı
+                  <br>• <strong>${randomlySignificantCount}</strong> kombinasyon sadece rastgele anlamlı
+                  <br>• <strong>Bonferroni Threshold:</strong> p < ${((0.05 / (opt.total || 400)) * 1000).toFixed(6)}
+                  <br>• <strong>Tavsiye:</strong> Sadece 🟢 ve ✅ işaretli kombinasyonları kullanın
+              `;
+          } else {
+              overfittingWarning.style.display = 'none';
+          }
+          
+          const VISIBLE_RESULTS = 200;
+          const top200 = opt.results.slice(0, VISIBLE_RESULTS);
+
+          if (opt.results.length > VISIBLE_RESULTS) {
+              const infoDiv = document.createElement('div');
+              infoDiv.className = 'info-box';
+              infoDiv.style.marginBottom = '15px';
+              resultsList.parentNode.insertBefore(infoDiv, resultsList);
+          }
+
+          top200.forEach((result, index) => {
+              const row = document.createElement('div');
+              row.className = 'optimizer-row';
+              
+              const trainingROIClass = (result.trainingROI || 0) >= 2 ? 'positive' : (result.trainingROI || 0) >= 1 ? 'neutral' : 'negative';
+              const validationROIClass = (result.validationROI || 0) >= 2 ? 'positive' : (result.validationROI || 0) >= 1 ? 'neutral' : 'negative';
+              const sharpeClass = (result.sharpeRatio || 0) > 1 ? 'positive' : (result.sharpeRatio || 0) > 0 ? 'neutral' : 'negative';
+              const roiDiffClass = (result.roiDifference || 0) > 50 ? 'negative' : (result.roiDifference || 0) > 25 ? 'neutral' : 'positive';
+              
+              const maxBalanceClass = (result.maxBalance || 0) > (result.initialBalance * 2) ? 'positive' : 'neutral';
+              const finalBalanceClass = (result.finalBalance || 0) > result.initialBalance ? 'positive' : 'negative';
+              const tradesClass = (result.totalTrades || 0) > 100 ? 'positive' : 'neutral';
+              const lossesClass = (result.maxConsecutiveLosses || 0) > 10 ? 'negative' : (result.maxConsecutiveLosses || 0) > 5 ? 'neutral' : 'positive';
+              
+              // GÜÇLENDİRİLMİŞ P-VALUE CLASS
+              const pValueClass = (result.bonferroniPValue !== undefined && 
+                                   result.bonferroniPValue !== null && 
+                                   result.bonferroniPValue !== 1 &&
+                                   !isNaN(result.bonferroniPValue)) ? 
+                  ((result.bonferroniPValue < 0.001) ? 'positive' : 
+                   (result.bonferroniPValue < 0.01) ? 'neutral' : 'negative') : 'negative';
+              const significanceIcon = getSignificanceIcon(result.significance);
+              const significanceClass = result.isSignificant ? 'positive' : 'negative';
+
+              const directionIcon = result.direction === 'long' ? '📈' : '📉';
+              const overfittingIcon = result.overfitting ? '⚠️' : (result.validationROI || 0) > (result.trainingROI || 0) ? '🎯' : '✅';
+              const betWarningIcon = result.exceedsInitialBalance ? '🚨' : '✅';
+              
+              const validationROIDisplay = result.validationROI !== null ? 
+                  `${result.validationROI.toFixed(3)}x` : 'N/A';
+              const sharpeDisplay = result.sharpeRatio !== null ? 
+                  result.sharpeRatio.toFixed(2) : 'N/A';
+              
+              row.innerHTML = `
+                  <div>${index + 1}</div>
+                  <div>${result.leverage}x</div>
+                  <div>%${result.profitPercent}</div>
+                  <div>${result.multiplier}x</div>
+                  <div>${directionIcon}</div>
+                  <div class="neutral">${result.initialBet.toFixed(2)}</div>
+                  <div class="${maxBalanceClass}">${(result.maxBalance || 0).toFixed(0)}</div>
+                  <div class="${finalBalanceClass}">${(result.finalBalance || 0).toFixed(0)}</div>
+                  <div class="${tradesClass}">${result.totalTrades || 0}</div>
+                  <div class="${lossesClass}">${result.maxConsecutiveLosses || 0}</div>
+                  <div class="${trainingROIClass}">${(result.trainingROI || 0).toFixed(3)}x</div>
+                  <div class="${validationROIClass}">${validationROIDisplay}</div>
+                  <div class="${sharpeClass}">${sharpeDisplay}</div>
+                  <div class="${roiDiffClass}">${result.roiDifference !== null ? result.roiDifference.toFixed(1) + '%' : 'N/A'}</div>
+                  <div class="positive">${(result.validationScore || 0).toFixed(3)}</div>
+                  <div class="${pValueClass}">${formatPValue(result.bonferroniPValue)}</div>
+                  <div class="${significanceClass}" title="${getSignificanceTooltip(result.significance)}" style="cursor: help;">${significanceIcon}</div>
+                  <div style="font-size: 12px;">${overfittingIcon}</div>
+                  <div class="${result.exceedsInitialBalance ? 'bet-warning' :'positive'}" 
+                      title="${result.exceedsInitialBalance ? 'Bahis miktarı başlangıç sermayesini aştı!' : 'Bahis sermaye sınırları içinde'}" 
+                      style="font-size: 12px; cursor: help;">${betWarningIcon}</div>
+              `;
+              
+             if (result.overfitting) {
+                 row.style.background = 'linear-gradient(45deg, rgba(248,113,113,0.2), rgba(239,68,68,0.1))';
+                 row.style.border = '1px solid rgba(248,113,113,0.3)';
+             }
+             
+             if (result.exceedsInitialBalance) {
+                 row.style.borderLeft = '4px solid #f87171';
+             }
+             
+             if (index < 3) {
+                 const colors = ['255,215,0', '192,192,192', '205,127,50'];
+                 row.style.background = `linear-gradient(45deg, rgba(${colors[index]}, 0.2), rgba(255,255,255,0.05))`;
+             }
+             
+             resultsList.appendChild(row);
+         });
+     };
+
+     const getValidationMethodName = (method) => {
+         const names = {
+             'none': 'Validasyon Yok',
+             'simple': 'Basit Train/Test Split',
+             'walkforward': 'Walk-Forward Analysis',
+             'crossval': 'Cross-Validation (3-Fold)'
+         };
+         return names[method] || method;
+     };
+
+     const sortResults = (column, type) => {
+         if (column === 'index') {
+             opt.results.sort((a, b) => (b.roi || 0) - (a.roi || 0));
+             opt.sort = { column: 'roi', direction: 'desc' };
+             displayResults();
+             return;
+         }
+
+         let direction = opt.sort.column === column && opt.sort.direction === 'desc' ? 'asc' : 'desc';
+
+         opt.results.sort((a, b) => {
+             if (column === 'direction') {
+                 const aVal = a[column] || '';
+                 const bVal = b[column] || '';
+                 return direction === 'desc' ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+             } else {
+                 const aVal = parseFloat(a[column]) || 0;
+                 const bVal = parseFloat(b[column]) || 0;
+                 return direction === 'desc' ? bVal - aVal : aVal - bVal;
+             }
+         });
+
+         opt.sort = { column, direction };
+         displayResults();
+     };
+
+     const exportResults = () => {
+         try {
+             if (!opt.results || opt.results.length === 0) return alert('⚠️ Henüz sonuç yok!');
+
+             const validationMethod = document.getElementById('validationMethod').value;
+             const exportData = {
+                 metadata: { 
+                     ...opt.meta, 
+                     validationMethod, 
+                     overfittingProtection: validationMethod !== 'none',
+                     betExceedsCapitalTracking: true,
+                     singleCoinOptimization: true,
+                     advancedValidationFeatures: {
+                         walkForward: true,
+                         crossValidation: true,
+                         realSharpeRatio: true,
+                         consistencyScoring: true,
+                         statisticalSignificance: true
+                     }
+                 },
+                 parameters: opt.params,
+                 validationSettings: {
+                     method: validationMethod,
+                     criteria: document.getElementById('validationCriteria').value,
+                     topCombinations: parseInt(document.getElementById('topCombinations').value),
+                     overfittingThreshold: parseFloat(document.getElementById('overfittingThreshold').value),
+                     ...(validationMethod === 'walkforward' && {
+                         windowSize: parseFloat(document.getElementById('windowSize').value),
+                         stepSize: parseFloat(document.getElementById('stepSize').value)
+                     })
+                 },
+                 summary: {
+                     totalResults: opt.results.length,
+                     totalTrainingResults: opt.trainingResults?.length || 0,
+                     bestTrainingROI: opt.results[0]?.trainingROI || 0,
+                     bestValidationROI: opt.results[0]?.validationROI || 0,
+                     bestSharpeRatio: Math.max(...opt.results.map(r => r.sharpeRatio || 0)),
+                     overfittedCombinations: opt.results.filter(r => r.overfitting).length,
+                     betExceedsCombinations: opt.results.filter(r => r.exceedsInitialBalance).length,
+                     statisticallySignificantCombinations: opt.results.filter(r => r.isSignificant).length
+                 },
+                 trainingResults: opt.trainingResults || [],
+                 results: opt.results
+             };
+
+             const jsonString = JSON.stringify(exportData, null, 2);
+             const blob = new Blob([jsonString], { type: 'application/json' });
+             const fileName = `single_coin_results_${opt.params.coin}_${validationMethod}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+             
+             const url = URL.createObjectURL(blob);
+             const a = document.createElement('a');
+             a.href = url;
+             a.download = fileName;
+             document.body.appendChild(a);
+             a.click();
+             document.body.removeChild(a);
+             URL.revokeObjectURL(url);
+
+             alert(`✅ Single-coin sonuçları kaydedildi: ${fileName}`);
+         } catch (error) {
+             console.error('❌ Export hatası:', error);
+             alert('Export hatası: ' + error.message);
+         }
+     };
+
+     const handleFileSelect = (event) => {
+         const file = event.target.files[0];
+         if (file) loadJsonFile(file);
+     };
+
+     const handleDragOver = (event) => {
+         event.preventDefault();
+         event.currentTarget.classList.add('dragover');
+     };
+
+     const handleDragLeave = (event) => {
+         event.preventDefault();
+         event.currentTarget.classList.remove('dragover');
+     };
+
+     const handleFileDrop = (event) => {
+         event.preventDefault();
+         event.currentTarget.classList.remove('dragover');
+         
+         const files = event.dataTransfer.files;
+         if (files.length > 0 && (files[0].type === 'application/json' || files[0].name.endsWith('.json'))) {
+             loadJsonFile(files[0]);
+         } else {
+             alert('⚠️ Geçerli JSON dosyası seçin!');
+         }
+     };
+
+     const loadJsonFile = (file) => {
+         const reader = new FileReader();
+         
+         reader.onload = function(e) {
+             try {
+                 const jsonData = JSON.parse(e.target.result);
+                 
+                 if (!jsonData.results || !jsonData.parameters) {
+                     throw new Error('Geçersiz JSON formatı!');
+                 }
+
+                 opt.results = jsonData.results;
+                 opt.params = jsonData.parameters;
+                 opt.meta = jsonData.metadata;
+                 
+                 if (jsonData.trainingResults) {
+                     opt.trainingResults = jsonData.trainingResults;
+                     document.getElementById('validationSection').style.display = 'block';
+                     console.log(`📊 Training sonuçları yüklendi: ${opt.trainingResults.length} kombinasyon`);
+                 }
+
+                 if (jsonData.validationSettings) {
+                     document.getElementById('validationMethod').value = jsonData.validationSettings.method || 'simple';
+                     document.getElementById('validationCriteria').value = jsonData.validationSettings.criteria || 'roi';
+                     document.getElementById('topCombinations').value = jsonData.validationSettings.topCombinations || 100;
+                     document.getElementById('overfittingThreshold').value = jsonData.validationSettings.overfittingThreshold || 50;
+                     
+                     if (jsonData.validationSettings.windowSize) {
+                         document.getElementById('windowSize').value = jsonData.validationSettings.windowSize;
+                     }
+                     if (jsonData.validationSettings.stepSize) {
+                         document.getElementById('stepSize').value = jsonData.validationSettings.stepSize;
+                     }
+                     
+                     updateValidationDescription();
+                 }
+
+                 if (jsonData.parameters) {
+                     const coin = jsonData.parameters.coin || (jsonData.parameters.coins && jsonData.parameters.coins[0]) || '';
+                     document.getElementById('optCoinPair').value = coin;
+                     document.getElementById('optTimeframe').value = jsonData.parameters.timeframe || '5m';
+                     document.getElementById('optStartDate').value = jsonData.parameters.startDate || '';
+                     document.getElementById('optEndDate').value = jsonData.parameters.endDate || '';
+                     updateCoinCount();
+                     estimateCandles();
+                 }
+
+                 displayResults();
+                 document.getElementById('jsonControls').style.display = 'block';
+                 document.getElementById('reOptBtn').style.display = 'inline-block';
+
+                 const trainingInfo = opt.trainingResults?.length ? ` (${opt.trainingResults.length} training sonucu dahil)` : '';
+                 const validationInfo = jsonData.validationSettings ? ` - ${getValidationMethodName(jsonData.validationSettings.method)}` : '';
+                 alert(`✅ Single-coin JSON yüklendi: ${jsonData.results.length} sonuç${trainingInfo}${validationInfo}`);
+             } catch (error) {
+                 console.error('❌ JSON yükleme hatası:', error);
+                 alert('JSON yükleme hatası: ' + error.message);
+             }
+         };
+         
+         reader.onerror = () => alert('❌ Dosya okuma hatası!');
+         reader.readAsText(file);
+     };
+
+     const fetchDataByDateRange = async (symbol, interval, startDate, endDate, useDataProgressBar = false) => {
+         const startTime = new Date(startDate + 'T00:00:00Z').getTime();
+         const endTime = new Date(endDate + 'T23:59:59Z').getTime();
+         return await fetchLargeDataset(symbol, interval, startTime, endTime, useDataProgressBar);
+     };
+
+     const fetchLargeDataset = async (symbol, interval, startTime, endTime, useDataProgressBar = false) => {
+         const maxPerRequest = 1000;
+         const allData = [];
+         let currentEndTime = endTime;
+         
+         const progressContainer = useDataProgressBar ? 
+             document.getElementById('dataProgressContainer') : 
+             document.getElementById('optimizeProgressContainer');
+         const progressBar = useDataProgressBar ? 
+             document.getElementById('dataProgressBar') : 
+             document.getElementById('optimizeProgressBar');
+         const progressText = useDataProgressBar ? 
+             document.getElementById('dataProgressText') : 
+             document.getElementById('optimizeProgressText');
+         
+         progressContainer.style.display = 'block';
+         
+         while (currentEndTime > startTime) {
+             try {
+                 const batch = await fetchBinanceData(symbol, interval, maxPerRequest, currentEndTime);
+                 if (!batch || batch.length === 0) break;
+                 
+                 const filteredBatch = batch.filter(candle => {
+                     const candleTime = parseInt(candle[0]);
+                     return candleTime >= startTime && candleTime <= endTime;
+                 });
+                 
+                 if (filteredBatch.length > 0) {
+                     allData.unshift(...filteredBatch);
+                     if (parseInt(filteredBatch[0][0]) <= startTime) break;
+                 }
+                 
+                 currentEndTime = parseInt(batch[0][0]) - 1;
+                 
+                 const progress = Math.min(((endTime - currentEndTime) / (endTime - startTime)) * 100, 100);
+                 progressBar.style.width = `${progress}%`;
+                 progressText.textContent = `${symbol}: ${allData.length} veri çekildi`;
+                 
+                 await new Promise(resolve => setTimeout(resolve, 100));
+             } catch (error) {
+                 console.error(`❌ ${symbol} veri çekme hatası:`, error);
+                 throw error;
+             }
+         }
+         
+         allData.sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+         return allData;
+     };
+
+     const fetchBinanceData = async (symbol, interval, limit, endTime = null) => {
+         let url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
+         if (endTime) url += `&endTime=${endTime}`;
+         
+         const proxies = [
+             `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+             `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+             `https://corsproxy.io/?${encodeURIComponent(url)}`
+         ];
+         
+         for (let i = 0; i < proxies.length; i++) {
+             try {
+                 const response = await fetch(proxies[i]);
+                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                 
+                 let data;
+                 try {
+                     data = await response.json();
+                 } catch (parseError) {
+                     throw new Error(`JSON parse error: ${parseError.message}`);
+                 }
+                 
+                 if (Array.isArray(data)) return data;
+                 
+                 const possibleKeys = ['data', 'contents', 'response', 'result'];
+                 for (const key of possibleKeys) {
+                     if (data[key] && Array.isArray(data[key])) return data[key];
+                 }
+                 
+                 throw new Error(`Invalid data format from proxy ${i + 1}`);
+             } catch (error) {
+                 console.log(`Proxy ${i + 1} hatası:`, error.message);
+                 if (i === proxies.length - 1) throw new Error(`Tüm proxyler başarısız: ${error.message}`);
+             }
+         }
+     };
+
+     document.addEventListener('DOMContentLoaded', function() {
+         setDefaultDates();
+         
+         document.getElementById('optCoinPair').addEventListener('input', function(e) {
+             e.target.value = e.target.value.toUpperCase();
+             updateCoinCount();
+         });
+
+         document.getElementById('dataCoinPair').addEventListener('input', function(e) {
+             e.target.value = e.target.value.toUpperCase();
+         });
+         
+         document.getElementById('optInitialBalance').addEventListener('input', updateCoinCount);
+         document.getElementById('optStartDate').addEventListener('change', estimateCandles);
+         document.getElementById('optEndDate').addEventListener('change', estimateCandles);
+         document.getElementById('optTimeframe').addEventListener('change', estimateCandles);
+         
+         document.getElementById('validationMethod').addEventListener('change', updateValidationDescription);
+         
+         updateCoinCount();
+         updateValidationDescription();
+         
+         console.log('🚀 Single-Coin Martingale Optimizasyon Sistemi v5.0 yüklendi');
+         console.log('✨ Tam özellikli validation sistemi:');
+         console.log('   • Walk-Forward Analysis ile gerçek dünya testi');
+         console.log('   • 3-Fold Cross-Validation ile çapraz doğrulama');
+         console.log('   • Gerçek Sharpe Ratio hesaplama');
+         console.log('   • Tutarlılık ve kompozit skorlama');
+         console.log('   • Bahis-sermaye aşımı kontrolü');
+         console.log('   • Overfitting hafıza sistemi');
+         console.log('   • İstatistiksel anlamlılık testi (Bonferroni düzeltmeli)');
+         console.log('   • Single-coin optimizasyon - Daha hızlı ve kararlı');
+     });
+ </script>
+</body>
+</html>
