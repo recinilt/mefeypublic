@@ -977,7 +977,7 @@
                      ...result,
                      trainingROI: result.roi,
                      validationROI: null,
-                     sharpeRatio: null,
+                     sharpeRatio: result.sharpeRatio || 0,
                      roiDifference: null,
                      validationScore: 0,
                      overfitting: false
@@ -1175,6 +1175,7 @@
                  profitFactor,
                  exceedsInitialBalance,
                  returns: allReturns,
+                sharpeRatio: sharpeRatio, 
                  // İstatistiksel anlamlılık verileri - KORUMAYA DİKKAT!
                  tStat: stats.tStat,
                  pValue: stats.pValue,
