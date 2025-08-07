@@ -1,0 +1,829 @@
+import time, requests, hmac, hashlib, json
+from urllib.parse import urlencode
+from datetime import datetime
+
+class BybitFuturesBot:
+   def __init__(self, api_key, api_secret, demo_mode=True):
+       self.api_key, self.api_secret = api_key, api_secret
+       self.base_url = "https://api-testnet.bybit.com" if demo_mode else "https://api.bybit.com"
+       self.demo_mode = demo_mode
+       self.symbol_info = {}
+       self.reset_position()
+       self.stats = {
+           'session_start': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+           'initial_balance': 0, 'current_balance': 0, 'total_pnl': 0,
+           'total_trades': 0, 'winning_trades': 0, 'losing_trades': 0,
+           'max_consecutive_losses': 0, 'current_consecutive_losses': 0,
+           'trade_history': []
+       }
+       
+       # Dinamik ilk bahis sistemi için yeni değişkenler
+       self.auto_increase_enabled = False
+       self.target_turn = 0
+       self.threshold_amount = 0
+       self.original_initial_bet = 0
+       self.current_initial_bet = 0
+       self.multiplier = 2.0
+       
+   def reset_position(self):
+       self.position_opened = False
+       self.last_entry_price = 0
+       self.current_quantity = 0
+       self.leverage = 1
+       self.limit_order_id = None
+       self.limit_price = 0
+   
+   def calculate_risk_table(self, initial_bet, multiplier, target_turn):
+       """Risk tablosunu hesapla ve hedef turun toplam kaybını döndür"""
+       total_loss = 0
+       current_bet = initial_bet
+       
+       print(f"\n📊 Risk Tablosu - İlk Bahis: ${initial_bet:.2f}, Çarpan: {multiplier}x")
+       print("-" * 60)
+       print(f"{'Tur':<5} {'Bahis':<10} {'Toplam Kayıp':<15} {'Kayıp %'}")
+       print("-" * 60)
+       
+       for turn in range(1, 31):  # 30 tura kadar hesapla
+           total_loss += current_bet
+           loss_percent = (total_loss / self.stats['current_balance']) * 100 if self.stats['current_balance'] > 0 else 0
+           
+           print(f"{turn:<5} ${current_bet:<9.2f} ${total_loss:<14.2f} {loss_percent:<.1f}%")
+           
+           if turn == target_turn:
+               target_loss = total_loss
+           
+           current_bet *= multiplier
+       
+       print("-" * 60)
+       return target_loss
+   
+   def update_threshold(self):
+       """Mevcut ilk bahis miktarına göre eşik değerini güncelle"""
+       if not self.auto_increase_enabled:
+           return
+           
+       # 11 seçilmişse 13'e, 12 seçilmişse 14'e bak
+       actual_turn = self.target_turn + 2
+       target_loss = self.calculate_turn_total_loss(self.current_initial_bet, self.multiplier, actual_turn)
+       self.threshold_amount = target_loss * 1.1
+       
+       print(f"🎯 Güncel Eşik: ${self.threshold_amount:.2f} (Seçilen: {self.target_turn}, Bakılan: {actual_turn}, İlk Bahis: ${self.current_initial_bet:.2f})")
+   
+   def calculate_turn_total_loss(self, initial_bet, multiplier, turn_number):
+       """Belirli bir tur için toplam kaybı hesapla"""
+       total_loss = 0
+       current_bet = initial_bet
+       
+       for turn in range(1, turn_number + 1):
+           total_loss += current_bet
+           current_bet *= multiplier
+           
+       return total_loss
+   
+   def check_and_increase_initial_bet(self):
+       """Bakiye eşiği geçtiyse ilk bahsi artır"""
+       if not self.auto_increase_enabled or self.position_opened:
+           return
+           
+       if self.stats['current_balance'] > self.threshold_amount:
+           old_bet = self.current_initial_bet
+           self.current_initial_bet *= self.multiplier
+           
+           # Yeni eşiği hesapla
+           self.update_threshold()
+           
+           print(f"🚀 İLK BAHİS ARTIŞI! ${old_bet:.2f} → ${self.current_initial_bet:.2f}")
+           print(f"💰 Mevcut Bakiye: ${self.stats['current_balance']:.2f}")
+           print(f"🎯 Yeni Eşik: ${self.threshold_amount:.2f}")
+           
+           # İstatistiğe kaydet
+           self.update_stats("İLK_BAHİS_ARTIŞI", self.current_initial_bet, 0, 0)
+   
+   def get_signature(self, params, method="GET", endpoint="", body=""):
+       timestamp = str(int(time.time() * 1000))
+       params["api_key"] = self.api_key
+       params["timestamp"] = timestamp
+       
+       # ByBit için param_str oluşturma
+       param_str = "&".join([f"{k}={v}" for k, v in sorted(params.items())])
+       
+       # ByBit imza formatı
+       sign_str = f"{timestamp}{self.api_key}{param_str}"
+       if body:
+           sign_str += body
+           
+       signature = hmac.new(
+           self.api_secret.encode(),
+           sign_str.encode(),
+           hashlib.sha256
+       ).hexdigest()
+       
+       return signature, timestamp
+   
+   def get_balance(self):
+       if self.demo_mode:
+           return self.stats['current_balance']
+       
+       try:
+           params = {"accountType": "UNIFIED"}
+           signature, timestamp = self.get_signature(params)
+           
+           headers = {
+               "X-BAPI-API-KEY": self.api_key,
+               "X-BAPI-SIGN": signature,
+               "X-BAPI-TIMESTAMP": timestamp
+           }
+           
+           response = requests.get(
+               f"{self.base_url}/v5/account/wallet-balance",
+               params=params,
+               headers=headers
+           ).json()
+           
+           if response["retCode"] == 0:
+               for coin in response["result"]["list"][0]["coin"]:
+                   if coin["coin"] == "USDT":
+                       balance = float(coin["walletBalance"])
+                       self.stats['current_balance'] = balance
+                       return balance
+           return 0
+       except Exception as e:
+           print(f"❌ Bakiye alınamadı: {e}")
+           return self.stats['current_balance']
+   
+   def get_position_info(self, symbol):
+       """Açık pozisyon var mı kontrol et"""
+       if self.demo_mode:
+           return self.position_opened
+       
+       try:
+           params = {"category": "linear", "symbol": symbol}
+           signature, timestamp = self.get_signature(params)
+           
+           headers = {
+               "X-BAPI-API-KEY": self.api_key,
+               "X-BAPI-SIGN": signature,
+               "X-BAPI-TIMESTAMP": timestamp
+           }
+           
+           response = requests.get(
+               f"{self.base_url}/v5/position/list",
+               params=params,
+               headers=headers
+           ).json()
+           
+           if response["retCode"] == 0:
+               for pos in response["result"]["list"]:
+                   if pos["symbol"] == symbol and float(pos["size"]) != 0:
+                       return True
+           return False
+       except:
+           return self.position_opened
+   
+   def get_symbol_info(self, symbol):
+       url = f"{self.base_url}/v5/market/instruments-info"
+       params = {"category": "linear", "symbol": symbol}
+       
+       response = requests.get(url, params=params)
+       data = response.json()
+       
+       if data["retCode"] == 0 and data["result"]["list"]:
+           instrument = data["result"]["list"][0]
+           
+           symbol_data = {
+               'quantityPrecision': len(instrument['lotSizeFilter']['qtyStep'].split('.')[-1]) if '.' in instrument['lotSizeFilter']['qtyStep'] else 0,
+               'pricePrecision': len(instrument['priceFilter']['tickSize'].split('.')[-1]) if '.' in instrument['priceFilter']['tickSize'] else 0,
+               'minQty': float(instrument['lotSizeFilter']['minOrderQty']),
+               'stepSize': float(instrument['lotSizeFilter']['qtyStep']),
+               'tickSize': float(instrument['priceFilter']['tickSize'])
+           }
+           
+           self.symbol_info[symbol] = symbol_data
+           print(f"📋 {symbol} - MinQty: {symbol_data['minQty']}, QtyPrec: {symbol_data['quantityPrecision']}, PricePrec: {symbol_data['pricePrecision']}")
+           return
+       
+       print(f"⚠️ Symbol bilgisi bulunamadı: {symbol}")
+   
+   def format_quantity(self, symbol, quantity):
+       if symbol not in self.symbol_info:
+           return quantity
+       
+       precision = self.symbol_info[symbol]['quantityPrecision']
+       step_size = self.symbol_info[symbol]['stepSize']
+       min_qty = self.symbol_info[symbol]['minQty']
+       
+       quantity = round(quantity / step_size) * step_size
+       quantity = round(quantity, precision)
+       quantity = max(quantity, min_qty)
+       
+       return quantity
+   
+   def format_price(self, symbol, price):
+       if symbol not in self.symbol_info:
+           return price
+       
+       precision = self.symbol_info[symbol]['pricePrecision']
+       tick_size = self.symbol_info[symbol]['tickSize']
+       
+       price = round(price / tick_size) * tick_size
+       price = round(price, precision)
+       
+       return price
+   
+   def get_price(self, symbol):
+       url = f"{self.base_url}/v5/market/tickers"
+       params = {"category": "linear", "symbol": symbol}
+       response = requests.get(url, params=params)
+       data = response.json()
+       
+       if data["retCode"] == 0 and data["result"]["list"]:
+           return float(data["result"]["list"][0]["lastPrice"])
+       
+       raise Exception("Fiyat alınamadı")
+   
+   def calculate_pnl(self, current_price, side):
+       """Leverage etkili PnL hesaplama"""
+       if not self.position_opened or self.current_quantity <= 0:
+           return 0
+       
+       if side == "Buy":  # Long pozisyon
+           pnl = (current_price - self.last_entry_price) * self.current_quantity
+       else:  # Short pozisyon  
+           pnl = (self.last_entry_price - current_price) * self.current_quantity
+       
+       return pnl
+   
+   def set_leverage(self, symbol, leverage):
+       """ByBit leverage ayarlama"""
+       if self.demo_mode:
+           print(f"🎮 DEMO: Leverage {leverage}x ayarlandı")
+           return
+           
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "buyLeverage": str(leverage),
+           "sellLeverage": str(leverage)
+       }
+       
+       signature, timestamp = self.get_signature(params, "POST", "/v5/position/set-leverage", json.dumps(params))
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp,
+           "Content-Type": "application/json"
+       }
+       
+       try:
+           response = requests.post(
+               f"{self.base_url}/v5/position/set-leverage",
+               json=params,
+               headers=headers
+           ).json()
+           
+           if response["retCode"] != 0:
+               print(f"⚠️ Leverage ayarlama uyarısı: {response['retMsg']}")
+       except Exception as e:
+           print(f"⚠️ Leverage ayarlama hatası: {e}")
+   
+   def cancel_limit_order(self, symbol):
+       if not self.limit_order_id:
+           return
+       
+       if self.demo_mode:
+           print(f"🎮 DEMO: Limit emir iptal edildi")
+           self.limit_order_id = None
+           return
+       
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "orderId": self.limit_order_id
+       }
+       
+       signature, timestamp = self.get_signature(params, "POST", "/v5/order/cancel", json.dumps(params))
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp,
+           "Content-Type": "application/json"
+       }
+       
+       try:
+           requests.post(
+               f"{self.base_url}/v5/order/cancel",
+               json=params,
+               headers=headers
+           )
+           self.limit_order_id = None
+       except:
+           pass
+   
+   def check_limit_order(self, symbol, direction):
+       if not self.limit_order_id:
+           return False
+       
+       if self.demo_mode:
+           current_price = self.get_price(symbol)
+           if (direction == "long" and current_price >= self.limit_price) or \
+              (direction == "short" and current_price <= self.limit_price):
+               print(f"🎮 DEMO: Limit emir tetiklendi! ${current_price:.8f}")
+               return True
+           return False
+       
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "orderId": self.limit_order_id
+       }
+       
+       signature, timestamp = self.get_signature(params)
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp
+       }
+       
+       try:
+           response = requests.get(
+               f"{self.base_url}/v5/order/realtime",
+               params=params,
+               headers=headers
+           ).json()
+           
+           if response["retCode"] == 0 and response["result"]["list"]:
+               order_status = response["result"]["list"][0]["orderStatus"]
+               return order_status == "Filled"
+           return False
+       except:
+           return False
+   
+   def close_position(self, symbol, side):
+       if not self.position_opened or self.current_quantity <= 0:
+           return True
+       
+       close_side = "Sell" if side == "Buy" else "Buy"
+       
+       if self.demo_mode:
+           current_price = self.get_price(symbol)
+           pnl = self.calculate_pnl(current_price, side)
+           self.stats['current_balance'] += pnl
+           self.update_stats("KAPAT", 0, pnl, current_price)
+           print(f"🎮 DEMO: Pozisyon kapatıldı - PnL: ${pnl:.2f}")
+           self.reset_position()
+           
+           # Pozisyon kapandıktan sonra ilk bahis artışı kontrolü
+           self.check_and_increase_initial_bet()
+           return True
+       
+       formatted_qty = self.format_quantity(symbol, self.current_quantity)
+       
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "side": close_side,
+           "orderType": "Market",
+           "qty": str(formatted_qty),
+           "reduceOnly": True
+       }
+       
+       signature, timestamp = self.get_signature(params, "POST", "/v5/order/create", json.dumps(params))
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp,
+           "Content-Type": "application/json"
+       }
+       
+       try:
+           response = requests.post(
+               f"{self.base_url}/v5/order/create",
+               json=params,
+               headers=headers
+           ).json()
+           
+           if response["retCode"] != 0:
+               print(f"❌ Kapatma Hatası: {response['retMsg']}")
+               return False
+           
+           print(f"✅ Pozisyon kapatıldı")
+           self.reset_position()
+           
+           # Pozisyon kapandıktan sonra ilk bahis artışı kontrolü
+           self.check_and_increase_initial_bet()
+           return True
+       except Exception as e:
+           print(f"❌ Kapatma hatası: {e}")
+           return False
+   
+   def place_limit_order(self, symbol, side, quantity, price):
+       formatted_qty = self.format_quantity(symbol, quantity)
+       formatted_price = self.format_price(symbol, price)
+       
+       if self.demo_mode:
+           print(f"🎮 DEMO: Limit emir ${formatted_price:.8f} fiyatına koyuldu (Qty: {formatted_qty})")
+           self.limit_order_id = "demo_limit"
+           self.limit_price = formatted_price
+           return {"orderId": "demo_limit"}
+       
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "side": side,
+           "orderType": "Limit",
+           "qty": str(formatted_qty),
+           "price": str(formatted_price),
+           "timeInForce": "GTC"
+       }
+       
+       signature, timestamp = self.get_signature(params, "POST", "/v5/order/create", json.dumps(params))
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp,
+           "Content-Type": "application/json"
+       }
+       
+       response = requests.post(
+           f"{self.base_url}/v5/order/create",
+           json=params,
+           headers=headers
+       ).json()
+       
+       if response["retCode"] != 0:
+           print(f"❌ Limit Order Hatası: {response['retMsg']}")
+           return None
+       
+       self.limit_order_id = response["result"]["orderId"]
+       self.limit_price = formatted_price
+       return response["result"]
+   
+   def place_order(self, symbol, side, amount, leverage):
+       current_price = self.get_price(symbol)
+       leveraged_quantity = (amount * leverage) / current_price
+       formatted_qty = self.format_quantity(symbol, leveraged_quantity)
+       
+       if self.demo_mode:
+           print(f"🎮 DEMO: {side} emri simüle edildi - {formatted_qty} {symbol[:3]}")
+           return {"orderStatus": "Filled", "cumExecQty": str(formatted_qty), "avgPrice": str(current_price)}
+       
+       # Önce leverage ayarla
+       self.set_leverage(symbol, leverage)
+       
+       # Emir ver
+       params = {
+           "category": "linear",
+           "symbol": symbol,
+           "side": side,
+           "orderType": "Market",
+           "qty": str(formatted_qty)
+       }
+       
+       signature, timestamp = self.get_signature(params, "POST", "/v5/order/create", json.dumps(params))
+       
+       headers = {
+           "X-BAPI-API-KEY": self.api_key,
+           "X-BAPI-SIGN": signature,
+           "X-BAPI-TIMESTAMP": timestamp,
+           "Content-Type": "application/json"
+       }
+       
+       response = requests.post(
+           f"{self.base_url}/v5/order/create",
+           json=params,
+           headers=headers
+       ).json()
+       
+       if response["retCode"] != 0:
+           print(f"❌ Market Order Hatası: {response['retMsg']}")
+           return None
+       
+       return response["result"]
+   
+   def set_limit_order(self, symbol, direction, profit_loss_percent):
+       if self.current_quantity <= 0:
+           print("❌ Pozisyon bilgisi eksik, limit emir koyulamadı!")
+           return
+       
+       if direction == "long":
+           limit_price = self.last_entry_price * (1 + profit_loss_percent / 100)
+           side = "Sell"
+       else:
+           limit_price = self.last_entry_price * (1 - profit_loss_percent / 100)
+           side = "Buy"
+       
+       result = self.place_limit_order(symbol, side, self.current_quantity, limit_price)
+       if result:
+           print(f"🎯 Limit emir: ${limit_price:.8f} (Giriş: ${self.last_entry_price:.8f})")
+       else:
+           print("❌ Limit emir koyulamadı!")
+   
+   def handle_position_closed(self, symbol, direction, current_bet, leverage, side, profit_loss_percent):
+       """Pozisyon kapandığında ne yapılacağını belirle"""
+       limit_triggered = self.check_limit_order(symbol, direction)
+       
+       if limit_triggered:
+           # Kar! Bahis sıfırla ve ilk bahis kontrolü yap
+           print(f"✅ Limit emirle kapandı! Kar elde edildi!")
+           self.update_stats("LIMIT_KAPAT", 0, 0, self.limit_price)
+           self.reset_position()
+           self.check_and_increase_initial_bet()
+           return self.current_initial_bet
+       else:
+           # Likidation! Bahis arttır ve yeni pozisyon aç
+           print(f"💥 Likidation! Pozisyon zorla kapatıldı!")
+           self.cancel_limit_order(symbol)
+           new_bet = current_bet * self.multiplier
+           
+           # Yeni pozisyon aç
+           current_price = self.get_price(symbol)
+           print(f"🔥 Likidation sonrası yeni pozisyon: ${new_bet:.2f} ({leverage}x)")
+           order = self.place_order(symbol, side, new_bet, leverage)
+           if order is None:
+               print("❌ Yeni pozisyon açılamadı!")
+               return current_bet
+           
+           # Pozisyon bilgilerini güncelle
+           executed_qty = float(order["cumExecQty"]) if order.get("cumExecQty") else float(order.get("qty", "0"))
+           executed_price = float(order["avgPrice"]) if order.get("avgPrice") else current_price
+           
+           if executed_qty == 0:
+               print("❌ Yeni pozisyon açılamadı!")
+               return current_bet
+               
+           self.position_opened = True
+           self.last_entry_price = executed_price
+           self.current_quantity = executed_qty
+           self.leverage = leverage
+           
+           # Yeni limit emir
+           self.set_limit_order(symbol, direction, profit_loss_percent)
+           self.update_stats("LİKİDASYON_YENİ", new_bet, 0, executed_price)
+           
+           return new_bet
+   
+   def update_stats(self, trade_type, amount, pnl=0, price=0):
+       self.stats['total_trades'] += 1
+       if not self.demo_mode and pnl != 0:
+           self.get_balance()
+       else:
+           self.stats['current_balance'] += pnl
+       self.stats['total_pnl'] += pnl
+       
+       if pnl > 0:
+           self.stats['winning_trades'] += 1
+           self.stats['current_consecutive_losses'] = 0
+       elif pnl < 0:
+           self.stats['losing_trades'] += 1
+           self.stats['current_consecutive_losses'] += 1
+           self.stats['max_consecutive_losses'] = max(self.stats['max_consecutive_losses'], 
+                                                    self.stats['current_consecutive_losses'])
+       
+       trade_data = {
+           'time': datetime.now().strftime('%H:%M:%S'),
+           'type': trade_type, 'amount': amount, 'price': price, 'pnl': pnl,
+           'balance': self.stats['current_balance'], 'consecutive_losses': self.stats['current_consecutive_losses']
+       }
+       self.stats['trade_history'].append(trade_data)
+       self.save_stats(trade_data)
+   
+   def save_stats(self, trade_data):
+       with open('bybitstatistics.txt', 'a', encoding='utf-8') as f:
+           if trade_data['type'] == 'SESSION_START':
+               f.write(f"\n{'='*80}\n🚀 YENİ SESSİON BAŞLADI - {self.stats['session_start']} 🚀\n{'='*80}\n")
+               f.write(f"💰 Başlangıç Sermayesi: {self.stats['initial_balance']} USDT\n")
+               f.write(f"🎮 Mod: {'DEMO (Test)' if self.demo_mode else 'GERÇEK'}\n")
+               f.write(f"💱 Symbol: {self.stats['symbol']} | ⚡ Kaldıraç: {self.stats['leverage']}x\n")
+               f.write(f"📈 Yön: {self.stats['direction']} | 💵 İlk Bahis: ${self.stats['initial_bet']}\n")
+               f.write(f"🔢 Çarpan: {self.stats['multiplier']}x | 📊 Kar/Zarar: {self.stats['profit_loss_percent']}%\n")
+               f.write(f"🎯 Sistem: POZISYON KAPATMA + YENİ AÇMA + LİKİDASYON KONTROLÜ\n")
+               if self.auto_increase_enabled:
+                   actual_turn = self.target_turn + 2
+                   f.write(f"🚀 Dinamik İlk Bahis: AÇIK (Seçilen: {self.target_turn}, Bakılan: {actual_turn}, Eşik: ${self.threshold_amount:.2f})\n")
+               else:
+                   f.write(f"🚀 Dinamik İlk Bahis: KAPALI\n")
+               f.write(f"{'-'*80}\n")
+           else:
+               if trade_data['type'] == 'İLK_BAHİS_ARTIŞI':
+                   f.write(f"[{trade_data['time']}] 🚀 İLK BAHİS ARTIŞI | "
+                          f"💵 Yeni İlk Bahis: ${trade_data['amount']:.2f} | "
+                          f"💰 Bakiye: ${trade_data['balance']:.2f}\n")
+               else:
+                   f.write(f"[{trade_data['time']}] {trade_data['type']} | "
+                          f"💵 ${trade_data['amount']:.2f} | 📈 {trade_data['price']:.8f} | "
+                          f"{'💚' if trade_data['pnl'] >= 0 else '💔'} PnL: ${trade_data['pnl']:.2f} | "
+                          f"💰 Bakiye: ${trade_data['balance']:.2f} | "
+                          f"🔥 Ard.Kayıp: {trade_data['consecutive_losses']}\n")
+   
+   def run_bot(self):
+       print("\n" + "="*60)
+       print("🤖 BYBIT FUTURES BOT - DİNAMİK İLK BAHİS SİSTEMİ 🤖")
+       print("="*60)
+       
+       mode = input("🎮 Mod seçin (1=Demo/Test, 2=Gerçek): ")
+       self.demo_mode = mode != "2"
+       self.base_url = "https://api-testnet.bybit.com" if self.demo_mode else "https://api.bybit.com"
+       
+       symbol = input("💱 İşlem çifti (BTCUSDT): ").upper() or "BTCUSDT"
+       
+       print("📋 Symbol bilgileri alınıyor...")
+       self.get_symbol_info(symbol)
+       
+       leverage = int(input("⚡ Kaldıraç (100): ") or "100")
+       direction = input("📈 Yön (long/short): ").lower()
+       initial_amount = float(input("💰 İlk bahis (USDT): "))
+       multiplier = float(input("🔢 Çarpan (2): ") or "2")
+       profit_loss_percent = float(input("📊 Kar/Zarar % (4): ") or "4")
+       
+       # Dinamik ilk bahis sistemi ayarları
+       auto_increase = input("\n🚀 Ardışık kaybettiğin turlardaki toplam kayıp miktarına göre ilk bahis artırılsın mı? (e/h): ").lower()
+       
+       if auto_increase in ['e', 'evet', 'y', 'yes']:
+           self.auto_increase_enabled = True
+           self.target_turn = int(input("🎯 Kaçıncı turdan sonraki toplam kayba göre bakılsın? (1-30): "))
+           self.multiplier = multiplier
+           self.original_initial_bet = initial_amount
+           self.current_initial_bet = initial_amount
+           
+           if self.demo_mode:
+               demo_balance = float(input("💼 Demo başlangıç sermayesi (1000): ") or "1000")
+               self.stats['current_balance'] = demo_balance
+           else:
+               print("💰 Gerçek bakiye kontrol ediliyor...")
+               real_balance = self.get_balance()
+               print(f"💰 Mevcut bakiye: ${real_balance:.2f} USDT")
+           
+           # İlk eşik hesaplama
+           self.update_threshold()
+           
+           print(f"\n✅ Dinamik İlk Bahis Sistemi Aktif!")
+           actual_turn = self.target_turn + 2
+           ##############################################################
+           print(f"🎯 Seçilen Tur: {self.target_turn} → Bakılan Tur: {actual_turn}")
+           print(f"💰 İlk Eşik: ${self.threshold_amount:.2f} USDT")
+           
+       else:
+           self.auto_increase_enabled = False
+           self.current_initial_bet = initial_amount
+           
+           if self.demo_mode:
+               demo_balance = float(input("💼 Demo başlangıç sermayesi (1000): ") or "1000")
+               self.stats['current_balance'] = demo_balance
+           else:
+               print("💰 Gerçek bakiye kontrol ediliyor...")
+               real_balance = self.get_balance()
+               print(f"💰 Mevcut bakiye: ${real_balance:.2f} USDT")
+           
+       self.stats['initial_balance'] = self.stats['current_balance']
+       self.stats['symbol'] = symbol
+       self.stats['leverage'] = leverage
+       self.stats['direction'] = direction.upper()
+       self.stats['initial_bet'] = initial_amount
+       self.stats['multiplier'] = multiplier
+       self.stats['profit_loss_percent'] = profit_loss_percent
+       self.update_stats("SESSION_START", 0)
+       
+       side = "Buy" if direction == "long" else "Sell"
+       current_bet = self.current_initial_bet
+       
+       print(f"\n🚀 Bot başlatıldı: {symbol} {direction.upper()} {leverage}x - LİKİDASYON KONTROLÜ")
+       print(f"💰 Sermaye: ${self.stats['current_balance']:.2f} | Mod: {'DEMO' if self.demo_mode else 'GERÇEK'}")
+       if self.auto_increase_enabled:
+           print(f"🚀 Dinamik İlk Bahis: AÇIK | Mevcut İlk Bahis: ${self.current_initial_bet:.2f}")
+       
+       while True:
+           try:
+               if not self.demo_mode:
+                   self.get_balance()
+               
+               current_price = self.get_price(symbol)
+               print(f"\n📊 Fiyat: ${current_price:.8f} | Bakiye: ${self.stats['current_balance']:.2f}")
+               if self.auto_increase_enabled:
+                   print(f"🚀 Mevcut İlk Bahis: ${self.current_initial_bet:.2f} | Eşik: ${self.threshold_amount:.2f}")
+               
+               # Pozisyon durumu kontrolü
+               actual_position_exists = self.get_position_info(symbol)
+               
+               if self.position_opened and not actual_position_exists:
+                   # Pozisyon kapanmış (likidation veya limit)
+                   current_bet = self.handle_position_closed(symbol, direction, current_bet, leverage, side, profit_loss_percent)
+                   time.sleep(2)
+                   continue
+               
+               if not self.position_opened:
+                   # İlk bahis artışı kontrolü
+                   self.check_and_increase_initial_bet()
+                   current_bet = self.current_initial_bet
+                   
+                   # Bakiye kontrolü
+                   if self.stats['current_balance'] < current_bet:
+                       print("⚠️ Yetersiz bakiye! Bot durduruluyor.")
+                       break
+                       
+                   print(f"🎯 Yeni pozisyon: ${current_bet:.2f} ({leverage}x kaldıraç)")
+                   order = self.place_order(symbol, side, current_bet, leverage)
+                   if order is None:
+                       print("💰 Hesap bakiyenizi kontrol edin!")
+                       break
+                   
+                   # Demo modda bakiye güncellemesi
+                   if self.demo_mode:
+                       self.stats['current_balance'] -= current_bet
+                   
+                   # Pozisyon bilgilerini kaydet
+                   executed_qty = float(order["cumExecQty"]) if order.get("cumExecQty") else float(order.get("qty", "0"))
+                   executed_price = float(order["avgPrice"]) if order.get("avgPrice") else current_price
+                   
+                   if executed_qty == 0:
+                       print("❌ Pozisyon açılamadı, tekrar deneniyor...")
+                       time.sleep(3)
+                       continue
+                   
+                   self.position_opened = True
+                   self.last_entry_price = executed_price
+                   self.current_quantity = executed_qty
+                   self.leverage = leverage
+                   
+                   # Limit emir koy
+                   self.set_limit_order(symbol, direction, profit_loss_percent)
+                   self.update_stats("AÇILIŞ", current_bet, 0, executed_price)
+                   
+               else:
+                   # Kayıp kontrolü
+                   change_pct = ((current_price - self.last_entry_price) / self.last_entry_price) * 100
+                   
+                   if (direction == "long" and change_pct <= -profit_loss_percent) or \
+                      (direction == "short" and change_pct >= profit_loss_percent):
+                       
+                       # Limit emri iptal et
+                       self.cancel_limit_order(symbol)
+                       
+                       # Mevcut pozisyonu kapat (PnL hesaplaması içinde)
+                       print(f"🔄 Pozisyon kapatılıyor...")
+                       if not self.close_position(symbol, side):
+                           print("❌ Pozisyon kapatılamadı!")
+                           time.sleep(3)
+                           continue
+                       
+                       time.sleep(1)
+                       
+                       # Yeni bahis miktarı
+                       current_bet *= multiplier
+                       
+                       if self.stats['current_balance'] < current_bet:
+                           print("⚠️ Yetersiz bakiye!")
+                           break
+                           
+                       print(f"🔥 Yeni pozisyon: ${current_bet:.2f} ({leverage}x)")
+                       order = self.place_order(symbol, side, current_bet, leverage)
+                       if order is None:
+                           print("❌ Yeni pozisyon açılamadı!")
+                           continue
+                       
+                       # Demo modda bakiye güncellemesi
+                       if self.demo_mode:
+                           self.stats['current_balance'] -= current_bet
+                       
+                       # Yeni pozisyon bilgileri
+                       executed_qty = float(order["cumExecQty"]) if order.get("cumExecQty") else float(order.get("qty", "0"))
+                       executed_price = float(order["avgPrice"]) if order.get("avgPrice") else current_price
+                       
+                       if executed_qty == 0:
+                           print("❌ Yeni pozisyon açılamadı!")
+                           continue
+                           
+                       self.position_opened = True
+                       self.last_entry_price = executed_price
+                       self.current_quantity = executed_qty
+                       
+                       # Yeni limit emir
+                       self.set_limit_order(symbol, direction, profit_loss_percent)
+                       self.update_stats("YENİ_POZİSYON", current_bet, 0, executed_price)
+               
+               time.sleep(3)
+               
+           except KeyboardInterrupt:
+               print(f"\n🛑 Bot durduruldu!")
+               if self.position_opened:
+                   self.cancel_limit_order(symbol)
+               break
+           except Exception as e:
+               print(f"❌ Hata: {e}")
+               time.sleep(3)
+
+if __name__ == "__main__":
+   print("🔐 API Bilgileri (Demo modda da gerçek fiyat için gerekli)")
+   api_key = input("ByBit API Key: ")
+   api_secret = input("API Secret: ")
+   
+   if not api_key or not api_secret:
+       print("⚠️ API bilgileri gerekli! (Gerçek fiyat çekmek için)")
+       exit()
+   
+   bot = BybitFuturesBot(api_key, api_secret)
+   bot.run_bot()

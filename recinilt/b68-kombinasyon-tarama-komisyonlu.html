@@ -1533,11 +1533,11 @@
         const calculateAdvancedScore = (result) => {
             const weights = {
                 finalBalance: 0.15,      // %15
-                maxLosses: 0.20,         // %20 (5 altı çok önemli)
+                maxLosses: 0.15,         // %20 (5 altı çok önemli)
                 trainingROI: 0.10,       // %10 (Daha az ağırlık)
                 validationROI: 0.25,     // %25 (Ana kriter)
                 sharpeRatio: 0.15,       // %15
-                statisticalSig: 0.15     // %15 (Artırıldı - güvenilirlik önemli)
+                statisticalSig: 0.20     // %15 (Artırıldı - güvenilirlik önemli)
             };
             
             // 1. Final Balance Score (son bakiye > başlangıç)
@@ -1599,82 +1599,107 @@
             return Math.max(0, finalScore);
         };
 
-     const processCandle = (candle, state, params) => {
-            const [, open, high, low] = candle.map((val, i) => i === 0 ? parseInt(val) : parseFloat(val));
+    const processCandle = (candle, state, params) => {
+        const [, open, high, low] = candle.map((val, i) => i === 0 ? parseInt(val) : parseFloat(val));
+        
+        // ✅ DOĞRU STOP LOSS HESAPLAMASI
+        const liquidationPercent = 100 / params.leverage; // Likidite seviyesi
+        const profitLossPercent = params.profitPercent; // Kar/zarar seviyesi
+        const stopLossPercent = Math.min(liquidationPercent, profitLossPercent); // Hangisi küçükse
+        
+        if (!state.position.isOpen) {
+            if (state.currentBet > state.initialBalance) {
+                state.betExceededCapital = true;
+            }
             
-            // ✅ DOĞRU STOP LOSS HESAPLAMASI
-            const liquidationPercent = 100 / params.leverage; // Likidite seviyesi
-            const profitLossPercent = params.profitPercent; // Kar/zarar seviyesi
-            const stopLossPercent = Math.min(liquidationPercent, profitLossPercent); // Hangisi küçükse
+            // 🆕 GİRİŞ KOMİSYONU HESAPLAMASI
+            const positionValue = state.currentBet * params.leverage;
+            const entryCommission = positionValue * 0.0005; // %0.05 taker komisyonu
+            const totalCost = state.currentBet + entryCommission;
             
-            if (!state.position.isOpen) {
-                if (state.currentBet > state.initialBalance) {
-                    state.betExceededCapital = true;
-                }
+            if (state.balance < totalCost) {
+                return false; // Yeterli bakiye yok
+            }
+        
+            state.position.isOpen = true;
+            state.position.entryPrice = open;
+            state.position.betAmount = state.currentBet;
+            state.balance -= totalCost; // Bahis + giriş komisyonu düş
+            state.totalTrades++;
+            return true;
+        }
+        
+        let profitTarget, stopLossPrice;
+        
+        if (params.direction === 'long') {
+            profitTarget = state.position.entryPrice * (1 + params.profitPercent / 100);
+            stopLossPrice = state.position.entryPrice * (1 - stopLossPercent / 100);
+            
+            // 🆕 KAR DURUMU - ÇIKIŞ KOMİSYONU DAHİL
+            if (high >= profitTarget) {
+                const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
+                const positionValue = state.currentBet * params.leverage;
+                const exitCommission = positionValue * 0.0005; // Çıkış komisyonu
                 
-                if (state.balance < state.currentBet) {
-                    return false;
-                }
-            
-                state.position.isOpen = true;
-                state.position.entryPrice = open;
-                state.position.betAmount = state.currentBet;
-                state.balance -= state.currentBet;
-                state.totalTrades++;
+                state.balance += (state.currentBet + profit - exitCommission); // Net kar
+                state.totalProfit += (profit - exitCommission); // Komisyon düşülmüş kar
+                state.winTrades++;
+                state.consecutiveLosses = 0;
+                state.currentBet = params.initialBet;
+                state.position.isOpen = false;
                 return true;
             }
             
-            let profitTarget, stopLossPrice;
-            
-            if (params.direction === 'long') {
-                profitTarget = state.position.entryPrice * (1 + params.profitPercent / 100);
-                stopLossPrice = state.position.entryPrice * (1 - stopLossPercent / 100); // ✅ Düzeltildi
+            // 🆕 ZARAR DURUMU - ÇIKIŞ KOMİSYONU DAHİL
+            if (low <= stopLossPrice) {
+                const positionValue = state.currentBet * params.leverage;
+                const exitCommission = positionValue * 0.0005; // Çıkış komisyonu
                 
-                if (high >= profitTarget) {
-                    const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
-                    state.balance += state.currentBet + profit;
-                    state.totalProfit += profit;
-                    state.winTrades++;
-                    state.consecutiveLosses = 0;
-                    state.currentBet = params.initialBet;
-                    state.position.isOpen = false;
-                    return true;
-                }
-                
-                if (low <= stopLossPrice) {
-                    state.totalLoss += state.currentBet;
-                    state.consecutiveLosses++;
-                    state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
-                    state.currentBet = state.currentBet * params.multiplier;
-                    state.position.isOpen = false;
-                    return true;
-                }
-            } else {
-                profitTarget = state.position.entryPrice * (1 - params.profitPercent / 100);
-                stopLossPrice = state.position.entryPrice * (1 + stopLossPercent / 100); // ✅ SHORT için de düzeltildi
-                
-                if (low <= profitTarget) {
-                    const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
-                    state.balance += state.currentBet + profit;
-                    state.totalProfit += profit;
-                    state.winTrades++;
-                    state.consecutiveLosses = 0;
-                    state.currentBet = params.initialBet;
-                    state.position.isOpen = false;
-                    return true;
-                }
-                
-                if (high >= stopLossPrice) {
-                    state.totalLoss += state.currentBet;
-                    state.consecutiveLosses++;
-                    state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
-                    state.currentBet = state.currentBet * params.multiplier;
-                    state.position.isOpen = false;
-                    return true;
-                }
+                state.balance -= exitCommission; // Zarar durumunda da komisyon ödenir
+                state.totalLoss += (state.currentBet + exitCommission); // Toplam kayıp (bahis + komisyon)
+                state.consecutiveLosses++;
+                state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
+                state.currentBet = state.currentBet * params.multiplier;
+                state.position.isOpen = false;
+                return true;
             }
-            return true;
-        };
+        } else {
+            // SHORT POZİSYON
+            profitTarget = state.position.entryPrice * (1 - params.profitPercent / 100);
+            stopLossPrice = state.position.entryPrice * (1 + stopLossPercent / 100);
+            
+            // 🆕 KAR DURUMU - SHORT
+            if (low <= profitTarget) {
+                const profit = state.currentBet * params.leverage * (params.profitPercent / 100);
+                const positionValue = state.currentBet * params.leverage;
+                const exitCommission = positionValue * 0.0005;
+                
+                state.balance += (state.currentBet + profit - exitCommission);
+                state.totalProfit += (profit - exitCommission);
+                state.winTrades++;
+                state.consecutiveLosses = 0;
+                state.currentBet = params.initialBet;
+                state.position.isOpen = false;
+                return true;
+            }
+            
+            // 🆕 ZARAR DURUMU - SHORT
+            if (high >= stopLossPrice) {
+                const positionValue = state.currentBet * params.leverage;
+                const exitCommission = positionValue * 0.0005;
+                
+                state.balance -= exitCommission;
+                state.totalLoss += (state.currentBet + exitCommission);
+                state.consecutiveLosses++;
+                state.maxConsecutiveLosses = Math.max(state.maxConsecutiveLosses, state.consecutiveLosses);
+                state.currentBet = state.currentBet * params.multiplier;
+                state.position.isOpen = false;
+                return true;
+            }
+        }
+        return true;
+    };
+
 
      const updateDrawdown = (state) => {
          if (state.balance > state.peakBalance) state.peakBalance = state.balance;
