@@ -1475,7 +1475,7 @@
           let totalLossAccumulated = 0;
           const winMultiplierValue = 1 + (state.leverage * (state.profitPercent / 100));
           
-          for (let round = 1; round <= state.maxRounds; round++) {
+          for (let round = 0; round <= state.maxRounds; round++) {
               const totalWin = bet * winMultiplierValue;
               totalLossAccumulated += bet;
               const netProfit = totalWin - totalLossAccumulated;
