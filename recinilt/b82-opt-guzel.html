@@ -581,51 +581,51 @@
        }
    };
 
-     const generateValues = (range, parameterType) => {
-           const values = [];
-           const count = Math.max(1, Math.floor(range.count));
-           
-           if (count === 1) {
-               values.push(range.min);
-               return values;
-           }
-           
-           // Her parametre için ayrı radio button değerini kontrol et
-           const parameterMethod = document.querySelector(`input[name="${parameterType}Method"]:checked`)?.value || 'geometric';
-           
-           if (parameterMethod === 'step') {
-               // ADIM: Sabit artış (5-75-4 → 5,9,13,17,21...75'e kadar)
-                const stepSize = range.count;
-                const maxSteps = Math.ceil((range.max - range.min) / stepSize) + 1; // Max adım sayısı
-                
-                for (let value = range.min; value <= range.max && values.length < maxSteps; value += stepSize) {
-                    // Değeri max'tan büyük olmasına izin verme
-                    const finalValue = Math.min(value, range.max);
-                    values.push(Math.round(finalValue * 1000) / 1000);
-                    
-                    // Eğer max'a ulaştıysak dur
-                    if (finalValue >= range.max) break;
-                }
-           } else if (parameterMethod === 'linear') {
-               // LİNEER PARÇA: Eşit aralıklı (son değer dahil)
-               // 2-16-4 → 2, 6.67, 11.33, 16
-               const step = (range.max - range.min) / (count - 1);
-               for (let i = 0; i < count; i++) {
-                   const value = range.min + (step * i);
-                   values.push(Math.round(value * 1000) / 1000);
-               }
-           } else {
-               // GEOMETRİK PARÇA: Eşit yüzdeli artış (mevcut sistem)
-               // 2-16-4 → 2, 4, 8, 16 (her biri bir öncekinin 2 katı)
-               for (let i = 0; i < count; i++) {
-                   const ratio = i / (count - 1);
-                   const value = range.min * Math.pow(range.max / range.min, ratio);
-                   values.push(Math.round(value * 1000) / 1000);
-               }
-           }
-           
-           return values;
-       };
+   const generateValues = (range, parameterType) => {
+        const values = [];
+        // ❌ count hesabını kaldır, direkt range.count kullan
+        
+        // Her parametre için ayrı radio button değerini kontrol et
+        const parameterMethod = document.querySelector(`input[name="${parameterType}Method"]:checked`)?.value || 'geometric';
+        
+        if (parameterMethod === 'step') {
+            // ADIM: Sabit artış
+            const stepSize = range.count;
+            
+            // Geçersiz adım kontrolü
+            if (stepSize <= 0) {
+                values.push(range.min);
+                return values;
+            }
+            
+            // Normal adım işlemi
+            for (let value = range.min; value <= range.max; value += stepSize) {
+                values.push(Math.round(value * 1000) / 1000);
+                // Güvenlik: çok fazla değer üretme
+                if (values.length > 1000) break;
+            }
+            
+        } else if (parameterMethod === 'linear') {
+            // LİNEER: Eşit aralıklı
+            const count = Math.max(2, Math.floor(range.count)); // En az 2 değer
+            const step = (range.max - range.min) / (count - 1);
+            for (let i = 0; i < count; i++) {
+                const value = range.min + (step * i);
+                values.push(Math.round(value * 1000) / 1000);
+            }
+        } else {
+            // GEOMETRİK: Üstel artış
+            const count = Math.max(2, Math.floor(range.count)); // En az 2 değer
+            for (let i = 0; i < count; i++) {
+                const ratio = i / (count - 1);
+                const value = range.min * Math.pow(range.max / range.min, ratio);
+                values.push(Math.round(value * 1000) / 1000);
+            }
+        }
+        
+        return values;
+    };
+
 
    const calculateInitialBet = (minBetSize, leverage) => Math.max(minBetSize / leverage, 0.1);
 
