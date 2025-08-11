@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kripto Para Volatilite Analiz Aracı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        }
+
+        .progress-container {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .results {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+            flex: 1;
+            text-align: right;
+        }
+
+        .volatility-highlight {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.3em;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .spinner {
+            border: 4px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .top100-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .top100-table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .top100-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e1e5e9;
+            color: #333;
+        }
+
+        .top100-table tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .rank-cell {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .success {
+            background: #51cf66;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .status-log {
+            background: #f8f9fa;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .log-success { background: #d4edda; color: #155724; }
+        .log-error { background: #f8d7da; color: #721c24; }
+        .log-info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💹 Kripto Para Volatilite Analiz Aracı</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('upload')">📁 Dosya Yükle</button>
+            <button class="tab" onclick="switchTab('download')">📥 Veri İndir</button>
+            <button class="tab" onclick="switchTab('bulk')">🔄 Toplu Analiz</button>
+        </div>
+
+        <!-- Dosya Yükleme Tab -->
+        <div id="upload-tab" class="tab-content active">
+            <div class="section">
+                <h2>📊 Mevcut Dosya Analizi</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📊</div>
+                    <div class="upload-text">JSON dosyasını buraya sürükleyin veya tıklayarak seçin</div>
+                    <button class="btn">Dosya Seç</button>
+                    <input type="file" id="fileInput" accept=".json">
+                </div>
+            </div>
+        </div>
+
+        <!-- Manuel İndirme Tab -->
+        <div id="download-tab" class="tab-content">
+            <div class="section">
+                <h2>📥 Binance Veri İndirme</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="coinPair">Coin Çifti:</label>
+                        <input type="text" id="coinPair" placeholder="BTCUSDT" value="BTCUSDT">
+                        <small style="color: #666; margin-top: 5px;">Örn: BTCUSDT, ETHUSDT, DOGEUSDT</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="interval">Zaman Dilimi:</label>
+                        <select id="interval">
+                            <option value="1m">1 Dakika</option>
+                            <option value="5m">5 Dakika</option>
+                            <option value="15m">15 Dakika</option>
+                            <option value="1h">1 Saat</option>
+                            <option value="4h">4 Saat</option>
+                            <option value="12h">12 Saat</option>
+                            <option value="1d" selected>1 Gün</option>
+                            <option value="1w">1 Hafta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Başlangıç Tarihi:</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Bitiş Tarihi:</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <button class="btn" onclick="downloadSingleCoin()">📥 Verileri İndir ve Analiz Et</button>
+            </div>
+        </div>
+
+        <!-- Toplu Analiz Tab -->
+        <div id="bulk-tab" class="tab-content">
+            <div class="section">
+                <h2>🔄 Top 100 Coin Toplu Analiz</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="bulkInterval">Zaman Dilimi:</label>
+                        <select id="bulkInterval">
+                            <option value="1h">1 Saat</option>
+                            <option value="4h">4 Saat</option>
+                            <option value="12h">12 Saat</option>
+                            <option value="1d" selected>1 Gün</option>
+                            <option value="1w">1 Hafta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkStartDate">Başlangıç Tarihi:</label>
+                        <input type="date" id="bulkStartDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="bulkEndDate">Bitiş Tarihi:</label>
+                        <input type="date" id="bulkEndDate">
+                    </div>
+                </div>
+                <div style="margin: 20px 0;">
+                    <button class="btn" onclick="startBulkAnalysis()" id="startBulkBtn">🚀 Toplu Analizi Başlat</button>
+                    <button class="btn btn-danger" onclick="stopBulkAnalysis()" id="stopBulkBtn" style="display: none;">⏹️ Durdur</button>
+                </div>
+                
+                <div class="progress-container" id="bulkProgress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0 / 100 coin analiz edildi</div>
+                </div>
+
+                <div class="status-log" id="statusLog" style="display: none;"></div>
+
+                <div id="top100Results" style="display: none;">
+                    <h3>📊 Top 100 Coin Volatilite Sıralaması</h3>
+                    <table class="top100-table">
+                        <thead>
+                            <tr>
+                                <th>Sıra</th>
+                                <th>Coin Çifti</th>
+                                <th>Medyan Volatilite</th>
+                                <th>Ortalama Volatilite</th>
+                                <th>Min Volatilite</th>
+                                <th>Max Volatilite</th>
+                                <th>Veri Sayısı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top100TableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div id="loadingText">Dosya analiz ediliyor...</div>
+        </div>
+
+        <div class="error" id="error"></div>
+        <div class="success" id="success"></div>
+
+        <div class="results" id="results">
+            <h2 style="color: #333; margin-bottom: 20px; text-align: center;">📈 Analiz Sonuçları</h2>
+            
+            <div class="result-item">
+                <span class="result-label">Coin Çifti:</span>
+                <span class="result-value" id="symbol">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Zaman Dilimi:</span>
+                <span class="result-value" id="intervalDisplay">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Başlangıç Tarihi:</span>
+                <span class="result-value" id="startDateDisplay">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Bitiş Tarihi:</span>
+                <span class="result-value" id="endDateDisplay">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Toplam Veri Sayısı:</span>
+                <span class="result-value" id="candleCount">-</span>
+            </div>
+            
+            <div class="result-item">
+                <span class="result-label">Ortalama Volatilite:</span>
+                <span class="result-value volatility-highlight" id="avgVolatility">-</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="minVolatility">-</div>
+                    <div class="stat-label">Minimum Volatilite</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="maxVolatility">-</div>
+                    <div class="stat-label">Maksimum Volatilite</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="medianVolatility">-</div>
+                    <div class="stat-label">Medyan Volatilite</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let bulkAnalysisRunning = false;
+        let bulkAnalysisStop = false;
+        let top100Data = [];
+
+        // Top 100 coin listesi (Binance'de hacim bazında)
+        const top100CoinsEski = [
+            'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'SHIBUSDT', 'AVAXUSDT', 'DOTUSDT',
+            'TRXUSDT', 'LINKUSDT', 'BCHUSDT', 'NEARUSDT', 'MATICUSDT', 'LTCUSDT', 'UNIUSDT', 'ICPUSDT', 'APTUSDT', 'LEOUSDT',
+            'ETCUSDT', 'XLMUSDT', 'FILUSDT', 'STXUSDT', 'ATOMUSDT', 'CROUSDT', 'VETUSDT', 'ALGOUSDT', 'AAVEUSDT', 'MANAUSDT',
+            'SANDUSDT', 'INJUSDT', 'OPUSDT', 'ARBUSDT', 'GRTUSDT', 'IMXUSDT', 'HBARUSDT', 'MKRUSDT', 'THETAUSDT', 'APEUSDT',
+            'AXSUSDT', 'FLOWUSDT', 'EOSUSDT', 'FTMUSDT', 'XTZUSDT', 'QNTUSDT', 'EGLDUSDT', 'CHZUSDT', 'XMRUSDT', 'KLAYUSDT',
+            'ONEUSDT', 'GALAUSDT', 'ROSEUSDT', 'ZILUSDT', 'WAVESUSDT', 'LRCUSDT', 'ENJUSDT', 'CRVUSDT', 'COMPUSDT', 'YFIUSDT',
+            'SNXUSDT', 'DASHUSDT', 'ZECUSDT', 'BATUSDT', 'IOTAUSDT', 'RENUSDT', 'KNCUSDT', 'RLCUSDT', 'STORJUSDT', 'BNTUSDT',
+            'HOTUSDT', 'NANOUSDT', 'SCUSDT', 'DGBUSDT', 'RVNUSDT', 'ICXUSDT', 'ONTUSDT', 'XEMUSDT', 'CKBUSDT', 'CELRUSDT',
+            'ZILUSDT', 'ZENUSDT', 'FETUSDT', 'COTIUSDT', 'CHRUSDT', 'BANDUSDT', 'BELUSDT', 'OGNUSDT', 'WTCUSDT', 'NKNUSDT',
+            'OCEANUSDT', 'CTXCUSDT', 'KEYUSDT', 'DOCKUSDT', 'WANUSDT', 'FUNUSDT', 'CVCUSDT', 'BTTUSDT', 'WINUSDT', 'COCOSUSDT'
+        ];
+        // Güncel Top 200 coin listesi (Binance'de hacim bazında)
+        const top100Coins = [
+            'BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT', 'XRPUSDT', 'DOGEUSDT', 'ADAUSDT', 'SHIBUSDT', 'AVAXUSDT', 'DOTUSDT',
+            'TRXUSDT', 'LINKUSDT', 'BCHUSDT', 'NEARUSDT', 'MATICUSDT', 'LTCUSDT', 'UNIUSDT', 'ICPUSDT', 'APTUSDT', 'LEOUSDT',
+            'ETCUSDT', 'XLMUSDT', 'FILUSDT', 'STXUSDT', 'ATOMUSDT', 'CROUSDT', 'VETUSDT', 'ALGOUSDT', 'AAVEUSDT', 'MANAUSDT',
+            'SANDUSDT', 'INJUSDT', 'OPUSDT', 'ARBUSDT', 'GRTUSDT', 'IMXUSDT', 'HBARUSDT', 'MKRUSDT', 'THETAUSDT', 'APEUSDT',
+            'AXSUSDT', 'FLOWUSDT', 'EOSUSDT', 'FTMUSDT', 'XTZUSDT', 'QNTUSDT', 'EGLDUSDT', 'CHZUSDT', 'XMRUSDT', 'KLAYUSDT',
+            'ONEUSDT', 'GALAUSDT', 'ROSEUSDT', 'ZILUSDT', 'WAVESUSDT', 'LRCUSDT', 'ENJUSDT', 'CRVUSDT', 'COMPUSDT', 'YFIUSDT',
+            'SNXUSDT', 'DASHUSDT', 'ZECUSDT', 'BATUSDT', 'IOTAUSDT', 'RENUSDT', 'KNCUSDT', 'RLCUSDT', 'STORJUSDT', 'BNTUSDT',
+            'HOTUSDT', 'NANOUSDT', 'SCUSDT', 'DGBUSDT', 'RVNUSDT', 'ICXUSDT', 'ONTUSDT', 'XEMUSDT', 'CKBUSDT', 'CELRUSDT',
+            'ZENUSDT', 'FETUSDT', 'COTIUSDT', 'CHRUSDT', 'BANDUSDT', 'BELUSDT', 'OGNUSDT', 'WTCUSDT', 'NKNUSDT', 'COCOSUSDT',
+            'OCEANUSDT', 'CTXCUSDT', 'KEYUSDT', 'DOCKUSDT', 'WANUSDT', 'FUNUSDT', 'CVCUSDT', 'BTTUSDT', 'WINUSDT', 'PERPUSDT',
+            'SUIUSDT', 'PEPEUSDT', 'TONUSDT', 'TAOUSDT', 'TIAUSDT', 'WLDUSDT', 'RENDERUSDT', 'KASUSDT', 'BONKUSDT', 'STRKUSDT',
+            'NOTUSDT', 'WIFUSDT', 'POPCATUSDT', 'FLOKIUSDT', 'JASMYUSDT', 'JETOUSDT', 'LDOUSDT', 'ONDOUSDT', 'SEIUSDT', 'JUPUSDT',
+            'AIUSDT', 'DYDXUSDT', 'RAYUSDT', 'MEMEUSDT', 'BNXUSDT', 'ALTUSDT', 'ARKMUSDT', 'UMAUSDT', 'PENGUUSDT', 'PYTHUSDT',
+            'REIUSDT', 'AKROUSDT', 'AGIXUSDT', 'CFXUSDT', 'MAGICUSDT', 'GALOUSDT', 'DUSKUSDT', 'EDUUSDT', 'IDUSDT', 'MAVUSDT',
+            'RDNTUSDT', 'HOOKUSDT', 'GASUSDT', 'GLMRUSDT', 'ARKUSDT', 'LQTYUSDT', 'IQUSDT', 'NTRNUSDT', 'TIAUSDT', 'MNTUSDT',
+            'COMBOUSDT', 'MAVAUSDT', 'PENDLEUSDT', 'SAFEUSDT', 'XVGUSDT', 'ARDROUSDT', 'NEOUSDT', 'GODSUSDT', 'SXPUSDT', 'CAKEUSDT',
+            'FIDAUSDT', 'GMXUSDT', 'MASKUSDT', 'TOKENUSDT', 'LPTUSDT', 'HIGHUSDT', 'BADGERUSDT', 'ENSUSDT', 'ACHUSDT', 'BLUR',
+            'C98USDT', 'LINAUSDT', 'API3USDT', 'SPELLUSDT', 'BEAMXUSDT', 'TRUUSDT', 'ORBSUSDT', 'ALPINEUSD', 'PHBUSDT', 'ASTRUSDT',
+            'LEVERUSDT', 'RIFUSDT', 'POWRUSDT', 'BURGERUSDT', 'SLPUSDT', 'QUICKUSDT', 'SUPERUSDT', 'EPSUSDT', 'TUSDT', 'FRONTUSDT',
+            'CVPUSDT', 'REPUSDT', 'ACMUSDT', 'VOXELUSDT', 'ANCUSDT', 'GRTUSDT', 'KLAYUSDT', 'AGLDUSDT', 'RADUSDT', 'FISUSDT'
+            ];
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+
+            hideElements();
+        }
+
+        // Upload area handlers
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // File handling
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showError('Lütfen geçerli bir JSON dosyası seçin.');
+                return;
+            }
+
+            hideElements();
+            showLoading('Dosya analiz ediliyor...');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    analyzeFileData(data);
+                } catch (err) {
+                    showError('Dosya okunamadı. Geçerli bir JSON dosyası olduğundan emin olun.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Single coin download
+        async function downloadSingleCoin() {
+            const coinPair = document.getElementById('coinPair').value.trim().toUpperCase();
+            const interval = document.getElementById('interval').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!coinPair) {
+                showError('Lütfen bir coin çifti girin.');
+                return;
+            }
+
+            if (!startDate || !endDate) {
+                showError('Lütfen başlangıç ve bitiş tarihlerini seçin.');
+                return;
+            }
+
+            hideElements();
+            showLoading('Binance\'dan veriler indiriliyor...');
+
+            try {
+                const data = await fetchBinanceData(coinPair, interval, startDate, endDate);
+                const formattedData = formatBinanceData(data, coinPair, interval, startDate, endDate);
+                
+                // Save file
+                downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                
+                // Analyze
+                analyzeData(formattedData);
+                showSuccess('Veriler başarıyla indirildi ve analiz edildi!');
+
+            } catch (error) {
+                showError(`Veri indirme hatası: ${error.message}`);
+            }
+        }
+
+        // Bulk analysis
+        async function startBulkAnalysis() {
+            if (bulkAnalysisRunning) return;
+
+            bulkAnalysisRunning = true;
+            bulkAnalysisStop = false;
+            top100Data = [];
+
+            const interval = document.getElementById('bulkInterval').value;
+            const startDate = document.getElementById('bulkStartDate').value;
+            const endDate = document.getElementById('bulkEndDate').value;
+
+            if (!startDate || !endDate) {
+                showError('Lütfen başlangıç ve bitiş tarihlerini seçin.');
+                bulkAnalysisRunning = false;
+                return;
+            }
+
+            document.getElementById('startBulkBtn').style.display = 'none';
+            document.getElementById('stopBulkBtn').style.display = 'inline-block';
+            document.getElementById('bulkProgress').style.display = 'block';
+            document.getElementById('statusLog').style.display = 'block';
+            document.getElementById('top100Results').style.display = 'block';
+
+            hideElements();
+            addLog('Toplu analiz başlatılıyor...', 'info');
+
+            try {
+                let completed = 0;
+                const total = top100Coins.length;
+
+                for (let i = 0; i < total && !bulkAnalysisStop; i++) {
+                    const coinPair = top100Coins[i];
+                    
+                    try {
+                        addLog(`${coinPair} indiriliyor...`, 'info');
+                        
+                        const data = await fetchBinanceData(coinPair, interval, startDate, endDate);
+                        const formattedData = formatBinanceData(data, coinPair, interval, startDate, endDate);
+                        
+                        // Save file
+                        downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                        
+                        // Analyze
+                        const analysis = analyzeDataForBulk(formattedData);
+                        
+                        if (analysis) {
+                            analysis.symbol = coinPair;
+                            top100Data.push(analysis);
+                            
+                            // Sort by median volatility (descending)
+                            top100Data.sort((a, b) => b.medianVolatility - a.medianVolatility);
+                            
+                            updateTop100Table();
+                            addLog(`✅ ${coinPair} başarıyla analiz edildi`, 'success');
+                        }
+
+                        completed++;
+                        updateProgress(completed, total);
+                        
+                        // Rate limiting
+                        await new Promise(resolve => setTimeout(resolve, 100));
+
+                    } catch (error) {
+                        addLog(`❌ ${coinPair} hatası: ${error.message}`, 'error');
+                    }
+                }
+
+                if (!bulkAnalysisStop) {
+                    addLog(`🎉 Toplu analiz tamamlandı! ${completed} coin başarıyla analiz edildi.`, 'success');
+                }
+
+            } catch (error) {
+                addLog(`❌ Toplu analiz hatası: ${error.message}`, 'error');
+            }
+
+            bulkAnalysisRunning = false;
+            document.getElementById('startBulkBtn').style.display = 'inline-block';
+            document.getElementById('stopBulkBtn').style.display = 'none';
+        }
+
+        function stopBulkAnalysis() {
+            bulkAnalysisStop = true;
+            bulkAnalysisRunning = false;
+            addLog('⏹️ Toplu analiz durduruldu', 'info');
+            document.getElementById('startBulkBtn').style.display = 'inline-block';
+            document.getElementById('stopBulkBtn').style.display = 'none';
+        }
+
+        // Binance API Functions with codetabs proxy
+        async function fetchBinanceData(symbol, interval, startDate, endDate) {
+            const startTime = new Date(startDate).getTime();
+            const endTime = new Date(endDate).getTime();
+            const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&startTime=${startTime}&endTime=${endTime}&limit=1000`;
+            const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+            
+            const response = await fetch(proxyUrl);
+            if (!response.ok) throw new Error(`${symbol} verisi alınamadı`);
+            return await response.json();
+        }
+
+        // Data formatting
+        function formatBinanceData(data, symbol, interval, startDate, endDate) {
+            const formattedData = data.map(candle => {
+                return [
+                    new Date(candle[0]).toISOString(), // timestamp
+                    parseFloat(candle[1]), // open
+                    parseFloat(candle[2]), // high
+                    parseFloat(candle[3]), // low
+                    parseFloat(candle[4]), // close
+                    parseFloat(candle[5])  // volume
+                ];
+            });
+
+            return {
+                symbol: symbol,
+                interval: interval,
+                startDate: startDate,
+                endDate: endDate,
+                dataCount: formattedData.length,
+                data: formattedData,
+                downloadDate: new Date().toISOString()
+            };
+        }
+
+        // Analysis functions
+        function analyzeFileData(data) {
+            try {
+                if (!data.data || !Array.isArray(data.data)) {
+                    throw new Error('Geçersiz veri formatı');
+                }
+
+                const analysis = calculateVolatility(data.data);
+                displayResults(data, analysis);
+
+            } catch (err) {
+                showError(`Veri analiz edilirken hata oluştu: ${err.message}`);
+            }
+        }
+
+        function analyzeData(data) {
+            try {
+                if (!data.data || !Array.isArray(data.data)) {
+                    throw new Error('Geçersiz veri formatı');
+                }
+
+                const analysis = calculateVolatility(data.data);
+                displayResults(data, analysis);
+
+            } catch (err) {
+                showError(`Veri analiz edilirken hata oluştu: ${err.message}`);
+            }
+        }
+
+        function analyzeDataForBulk(data) {
+            try {
+                if (!data.data || !Array.isArray(data.data)) {
+                    return null;
+                }
+
+                return calculateVolatility(data.data);
+
+            } catch (err) {
+                return null;
+            }
+        }
+
+        function calculateVolatility(candleData) {
+            const volatilities = [];
+
+            candleData.forEach((candle, index) => {
+                if (candle.length >= 5) {
+                    const [timestamp, open, high, low, close, volume] = candle;
+                    if (low > 0) {
+                        const volatility = (high - low) / low;
+                        volatilities.push(volatility);
+                    }
+                }
+            });
+
+            if (volatilities.length === 0) {
+                throw new Error('Hesaplanabilir veri bulunamadı');
+            }
+
+            const avgVolatility = volatilities.reduce((sum, vol) => sum + vol, 0) / volatilities.length;
+            const minVolatility = Math.min(...volatilities);
+            const maxVolatility = Math.max(...volatilities);
+            
+            const sortedVolatilities = [...volatilities].sort((a, b) => a - b);
+            const medianVolatility = sortedVolatilities.length % 2 === 0
+                ? (sortedVolatilities[sortedVolatilities.length / 2 - 1] + sortedVolatilities[sortedVolatilities.length / 2]) / 2
+                : sortedVolatilities[Math.floor(sortedVolatilities.length / 2)];
+
+            return {
+                count: volatilities.length,
+                avgVolatility,
+                minVolatility,
+                maxVolatility,
+                medianVolatility
+            };
+        }
+
+        function displayResults(data, analysis) {
+            const formatDate = (dateStr) => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('tr-TR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            };
+
+            const intervalMap = {
+                '1m': '1 Dakika',
+                '5m': '5 Dakika',
+                '15m': '15 Dakika',
+                '30m': '30 Dakika',
+                '1h': '1 Saat',
+                '4h': '4 Saat',
+                '12h': '12 Saat',
+                '1d': '1 Gün',
+                '1w': '1 Hafta',
+                '1M': '1 Ay'
+            };
+
+            document.getElementById('symbol').textContent = data.symbol || 'N/A';
+            document.getElementById('intervalDisplay').textContent = intervalMap[data.interval] || data.interval || 'N/A';
+            document.getElementById('startDateDisplay').textContent = data.startDate ? formatDate(data.startDate) : 'N/A';
+            document.getElementById('endDateDisplay').textContent = data.endDate ? formatDate(data.endDate) : 'N/A';
+            document.getElementById('candleCount').textContent = analysis.count.toLocaleString('tr-TR');
+            document.getElementById('avgVolatility').textContent = `%${(analysis.avgVolatility * 100).toFixed(4)}`;
+            document.getElementById('minVolatility').textContent = `%${(analysis.minVolatility * 100).toFixed(4)}`;
+            document.getElementById('maxVolatility').textContent = `%${(analysis.maxVolatility * 100).toFixed(4)}`;
+            document.getElementById('medianVolatility').textContent = `%${(analysis.medianVolatility * 100).toFixed(4)}`;
+
+            hideElements();
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Progress and UI functions
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = `${current} / ${total} coin analiz edildi`;
+        }
+
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('statusLog');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString('tr-TR')}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateTop100Table() {
+            const tbody = document.getElementById('top100TableBody');
+            tbody.innerHTML = '';
+
+            top100Data.forEach((coin, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="rank-cell">${index + 1}</td>
+                    <td><strong>${coin.symbol}</strong></td>
+                    <td><strong>%${(coin.medianVolatility * 100).toFixed(4)}</strong></td>
+                    <td>%${(coin.avgVolatility * 100).toFixed(4)}</td>
+                    <td>%${(coin.minVolatility * 100).toFixed(4)}</td>
+                    <td>%${(coin.maxVolatility * 100).toFixed(4)}</td>
+                    <td>${coin.count.toLocaleString('tr-TR')}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // File download function
+        function downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // UI helper functions
+        function showLoading(text = 'Yükleniyor...') {
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function showError(message) {
+            hideElements();
+            document.getElementById('error').textContent = message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        function showSuccess(message) {
+            document.getElementById('success').textContent = message;
+            document.getElementById('success').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('success').style.display = 'none';
+            }, 5000);
+        }
+
+        function hideElements() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default dates (last 30 days)
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+            
+            document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('bulkStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('bulkEndDate').value = today.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>
