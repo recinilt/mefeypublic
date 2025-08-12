@@ -480,11 +480,6 @@
 
                 <div id="top100Results" style="display: none;">
                     <h3>📊 Top 100 Coin Volatilite Sıralaması</h3>
-                    <div style="margin: 15px 0; text-align: center;">
-                        <button class="btn" onclick="exportToExcel()" id="exportBtn" style="background: linear-gradient(45deg, #28a745, #20c997);">
-                            📊 Excel Olarak İndir
-                        </button>
-                    </div>
                     <table class="top100-table">
                         <thead>
                             <tr>
@@ -710,7 +705,6 @@
 
         // Bulk analysis
         async function startBulkAnalysis() {
-            document.getElementById('exportBtn').style.display = 'none';
             if (bulkAnalysisRunning) return;
 
             bulkAnalysisRunning = true;
@@ -984,13 +978,6 @@
                 `;
                 tbody.appendChild(row);
             });
-
-            // Excel export butonunu göster
-            if (top100Data.length > 0) {
-                document.getElementById('exportBtn').style.display = 'inline-block';
-            } else {
-                document.getElementById('exportBtn').style.display = 'none';
-            }
         }
 
         // File download function
@@ -1004,49 +991,6 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }
-
-        // Excel export function
-        function exportToExcel() {
-            const interval = document.getElementById('bulkInterval').value;
-            const startDate = document.getElementById('bulkStartDate').value;
-            const endDate = document.getElementById('bulkEndDate').value;
-            
-            // Excel dosya adı oluştur
-            const fileName = `Volatilite_Tablosu_${interval}_${startDate}_${endDate}.xlsx`;
-            
-            // Tablo verilerini hazırla
-            const headers = ['Sıra', 'Coin Çifti', 'Medyan Volatilite (%)', 'Ortalama Volatilite (%)', 'Min Volatilite (%)', 'Max Volatilite (%)', 'Veri Sayısı'];
-            
-            const rows = top100Data.map((coin, index) => [
-                index + 1,
-                coin.symbol,
-                (coin.medianVolatility * 100).toFixed(4),
-                (coin.avgVolatility * 100).toFixed(4),
-                (coin.minVolatility * 100).toFixed(4),
-                (coin.maxVolatility * 100).toFixed(4),
-                coin.count
-            ]);
-            
-            // CSV formatında veri oluştur (Excel otomatik açar)
-            let csvContent = '\uFEFF'; // UTF-8 BOM
-            csvContent += headers.join('\t') + '\n';
-            rows.forEach(row => {
-                csvContent += row.join('\t') + '\n';
-            });
-            
-            // Dosyayı indir
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            showSuccess('Excel dosyası başarıyla indirildi!');
         }
 
         // UI helper functions
