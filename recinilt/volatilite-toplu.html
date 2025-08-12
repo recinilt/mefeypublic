@@ -458,6 +458,12 @@
                         <input type="date" id="bulkEndDate">
                     </div>
                 </div>
+                <div style="margin: 15px 0;">
+                    <label style="display: flex; align-items: center; gap: 10px; font-size: 1em;">
+                        <input type="checkbox" id="downloadFiles" style="transform: scale(1.2);">
+                        <span>Analiz edilen dosyaları otomatik indir</span>
+                    </label>
+                </div>
                 <div style="margin: 20px 0;">
                     <button class="btn" onclick="startBulkAnalysis()" id="startBulkBtn">🚀 Toplu Analizi Başlat</button>
                     <button class="btn btn-danger" onclick="stopBulkAnalysis()" id="stopBulkBtn" style="display: none;">⏹️ Durdur</button>
@@ -685,8 +691,11 @@
                 const data = await fetchBinanceData(coinPair, interval, startDate, endDate);
                 const formattedData = formatBinanceData(data, coinPair, interval, startDate, endDate);
                 
-                // Save file
-                downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                // Save file (only if checkbox is checked)
+                const shouldDownload = document.getElementById('downloadFiles').checked;
+                if (shouldDownload) {
+                    downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                }
                 
                 // Analyze
                 analyzeData(formattedData);
