@@ -691,11 +691,8 @@
                 const data = await fetchBinanceData(coinPair, interval, startDate, endDate);
                 const formattedData = formatBinanceData(data, coinPair, interval, startDate, endDate);
                 
-                // Save file (only if checkbox is checked)
-                const shouldDownload = document.getElementById('downloadFiles').checked;
-                if (shouldDownload) {
-                    downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
-                }
+                // Save file
+                downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
                 
                 // Analyze
                 analyzeData(formattedData);
@@ -746,8 +743,11 @@
                         const data = await fetchBinanceData(coinPair, interval, startDate, endDate);
                         const formattedData = formatBinanceData(data, coinPair, interval, startDate, endDate);
                         
-                        // Save file
-                        downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                        // Save file (only if checkbox is checked)
+                        const shouldDownload = document.getElementById('downloadFiles').checked;
+                        if (shouldDownload) {
+                            downloadJSON(formattedData, `${coinPair}_${interval}_Volatilite_${startDate}_${endDate}.json`);
+                        }
                         
                         // Analyze
                         const analysis = analyzeDataForBulk(formattedData);
