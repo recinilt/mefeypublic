@@ -846,6 +846,16 @@
            </div>
        `;
 
+
+       // Meditasyon bilgi metni
+       const contactInfo = `
+           <div class="info-box">
+               <h3>İletişim</h3>
+               <p>İletişim ve önerileriniz için <strong>recepyeni@gmail.com</strong> adresine eposta gönderiniz.</p>
+               
+           </div>
+       `;
+
        // Dinamik form oluşturma fonksiyonları
        function createPersonsMap(sectionName, fieldName, persons) {
            const sectionId = normalizeString(sectionName);
@@ -1171,6 +1181,11 @@ function togglePersonaBehavior(elementId) {
            const infoSection = document.createElement('div');
            infoSection.innerHTML = meditationInfo;
            container.appendChild(infoSection);
+
+           // İletişim bilgi metnini ekle
+           const contactSection = document.createElement('div');
+           contactSection.innerHTML = contactInfo;
+           container.appendChild(contactSection);
        }
 
        // Yeni seçenek ekleme fonksiyonu
