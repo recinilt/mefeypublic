@@ -1,0 +1,1453 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karakter Benlik Kodları - Kişisel Analiz Formu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(252, 182, 159, 0.4);
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .section-header h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .section-header p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .section-content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 30px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .old-new-container {
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .old-new-container h4 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .old-new-container.old {
+            border-left: 6px solid #dc3545;
+        }
+        
+        .old-new-container.old h4 {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        }
+        
+        .old-new-container.new {
+            border-left: 6px solid #28a745;
+        }
+        
+        .old-new-container.new h4 {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .checkbox-item:hover {
+            background-color: #f0f8ff;
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.3);
+            accent-color: #667eea;
+        }
+        
+        .checkbox-item label {
+            font-weight: 400 !important;
+            margin-bottom: 0 !important;
+            font-size: 0.95rem;
+            cursor: pointer;
+            flex: 1;
+        }
+        
+        textarea, input[type="text"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        textarea:focus, input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        textarea {
+            min-height: 120px;
+        }
+        
+        .custom-input {
+            margin-top: 15px;
+        }
+        
+        .file-input {
+            margin-bottom: 15px;
+        }
+        
+        #importInput {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        
+        .file-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .add-option-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .add-option-btn:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Özel stiller */
+        .person-selector {
+            margin-bottom: 20px;
+        }
+        
+        .person-traits-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .trait-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .trait-tag {
+            background: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .trait-tag:hover {
+            background: #0056b3;
+        }
+        
+        .trait-tag.selected {
+            background: #28a745;
+        }
+        
+        .traits-hint {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #0066cc;
+        }
+        
+        .traits-hint h5 {
+            margin-bottom: 10px;
+            color: #004499;
+        }
+        
+        .persona-behavior-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border: 2px solid #90caf9;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .info-box h3 {
+            color: #1565c0;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .info-box p {
+            margin-bottom: 12px;
+            line-height: 1.7;
+        }
+        
+        .info-box strong {
+            color: #0d47a1;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌟 Karakter Benlik Kodları</h1>
+            <p>Kişisel Gelişim ve Farkındalık Analizi</p>
+        </div>
+        
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="controls">
+                <label for="importInput" class="btn btn-secondary file-label">
+                    📁 Excel İçe Aktar
+                </label>
+                <input type="file" id="importInput" accept=".xlsx,.xls,.csv">
+                <button class="btn btn-primary" onclick="exportToExcel()">📊 Excel'e Aktar</button>
+                <button class="btn btn-secondary" onclick="clearForm()">🗑️ Formu Temizle</button>
+                <button class="btn btn-secondary" onclick="saveToLocalStorage()">💾 Kaydet</button>
+                <button class="btn btn-secondary" onclick="loadFromLocalStorage()">📂 Yükle</button>
+            </div>
+
+            <form id="karakterForm">
+                <div id="sections-container"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // String normalizasyon fonksiyonu
+        function normalizeString(str) {
+            return str
+                .toLowerCase()
+                .replace(/ç/g, 'c')
+                .replace(/ğ/g, 'g')
+                .replace(/ı/g, 'i')
+                .replace(/ö/g, 'o')
+                .replace(/ş/g, 's')
+                .replace(/ü/g, 'u')
+                .replace(/\s+/g, '_')
+                .replace(/[^\w]/g, '_');
+        }
+
+        // Kişilik özellikleri havuzu
+        const personalityTraits = [
+            "Kontrolcü", "Diğergam", "Yaptığı iyilikleri başa kakan", "Soğuk", "Farkındalıklı", 
+            "Yönetmek isteyen", "Kendi doğrularını putlaştıran", "Başkasını değiştirmeye çalışan",
+            "Anlayışlı", "Alttan alan", "Sevilmek isteyen", "Kendini değersiz hisseden",
+            "Kabullenilmek isteyen", "Laf taşıyan", "Çok konuşan", "Kibirli", "Özverili",
+            "Sorumsuz", "Yalan söylemeyi iyi beceren", "İkna eden", "İyiliksever", "Bencil",
+            "Karakter benliğini geliştirmeye çalışan", "Özgüvenli", "Sorumluluk sahibi",
+            "Pasif agresif", "İçine kapanık", "Farkındalığını artırmak isteyen",
+            "Başkasının gözünde değerli hissetmek için çok çalışan", "Mükemmeliyetçi",
+            "Eleştirmen", "Otoriter", "Korumacı", "Rekabetçi", "İşbirlikçi", "Sabırlı",
+            "Sabırsız", "Güvenilir", "Güvenilmez", "Neşeli", "Karamsar", "İyimser",
+            "Kötümser", "Empatik", "Bencil", "Cömert", "Cimri", "Cesur", "Korkak",
+            "Kararlı", "Kararsız", "Yaratıcı", "Geleneksel", "Esnek", "Katı", "Hoşgörülü",
+            "Hoşgörüsüz", "Affedici", "Kin tutucu", "Şükredici", "Şikayetçi"
+        ];
+
+        // Davranış kalıpları havuzu
+        const behaviorPatterns = [
+            "Saygılı ve sessiz", "Hiyerarşiye uygun", "Rekabetçi ve agresif", 
+            "İşbirlikçi ve destekleyici", "Profesyonel mesafeli", "Samimi ve yakın",
+            "Lider karakteri", "Takipçi karakteri", "Yaratıcı ve yenilikçi",
+            "Güvenilir ve istikrarlı", "Kendim olmaya çalışırım", "Maskeleri fark ediyorum",
+            "Duruma göre adapte", "Linç edilmemek için", "Güvende hissetmek için",
+            "Otantik olmaya çalışırım", "Mükemmel görünme çabası", "Bilgili görünme",
+            "Popüler olma çabası", "Beğeni avcılığı", "Takipçi toplama", "Etkileyici paylaşım",
+            "Duygusal paylaşım", "Mizahi yaklaşım", "Ciddi ve mesafeli", "Günlük yaşam",
+            "İtaatkar çocuk", "Başarılı birey", "Sorumlu yetişkin", "Koruyucu rol",
+            "Eğlenceli kişi", "Ciddi ve mature", "Geleneksel değerlerde", "Modern ve açık",
+            "Tartışmacı tavır", "Uyumlu davranış", "Sevgi bekleyen", "Onaylama arayan",
+            "Kabul görme isteği", "Değerli hissetme", "Özgün yaklaşım", "Rol yapma",
+            "Doğal davranma", "Performans sergileme", "Kendini gizleme", "Açık olma"
+        ];
+
+        // Form kategorileri ve seçenekleri
+        const formData = {
+            "Birincil Kimlik": {
+                emoji: "👤",
+                description: "Temel kimlik tanımlarınız",
+                fields: {
+                    "İsim Anlayışı": {
+                        options: [
+                            "Aile adımla tanımlanırım", "Toplumsal rolümle tanımlanırım", 
+                            "Mesleğimle tanımlanırım", "Dinimle tanımlanırım", "Milliyetimle tanımlanırım",
+                            "İsim sadece bir etiket", "Varoluşsal kimlik önemli", "Adem soyu kimliği",
+                            "Evrensel kimlik", "İsimsiz varlık"
+                        ]
+                    },
+                    "Cinsiyet Rolü": {
+                        options: [
+                            "Geleneksel erkek rolü", "Geleneksel kadın rolü", "Modern erkek rolü",
+                            "Modern kadın rolü", "Androjen yaklaşım", "Esnek cinsiyet rolleri",
+                            "Non-binary kimlik", "Queer kimlik", "Rol reddiyesi", "Durumsal roller"
+                        ]
+                    },
+                    "Din/Manevi Yaklaşım": {
+                        options: [
+                            "Sünni Müslüman", "Alevi Müslüman", "Şii Müslüman", "Sufi yaklaşım",
+                            "Ortodoks Hristiyan", "Katolik Hristiyan", "Protestan Hristiyan",
+                            "Ortodoks Yahudi", "Reform Yahudi", "Budist", "Hindu", "Ateist",
+                            "Agnostik", "Deist", "Panteist", "Esenlik Şefkat Aşk",
+                            "Varoluşsal Bilinç", "Evrensel Sevgi", "New Age", "Şamanizm"
+                        ]
+                    }
+                }
+            },
+            "Etnik ve İdeolojik Kimlik": {
+                emoji: "🌍",
+                description: "Etnik köken ve ideolojik görüşleriniz",
+                fields: {
+                    "Etnik Kimlik": {
+                        options: [
+                            "Türk", "Kürt", "Arap", "Boşnak", "Arnavut", "Gürcü", "Ermeni",
+                            "Rum", "Çerkez", "Laz", "Adem soyu", "İnsanlık ailesi",
+                            "Evrensel varlık", "Etnisite üstü", "Kozmopolit"
+                        ]
+                    },
+                    "İdeolojik Görüş": {
+                        options: [
+                            "İslamcı", "Kemalist", "Marksist", "Liberal", "Sosyal Demokrat",
+                            "Milliyetçi", "Kürtçü", "Feminist", "Çevreci", "Anarşist",
+                            "Muhafazakar", "Libertaryen", "Sosyalist", "Faşist karşıtı",
+                            "Aşk ile çeşitlilik", "Karşılıklı saygı", "Bireysel özgürlük",
+                            "İdeoloji üstü", "Pragmatist"
+                        ]
+                    }
+                }
+            },
+            "İkincil İnançlar": {
+                emoji: "🔮",
+                description: "Batıl inançlar ve mistik görüşler",
+                fields: {
+                    "Burçlar ve Astroloji": {
+                        options: [
+                            "Tamamen inanırım", "Kısmen inanırım", "Eğlence amaçlı bakarım",
+                            "Pek inanmam", "Hiç inanmam", "Zigot oluşum anı etkisi",
+                            "Kozmik etki var ama sınırlı", "Sadece sembolik anlam",
+                            "Bilimsel temelsiz", "Psikolojik etki"
+                        ]
+                    },
+                    "Şans ve Tesadüf": {
+                        options: [
+                            "Şansa inanırım", "Tesadüf vardır", "Her şey önceden yazılı",
+                            "Kader inancı", "Karma inancı", "İllâ Hû (Her şey O'ndan)",
+                            "Ölçü ve düzen var", "Sebep-sonuç ilişkisi", "Kaos teorisi",
+                            "Olasılık hesabı"
+                        ]
+                    },
+                    "Batıl İnançlar": {
+                        options: [
+                            "Nazar boncuğu", "Uğursuz sayılar", "Kara kedi uğursuzluğu",
+                            "Ayna kırılması", "Merdiven altından geçmeme", "Gölgeye basmama",
+                            "Mezarlık geçerken ıslık", "Üçlü çakmak yakma", "Her şeyi sorgulama",
+                            "Gözlem ve test etme", "Rasyonel düşünme", "Bilimsel yaklaşım"
+                        ]
+                    }
+                }
+            },
+            "Ahlaki Yargılar": {
+                emoji: "⚖️",
+                description: "Neyin iyi, neyin kötü olduğuna dair görüşleriniz",
+                fields: {
+                    "Kötü Davranışlar": {
+                        options: [
+                            "Çalmak", "Yalan söylemek", "Aldatmak", "Öldürmek", "Zarar vermek",
+                            "Zina yapmak", "Kumar oynamak", "İçki içmek", "Uyuşturucu kullanmak",
+                            "Rüşvet vermek/almak", "Faiz yemek", "Gıybet etmek", "İftira atmak",
+                            "Anne-babaya isyan", "Kibir göstermek", "İsraf etmek", "Zulmetmek",
+                            "Haksızlık yapmak", "Başkasının hakkına girmek", "Çevreye zarar vermek",
+                            "Hayvanlara eziyet", "Çocuklara zarar", "Yaşlılara saygısızlık",
+                            "Kendine yalan söylemek", "Başkasına zorla karışmak", "İnanca saygısızlık",
+                            "Dogmatik olmak", "Kin tutmak", "Nefret beslemek", "Acımasızlık"
+                        ]
+                    },
+                    "İyi Davranışlar": {
+                        options: [
+                            "Doğru söylemek", "Adil olmak", "Merhametli olmak", "Yardımlaşmak",
+                            "Saygılı olmak", "Sabırlı olmak", "Affetmek", "Şükretmek",
+                            "Alçakgönüllü olmak", "Dürüst olmak", "Güvenilir olmak", "Sevgi göstermek",
+                            "Anlayışlı olmak", "Hoşgörülü olmak", "İyilik yapmak", "Koruyucu olmak",
+                            "Destekleyici olmak", "Esenlik şefkat aşk", "Koşulsuz sevmek",
+                            "Farkındalık geliştirmek"
+                        ]
+                    }
+                }
+            },
+            "Epistemolojik Yargılar": {
+                emoji: "🧠",
+                description: "Bilgi, doğru ve varoluşla ilgili görüşleriniz",
+                fields: {
+                    "Bilgi Kaynakları": {
+                        options: [
+                            "Kitaplar mutlaktır", "Otoriteler doğrudur", "Deneyim en önemlidir",
+                            "Akıl yeterlidir", "Sezgi önemlidir", "Bilim tek yoldur",
+                            "Din tek kaynaktır", "Gelenek doğrudur", "Her şeyi sorgularım",
+                            "Çoklu kaynak kullanırım", "Kendi deneyimimi önemserim",
+                            "Kollektif bilgelik", "İç bilgi", "Varoluşsal bilgi"
+                        ]
+                    },
+                    "Varoluş Anlayışı": {
+                        options: [
+                            "Allah uzaktan yönetir", "Tanrı ve kul ayrı", "Maddi dünya gerçek",
+                            "Ruh bedenden ayrı", "Ölümden sonra hesap", "Allah şah damarımızdan yakın",
+                            "Kollektif bilinç", "Hepimiz biriyiz", "Aşk temel güdü",
+                            "Güven ve değer motoru", "O'ndayız O'ndanız", "Varoluş illüzyon",
+                            "Bilinç birincil", "Enerji ve titreşim"
+                        ]
+                    }
+                }
+            },
+            "Estetik Yargılar": {
+                emoji: "🎨",
+                description: "Güzellik ve çirkinlik algınız",
+                fields: {
+                    "Güzellik Kriterleri": {
+                        options: [
+                            "Simetri güzeldir", "Altın oran", "Geleneksel güzellik", "Modern güzellik",
+                            "Doğal güzellik", "Sanatsal güzellik", "İç güzellik", "Ruhsal güzellik",
+                            "Çeşitlilik güzel", "Her şey güzel", "Göreceli güzellik",
+                            "Kültürel güzellik", "Bireysel beğeni", "Tanrı'nın tezahürü"
+                        ]
+                    },
+                    "Sanat Tercihi": {
+                        options: [
+                            "Klasik müzik", "Pop müzik", "Rock müzik", "Halk müziği", "Caz müzik",
+                            "Elektronik müzik", "Klasik resim", "Modern sanat", "Soyut sanat",
+                            "Dijital sanat", "Geleneksel el sanatları", "Çağdaş dans",
+                            "Tiyatro", "Sinema", "Edebiyat"
+                        ]
+                    }
+                }
+            },
+            "Hukuki Yargılar": {
+                emoji: "⚖️",
+                description: "Neyin suç neyin suç olmadığına dair görüşleriniz",
+                fields: {
+                    "Suç Olan Davranışlar": {
+                        options: [
+                            "Hırsızlık", "Cinayet", "Tecavüz", "Dolandırıcılık", "Rüşvet",
+                            "Vergi kaçırma", "Uyuşturucu ticareti", "İnsan ticareti", "Çocuk istismarı",
+                            "Aile içi şiddet", "Çevreye zarar", "Terör", "Irkçılık", "Nefret suçları",
+                            "Siber suçlar", "Zina", "Fuhuş", "Kumar", "İçki", "Zincirleme işkence"
+                        ]
+                    },
+                    "Tartışmalı Konular": {
+                       options: [
+                           "Ötanazi", "Kürtaj", "Eşcinsel evlilik", "Uyuşturucu kullanımı",
+                           "Fahişelik", "Alkol tüketimi", "Kumar oynamak", "Evlilik dışı ilişki",
+                           "Dini alay", "Bayrak yakma", "Sivil itaatsizlik", "Hakaret",
+                           "İfade özgürlüğü sınırları", "Basın özgürlüğü", "Özel yaşam ihlali"
+                       ]
+                   }
+               }
+           },
+           "Ekonomik Yargılar": {
+               emoji: "💰",
+               description: "Pahalılık ve ucuzluk anlayışınız",
+               fields: {
+                   "Değer Anlayışı": {
+                       options: [
+                           "Fiyat = Değer", "Marka değeri", "El emeği değeri", "Nadir bulunur değeri",
+                           "Kullanım değeri", "Duygusal değer", "Yatırım değeri", "Statü değeri",
+                           "İhtiyaç = Değer", "Bütçe uygunluğu", "Kalite-fiyat oranı",
+                           "Sürdürülebilirlik değeri", "Etik değer", "Manevi değer"
+                       ]
+                   },
+                   "Tüketim Alışkanlığı": {
+                       options: [
+                           "Lüks tüketici", "Marka odaklı", "Kalite odaklı", "Fiyat odaklı",
+                           "İhtiyaç odaklı", "Minimalist", "Çevreci tüketici", "Etik tüketici",
+                           "İmpuls alışveriş", "Planlı alışveriş", "Bilinçli tüketici",
+                           "Hedonik tüketici", "Statü tüketici", "Praktik tüketici"
+                       ]
+                   }
+               }
+           },
+           "Başarı ve Yaşam Modelleri": {
+               emoji: "🏆",
+               description: "Başarı ve mutluluk kriterleriniz",
+               fields: {
+                   "Başarı Kriterleri": {
+                       options: [
+                           "Para kazanmak", "Ünlü olmak", "Güçlü olmak", "Saygın olmak", "Sevilmek",
+                           "Etkili olmak", "Özgür olmak", "Mutlu olmak", "Huzurlu olmak", "Sağlıklı olmak",
+                           "Bilgili olmak", "Yetenekli olmak", "Yaratıcı olmak", "Yardımsever olmak",
+                           "Kendi kendine yetmek", "Aile kurmak", "Çocuk sahibi olmak", "Kariyer yapmak",
+                           "Topluma katkı", "Manevi gelişim", "Farkındalık artışı",
+                           "Varoluşsal benlikle buluşma", "Esenlik şefkat aşk"
+                       ]
+                   },
+                   "Mutluluk Kaynakları": {
+                       options: [
+                           "Maddi bolluk", "Sosyal statü", "Aşk ilişkisi", "Aile bağları", "Arkadaşlık",
+                           "Sağlık", "Başarı", "Takdir edilme", "Özgürlük", "Güvenlik", "Huzur",
+                           "Anlam", "Yaratıcılık", "Öğrenme", "Gelişim", "Yardımlaşma",
+                           "Doğa ile bağlantı", "Sanat", "Müzik", "Spor", "Meditasyon", "İbadet",
+                           "Varoluşsal farkındalık", "Koşulsuz sevgi"
+                       ]
+                   },
+                   "Meslek Anlayışı": {
+                       options: [
+                           "Kimlik kaynağı", "Prestij aracı", "Para kazanma yolu", "Toplumsal statü",
+                           "Aile beklentisi", "Kişisel tutku", "Yetenekleri kullanma", "Topluma hizmet",
+                           "Yaratıcılık alanı", "Güvenli gelir", "Kariyer basamağı", "Sadece geçim aracı",
+                           "Varoluş çeşitliliği", "Rızkın Allah'tan geldiği", "Kaldırabildiğini yüklenmek",
+                           "Anlamları dosdoğru yapmak"
+                       ]
+                   }
+               }
+           },
+           "Alışkanlıklar ve Tercihler": {
+               emoji: "🔄",
+               description: "Dogmatik alışkanlıklar ve kişisel tercihleriniz",
+               fields: {
+                   "Günlük Rutinler": {
+                       options: [
+                           "Erken kalkmak zorunlu", "Geç yatmak yasak", "5 vakit namaz şart",
+                           "Günlük spor şart", "Kitap okuma şart", "Televizyon yasak",
+                           "Sosyal medya sınırlı", "Müzik dinleme", "Meditasyon yapma", "Yoga yapma",
+                           "Yürüyüş yapma", "Nefes egzersizi", "Esnek rutinler", "Ana göre ayarlama",
+                           "Dogmatikleşmeme", "Keyif odaklı", "İhtiyaç odaklı", "Sezgisel yaşam"
+                       ]
+                   },
+                   "Giyim Kuşam": {
+                       options: [
+                           "Geleneksel erkek kıyafeti", "Geleneksel kadın kıyafeti", "Modern giyim",
+                           "Spor giyim", "Resmi giyim", "Casual giyim", "Alternatif tarz",
+                           "Marka odaklı", "Rahat odaklı", "Fonksiyonel giyim", "Duruma göre giyim",
+                           "Toplumsal beklenti", "Kişisel tercih", "Rol gerektirirse değişim",
+                           "Esnek yaklaşım", "Dogmatik olmama"
+                       ]
+                   },
+                   "Beslenme Alışkanlıkları": {
+                       options: [
+                           "Helal gıda zorunlu", "Organik beslenme", "Vejetaryen beslenme",
+                           "Vegan beslenme", "Akdeniz diyeti", "Ketojenik diyet", "Aralıklı oruç",
+                           "Sağlıklı beslenme", "Lezzet odaklı", "Pratik beslenme", "Geleneksel mutfak",
+                           "Uluslararası mutfak", "Ev yemeği", "Dışarıda yemek", "Zaruret odaklı",
+                           "Bilinçli tüketim", "Esnek beslenme", "Duygusal beslenme"
+                       ]
+                   }
+               }
+           },
+           "Ötekiler Haritası": {
+               emoji: "👥",
+               description: "Yakın çevre ve genel ötekiler hakkındaki görüşleriniz",
+               type: "special_others_map",
+               fields: {
+                   "Aile Üyeleri": {
+                       persons: ["Anne", "Baba", "Eş/Sevgili", "Erkek Kardeş", "Kız Kardeş", 
+                               "Abla", "Abi", "Çocuk", "Dede", "Nine", "Amca", "Teyze", "Hala", "Dayı"]
+                   },
+                   "Sosyal Çevre": {
+                       persons: ["En Yakın Arkadaş", "Kanka", "İş Arkadaşı", "Sınıf Arkadaşı", 
+                               "Komşu", "Dost", "Tanıdık", "Ex-Sevgili", "Flört", "Mentor/Mürşit", "Öğrenci/Mürit"]
+                   },
+                   "Etnik/Dini Gruplar": {
+                       persons: ["Kürtler", "Araplar", "Ermeniler", "Rumlar", "Yahudiler", 
+                               "Hristiyanlar", "Alevilər", "Sünniler", "Ateistler", "Agnostikler", 
+                               "Budistler", "Hindular"]
+                   },
+                   "Sosyal Sınıflar": {
+                       persons: ["Zenginler", "Fakirler", "Orta Sınıf", "Eğitimliler", "Eğitimsizler",
+                               "İşçiler", "Memurlar", "Patronlar", "Esnaflar", "Çiftçiler", 
+                               "Sanatçılar", "Akademisyenler", "Siyasetçiler"]
+                   }
+               }
+           },
+           "Personalar ve Maskeler": {
+               emoji: "🎭",
+               description: "Farklı ortamlarda sergiledikleriniz",
+               type: "special_personas",
+               fields: {
+                   "İş Ortamları": {
+                       situations: ["Amirle Konuşurken", "Astla Konuşurken", "Eş Düzey Meslektaşla", 
+                                  "Müşteriyle", "Toplantıda", "Sunum Yaparken", "İş Görüşmesinde",
+                                  "Performans Değerlendirmesinde", "Ekip Çalışmasında", "Kriz Anında"]
+                   },
+                   "Aile Ortamları": {
+                       situations: ["Anne Yanında", "Baba Yanında", "Eş Yanında", "Çocuk Yanında",
+                                  "Kardeş Yanında", "Büyükler Yanında", "Aile Toplantısında",
+                                  "Akraba Ziyaretinde", "Bayram/Düğün Gibi Etkinliklerde"]
+                   },
+                   "Sosyal Ortamlar": {
+                       situations: ["En Yakın Arkadaş Yanında", "Kanka Yanında", "Grup Halindeyken",
+                                  "Parti/Eğlence Ortamında", "Sosyal Medyada", "Tanımadığım İnsanlarla",
+                                  "Mentor/Mürşit Yanında", "Öğrenci/Mürit Yanında", "Romantik İlişkide",
+                                  "Çatışma/Tartışma Anında"]
+                   },
+                   "Özel Durumlar": {
+                       situations: ["Yalnızken", "Stresli Anlarda", "Mutlu Anlarda", "Üzgün Anlarda",
+                                  "Kızgın Anlarda", "Korktuğum Anlarda", "Gurur Duyduğum Anlarda",
+                                  "Utandığım Anlarda", "Hayal Kırıklığında", "Başarı Anında"]
+                   }
+               }
+           }
+       };
+
+       // Meditasyon bilgi metni
+       const meditationInfo = `
+           <div class="info-box">
+               <h3>🧘 Meditasyonun Gerçek Anlamı ve Uygulama</h3>
+               <p><strong>Meditasyon</strong> kelimesi son yirmi-yirmi beş yıllık dönemde pazarlamada aşırı dejenere edilmiş, tahrip edilmiş. On bin yıldır gerçekten bu metotları kullanan insanların meditasyon dediğinde kastettiğinden çok fantastik anlamlara büründürülmüş.</p>
+               
+               <p>Bizim sözünü ettiğimiz meditasyon çok muhteşem bir araç - bütün bu işlerde birincil aracımız. Meditasyon bir üst başlıktır, o kocaman bir kitabın ön kapağında yazan şeydir. Ve onun on beş-on altı tane bölümü vardır. Ne için kullanacağına yönelik olarak farklı türleri var.</p>
+
+               <h3>🌊 Meditatif Halin Temelleri</h3>
+               <p><strong>Meditasyon demek:</strong> İnsanın normal hayatın içindeki şartlandırılmış zihni, karakter benliğiyle yaşarken hayatın debdebesi içerisinde kendisi için çok önemli olan konuları - kendini tanımak, varoluş konuları gibi - yeterince verim alamamasından dolayı özel bir alan, özel bir ortam oluşturarak o konuları çözmeye çalışması.</p>
+
+               <p><strong>Gevşeme ve Ortam Hazırlığı:</strong> Sessizlik ve rahatçık ortamında, yalnızken telefonu kapatıp uzağa koymak, her şeyi bir kenara bırakmak. Evinde ya da bahçende, sevdiğin bir doğal ortamda bunu yapman daha verimli olur.</p>
+
+               <p><strong>Bilinçli Gevşeme:</strong> Burundan diyafram nefesi alıp yavaşça ağzından vererek, kollarını en rahat oturuşla gevşetmek. Omuzların düşmesi gerekir.</p>
+
+               <p><strong>Zihinle Savaşmamak:</strong> Dur zihni durduracağım, düşünceleri bunlar - bunlar hep yanlış anlaşılan şeyler. Zihninle savaşmadan bırak zihnin o anda ne düşünüyorsa düşünsün, nerelere gidiyorsa gitsin.</p>
+
+               <h3>🔍 Berrak Görüşün Metaforu</h3>
+               <p>Bu gevşeme, o çalkantıların dinmesi nedir? Gölde kahverengisi olur, alttaki toprak çamur kalkmıştır, dalgalar vardır, gölün on santim altını bile göremezsin suyun. Bulanık bir su gibidir zihin.</p>
+
+               <p>Bizim kastettiğimiz meditasyonun bu ön hali, olabildiğince yavaşlayıp sessiz ortamda gevşeyip o çalkantıların, dalgaların dinmesi, o toz zereciklerinin çamur zereciklerinin dibe çöküp o gölün olabildiğince berraklaşmasını sağlamak gibidir. Daha net görmeyi sağla. Çamur çöker, pırıl pırıl o su kalır.</p>
+
+               <h3>👁️ Yargısız Gözlem</h3>
+               <p>Bu konularda en önemli üçüncü kriter: Bütün bunları kendinle ilgili özellikle gözden geçirirken <strong>hiçbir yargılama ve değerlendirme yapmayacaksın</strong>. "Bak ben ne yapıyorum ya? Bak ne kadar yanlış" denmez. Sadece bakacaksın: "Uyku konusunda benim davranışım nedir? Ben ilkesel olarak on birde yatıp sabah beşte kalkmayı çocukluğumdan beri karakterimin bir parçası olarak görüyorum." Hiçbir değerlendirme yapmıyorsun, yargı da yapmıyorsun.</p>
+
+               <h3>🔗 Karakter Benliğin Doğası: Ötekilerin Ürünü Olmak</h3>
+               <p>İşte geldi kalıp cümle: <strong>Karakter benlik ötekilerin üretimidir.</strong> Bu çok kritik bir cümle. Dolayısıyla dünya yapımıdır, bu dünyada imal edilmiş bir şeydir, ötekiler tarafından.</p>
+
+               <p>Karakter benlik ötekilerin üretimi olduğu için <strong>ötekilere mahkumdur.</strong> Yani sen sürekli sen olabilmek için ötekilere mahkumsun. Bu konuda hiçbir taviz yok - burayı kaçırmamamız gerekiyor çünkü kilit bir şey bu.</p>
+
+               <h3>🏝️ Yalnızlık Korkusu ve Cast Away Gerçeği</h3>
+               <p>Yalnızlık karakter benliğin en büyük korkusudur. Tom Hanks'in oynadığı Cast Away filminde mükemmel bir örnek var: Uçak düşünce ıssız adaya çıkan karakter, voleybol topunun üzerine kendi kanıyla bir insan sureti çizer, ona "Wilson" ismini koyar ve sürekli onunla sohbet etmeye başlar.</p>
+
+               <p>Neden? Çünkü karakter benlik ötekilere mahkum olduğu için yapayalnız olduğunu anlayınca korkudan çıldırırdı. O voleybol topu arkadaşı sayesinde karakter benliğini karşıdaki bir ötekiyle sürekli iletişimde tutuyordu.</p>
+
+               <h3>🌅 Özdeşleşmekten Kurtulmanın Anları</h3>
+               <p>Üç durumda karakter benlikle özdeş durumda değilizdir:</p>
+               <p><strong>Bilinçsiz Kurtulma Anları:</strong> Derin uyku, ani korku patlamaları, orgazm anları</p>
+               <p><strong>Bilinçli Kurtulma Yolları:</strong> Adrenalin sporları, meditatif yöntemler</p>
+               <p>Bu deneyimleri anlatmaya gelince dil aczi devreye girer. Kelimelerin, zihnin, düşüncelerin, kavramların hiçbir şey ifade etmediği hale geldiğinde "sustuk" deriz.</p>
+           </div>
+       `;
+
+       // Dinamik form oluşturma fonksiyonları
+       function createPersonsMap(sectionName, fieldName, persons) {
+           const sectionId = normalizeString(sectionName);
+           const fieldId = normalizeString(fieldName);
+           
+           return `
+               <div class="traits-hint">
+                   <h5>💡 Kullanabileceğiniz Kişilik Özellikleri Örnekleri:</h5>
+                   <div class="trait-selector">
+                        ${personalityTraits.map(trait => 
+                            `<span class="trait-tag" onclick="addTraitToInput('${sectionName}_${fieldName}', '${trait}')">${trait}</span>`
+                        ).join('')}
+                    </div>
+               </div>
+               <div class="comparison-container">
+                   <div class="old-new-container old">
+                       <h4>Eski Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${persons.map(person => {
+                               const personId = normalizeString(person);
+                               const fullId = `${sectionId}_${fieldId}_${personId}_eski`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_eski_persons" 
+                                              value="${person}"
+                                              onchange="togglePersonTraits('${fullId}')">
+                                       <label for="${fullId}">${person}</label>
+                                   </div>
+                                   <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${person}_eski_traits_text" 
+                                                 placeholder="${person} hakkındaki kalıp yargılarınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_eski_custom" 
+                                 placeholder="Diğer kişiler ve görüşleriniz..." 
+                                 class="custom-input"></textarea>
+                   </div>
+                   <div class="old-new-container new">
+                       <h4>Yeni Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${persons.map(person => {
+                               const personId = normalizeString(person);
+                               const fullId = `${sectionId}_${fieldId}_${personId}_yeni`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_yeni_persons" 
+                                              value="${person}"
+                                              onchange="togglePersonTraits('${fullId}')">
+                                       <label for="${fullId}">${person}</label>
+                                   </div>
+                                   <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${person}_yeni_traits_text" 
+                                                 placeholder="${person} hakkındaki yeni yaklaşımınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_yeni_custom" 
+                                 placeholder="Yeni yaklaşımınız..." 
+                                 class="custom-input"></textarea>
+                   </div>
+               </div>
+           `;
+       }
+
+       function createPersonasMap(sectionName, fieldName, situations) {
+           const sectionId = normalizeString(sectionName);
+           const fieldId = normalizeString(fieldName);
+           
+           return `
+               <div class="traits-hint">
+                   <h5>💡 Kullanabileceğiniz Davranış Kalıpları Örnekleri:</h5>
+                   <div class="trait-selector">
+                        ${behaviorPatterns.map(pattern => 
+                            `<span class="trait-tag" onclick="addTraitToInput('${sectionName}_${fieldName}', '${pattern}')">${pattern}</span>`
+                        ).join('')}
+                    </div>
+               </div>
+               <div class="comparison-container">
+                   <div class="old-new-container old">
+                       <h4>Eski Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${situations.map(situation => {
+                               const situationId = normalizeString(situation);
+                               const fullId = `${sectionId}_${fieldId}_${situationId}_eski`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_eski_situations" 
+                                              value="${situation}"
+                                              onchange="togglePersonaBehavior('${fullId}')">
+                                       <label for="${fullId}">${situation}</label>
+                                   </div>
+                                   <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${situation}_eski_behavior_text" 
+                                                 placeholder="${situation} durumundaki eski davranış kalıplarınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_eski_custom" 
+                                 placeholder="Diğer durumlar ve eski davranışlarınız..." 
+                                 class="custom-input"></textarea>
+                   </div>
+                   <div class="old-new-container new">
+                       <h4>Yeni Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${situations.map(situation => {
+                               const situationId = normalizeString(situation);
+                               const fullId = `${sectionId}_${fieldId}_${situationId}_yeni`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_yeni_situations" 
+                                              value="${situation}"
+                                              onchange="togglePersonaBehavior('${fullId}')">
+                                       <label for="${fullId}">${situation}</label>
+                                   </div>
+                                   <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${situation}_yeni_behavior_text" 
+                                                 placeholder="${situation} durumundaki yeni yaklaşımınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_yeni_custom" 
+                                 placeholder="Yeni yaklaşımınız..." 
+                                 class="custom-input"></textarea>
+                   </div>
+               </div>
+           `;
+       }
+
+       // Özellik ekleme fonksiyonu
+       // Özellik ekleme fonksiyonu - ESKİ FONKSİYONU BUL VE TAMAMEN DEĞİŞTİR
+function addTraitToInput(fieldPrefix, trait) {
+    // Önce açık olan (görünür) textarea'ları bul
+    const visibleTextareas = document.querySelectorAll('textarea[style*="display: block"], .person-traits-container[style*="display: block"] textarea, .persona-behavior-container[style*="display: block"] textarea');
+    
+    if (visibleTextareas.length > 0) {
+        // Son açık textarea'yı al
+        const targetTextarea = visibleTextareas[visibleTextareas.length - 1];
+        if (targetTextarea.value.trim()) {
+            targetTextarea.value += ', ' + trait;
+        } else {
+            targetTextarea.value = trait;
+        }
+        targetTextarea.focus();
+        return;
+    }
+    
+    // Eğer açık textarea yoksa, fieldPrefix'e göre bul
+    const sectionName = fieldPrefix.split('_')[0];
+    const fieldName = fieldPrefix.split('_')[1];
+    
+    // Hem eski hem yeni yaklaşım textarea'larını dene
+    const possibleNames = [
+        `${sectionName}_${fieldName}_eski_custom`,
+        `${sectionName}_${fieldName}_yeni_custom`
+    ];
+    
+    for (let name of possibleNames) {
+        const textarea = document.querySelector(`textarea[name="${name}"]`);
+        if (textarea) {
+            if (textarea.value.trim()) {
+                textarea.value += ', ' + trait;
+            } else {
+                textarea.value = trait;
+            }
+            textarea.focus();
+            return;
+        }
+    }
+}
+       
+// Kişi özellik alanını göster/gizle
+function togglePersonTraits(elementId) {
+    const checkbox = document.getElementById(elementId);
+    const traitsContainer = document.getElementById(elementId + '_traits');
+    
+    if (checkbox && traitsContainer) {
+        if (checkbox.checked) {
+            traitsContainer.style.display = 'block';
+            traitsContainer.style.visibility = 'visible';
+        } else {
+            traitsContainer.style.display = 'none';
+            traitsContainer.style.visibility = 'hidden';
+        }
+    }
+}
+
+// Persona davranış alanını göster/gizle
+function togglePersonaBehavior(elementId) {
+    const checkbox = document.getElementById(elementId);
+    const behaviorContainer = document.getElementById(elementId + '_behavior');
+    
+    if (checkbox && behaviorContainer) {
+        if (checkbox.checked) {
+            behaviorContainer.style.display = 'block';
+            behaviorContainer.style.visibility = 'visible';
+        } else {
+            behaviorContainer.style.display = 'none';
+            behaviorContainer.style.visibility = 'hidden';
+        }
+    }
+}
+
+       // Normal alan oluşturma
+       function createNormalField(sectionName, fieldName, options) {
+           return `
+               <div class="comparison-container">
+                   <div class="old-new-container old">
+                       <h4>Eski Yaklaşım</h4>
+                       <div class="checkbox-grid" id="${sectionName}_${fieldName}_eski_grid">
+                           ${options.map((option, index) => `
+                               <div class="checkbox-item">
+                                   <input type="checkbox" 
+                                          id="${sectionName}_${fieldName}_eski_${index}" 
+                                          name="${sectionName}_${fieldName}_eski" 
+                                          value="${option}">
+                                   <label for="${sectionName}_${fieldName}_eski_${index}">${option}</label>
+                               </div>
+                           `).join('')}
+                       </div>
+                       <button type="button" class="add-option-btn" onclick="addNewOption('${sectionName}_${fieldName}_eski_grid', '${sectionName}_${fieldName}_eski')">
+                           ➕ Yeni Seçenek Ekle
+                       </button>
+                       <textarea name="${sectionName}_${fieldName}_eski_custom" 
+                                 placeholder="Diğer görüşlerinizi buraya yazabilirsiniz..." 
+                                 class="custom-input"></textarea>
+                   </div>
+                   <div class="old-new-container new">
+                       <h4>Yeni Yaklaşım</h4>
+                       <div class="checkbox-grid" id="${sectionName}_${fieldName}_yeni_grid">
+                           ${options.map((option, index) => `
+                               <div class="checkbox-item">
+                                   <input type="checkbox" 
+                                          id="${sectionName}_${fieldName}_yeni_${index}" 
+                                          name="${sectionName}_${fieldName}_yeni" 
+                                          value="${option}">
+                                   <label for="${sectionName}_${fieldName}_yeni_${index}">${option}</label>
+                               </div>
+                           `).join('')}
+                       </div>
+                       <button type="button" class="add-option-btn" onclick="addNewOption('${sectionName}_${fieldName}_yeni_grid', '${sectionName}_${fieldName}_yeni')">
+                           ➕ Yeni Seçenek Ekle
+                       </button>
+                       <textarea name="${sectionName}_${fieldName}_yeni_custom" 
+                                 placeholder="Yeni yaklaşımınızı buraya yazabilirsiniz..." 
+                                 class="custom-input"></textarea>
+                   </div>
+               </div>
+           `;
+       }
+
+       // Form oluşturma fonksiyonu
+       function createForm() {
+           const container = document.getElementById('sections-container');
+           
+           Object.entries(formData).forEach(([sectionName, sectionData]) => {
+               const section = document.createElement('div');
+               section.className = 'section';
+               
+               let fieldsHtml = '';
+               
+               if (sectionData.type === 'special_others_map') {
+                   // Ötekiler Haritası için özel render
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       fieldsHtml += `
+                           <div class="form-group">
+                               <label>${fieldName}:</label>
+                               ${createPersonsMap(sectionName, fieldName, fieldData.persons)}
+                           </div>
+                       `;
+                   });
+               } else if (sectionData.type === 'special_personas') {
+                   // Personalar için özel render
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       fieldsHtml += `
+                           <div class="form-group">
+                               <label>${fieldName}:</label>
+                               ${createPersonasMap(sectionName, fieldName, fieldData.situations)}
+                           </div>
+                       `;
+                   });
+               } else {
+                   // Normal alanlar için
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       fieldsHtml += `
+                           <div class="form-group">
+                               <label>${fieldName}:</label>
+                               ${createNormalField(sectionName, fieldName, fieldData.options)}
+                           </div>
+                       `;
+                   });
+               }
+               
+               section.innerHTML = `
+                   <div class="section-header">
+                       <h2>${sectionData.emoji} ${sectionName}</h2>
+                       <p>${sectionData.description}</p>
+                   </div>
+                   <div class="section-content">
+                       ${fieldsHtml}
+                   </div>
+               `;
+               container.appendChild(section);
+           });
+           
+           // Meditasyon bilgi metnini ekle
+           const infoSection = document.createElement('div');
+           infoSection.innerHTML = meditationInfo;
+           container.appendChild(infoSection);
+       }
+
+       // Yeni seçenek ekleme fonksiyonu
+       function addNewOption(gridId, fieldName) {
+           const grid = document.getElementById(gridId);
+           const optionText = prompt("Yeni seçeneği yazın:");
+           
+           if (optionText && optionText.trim()) {
+               const timestamp = Date.now();
+               const checkboxDiv = document.createElement('div');
+               checkboxDiv.className = 'checkbox-item';
+               checkboxDiv.innerHTML = `
+                   <input type="checkbox" 
+                          id="${fieldName}_custom_${timestamp}" 
+                          name="${fieldName}" 
+                          value="${optionText.trim()}">
+                   <label for="${fieldName}_custom_${timestamp}">${optionText.trim()}</label>
+               `;
+               
+               grid.appendChild(checkboxDiv);
+           }
+       }
+
+       // Form verilerini toplama
+       function collectFormData() {
+           const form = document.getElementById('karakterForm');
+           const data = {};
+           
+           // Checkbox'ları topla
+           const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+           checkboxes.forEach(checkbox => {
+               if (!data[checkbox.name]) {
+                   data[checkbox.name] = [];
+               }
+               data[checkbox.name].push(checkbox.value);
+           });
+           
+           // Text area'ları topla
+           const textareas = form.querySelectorAll('textarea');
+           textareas.forEach(textarea => {
+               if (textarea.value.trim()) {
+                   data[textarea.name] = textarea.value.trim();
+               }
+           });
+           
+           return data;
+       }
+
+       // Excel'e aktarma
+       function exportToExcel() {
+           const data = collectFormData();
+           const wb = XLSX.utils.book_new();
+           
+           // Her kategori için ayrı sheet
+           Object.entries(formData).forEach(([sectionName, sectionData]) => {
+               const sheetData = [];
+               
+               if (sectionData.type === 'special_others_map') {
+                   // Ötekiler haritası için özel işlem
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       fieldData.persons.forEach(person => {
+                           const eskiPersonKey = `${sectionName}_${fieldName}_${person}_eski_traits_text`;
+                           const yeniPersonKey = `${sectionName}_${fieldName}_${person}_yeni_traits_text`;
+                           
+                           if (data[eskiPersonKey] || data[yeniPersonKey]) {
+                               sheetData.push({
+                                   'Kategori': fieldName,
+                                   'Kişi/Grup': person,
+                                   'Eski Yaklaşım': data[eskiPersonKey] || '',
+                                   'Yeni Yaklaşım': data[yeniPersonKey] || ''
+                               });
+                           }
+                       });
+                   });
+               } else if (sectionData.type === 'special_personas') {
+                   // Personalar için özel işlem
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       fieldData.situations.forEach(situation => {
+                           const eskiBehaviorKey = `${sectionName}_${fieldName}_${situation}_eski_behavior_text`;
+                           const yeniBehaviorKey = `${sectionName}_${fieldName}_${situation}_yeni_behavior_text`;
+                           
+                           if (data[eskiBehaviorKey] || data[yeniBehaviorKey]) {
+                               sheetData.push({
+                                   'Kategori': fieldName,
+                                   'Durum': situation,
+                                   'Eski Davranış': data[eskiBehaviorKey] || '',
+                                   'Yeni Davranış': data[yeniBehaviorKey] || ''
+                               });
+                           }
+                       });
+                   });
+               } else {
+                   // Normal alanlar için
+                   Object.entries(sectionData.fields).forEach(([fieldName, fieldData]) => {
+                       const eskiKey = `${sectionName}_${fieldName}_eski`;
+                       const yeniKey = `${sectionName}_${fieldName}_yeni`;
+                       const eskiCustomKey = `${sectionName}_${fieldName}_eski_custom`;
+                       const yeniCustomKey = `${sectionName}_${fieldName}_yeni_custom`;
+                       
+                       sheetData.push({
+                           'Alan': fieldName,
+                           'Eski Seçimler': data[eskiKey] ? data[eskiKey].join(', ') : '',
+                           'Eski Özel Notlar': data[eskiCustomKey] || '',
+                           'Yeni Seçimler': data[yeniKey] ? data[yeniKey].join(', ') : '',
+                           'Yeni Özel Notlar': data[yeniCustomKey] || ''
+                       });
+                   });
+               }
+               
+               if (sheetData.length > 0) {
+                   const ws = XLSX.utils.json_to_sheet(sheetData);
+                   XLSX.utils.book_append_sheet(wb, ws, sectionName.substring(0, 30));
+               }
+           });
+           
+           // Genel özet sheet
+           const summaryData = [];
+           Object.entries(data).forEach(([key, value]) => {
+               summaryData.push({
+                   'Alan': key,
+                   'Değer': Array.isArray(value) ? value.join(', ') : value
+               });
+           });
+           
+           const summaryWs = XLSX.utils.json_to_sheet(summaryData);
+           XLSX.utils.book_append_sheet(wb, summaryWs, 'Genel Özet');
+           
+           // Dosyayı kaydet
+           const today = new Date().toISOString().split('T')[0];
+           XLSX.writeFile(wb, `karakter_benlik_analizi_${today}.xlsx`);
+       }
+
+       // Excel'den içe aktarma
+       document.getElementById('importInput').addEventListener('change', function(e) {
+           const file = e.target.files[0];
+           if (!file) return;
+           
+           const reader = new FileReader();
+           reader.onload = function(e) {
+               try {
+                   const data = new Uint8Array(e.target.result);
+                   const workbook = XLSX.read(data, { type: 'array' });
+                   
+                   // Genel özet sheet'i oku
+                   if (workbook.SheetNames.includes('Genel Özet')) {
+                       const worksheet = workbook.Sheets['Genel Özet'];
+                       const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                       
+                       // Form verilerini doldur
+                       jsonData.forEach(row => {
+                           const fieldName = row['Alan'];
+                           const value = row['Değer'];
+                           
+                           if (fieldName && value) {
+                               // Checkbox'ları işle
+                               if (value.includes(',')) {
+                                   const values = value.split(',').map(v => v.trim());
+                                   values.forEach(val => {
+                                       const checkbox = document.querySelector(`input[name="${fieldName}"][value="${val}"]`);
+                                       if (checkbox) {
+                                           checkbox.checked = true;
+                                           // Eğer özel alan checkbox'ı ise, ilgili alanı göster
+                                           const id = checkbox.id;
+                                           if (id.includes('_eski') || id.includes('_yeni')) {
+                                               togglePersonTraits(id);
+                                               togglePersonaBehavior(id);
+                                           }
+                                       }
+                                   });
+                               } else {
+                                   // Tek değer için checkbox veya textarea
+                                   const checkbox = document.querySelector(`input[name="${fieldName}"][value="${value}"]`);
+                                   if (checkbox) {
+                                       checkbox.checked = true;
+                                       // Checkbox seçildiğinde ilgili alanları göster
+                                       const id = checkbox.id;
+                                       if (id.includes('_eski') || id.includes('_yeni')) {
+                                           togglePersonTraits(id);
+                                           togglePersonaBehavior(id);
+                                       }
+                                   } else {
+                                       // Textarea olabilir
+                                       const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+                                       if (textarea) textarea.value = value;
+                                   }
+                               }
+                           }
+                       });
+                       
+                       alert('Excel dosyası başarıyla içe aktarıldı!');
+                       updateProgress();
+                   }
+               } catch (error) {
+                   alert('Excel dosyası okunurken hata oluştu: ' + error.message);
+               }
+           };
+           reader.readAsArrayBuffer(file);
+       });
+
+       // Formu temizleme
+       function clearForm() {
+           if (confirm('Tüm form verilerini silmek istediğinizden emin misiniz?')) {
+               document.getElementById('karakterForm').reset();
+               // Açık olan özel alanları gizle
+               document.querySelectorAll('.person-traits-container, .persona-behavior-container').forEach(container => {
+                   container.style.display = 'none';
+               });
+               updateProgress();
+           }
+       }
+
+       // Local Storage'a kaydetme
+       function saveToLocalStorage() {
+           const data = collectFormData();
+           localStorage.setItem('karakterBenlikData', JSON.stringify(data));
+           alert('Veriler yerel depolamaya kaydedildi!');
+       }
+
+       // Local Storage'dan yükleme
+       function loadFromLocalStorage() {
+           const savedData = localStorage.getItem('karakterBenlikData');
+           if (savedData) {
+               try {
+                   const data = JSON.parse(savedData);
+                   
+                   // Form verilerini doldur
+                   Object.entries(data).forEach(([fieldName, value]) => {
+                       if (Array.isArray(value)) {
+                           // Checkbox'lar için
+                           value.forEach(val => {
+                               const checkbox = document.querySelector(`input[name="${fieldName}"][value="${val}"]`);
+                               if (checkbox) {
+                                   checkbox.checked = true;
+                                   // Checkbox seçildiğinde ilgili alanları göster
+                                   const id = checkbox.id;
+                                   if (id.includes('_eski') || id.includes('_yeni')) {
+                                       togglePersonTraits(id);
+                                       togglePersonaBehavior(id);
+                                   }
+                               }
+                           });
+                       } else {
+                           // Textarea'lar için
+                           const textarea = document.querySelector(`textarea[name="${fieldName}"]`);
+                           if (textarea) textarea.value = value;
+                       }
+                   });
+                   
+                   alert('Veriler yerel depolamadan yüklendi!');
+                   updateProgress();
+               } catch (error) {
+                   alert('Veriler yüklenirken hata oluştu: ' + error.message);
+               }
+           } else {
+               alert('Kaydedilmiş veri bulunamadı!');
+           }
+       }
+
+       // İlerleme çubuğunu güncelleme
+       function updateProgress() {
+           const form = document.getElementById('karakterForm');
+           const totalElements = form.querySelectorAll('input[type="checkbox"], textarea').length;
+           const filledElements = form.querySelectorAll('input[type="checkbox"]:checked, textarea:not([value=""])').length;
+           
+           const progress = totalElements > 0 ? (filledElements / totalElements) * 100 : 0;
+           document.getElementById('progressFill').style.width = progress + '%';
+       }
+
+       // Form değişikliklerini izleme
+       document.addEventListener('change', updateProgress);
+       document.addEventListener('input', updateProgress);
+
+       // Sayfa yüklendiğinde formu oluştur
+       document.addEventListener('DOMContentLoaded', function() {
+           createForm();
+           updateProgress();
+       });
+   </script>
+</body>
+</html>
