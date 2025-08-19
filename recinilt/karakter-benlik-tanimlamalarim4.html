@@ -447,6 +447,7 @@
 
         // Kişilik özellikleri havuzu
         const personalityTraits = [
+            // Temel kişilik özellikleri
             "Kontrolcü", "Diğergam", "Yaptığı iyilikleri başa kakan", "Soğuk", "Farkındalıklı", 
             "Yönetmek isteyen", "Kendi doğrularını putlaştıran", "Başkasını değiştirmeye çalışan",
             "Anlayışlı", "Alttan alan", "Sevilmek isteyen", "Kendini değersiz hisseden",
@@ -457,10 +458,63 @@
             "Başkasının gözünde değerli hissetmek için çok çalışan", "Mükemmeliyetçi",
             "Eleştirmen", "Otoriter", "Korumacı", "Rekabetçi", "İşbirlikçi", "Sabırlı",
             "Sabırsız", "Güvenilir", "Güvenilmez", "Neşeli", "Karamsar", "İyimser",
-            "Kötümser", "Empatik", "Bencil", "Cömert", "Cimri", "Cesur", "Korkak",
+            "Kötümser", "Empatik", "Cömert", "Cimri", "Cesur", "Korkak",
             "Kararlı", "Kararsız", "Yaratıcı", "Geleneksel", "Esnek", "Katı", "Hoşgörülü",
-            "Hoşgörüsüz", "Affedici", "Kin tutucu", "Şükredici", "Şikayetçi"
-        ];
+            "Hoşgörüsüz", "Affedici", "Kin tutucu", "Şükredici", "Şikayetçi",
+            
+            // İlişkisel özellikler
+            "Düşman", "Dost", "Sevecen", "Şakacı", "Ciddi", "Espirili", "Huysuz", "Tatlı",
+            "Nazik", "Kaba", "Misafirperver", "Soğuk", "Sıcakkanlı", "Mesafeli", "Samimi",
+            "Yardımsever", "Bencil", "Fedakar", "Çıkarcı", "Paylaşımcı", "Cömert", "Eli sıkı",
+            "Konuşkan", "Sessiz", "Dinleyen", "Meraklı", "İlgisiz", "Destekleyici", "Eleştirici",
+            
+            // Duygusal özellikler
+            "Duygusal", "Soğukkanlı", "Hassas", "Kalpsiz", "Merhametli", "Acımasız", "Sevgi dolu",
+            "Nefret dolu", "Kıskanç", "Gıptacı", "Kıskançlık hissetmeyen", "Arkadaş canlısı",
+            "Asosyal", "Sosyal", "İçedönük", "Dışadönük", "Utangaç", "Çekinmeyen", "Rahat",
+            "Gergin", "Huzurlu", "Kaygılı", "Endişeli", "Kaygısız", "Stresli", "Sakin",
+            
+            // Etnik/Dini gruplara yönelik özellikler
+            "Önyargılı", "Açık fikirli", "Irkçı", "Hoşgörülü", "Milliyetçi", "Evrenselci",
+            "Dışlayıcı", "Kapsayıcı", "Ayrımcı", "Eşitlikçi", "Üstünlük taslayanı", "Alçakgönüllü",
+            "Yargılayıcı", "Anlayışlı", "Dogmatik", "Esnek düşünceli", "Fanatik", "Ilımlı",
+            "Keskin görüşlü", "Yumuşak huylu", "Sert", "Uzlaşmacı", "Tartışmacı", "Barışçı",
+            "Tehlikeli", "Güvenli", "Tehdit edici", "Zararsız", "Agresif", "Uysal",
+            "Şüpheli", "Güvenilir", "Yabancı", "Tanıdık", "Öteki", "Bizden", "Garip", "Normal",
+            
+            // Sosyal sınıflara yönelik özellikler
+            "Kibirli", "Mütevazı", "Ukala", "Sade", "Gösterişçi", "Gösterişsiz", "Züppe", "Saf",
+            "Snob", "Halktan", "Büyüklük taslayan", "Küçük görmeyen", "Tepeden bakan", "Eşit gören",
+            "Fırsatçı", "Dürüst", "Hesapçı", "Gönül rahatlığıyla", "Çıkar odaklı", "İlke odaklı",
+            "Statü meraklısı", "Statüyü önemsemeyen", "Para odaklı", "Manevi değer odaklı",
+            "Lüks düşkünü", "Sade yaşayan", "İsrafçı", "Tutumlu", "Savurgan", "Hesaplı",
+            "Aç gözlü", "Kanaat eden", "Hırslı", "Hırs yapmayan", "Rekabetçi", "Rekabet etmeyen",
+            "Materialist", "Manevi", "Tüketici", "Üretici", "Tembellik yapan", "Çalışkan",
+            
+            // Davranışsal özellikler
+            "Manipülatif", "Açık sözlü", "Kurnaz", "Naif", "Zeki", "Aptal", "Akıllı", "Ahmak",
+            "Pratik", "Teorik", "Gerçekçi", "Hayalperest", "Mantıklı", "Duygusal karar veren",
+            "Planlı", "Anlık karar veren", "Örgütlü", "Dağınık", "Disiplinli", "Disiplinsiz",
+            "Dikkatli", "Dikkatsiz", "Titiz", "Özensiz", "Perfeksiyonist", "Oluruna bırakan",
+            "Çabuk öfkelenen", "Sabrı taşmayan", "Öfke kontrolü olan", "Sinirli", "Asabi",
+            "Huysuz", "Dengesiz", "Dengeli", "Olgun", "Olgunlaşmamış", "Çocuksu", "Yetişkin",
+            
+            // Sosyal davranış özellikleri
+            "Lider", "Takipçi", "Bağımsız", "Bağımlı", "Özgür", "Kısıtlı", "Girişken", "Çekingen",
+            "Aktif", "Pasif", "Enerjik", "Yorgun", "Dinamik", "Statik", "Hareketli", "Durağan",
+            "Yaratıcı", "Taklit eden", "Özgün", "Kopya çeken", "Yenilikçi", "Tutucu", "Modern", "Eski kafalı",
+            "İlerici", "Gerici", "Değişime açık", "Değişime kapalı", "Uyum sağlayan", "Direnen",
+            
+            // Ahlaki özellikler
+            "Ahlaki", "Ahlaksız", "Erdemli", "Erdemsiz", "Namuslu", "Namussuz", "Şerefli", "Şerefsiz",
+            "Vicdanlı", "Vicdansız", "Adaletli", "Adaletsiz", "Hakkaniyetli", "Haksız", "Doğru", "Yanlış",
+            "Temiz", "Kirli", "Pak", "Murdar", "Saf", "Bozuk", "Masumane", "Kötü niyetli",
+            
+            // İletişim özellikleri
+            "Diplomatik", "Kaba sözlü", "Kibar", "Nezaketsiz", "Saygılı", "Saygısız", "Terbiyeli", "Terbiyesiz",
+            "Centilmen", "Kırıcı", "Yapıcı", "Yıkıcı", "Olumlu", "Olumsuz", "Pozitif", "Negatif",
+            "Güler yüzlü", "Somurtkan", "Gülümseyen", "Asık suratlı", "Keyifli", "Keyifsiz"
+            ];
 
         // Davranış kalıpları havuzu
         const behaviorPatterns = [
