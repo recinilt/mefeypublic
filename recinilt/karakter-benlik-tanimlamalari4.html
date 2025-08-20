@@ -912,82 +912,76 @@
 
        // Dinamik form oluşturma fonksiyonları
        function createPersonsMap(sectionName, fieldName, persons) {
-    const sectionId = normalizeString(sectionName);
-    const fieldId = normalizeString(fieldName);
-    
-    return `
-        <div class="traits-hint">
-            <h5>💡 Kullanabileceğiniz Kişilik Özellikleri Örnekleri:</h5>
-            <div class="trait-selector">
-                 ${personalityTraits.map(trait => 
-                     `<span class="trait-tag" onclick="addTraitToInput('${sectionName}_${fieldName}', '${trait}')">${trait}</span>`
-                 ).join('')}
-             </div>
-        </div>
-        <div class="comparison-container">
-            <div class="old-new-container old">
-                <h4>Eski Yaklaşım</h4>
-                <div class="person-selector" id="${sectionId}_${fieldId}_eski_grid">
-                    ${persons.map(person => {
-                        const personId = normalizeString(person);
-                        const fullId = `${sectionId}_${fieldId}_${personId}_eski`;
-                        return `
-                            <div class="checkbox-item">
-                                <input type="checkbox" 
-                                       id="${fullId}" 
-                                       name="${sectionName}_${fieldName}_eski_persons" 
-                                       value="${person}"
-                                       onchange="togglePersonTraits('${fullId}')">
-                                <label for="${fullId}">${person}</label>
-                            </div>
-                            <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
-                                <textarea name="${sectionName}_${fieldName}_${person}_eski_traits_text" 
-                                          placeholder="${person} hakkındaki kalıp yargılarınızı yazın..."
-                                          class="custom-input"></textarea>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                <button type="button" class="add-option-btn" onclick="addNewPersonOption('${sectionId}_${fieldId}_eski_grid', '${sectionName}_${fieldName}_eski_persons', 'eski')">
-                    ➕ Yeni Kişi/Grup Ekle
-                </button>
-                <textarea name="${sectionName}_${fieldName}_eski_custom" 
-                          placeholder="Diğer kişiler ve görüşleriniz..." 
-                          class="custom-input"></textarea>
-            </div>
-            <div class="old-new-container new">
-                <h4>Yeni Yaklaşım</h4>
-                <div class="person-selector" id="${sectionId}_${fieldId}_yeni_grid">
-                    ${persons.map(person => {
-                        const personId = normalizeString(person);
-                        const fullId = `${sectionId}_${fieldId}_${personId}_yeni`;
-                        return `
-                            <div class="checkbox-item">
-                                <input type="checkbox" 
-                                       id="${fullId}" 
-                                       name="${sectionName}_${fieldName}_yeni_persons" 
-                                       value="${person}"
-                                       onchange="togglePersonTraits('${fullId}')">
-                                <label for="${fullId}">${person}</label>
-                            </div>
-                            <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
-                                <textarea name="${sectionName}_${fieldName}_${person}_yeni_traits_text" 
-                                          placeholder="${person} hakkındaki yeni yaklaşımınızı yazın..."
-                                          class="custom-input"></textarea>
-                            </div>
-                        `;
-                    }).join('')}
-                </div>
-                <button type="button" class="add-option-btn" onclick="addNewPersonOption('${sectionId}_${fieldId}_yeni_grid', '${sectionName}_${fieldName}_yeni_persons', 'yeni')">
-                    ➕ Yeni Kişi/Grup Ekle
-                </button>
-                <textarea name="${sectionName}_${fieldName}_yeni_custom" 
-                          placeholder="Yeni yaklaşımınız..." 
-                          class="custom-input"></textarea>
-            </div>
-        </div>
-    `;
-}
+           const sectionId = normalizeString(sectionName);
+           const fieldId = normalizeString(fieldName);
+           
+           return `
+               <div class="traits-hint">
+                   <h5>💡 Kullanabileceğiniz Kişilik Özellikleri Örnekleri:</h5>
+                   <div class="trait-selector">
+                        ${personalityTraits.map(trait => 
+                            `<span class="trait-tag" onclick="addTraitToInput('${sectionName}_${fieldName}', '${trait}')">${trait}</span>`
+                        ).join('')}
+                    </div>
+               </div>
+               <div class="comparison-container">
+                   <div class="old-new-container old">
+                       <h4>Eski Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${persons.map(person => {
+                               const personId = normalizeString(person);
+                               const fullId = `${sectionId}_${fieldId}_${personId}_eski`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_eski_persons" 
+                                              value="${person}"
+                                              onchange="togglePersonTraits('${fullId}')">
+                                       <label for="${fullId}">${person}</label>
+                                   </div>
+                                   <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${person}_eski_traits_text" 
+                                                 placeholder="${person} hakkındaki kalıp yargılarınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_eski_custom" 
+                                 placeholder="Diğer kişiler ve görüşleriniz..." 
+                                 class="custom-input"></textarea>
+                   </div>
+                   <div class="old-new-container new">
+                       <h4>Yeni Yaklaşım</h4>
+                       <div class="person-selector">
+                           ${persons.map(person => {
+                               const personId = normalizeString(person);
+                               const fullId = `${sectionId}_${fieldId}_${personId}_yeni`;
+                               return `
+                                   <div class="checkbox-item">
+                                       <input type="checkbox" 
+                                              id="${fullId}" 
+                                              name="${sectionName}_${fieldName}_yeni_persons" 
+                                              value="${person}"
+                                              onchange="togglePersonTraits('${fullId}')">
+                                       <label for="${fullId}">${person}</label>
+                                   </div>
+                                   <div class="person-traits-container" id="${fullId}_traits" style="display:none;">
+                                       <textarea name="${sectionName}_${fieldName}_${person}_yeni_traits_text" 
+                                                 placeholder="${person} hakkındaki yeni yaklaşımınızı yazın..."
+                                                 class="custom-input"></textarea>
+                                   </div>
+                               `;
+                           }).join('')}
+                       </div>
+                       <textarea name="${sectionName}_${fieldName}_yeni_custom" 
+                                 placeholder="Yeni yaklaşımınız..." 
+                                 class="custom-input"></textarea>
+                   </div>
+               </div>
+           `;
+       }
 
        function createPersonasMap(sectionName, fieldName, situations) {
            const sectionId = normalizeString(sectionName);
@@ -1268,43 +1262,6 @@ function togglePersonaBehavior(elementId) {
                grid.appendChild(checkboxDiv);
            }
        }
-
-       // Yeni kişi/grup ekleme fonksiyonu (Ötekiler Haritası için)
-        function addNewPersonOption(gridId, fieldName, type) {
-            const grid = document.getElementById(gridId);
-            const personName = prompt("Yeni kişi/grup adını yazın:");
-            
-            if (personName && personName.trim()) {
-                const timestamp = Date.now();
-                const normalizedPerson = normalizeString(personName.trim());
-                const fullId = `${gridId.replace('_grid', '')}_${normalizedPerson}_${type}_${timestamp}`;
-                
-                const checkboxDiv = document.createElement('div');
-                checkboxDiv.className = 'checkbox-item';
-                checkboxDiv.innerHTML = `
-                    <input type="checkbox" 
-                        id="${fullId}" 
-                        name="${fieldName}" 
-                        value="${personName.trim()}"
-                        onchange="togglePersonTraits('${fullId}')">
-                    <label for="${fullId}">${personName.trim()}</label>
-                `;
-                
-                // Traits container'ı oluştur
-                const traitsDiv = document.createElement('div');
-                traitsDiv.className = 'person-traits-container';
-                traitsDiv.id = `${fullId}_traits`;
-                traitsDiv.style.display = 'none';
-                traitsDiv.innerHTML = `
-                    <textarea name="${fieldName.replace('_persons', '')}_${personName.trim()}_${type}_traits_text" 
-                            placeholder="${personName.trim()} hakkındaki ${type === 'eski' ? 'kalıp yargılarınızı' : 'yeni yaklaşımınızı'} yazın..."
-                            class="custom-input"></textarea>
-                `;
-                
-                grid.appendChild(checkboxDiv);
-                grid.appendChild(traitsDiv);
-            }
-        }
 
        // Form verilerini toplama
        function collectFormData() {
