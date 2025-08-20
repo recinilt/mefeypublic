@@ -990,77 +990,82 @@
 }
 
        function createPersonasMap(sectionName, fieldName, situations) {
-           const sectionId = normalizeString(sectionName);
-           const fieldId = normalizeString(fieldName);
-           
-           return `
-               <div class="traits-hint">
-                   <h5>💡 Kullanabileceğiniz Davranış Kalıpları Örnekleri:</h5>
-                   <div class="trait-selector">
+            const sectionId = normalizeString(sectionName);
+            const fieldId = normalizeString(fieldName);
+            
+            return `
+                <div class="traits-hint">
+                    <h5>💡 Kullanabileceğiniz Davranış Kalıpları Örnekleri:</h5>
+                    <div class="trait-selector">
                         ${behaviorPatterns.map(pattern => 
                             `<span class="trait-tag" onclick="addTraitToInput('${sectionName}_${fieldName}', '${pattern}')">${pattern}</span>`
                         ).join('')}
                     </div>
-               </div>
-               <div class="comparison-container">
-                   <div class="old-new-container old">
-                       <h4>Eski Yaklaşım</h4>
-                       <div class="person-selector">
-                           ${situations.map(situation => {
-                               const situationId = normalizeString(situation);
-                               const fullId = `${sectionId}_${fieldId}_${situationId}_eski`;
-                               return `
-                                   <div class="checkbox-item">
-                                       <input type="checkbox" 
-                                              id="${fullId}" 
-                                              name="${sectionName}_${fieldName}_eski_situations" 
-                                              value="${situation}"
-                                              onchange="togglePersonaBehavior('${fullId}')">
-                                       <label for="${fullId}">${situation}</label>
-                                   </div>
-                                   <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
-                                       <textarea name="${sectionName}_${fieldName}_${situation}_eski_behavior_text" 
-                                                 placeholder="${situation} durumundaki eski davranış kalıplarınızı yazın..."
-                                                 class="custom-input"></textarea>
-                                   </div>
-                               `;
-                           }).join('')}
-                       </div>
-                       <textarea name="${sectionName}_${fieldName}_eski_custom" 
-                                 placeholder="Diğer durumlar ve eski davranışlarınız..." 
-                                 class="custom-input"></textarea>
-                   </div>
-                   <div class="old-new-container new">
-                       <h4>Yeni Yaklaşım</h4>
-                       <div class="person-selector">
-                           ${situations.map(situation => {
-                               const situationId = normalizeString(situation);
-                               const fullId = `${sectionId}_${fieldId}_${situationId}_yeni`;
-                               return `
-                                   <div class="checkbox-item">
-                                       <input type="checkbox" 
-                                              id="${fullId}" 
-                                              name="${sectionName}_${fieldName}_yeni_situations" 
-                                              value="${situation}"
-                                              onchange="togglePersonaBehavior('${fullId}')">
-                                       <label for="${fullId}">${situation}</label>
-                                   </div>
-                                   <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
-                                       <textarea name="${sectionName}_${fieldName}_${situation}_yeni_behavior_text" 
-                                                 placeholder="${situation} durumundaki yeni yaklaşımınızı yazın..."
-                                                 class="custom-input"></textarea>
-                                   </div>
-                               `;
-                           }).join('')}
-                       </div>
-                       <textarea name="${sectionName}_${fieldName}_yeni_custom" 
-                                 placeholder="Yeni yaklaşımınız..." 
-                                 class="custom-input"></textarea>
-                   </div>
-               </div>
-           `;
-       }
-
+                </div>
+                <div class="comparison-container">
+                    <div class="old-new-container old">
+                        <h4>Eski Yaklaşım</h4>
+                        <div class="person-selector" id="${sectionId}_${fieldId}_eski_grid">
+                            ${situations.map(situation => {
+                                const situationId = normalizeString(situation);
+                                const fullId = `${sectionId}_${fieldId}_${situationId}_eski`;
+                                return `
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" 
+                                            id="${fullId}" 
+                                            name="${sectionName}_${fieldName}_eski_situations" 
+                                            value="${situation}"
+                                            onchange="togglePersonaBehavior('${fullId}')">
+                                        <label for="${fullId}">${situation}</label>
+                                    </div>
+                                    <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
+                                        <textarea name="${sectionName}_${fieldName}_${situation}_eski_behavior_text" 
+                                                placeholder="${situation} durumundaki eski davranış kalıplarınızı yazın..."
+                                                class="custom-input"></textarea>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button type="button" class="add-option-btn" onclick="addNewSituationOption('${sectionId}_${fieldId}_eski_grid', '${sectionName}_${fieldName}_eski_situations', 'eski')">
+                            ➕ Yeni Durum Ekle
+                        </button>
+                        <textarea name="${sectionName}_${fieldName}_eski_custom" 
+                                placeholder="Diğer durumlar ve eski davranışlarınız..." 
+                                class="custom-input"></textarea>
+                    </div>
+                    <div class="old-new-container new">
+                        <h4>Yeni Yaklaşım</h4>
+                        <div class="person-selector" id="${sectionId}_${fieldId}_yeni_grid">
+                            ${situations.map(situation => {
+                                const situationId = normalizeString(situation);
+                                const fullId = `${sectionId}_${fieldId}_${situationId}_yeni`;
+                                return `
+                                    <div class="checkbox-item">
+                                        <input type="checkbox" 
+                                            id="${fullId}" 
+                                            name="${sectionName}_${fieldName}_yeni_situations" 
+                                            value="${situation}"
+                                            onchange="togglePersonaBehavior('${fullId}')">
+                                        <label for="${fullId}">${situation}</label>
+                                    </div>
+                                    <div class="persona-behavior-container" id="${fullId}_behavior" style="display:none;">
+                                        <textarea name="${sectionName}_${fieldName}_${situation}_yeni_behavior_text" 
+                                                placeholder="${situation} durumundaki yeni yaklaşımınızı yazın..."
+                                                class="custom-input"></textarea>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button type="button" class="add-option-btn" onclick="addNewSituationOption('${sectionId}_${fieldId}_yeni_grid', '${sectionName}_${fieldName}_yeni_situations', 'yeni')">
+                            ➕ Yeni Durum Ekle
+                        </button>
+                        <textarea name="${sectionName}_${fieldName}_yeni_custom" 
+                                placeholder="Yeni yaklaşımınız..." 
+                                class="custom-input"></textarea>
+                    </div>
+                </div>
+            `;
+        }
        // Özellik ekleme fonksiyonu
        // Özellik ekleme fonksiyonu - ESKİ FONKSİYONU BUL VE TAMAMEN DEĞİŞTİR
 function addTraitToInput(fieldPrefix, trait) {
@@ -1306,6 +1311,43 @@ function togglePersonaBehavior(elementId) {
             }
         }
 
+
+        // Yeni durum ekleme fonksiyonu (Personalar ve Maskeler için)
+        function addNewSituationOption(gridId, fieldName, type) {
+            const grid = document.getElementById(gridId);
+            const situationName = prompt("Yeni durum/ortamı yazın:");
+            
+            if (situationName && situationName.trim()) {
+                const timestamp = Date.now();
+                const normalizedSituation = normalizeString(situationName.trim());
+                const fullId = `${gridId.replace('_grid', '')}_${normalizedSituation}_${type}_${timestamp}`;
+                
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'checkbox-item';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" 
+                        id="${fullId}" 
+                        name="${fieldName}" 
+                        value="${situationName.trim()}"
+                        onchange="togglePersonaBehavior('${fullId}')">
+                    <label for="${fullId}">${situationName.trim()}</label>
+                `;
+                
+                // Behavior container'ı oluştur
+                const behaviorDiv = document.createElement('div');
+                behaviorDiv.className = 'persona-behavior-container';
+                behaviorDiv.id = `${fullId}_behavior`;
+                behaviorDiv.style.display = 'none';
+                behaviorDiv.innerHTML = `
+                    <textarea name="${fieldName.replace('_situations', '')}_${situationName.trim()}_${type}_behavior_text" 
+                            placeholder="${situationName.trim()} durumundaki ${type === 'eski' ? 'eski davranış kalıplarınızı' : 'yeni yaklaşımınızı'} yazın..."
+                            class="custom-input"></textarea>
+                `;
+                
+                grid.appendChild(checkboxDiv);
+                grid.appendChild(behaviorDiv);
+            }
+        }
        // Form verilerini toplama
        function collectFormData() {
            const form = document.getElementById('karakterForm');
