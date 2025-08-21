@@ -1,0 +1,90 @@
+
+## PROMPT 2: MAKALE DÖNÜŞTÜRME VE YAZIM 
+
+### 🎯 Temel Hedef
+Birinci prompttan çıkan envanteri kullanarak, videoyu hiç izlememiş birinin ana konuları ve temel mesajları %100 kavrayabileceği ancak ÖZETLEMEDEN uzak duran, özlü ve verimli makale yazmak.
+
+### 📝 Yazım Öncesi Zorunlu Kontroller
+
+#### A. Envanter Kontrolü
+- Birinci prompttan çıkan TÜM öğeler listelenmiş mi?
+- Her kategori için önem dereceleri belirlendi mi?
+- Hiçbir temel içerik atlanmamış mı?
+
+#### B. Yapısal Planlama
+1. **İçindekiler**: Ana başlıkları gösteren özlü rehber
+2. **Giriş**: Konuyu çerçeveleyen hazırlık bölümü  
+3. **Ana Gelişme**: Envanterdeki önemli öğeleri kapsayan sistematik bölümler
+4. **Sonuç**: Bütünleyici, özetleyici final
+
+### 🚨 Mutlak Yazım Kuralları
+
+#### 1. SEÇİCİ AMA EKSİKSİZ AKTARIM
+- **Hiçbir ana konu atlanmayacak**
+- **Her temel mesaj aktarılacak**
+- **Envanterdeki TEMEL(🔴) öğelerin %100'ü**
+- **Envanterdeki ÖNEMLİ(🟡) öğelerin %100'ü**
+- **Envanterdeki EK(🟢) öğelerin yüzde 70'i seçilecek**
+
+#### 2. YASAKLI İFADELER
+Bu ifadelerden BİRİNİ bile kullanırsan BAŞTAN YAZ:
+- "Videoda başka örnekler de var..."
+- "Detaylara girmeden..."
+- "Kısaca özetlemek gerekirse..."
+- "Bunun gibi başka..."
+- "Ve benzeri..."
+
+#### 3. ZORUNLU İÇERİK ÖGELERİ
+- **Tüm ana mesajlar** tam olarak aktarılacak
+- **Temel kişisel deneyimler** eksiksiz yansıtılacak
+- **Konuşmacının ana atmosferi** korunacak
+- **Kritik örnekler ve alıntılar** dahil edilecek
+- **Önemli izleyici etkileşimleri** anlatılacak
+
+#### 4. VERİMLİLİK PRENSİPLERİ
+- **Tek cümlelik hikayeler:** Uzun anekdotları özünde saklayarak tek güçlü cümleye dönüştür
+- **Örnek birleştirme:** Aynı noktayı destekleyen 3 örneği 1 güçlü örnekte topla  
+- **Alıntı seçimi:** En çarpıcı alıntıyı seç, diğerlerini parafraze et
+- **Atmosfer korunumu:** Samimiyeti bozmadan yoğunlaştır
+
+### 📊 Kalite Kontrol Sistemi
+
+#### A. Yazım Sırası Kontroller (Her Bölüm Sonrası)
+1. Ana mesaj net aktarıldı mı?
+2. Gereksiz tekrar var mı?
+3. Her paragraf değer katıyor mu?
+4. Okuyucu sıkılmadan ilerliyor mu?
+
+#### B. Final Kontrolü (Makale Bitiminde)
+- [ ] Envanterdeki TEMEL(🔴) öğelerin %100'ü aktarıldı mı?
+- [ ] ÖNEMLİ(🟡) öğelerin %85'i dahil edildi mi?
+- [ ] Her ana mesaj eksiksiz verildi mi?
+- [ ] Videonun temel atmosferi hissediliyor mu?
+- [ ] Makale akıcı ve verimli mi?
+
+### 🎬 Başarı Testi
+
+**Final Sorusu:** "Bu makaleyi okuyan biri, konunun tüm temel noktalarını kavrayıp videonun ana mesajını tam olarak anlayabilir mi?"
+
+**Cevap EVET değilse → Makale tamamlanmamıştır!**
+
+### ⚖️ Uzunluk ve Verimlilik Prensibi
+- **Özlü ama derin yaz** - her kelime değer katmalı
+- **Ana konuları derinlemesine** ele al
+- **Verimli ol** ama eksik kalma
+- **Gereksiz tekrardan** kaçın, temel noktaları güçlendir
+
+### 📈 Hedef Kapsam Oranları
+- TEMEL(🔴) içerikler: %100 aktarım
+- ÖNEMLİ(🟡) içerikler: %85 aktarım  
+- EK(🟢) içerikler: En etkili %70'u seçerek aktarım
+
+### 🏁 Makale Sonunda Zorunlu Bildirim
+"**Kapsam Raporu:** Bu makalede transkriptteki ana konuların %[X] oranında, tüm içeriğin %[Y] verimlilik oranıyla aktarılmıştır."
+*(Hedef: Ana konular %100, Genel verimlilik %85)*
+
+### ⚠️ Hatırlatmalar
+- Artifact/eser kullanma, doğrudan yanıt ver
+- Özet yazmıyorsun, videoyu VERİMLİ şekilde YAZIYORSUN  
+- Okuyucu "Konuyu tam anladım!" demeli
+- Videonun ana mesajı, makale ile tam deneyimlenmeli

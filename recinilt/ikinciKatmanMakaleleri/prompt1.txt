@@ -1,0 +1,59 @@
+## PROMPT 1: İÇERİK ENVANTERİ VE HARİTALAMA (GÜNCELLENMİŞ)
+
+### 🎯 Temel Hedef
+Transkriptteki TÜM içeriği kategorize ederek eksiksiz bir envanter çıkarmak, önem derecelerine göre sınıflandırmak ve detaylı içerik haritası oluşturmak.
+
+### 📋 Zorunlu Analiz Süreci
+
+#### A. Transkript Taraması (3 Kez Okuma)
+1. **İlk Okuma:** Genel akışı kavra
+2. **İkinci Okuma:** Her detayı not al
+3. **Üçüncü Okuma:** Atlanabilecek noktaları işaretle
+
+#### B. Önem Derecelendirme Sistemi
+Her içerik öğesini şu şekilde sınıflandır:
+- **TEMEL (🔴):** Makalenin omurgası, mutlaka dahil
+- **ÖNEMLİ (🟡):** Konuyu destekleyen, özetle dahil
+- **EK (🟢):** Zenginleştirici, kısaltılabilir/atlanabilir
+
+#### C. Kapsamlı İçerik Envanteri
+Aşağıdaki kategorilerde TÜM içeriği madde madde listele ve önem derecesi ver:
+
+**📚 Ana İçerik Kategorileri:**
+- [ ] Ana konular ve alt başlıklar (kronolojik sırayla) + önem derecesi
+- [ ] Tüm hikayeler ve anekdotlar (kısa özetleriyle) + önem derecesi
+- [ ] Örnekler (günlük hayattan, tarihten, bilimden) + önem derecesi
+- [ ] Alıntılar ve özel ifadeler (tam metin) + önem derecesi
+- [ ] İzleyici etkileşimleri ve sorular + önem derecesi
+- [ ] Referans verilen kişiler, kitaplar, kavramlar + önem derecesi
+- [ ] Müzik, şiir veya sanatsal içerikler + önem derecesi
+- [ ] Kişisel deneyimler ve itiraflar + önem derecesi
+- [ ] Diğer videolara yapılan göndermeler + önem derecesi
+- [ ] Teknik sorunlar ve spontane gelişmeler + önem derecesi
+- [ ] Mottolar, özdeyişler, özel tanımlamalar + önem derecesi
+- [ ] Metaforlar ve benzetmeler + önem derecesi
+- [ ] Espriler, şakalar, samimi anlar + önem derecesi
+
+#### D. Yapısal Haritalama
+Her kategori için:
+- **Konu başlığı**
+- **Transkriptteki konumu** (yaklaşık hangi dakika/bölüm)
+- **İlişkili diğer konular**
+- **Önem derecesi** (🔴🟡🟢)
+- **Detay zenginliği** (Çok detaylı/Normal/Kısa geçiş)
+
+#### E. Bağlantı Analizi
+- Konular arası mantıksal bağlantıları tespit et
+- Sebep-sonuç ilişkilerini belirle
+- Tema geçişlerini işaretle
+- Ana argümanları destekleyen yan öğeleri grupla
+- Ana mesajları destekleyen en güçlü örnekleri seç
+- Benzer örneklerden en etkili olanını belirle
+
+### ✅ Tamamlanma Kriterleri
+- Transkriptteki her paragraftan en az bir öğe çıkarılmış olmalı
+- Hiçbir hikaye, örnek veya alıntı atlanmamalı
+- Her öğeye önem derecesi verilmiş olmalı
+- İçerik haritası tam ve tutarlı olmalı
+- Kategoriler arası çapraz referanslar kurulmuş olmalı
+
