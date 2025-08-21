@@ -50,29 +50,6 @@
             padding: 30px;
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 1.2rem;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .article-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -130,45 +107,11 @@
             word-break: break-all;
         }
 
-        .error {
+        .article-count {
             text-align: center;
-            padding: 40px;
-            color: #e74c3c;
+            margin-bottom: 30px;
+            color: #666;
             font-size: 1.1rem;
-        }
-
-        .error-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .retry-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .retry-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-        }
-
-        .no-articles {
-            text-align: center;
-            padding: 60px 20px;
-            color: #7f8c8d;
-        }
-
-        .no-articles-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
         }
 
         @media (max-width: 768px) {
@@ -193,154 +136,84 @@
             <p>İkinci katman makalelerinizi keşfedin</p>
         </div>
         <div class="content">
-            <div id="loading" class="loading">
-                <div class="spinner"></div>
-                <div>Makaleler yükleniyor...</div>
-            </div>
-            <div id="articles" class="article-grid" style="display: none;"></div>
-            <div id="error" class="error" style="display: none;">
-                <div class="error-icon">⚠️</div>
-                <div>Makaleler yüklenirken bir hata oluştu</div>
-                <button class="retry-button" onclick="loadArticles()">Tekrar Dene</button>
-            </div>
-            <div id="no-articles" class="no-articles" style="display: none;">
-                <div class="no-articles-icon">📝</div>
-                <h2>Henüz makale bulunamadı</h2>
-                <p>JargonTranscriptleri klasörü boş görünüyor</p>
-            </div>
+            <div class="article-count" id="articleCount"></div>
+            <div id="articles" class="article-grid"></div>
         </div>
     </div>
 
     <script>
-        async function loadArticles() {
-            const loadingEl = document.getElementById('loading');
-            const articlesEl = document.getElementById('articles');
-            const errorEl = document.getElementById('error');
-            const noArticlesEl = document.getElementById('no-articles');
-            
-            // Reset görünüm
-            loadingEl.style.display = 'block';
-            articlesEl.style.display = 'none';
-            errorEl.style.display = 'none';
-            noArticlesEl.style.display = 'none';
-            articlesEl.innerHTML = '';
-            
-            try {
-                // Klasör içeriğini al
-                const response = await fetch('mmaJargonTranscriptleri/');
-                
-                if (!response.ok) {
-                    throw new Error('Klasör bulunamadı veya erişim hatası');
-                }
-                
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                
-                // .txt dosyalarını bul
-                const links = Array.from(doc.querySelectorAll('a'))
-                    .filter(link => link.href && link.href.toLowerCase().endsWith('.txt'))
-                    .map(link => {
-                        const href = link.getAttribute('href');
-                        const fileName = href.split('/').pop();
-                        return {
-                            fileName: fileName,
-                            fullPath: `mmaJargonTranscriptleri/${fileName}`,
-                            displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
-                        };
-                    });
-                
-                loadingEl.style.display = 'none';
-                
-                if (links.length === 0) {
-                    noArticlesEl.style.display = 'block';
-                    return;
-                }
-                
-                // Makale kartlarını oluştur
-                links.forEach(article => {
-                    const articleCard = document.createElement('div');
-                    articleCard.className = 'article-card';
-                    articleCard.onclick = () => openArticle(article.fullPath);
-                    
-                    articleCard.innerHTML = `
-                        <div class="article-title">${article.displayName}</div>
-                        <div class="article-path">${article.fileName}</div>
-                    `;
-                    
-                    articlesEl.appendChild(articleCard);
-                });
-                
-                articlesEl.style.display = 'grid';
-                
-            } catch (error) {
-                console.error('Makale yükleme hatası:', error);
-                loadingEl.style.display = 'none';
-                errorEl.style.display = 'block';
-            }
+        // Makale dosya listesi
+        const articles = [
+            '012-_Kavramlar_012_Jargon_ve_Kavram_S_zl___Hakk_nda_transkript.txt',
+            '013-_Kavramlar_013_Nitelikli_Benlik_Fark_ndal___transkript.txt',
+            '014-_Kavramlar_014_En_Dipteki_Temel_Motor_2_G_d__ve___g_d_leri_transkript.txt',
+            '015-_Kavramlar_015__artland_r_Im___Zihin_rev2_transkript.txt',
+            '016-_Kavramlar_016_Sapiensin___Tip_Benli_i_transkript.txt',
+            '017-_Kavramlar_017_Bilin__ve_Fark_ndal_k_transkript.txt',
+            '018-_Kavramlar_018_Bilgi__nan__Sezgi_transkript.txt',
+            '019-_Kavramlar_019_Anlaml__Bilin_li_Fark_ndal_k_transkript.txt',
+            '020-_Kavramlar_020_Anlaml__Bilin_li_Fark_ndal_kl__Agnostik_H_l_transkript.txt',
+            '021-_Kavramlar_021__an_E_risi__l__s__transkript.txt',
+            '022-_Kavramlar_022__Alg_da_ve_Yarg_da_G_recelik__l__s__transkript.txt',
+            '023-_Kavramlar_023__Diyalektik_Zevc_UzayZamanMaddeEnerji__l__s__transkript.txt',
+            '024-_Kavramlar_024__Duygu_Durumu_H_l_Makam_transkript.txt',
+            '025-_Kavramlar_025__HazHuzurMutluluk_H_li_transkript.txt',
+            '026-_Kavramlar_026___deolojik_Cinnet_transkript.txt',
+            '027-_Kavramlar_027___zg_mluluk__zg_mlu_transkript.txt',
+            '028-_Kavramlar_028__Sevgi_ve___k_transkript.txt',
+            '029-_Kavramlar_029__Selam_ve_Esenlik_transkript.txt',
+            '030-_Kavramlar_030__Merhamet_ve__efkat_transkript.txt',
+            '031-_Kavramlar_031__Ak_l_Zihin_Zihin_Durumlar__transkript.txt',
+            '032-_Kavramlar_032___eli_ki_ve_Paradox_transkript.txt',
+            '033-_Kavramlar_033_B_t_n_Varolu__Tanr__Z_hirH__B_t_nH__tanr_lar_Melekler__eytanlar__blis_transkript.txt',
+            '034-_Kavramlar_034__Varolu__Hi_lik_Yokluk_Varl_k_transkript.txt',
+            '035-_Kavramlar_035__Kapsayarak_A_mak_transkript.txt',
+            '036-_Kavramlar_036___spatlamak_Temellendirmek_transkript.txt',
+            '037-_Kavramlar_037__Realite_Hakikat_Ger_eklik_transkript.txt',
+            '038-_Kavramlar_038__Kapanmayan_Yar_k_transkript.txt',
+            '039-_Kavramlar_039__B_y_k_EKS_K_The_ARZU_transkript.txt',
+            '040- Kavramlar_040  Qanitiin Teslimiyet_transkript.txt',
+            '041- Kavramlar_041  _lim _rif ___k_transkript.txt'
+        ];
+
+        function createDisplayName(fileName) {
+            // .txt uzantısını kaldır ve dosya adını temizle
+            return fileName
+                .replace('.txt', '')
+                .replace(/[-_]/g, ' ')
+                .replace(/(\d+)/g, ' $1')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toUpperCase();
         }
-        
-        function openArticle(filePath) {
-            // Yeni sekmede txt dosyasını aç
+
+        function openArticle(fileName) {
+            const filePath = `ikinciKatmanMakaleleri/${fileName}`;
             window.open(filePath, '_blank');
         }
-        
-        // Alternatif klasör okuma yöntemi (eğer yukarıdaki çalışmazsa)
-        async function loadArticlesAlternative() {
-            const loadingEl = document.getElementById('loading');
+
+        function loadArticles() {
             const articlesEl = document.getElementById('articles');
-            const errorEl = document.getElementById('error');
-            const noArticlesEl = document.getElementById('no-articles');
+            const countEl = document.getElementById('articleCount');
             
-            loadingEl.style.display = 'block';
-            articlesEl.style.display = 'none';
-            errorEl.style.display = 'none';
-            noArticlesEl.style.display = 'none';
+            // Makale sayısını göster
+            countEl.textContent = `${articles.length} makale bulundu`;
             
-            // Olası dosya isimlerini dene
-            const possibleFiles = [];
-            const testNames = [
-                'makale1.txt', 'makale2.txt', 'makale3.txt',
-                'article1.txt', 'article2.txt', 'article3.txt',
-                'metin1.txt', 'metin2.txt', 'metin3.txt'
-            ];
-            
-            for (const fileName of testNames) {
-                try {
-                    const response = await fetch(`mmaJargonTranscriptleri/${fileName}`, { method: 'HEAD' });
-                    if (response.ok) {
-                        possibleFiles.push({
-                            fileName: fileName,
-                            fullPath: `mmaJargonTranscriptleri/${fileName}`,
-                            displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
-                        });
-                    }
-                } catch (e) {
-                    // Dosya bulunamadı, devam et
-                }
-            }
-            
-            loadingEl.style.display = 'none';
-            
-            if (possibleFiles.length === 0) {
-                noArticlesEl.style.display = 'block';
-                return;
-            }
-            
-            possibleFiles.forEach(article => {
+            // Her makale için kart oluştur
+            articles.forEach(fileName => {
                 const articleCard = document.createElement('div');
                 articleCard.className = 'article-card';
-                articleCard.onclick = () => openArticle(article.fullPath);
+                articleCard.onclick = () => openArticle(fileName);
+                
+                const displayName = createDisplayName(fileName);
                 
                 articleCard.innerHTML = `
-                    <div class="article-title">${article.displayName}</div>
-                    <div class="article-path">${article.fileName}</div>
+                    <div class="article-title">${displayName}</div>
+                    <div class="article-path">${fileName}</div>
                 `;
                 
                 articlesEl.appendChild(articleCard);
             });
-            
-            articlesEl.style.display = 'grid';
         }
         
         // Sayfa yüklendiğinde makaleleri yükle
