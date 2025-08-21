@@ -227,7 +227,7 @@
             
             try {
                 // Klasör içeriğini al
-                const response = await fetch('./ikinciKatmanMakaleleri/');
+                const response = await fetch('ikinciKatmanMakaleleri/');
                 
                 if (!response.ok) {
                     throw new Error('Klasör bulunamadı veya erişim hatası');
@@ -245,7 +245,7 @@
                         const fileName = href.split('/').pop();
                         return {
                             fileName: fileName,
-                            fullPath: `./ikinciKatmanMakaleleri/${fileName}`,
+                            fullPath: `ikinciKatmanMakaleleri/${fileName}`,
                             displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
                         };
                     });
@@ -307,11 +307,11 @@
             
             for (const fileName of testNames) {
                 try {
-                    const response = await fetch(`./ikinciKatmanMakaleleri/${fileName}`, { method: 'HEAD' });
+                    const response = await fetch(`ikinciKatmanMakaleleri/${fileName}`, { method: 'HEAD' });
                     if (response.ok) {
                         possibleFiles.push({
                             fileName: fileName,
-                            fullPath: `./ikinciKatmanMakaleleri/${fileName}`,
+                            fullPath: `ikinciKatmanMakaleleri/${fileName}`,
                             displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
                         });
                     }

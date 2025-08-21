@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Makale Listesi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: left 0.3s ease;
+        }
+
+        .article-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .article-card:hover::before {
+            left: 0;
+        }
+
+        .article-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .article-path {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 8px;
+            word-break: break-all;
+        }
+
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .error-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .retry-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .no-articles {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .no-articles-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .article-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Makale Kütüphanesi</h1>
+            <p>İkinci katman makalelerinizi keşfedin</p>
+        </div>
+        <div class="content">
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <div>Makaleler yükleniyor...</div>
+            </div>
+            <div id="articles" class="article-grid" style="display: none;"></div>
+            <div id="error" class="error" style="display: none;">
+                <div class="error-icon">⚠️</div>
+                <div>Makaleler yüklenirken bir hata oluştu</div>
+                <button class="retry-button" onclick="loadArticles()">Tekrar Dene</button>
+            </div>
+            <div id="no-articles" class="no-articles" style="display: none;">
+                <div class="no-articles-icon">📝</div>
+                <h2>Henüz makale bulunamadı</h2>
+                <p>JargonTranscriptleri klasörü boş görünüyor</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadArticles() {
+            const loadingEl = document.getElementById('loading');
+            const articlesEl = document.getElementById('articles');
+            const errorEl = document.getElementById('error');
+            const noArticlesEl = document.getElementById('no-articles');
+            
+            // Reset görünüm
+            loadingEl.style.display = 'block';
+            articlesEl.style.display = 'none';
+            errorEl.style.display = 'none';
+            noArticlesEl.style.display = 'none';
+            articlesEl.innerHTML = '';
+            
+            try {
+                // Klasör içeriğini al
+                const response = await fetch('mmaJargonTranscriptleri/');
+                
+                if (!response.ok) {
+                    throw new Error('Klasör bulunamadı veya erişim hatası');
+                }
+                
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // .txt dosyalarını bul
+                const links = Array.from(doc.querySelectorAll('a'))
+                    .filter(link => link.href && link.href.toLowerCase().endsWith('.txt'))
+                    .map(link => {
+                        const href = link.getAttribute('href');
+                        const fileName = href.split('/').pop();
+                        return {
+                            fileName: fileName,
+                            fullPath: `mmaJargonTranscriptleri/${fileName}`,
+                            displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
+                        };
+                    });
+                
+                loadingEl.style.display = 'none';
+                
+                if (links.length === 0) {
+                    noArticlesEl.style.display = 'block';
+                    return;
+                }
+                
+                // Makale kartlarını oluştur
+                links.forEach(article => {
+                    const articleCard = document.createElement('div');
+                    articleCard.className = 'article-card';
+                    articleCard.onclick = () => openArticle(article.fullPath);
+                    
+                    articleCard.innerHTML = `
+                        <div class="article-title">${article.displayName}</div>
+                        <div class="article-path">${article.fileName}</div>
+                    `;
+                    
+                    articlesEl.appendChild(articleCard);
+                });
+                
+                articlesEl.style.display = 'grid';
+                
+            } catch (error) {
+                console.error('Makale yükleme hatası:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        function openArticle(filePath) {
+            // Yeni sekmede txt dosyasını aç
+            window.open(filePath, '_blank');
+        }
+        
+        // Alternatif klasör okuma yöntemi (eğer yukarıdaki çalışmazsa)
+        async function loadArticlesAlternative() {
+            const loadingEl = document.getElementById('loading');
+            const articlesEl = document.getElementById('articles');
+            const errorEl = document.getElementById('error');
+            const noArticlesEl = document.getElementById('no-articles');
+            
+            loadingEl.style.display = 'block';
+            articlesEl.style.display = 'none';
+            errorEl.style.display = 'none';
+            noArticlesEl.style.display = 'none';
+            
+            // Olası dosya isimlerini dene
+            const possibleFiles = [];
+            const testNames = [
+                'makale1.txt', 'makale2.txt', 'makale3.txt',
+                'article1.txt', 'article2.txt', 'article3.txt',
+                'metin1.txt', 'metin2.txt', 'metin3.txt'
+            ];
+            
+            for (const fileName of testNames) {
+                try {
+                    const response = await fetch(`mmaJargonTranscriptleri/${fileName}`, { method: 'HEAD' });
+                    if (response.ok) {
+                        possibleFiles.push({
+                            fileName: fileName,
+                            fullPath: `mmaJargonTranscriptleri/${fileName}`,
+                            displayName: fileName.replace('.txt', '').replace(/[-_]/g, ' ')
+                        });
+                    }
+                } catch (e) {
+                    // Dosya bulunamadı, devam et
+                }
+            }
+            
+            loadingEl.style.display = 'none';
+            
+            if (possibleFiles.length === 0) {
+                noArticlesEl.style.display = 'block';
+                return;
+            }
+            
+            possibleFiles.forEach(article => {
+                const articleCard = document.createElement('div');
+                articleCard.className = 'article-card';
+                articleCard.onclick = () => openArticle(article.fullPath);
+                
+                articleCard.innerHTML = `
+                    <div class="article-title">${article.displayName}</div>
+                    <div class="article-path">${article.fileName}</div>
+                `;
+                
+                articlesEl.appendChild(articleCard);
+            });
+            
+            articlesEl.style.display = 'grid';
+        }
+        
+        // Sayfa yüklendiğinde makaleleri yükle
+        window.addEventListener('load', loadArticles);
+    </script>
+</body>
+</html>
