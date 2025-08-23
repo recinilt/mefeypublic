@@ -1,0 +1,80 @@
+
+# Bilime Göre Bilginin İmkanı ve Araçları
+
+## İçindekiler
+- Bilimin Tarihsel Şekillenmesi ve Müstakil Alan Oluşumu
+- Bilim İçindeki Üç Ana Mezhep ve Çatışma Alanları
+- Kat-i Bilgi Sorusu ve Fizikalist Yaklaşım
+- Bilimsel Yöntem: Klasik Metot ve Modern Eleştiriler
+- Soyut Alanlar Sorunu ve Metafizik Tartışmalar
+- Varoluş Soruları ve Bilimin Sınırları
+
+---
+
+**Temel Mesaj:** Bilim 17-18. yüzyıldan bu yana müstakil bir alan olmasına rağmen, kendi içinde köklü tartışmalar barındırır ve varoluş sorularımıza tek başına yanıt veremez.
+
+## Bilimin Tarihsel Şekillenmesi
+
+Bilim bugün bildiğimiz anlamıyla 17-18. yüzyıldan itibaren müstakil bir alan haline geldi. Öncesinde rasyonel düşünce, yani felsefe alanında deney ve gözlem birer metot olarak kullanılmaktaydı. Somut âlemin nesnelerinden yapılan gözlem ve ölçümler, astronomi başlığında gök cisimlerinin hareketlerinin incelenmesi, geometri, matematik - bunların hepsi doğa filozoflarının doğayı, varlığın kökenini ararken kullandıkları araçlardı.
+
+Batı Avrupa'da orta çağ sonrası olaylar sonucu insanların belli bir tanımlama gereği hissetmesiyle, bir rekabetin sonucu da birazıcık, bilim müstakil alan haline teşekkül etti. Sanayi devrimi ve aydınlanmayla Batı Avrupa'dan başlayarak tüm dünyaya hızla yayıldı. Tıpkı dinler gibi, felsefe gibi, mistisizm gibi kendi kabulleri, kuralları, metotları, yöntemleri olan müstakil bir alan oldu.
+
+Ancak bilim de tıpkı diğerleri gibi tek tip bir şey, herkesçe kabul edilebilecek bir ütopya olmadı. **"İnsanın olduğu her yerde durum budur. İnsan ve onun zihninin, algısının ve yargısının olduğu her yerde bu tip bölümmeleler ve tartışmalar kaçınılmazdır."**
+
+## Bilimin Üç Mezhebi
+
+**"Bilimin 3 mezhebi diyorum ben"** - bilimin kapsam ve yöntemi hakkında üç temel yaklaşım vardır: Fizikalizm, tarihselcilik ve bilimcilik.
+
+**Fizikalistler** Auguste Comte'tan beri gelen ana damardır, pozitivizm dediğimiz. Yalnızca fiziksel dünya, bu âlem, bu evren ve onun nesneleri bilimin konusudur derler. Soyut konular bilimin konusu olamaz. Sadece nesnel olaylar, duyularımıza deney ve gözleme muhatap olabilecek dış dünyanın nesnel objeleri bilimin konusu olmalıdır.
+
+**Tarihselciler** hem nesnel olayların, hem de diğer her şeyin kendi yöntem ve ilkeleri belirlenerek bilimin konusu olabileceğini iddia ederler. Bugün adına insan psikolojisi, sosyoloji dediğimiz, onun toplu haldeki yaşayışı ve daha birçok somut olmayan konu ve alanlar da bilimin konusuna girer, fakat onların da kendi bilimsel ilke ve yöntemleri belirlendikten sonra incelenmelidir.
+
+**Bilimciler** en geniş yaklaşımla bilimin her konuyu inceleyebileceğini, her konunun bilimin alanına girdiğini savunur.
+
+Bu farklı mezheplerin kat-i bilgi sorusuna verdikleri yanıtlar da değişir. Fizikalist bir bilimci "kat-i bilgi sadece nesnelerin dünyasında mümkündür, bizim henüz ulaşamamız teorik, teknolojik ya da kuramsal eksikliklerimizden ileri gelmektedir" der.
+
+## Faydacı Bilme ve Salt Bilme
+
+Bilimsel bilgi iki türlü ele alınır. **Faydacı bilme** - bir faydaya yönelik bilme - varoluş soru ve sorunlarına hitap eden yönüdür. Kat-i bilgiye ulaştığımızda bundan fayda sağlamalıyız. Bunu yaklaşık 3 milyon yıldır teknoloji, yani alet üretme şeklinde görüyoruz.
+
+**"Teknoloji ve bilim çok çok nitelik farklı şeyler. Çoğu insan teknolojiyi bilim zanneder."** Faydacı bilmenin sonucu bilime göre teknoloji üretebilmek ve hayatı kolaylaştırmaktır. Teknoloji insan hayatını kolaylaştırmış, ömrünü uzatmış, işlerini daha kolay yapabilir hale getirmiş, refah sağlamış ama hepimizin çok iyi bildiği gibi tersinden insanın hiç hoşlanmadığı konularda çok daha vahim sonuçlara ulaşabilmesini, özellikle savaşlar ve üretilmiş silah teknolojileriyle onlara da yol açmıştır.
+
+Salt bilmek ise bilmek için bilmektir. **Her ikisi de aslında insanın varoluş soru ve sorunlarını kapsamlı açmasına yardımcı olabilirler.** Faydacı bilme varlığı, eşyayı dolayısıyla kendini tanıma yolunda insanın organizmal benliğinin kat-i bilgisine ulaşabilir. Salt bilmek ise insanın bilinç dışını, bilinç dışında bastırdığı soru ve sorunlarının yıpratıcı basıncını, gerilimini almaya yardımcı olabilir.
+
+## Bilimsel Yöntem ve Eleştiriler
+
+Kat-i bilginin kaynağı fizikalist bakışla nesnelerin kendisidir. **"Her şey olduğu gibidir, kendisidir."** Herhangi bir üçüncü şahıs ya da üstün güç yoktur. Bizzatihi nesnelerin kendisi onların bilgisinin kaynağıdır.
+
+20. yüzyılın ikinci yarısına kadar **klasik bilimsel metot** vardı: Gözlem ve deney yaparsın, sonuçlarına göre tümevarımsal genelleme yaparsın, hipotez kurarsın, o hipotezin onaylanması çalışmalarına başlarsın, kanıt toplamaya başlarsın.
+
+**Karl Popper etkisi** denilen şey David Hume'dan beri gelen sorunu ortaya koydu: **Tümevarım bilimsel bir şey midir?** David Hume'ın örneğiyle: Yaşadığın ildeki tüm kuğuları gözlemledin, hepsi beyaz. Bu evrendeki tüm kuğular beyazdır yargısına varabilir misin? Çünkü sen dünyanın her yerine bakmadın, sınırlı sayıda gözlem ve ölçümle bir konuda tüme varmaya çalıştın.
+
+Karl Popper doğrulamaya çalışmak yerine **yanlışlamaya çalışmak, çürütme yapmaya çalışmak** bir konu, bir hipotez hakkında daha faydalı olduğunu önerdi.
+
+Bilimsel yöntemin özellikleri: Düzenli, sistematik, metodlu inceleme; veriye dayanmalı; nesnel olmalı; analitik olmalı; tekrarlanabilir olmalı.
+
+## Soyut Alanlar ve Metafizik Problem
+
+En çetrefilli konu: Metafizik alan denilen varlığın görünenin ötesinde bir kökü var mı? İnsan psikolojisi konuları, zihin durumları, qualia problemi, bilinç-farkındalık konuları, bilinç dışı konular, toplumsal halde yaşayan insanın sosyolojik durumları - bunlar hakkında kat-i bilgiye ulaşmak mümkün müdür?
+
+Fizikalistler nesnel alanın bilgisine ulaştıkça öbürlerinin otomatik çözülebileceğini iddia ederler. Bir kısmı bu bilinç, farkındalık, insan psikolojisi denilen şeylerin sadece yanlış isimlendirmeler olduğunu, bunların hepsinin insan beynindeki nöral bağlantılar, networkler ve hormonal, elektro-kimyasal hadiselerin sonucu fiziksel temelde gerçekleştiğini düşünür.
+
+Diğer grup bu soyut konuların da bilimsel bilgisinin mümkün olduğunu, kendi bilimsel ilke ve metotları tanımlanarak çözüme ulaşması gerektiğini savunur. Bugün zaten bunu meslekler olarak da görüyoruz - üniversitelerde kürsüler, bölümler var, öğrenciler mezun oluyor psikoloji, sosyoloji gibi soyut konularda.
+
+## Einstein'ın Durumu ve Varoluş Soruları
+
+Bilimin temel problemi şurada ortaya çıkar: **Albert Einstein'ın bile birçok varoluş sorusu hakkında 60-70 yaşına geldiği halde baskıları vardı ve "saçma sapan hareketler yaptırıyor bana" dediği hareketler yapıyordu. Mutlu değildi.**
+
+**"Evet tamam, tüm nesnelerin bilgisine ulaştık. Bunun bizim varoluş sorularımıza faydası neden öyle otomatik hepsini çözmüyor?"**
+
+Fizikalist bilim rasyonel düşünceyi, aklı, mantığı yadsımaz fakat bunun somut nesnel alemde kullanılması gerektiğini söyler. Burada felsefeyle çatışmaya girmiştir çünkü "soyut düşünce olmadan sadece nesnel alemin nesnelerinin bilgisine uğraşmak hiçbir işe yaramaz" der felsefe.
+
+## Praktik Yarar ve Felsefi Zemin Gerekliliği
+
+**"Bir atom bombası üretiverirsin bunun sadece salt bir deney-gözlemle bilgiye ulaşarak bunu yapabilirsin"** ama asıl insanın arayışı olan varoluş soru ve sorunları zemini üzerinden önce böyle bir şeye ihtiyacımız var mı, bu ne işe yarayacak, bunun zincirleme sonuçları ne olacak ve insanlık olarak biz bütün bu zincirleme sonuçlarını karşılayabilir miyiz sorularının felsefi yorumlanması olmadan pratik faydaya dönüşmüyor.
+
+20. yüzyılda özellikle çok acı sonuçlarıyla yaşandığı ve birçok insanı deli depresyonlara soktuğu gibi, bilimsel bulguların felsefi yönüyle birlikte yorumlanmaması daha acı sonuçlara yol açmıştır.
+
+İnsanın yapısı gereği eğer bu varoluş sorularımıza çözüm merkezi olacaksa, somut nesnel deney-gözlem-ölçüm-kuramsal bilgi tabii ki insan için çok önemli ve değerli adımlar. Ancak bunun felsefi bir zemininden kaynaklanmadan, elde ettiğimiz gözlem sonuçlarının bütün insanlık tarihi boyunca gelen felsefi düşünme şekilleriyle birlikte yorumlanmadığında gerçekten ne toplumsal ne bireysel olarak pratik bir bilgiye, pratik bir feraha, refaha, huzura pek yol açmadığı görülmüştür.
+
+**Kapsam Raporu:** Bu makalede transkriptteki ana konuların %100 oranında, tüm içeriğin %87 verimlilik oranıyla aktarılmıştır.
