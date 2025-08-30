@@ -942,10 +942,10 @@
 
        function showDailyMotivation() {
            const today = new Date();
-           const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-           const quoteIndex = dayOfYear % motivationQuotes.length;
-           const quote = motivationQuotes[quoteIndex];
-           
+           //const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+           //const quoteIndex = dayOfYear % motivationQuotes.length;
+           //const quote = motivationQuotes[quoteIndex];
+           const quote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
            document.getElementById('dailyMotivation').innerHTML = `💡 ${quote}`;
        }
 
