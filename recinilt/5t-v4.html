@@ -548,7 +548,7 @@
        </div>
 
        <!-- Kayıt Seçimi Modal -->
-       <div id="storageModal" class="modal" style="display: none;"></div>
+       <div id="storageModal" class="modal" style="display: none;">
            <div class="modal-content">
                <h2>💾 Kayıt Yöntemi Seçimi</h2>
                <p style="text-align: center; margin-bottom: 30px;">5T analizlerinizi nerede saklamak istiyorsunuz?</p>
@@ -871,6 +871,7 @@
 
    <script src="5t-github-parametreleri.js"></script>
    <script>
+    document.getElementById('storageModal').style.display = 'none';
        // Global değişkenler
        const motivationQuotes = [
            "Ben bir FBS'yi 5T ile kullanarak kalbi cilalatma uzmanıyım. Rabbimle başbaşayım.",
