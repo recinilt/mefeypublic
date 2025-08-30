@@ -548,7 +548,7 @@
        </div>
 
        <!-- Kayıt Seçimi Modal -->
-       <div id="storageModal" class="modal" style="display: block;">
+       <div id="storageModal" class="modal" style="display: none;"></div>
            <div class="modal-content">
                <h2>💾 Kayıt Yöntemi Seçimi</h2>
                <p style="text-align: center; margin-bottom: 30px;">5T analizlerinizi nerede saklamak istiyorsunuz?</p>
@@ -917,17 +917,21 @@
 
        // Sayfa yüklendiğinde çalışır
        window.onload = function() {
-           updateTodayDate();
-           showDailyMotivation();
-           
-           if (checkStorageSettings()) {
-               loadAnalysis();
-           }
-           
-           generateChainGrid();
-           updateStats();
-           updateProgress();
-       };
+            updateTodayDate();
+            showDailyMotivation();
+            
+            // Kayıt ayarlarını kontrol et, yoksa modal aç
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'block';
+            } else {
+                // Ayarlar varsa direkt yükle
+                loadAnalysis();
+            }
+            
+            generateChainGrid();
+            updateStats();
+            updateProgress();
+        };
 
        function updateTodayDate() {
            const today = new Date();
@@ -964,65 +968,87 @@
        }
 
        async function confirmStorageSelection() {
-           if (storageMethod === 'github') {
-               const username = document.getElementById('loginUsername').value.trim();
-               const password = document.getElementById('loginPassword').value.trim();
-               
-               if (!username || !password) {
-                   alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
-                   return;
-               }
-               
-               try {
-                   await loadUserDatabase();
-                   
-                   if (userDatabase[username]) {
-                       if (userDatabase[username].password === password) {
-                           currentUser = username;
-                           analysisData = userDatabase[username].analyses || {};
-                           globalStats = userDatabase[username].stats || globalStats;
-                           
-                           showNotification(`👋 Hoş geldin ${username}!`);
-                           document.getElementById('storageModal').style.display = 'none';
-                           updateStorageInfo();
-                           loadTodayData();
-                       } else {
-                           alert('❌ Geçersiz şifre!');
-                           return;
-                       }
-                   } else {
-                       userDatabase[username] = {
-                           password: password,
-                           analyses: {},
-                           stats: {...globalStats},
-                           createdDate: new Date().toISOString()
-                       };
-                       
-                       currentUser = username;
-                       analysisData = {};
-                       
-                       await saveUserDatabase();
-                       showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
-                       document.getElementById('storageModal').style.display = 'none';
-                       updateStorageInfo();
-                   }
-               } catch (error) {
-                   console.error('GitHub kullanıcı doğrulama hatası:', error);
-                   showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
-                   storageMethod = 'local';
-                   document.getElementById('storageModal').style.display = 'none';
-                   updateStorageInfo();
-               }
-           } else {
-               const settings = { method: storageMethod };
-               localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
-               
-               showNotification('💻 Yerel kayıt seçildi!');
-               document.getElementById('storageModal').style.display = 'none';
-               updateStorageInfo();
-               setTimeout(loadAnalysis, 500);
-           }
-       }
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            analysisData = userDatabase[username].analyses || {};
+                            globalStats = userDatabase[username].stats || globalStats;
+                            
+                            // BURAYA EKLEME - GitHub ayarlarını kaydet
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            loadTodayData();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            analyses: {},
+                            stats: {...globalStats},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        analysisData = {};
+                        
+                        await saveUserDatabase();
+                        
+                        // BURAYA EKLEME - Yeni kullanıcı ayarlarını kaydet
+                        const settings = { 
+                            method: storageMethod, 
+                            username: currentUser 
+                        };
+                        localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+                    
+                    // BURAYA EKLEME - Hata durumunda yerel ayar kaydet
+                    const settings = { method: 'local' };
+                    localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                // Yerel kayıt seçildi
+                const settings = { method: storageMethod };
+                localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadAnalysis, 500);
+            }
+        }
+
 
        async function loadUserDatabase() {
             try {
@@ -1096,17 +1122,22 @@
 
 
        function checkStorageSettings() {
-           const savedSettings = localStorage.getItem('5t-storage-settings');
-           if (savedSettings) {
-               const settings = JSON.parse(savedSettings);
-               storageMethod = settings.method;
-               
-               document.getElementById('storageModal').style.display = 'none';
-               updateStorageInfo();
-               return true;
-           }
-           return false;
-       }
+            const savedSettings = localStorage.getItem('5t-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                // GitHub seçilmişse kullanıcı bilgilerini de yükle
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true; // Ayarlar mevcut
+            }
+            return false; // Ayarlar yok, modal açılsın
+        }
+
 
        function updateStorageInfo() {
            const info = document.getElementById('storageInfo');
@@ -1118,11 +1149,22 @@
        }
        
        function changeStorageMethod() {
-           localStorage.removeItem('5t-storage-settings');
-           document.getElementById('storageModal').style.display = 'block';
-           storageMethod = 'local';
-           currentUser = null;
-       }
+            // Ayarları sıfırla
+            localStorage.removeItem('5t-storage-settings');
+            
+            // Modal seçimlerini sıfırla
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Modal aç
+            document.getElementById('storageModal').style.display = 'block';
+            
+            // Varsayılanları sıfırla
+            storageMethod = 'local';
+            currentUser = null;
+        }
 
        function loadTodayData() {
            const today = new Date().toISOString().split('T')[0];
