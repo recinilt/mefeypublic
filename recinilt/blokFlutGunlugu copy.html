@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎶 Blok Flüt Öğrenme Defterim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .streak-display {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .streak-item {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .streak-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .today-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #ff6b6b;
+        }
+
+        .day-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .day-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .day-program {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .ritual-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checklist-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+
+        .text-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .save-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .progress-chain {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .chain-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chain-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .chain-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chain-day.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .chain-day.missed {
+            background: #ffeb3b;
+            color: #333;
+        }
+
+        .chain-day.empty {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .chain-day.today {
+            border: 3px solid #ff6b6b;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .mood-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .mood-btn {
+            font-size: 2em;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .mood-btn:hover, .mood-btn.selected {
+            background: #e3f2fd;
+            transform: scale(1.2);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .ritual-checklist {
+                grid-template-columns: 1fr;
+            }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎶 Blok Flüt Öğrenme Defterim</h1>
+            <p>Her gün küçük adımlarla büyük başarılara</p>
+            <div class="streak-display">
+                <div class="streak-item">
+                    <span class="streak-number" id="currentStreak">0</span>
+                    <small>Güncel Zincir</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="totalDays">0</span>
+                    <small>Toplam Gün</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="completionRate">0</span>
+                    <small>% Başarı</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Ayarları Modal -->
+        <div id="githubModal" class="modal" style="display: block;">
+            <div class="modal-content">
+                <h2>⚙️ GitHub Ayarları</h2>
+                <p>İlerlemenizi GitHub'da saklamak için bilgileri girin:</p>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>👤 GitHub Kullanıcı Adı:</strong></label>
+                    <input type="text" id="githubUser" class="text-area" placeholder="örnek: ahmet123" style="min-height: 40px;">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>📁 Repository (Depo) Adı:</strong></label>
+                    <input type="text" id="githubRepo" class="text-area" placeholder="örnek: flute-progress" style="min-height: 40px;">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>🔑 GitHub Token:</strong></label>
+                    <input type="password" id="githubToken" class="text-area" placeholder="ghp_xxxxxxxxxxxxxxxxx" style="min-height: 40px;">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Token almak için: GitHub → Settings → Developer settings → Personal access tokens → Generate new token
+                    </small>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>📝 Dosya Adı:</strong></label>
+                    <input type="text" id="githubFilename" class="text-area" placeholder="flute-progress" style="min-height: 40px;">
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="saveGitHubSettings()">✅ Ayarları Kaydet ve Devam</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn secondary" onclick="loadExistingData()">📥 Var Olan Verileri Yükle</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="today-section">
+                <div class="day-info">
+                    <div>
+                        <div class="day-title" id="dayTitle">Gün 1 - Isınma + Sekiz Nota Tekrarı</div>
+                        <div id="todayDate"></div>
+                    </div>
+                    <div>
+                        <strong>Saatim: 20:30</strong>
+                    </div>
+                </div>
+
+                <div class="day-program" id="dayProgram">
+                    <h4>📚 Bugünkü Program:</h4>
+                    <p id="programContent">Tüm 8 notayı sırayla yukarı–aşağı çal. Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa.</p>
+                    <p><strong>Odak:</strong> <span id="focusPoint">Nefes kontrolü, temiz ses.</span></p>
+                </div>
+
+                <div class="ritual-checklist">
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="flute-box">
+                        <span>🎼 Flüt kutum masada</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="opening-words">
+                        <span>🗣️ Başlangıç sözümü söyledim</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="deep-breath">
+                        <span>🌬️ 3 derin nefes aldım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="music-listen">
+                        <span>🎵 20 sn müzik dinledim</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="first-note">
+                        <span>🎶 İlk notayı çaldım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="exercise-done">
+                        <span>✅ Bugünkü egzersizi tamamladım</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label><strong>📝 Yaptıklarım:</strong></label>
+                    <textarea class="text-area" id="whatIDid" placeholder="Bugün hangi egzersizleri yaptım, nasıl geçti?"></textarea>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label><strong>⚠️ Zorlandığım yer:</strong></label>
+                    <textarea class="text-area" id="challenges" placeholder="Hangi kısımda zorlandım, neyi tekrar etmem gerek?"></textarea>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label><strong>🎯 İlerleme / fark ettiklerim:</strong></label>
+                    <textarea class="text-area" id="progress" placeholder="Ne öğrendim, hangi gelişmeleri fark ettim?"></textarea>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label><strong>🎁 Bugünkü ödülüm:</strong></label>
+                    <input type="text" class="text-area" style="min-height: 50px;" id="reward" placeholder="Kendime verdiğim küçük ödül">
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label><strong>💬 Kapanış sözüm:</strong></label>
+                    <textarea class="text-area" id="closingWords" placeholder="Kendime söylediğim kapanış sözü"></textarea>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <label><strong>😊 Ruh halim:</strong></label>
+                    <div class="mood-selector">
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="happy">😊</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="neutral">😐</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="sad">🙁</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="excited">🤩</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="tired">😴</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="save-section">
+                <p><strong>💾 İlerlemeyi kaydet ve GitHub'a yükle</strong></p>
+                <button class="btn" onclick="saveTodayProgress()">📊 Bugünü Kaydet</button>
+                <button class="btn secondary" onclick="loadProgressFromGitHub()">📥 GitHub'dan Yükle</button>
+            </div>
+
+            <div class="progress-chain">
+                <h3 class="chain-title">🔥 Çalışma Zinciri</h3>
+                <div class="chain-grid" id="chainGrid">
+                    <!-- Zincir günleri buraya dinamik olarak eklenecek -->
+                </div>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    <small>✅ Tamamlandı | ⚠️ Kısmen | ❌ Boş</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // GitHub ayarları (kullanıcı tarafından girilecek)
+        let kullaniciAdi = "";
+        let repoAdi = "";
+        let token = "";
+        let myemail = "";
+
+        // Ayarları kaydet
+        function saveGitHubSettings() {
+            kullaniciAdi = document.getElementById('githubUser').value.trim();
+            repoAdi = document.getElementById('githubRepo').value.trim();
+            token = document.getElementById('githubToken').value.trim();
+            myemail = document.getElementById('githubFilename').value.trim();
+            
+            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
+                alert('❌ Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            // Ayarları tarayıcıda sakla (güvenli değil ama pratik)
+            const settings = { kullaniciAdi, repoAdi, token, myemail };
+            localStorage.setItem('flute-github-settings', JSON.stringify(settings));
+            
+            // Modal'ı gizle
+            document.getElementById('githubModal').style.display = 'none';
+            
+            // Bildirim göster
+            showNotification('⚙️ GitHub ayarları kaydedildi!');
+            
+            // Verileri yüklemeyi dene
+            setTimeout(loadProgressFromGitHub, 500);
+        }
+        
+        // Var olan verileri yükle
+        function loadExistingData() {
+            saveGitHubSettings();
+        }
+        
+        // Sayfa yüklendiğinde ayarları kontrol et
+        function checkGitHubSettings() {
+            const savedSettings = localStorage.getItem('flute-github-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                kullaniciAdi = settings.kullaniciAdi;
+                repoAdi = settings.repoAdi;
+                token = settings.token;
+                myemail = settings.myemail;
+                
+                // Modal'ı gizle
+                document.getElementById('githubModal').style.display = 'none';
+                return true;
+            }
+            return false;
+        }
+        
+        // Ayarları sıfırla
+        function resetGitHubSettings() {
+            localStorage.removeItem('flute-github-settings');
+            document.getElementById('githubModal').style.display = 'block';
+            kullaniciAdi = "";
+            repoAdi = "";
+            token = "";
+            myemail = "";
+        }
+
+        // 7 günlük program
+        const weeklyProgram = [
+            {
+                title: "Gün 1 - Isınma + Sekiz Nota Tekrarı",
+                content: "Tüm 8 notayı sırayla yukarı–aşağı çal (La–Si–Do–Re–Mi–Fa–Sol–La). Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa (iki kısa, bir uzun).",
+                focus: "Nefes kontrolü, temiz ses",
+                closing: "Bugün temelimi güçlendirdim."
+            },
+            {
+                title: "Gün 2 - Ritim Çalışması",
+                content: "Metronom 60 bpm → 4/4 ölçüde 8 nota sırala. Aynı seriyi 2/4 ölçüde dene. Sonra kendi ritmini uydur → özgür çal.",
+                focus: "Notaları değil, ritmi hissetmek",
+                closing: "Ritimle flüt birleştiğinde ben akıyorum."
+            },
+            {
+                title: "Gün 3 - Basit Ezgi Parçalama",
+                content: "Kolay bir parça seç (örn. Mini Mini Bir Kuş). Parçayı 2 ölçülük bloklara böl. Her bloğu ayrı çalış, sonra birleştir.",
+                focus: "Hata = öğrenme anı",
+                closing: "Zor parçaları küçük bloklarla aşabilirim."
+            },
+            {
+                title: "Gün 4 - Ses Kaydı + Dinleme",
+                content: "Isınma (Gün 1). Gün 3'te çalıştığın parçayı baştan sona çal. Kaydet → sonra kendini dinle, not al.",
+                focus: "Dinlerken 'iyi/kötü' değil → 'ne öğrenebilirim?'",
+                closing: "Kendi sesimi dinlemek cesaretimdir."
+            },
+            {
+                title: "Gün 5 - Yeni Nota Kombinasyonları",
+                content: "Rastgele 4 nota seç → küçük motif yap. Motifi 3 kez tekrar et. Aynı motifi farklı ritimle çal.",
+                focus: "Doğaçlama, keyif",
+                closing: "Müzik üretme gücüm var."
+            },
+            {
+                title: "Gün 6 - İkinci Parça Denemesi",
+                content: "Yeni bir parça seç (örn. Twinkle Twinkle Little Star). Yalnızca ilk yarısını öğren → bloklara böl. 5 dk tekrarla, sonra baştan çal.",
+                focus: "Akışa girmek, hata takılmamak",
+                closing: "Zor görüneni kolaylaştırabilirim."
+            },
+            {
+                title: "Gün 7 - Paylaşım + Kutlama",
+                content: "Gün 3 ve Gün 6 parçalarını çal. Kaydet → bir arkadaşına/ailene dinlet. Serbest doğaçlama ile bitir.",
+                focus: "Paylaşmak ve kutlamak",
+                closing: "Bu hafta flütle yol aldım. Ben müziğimi üretiyorum ve keyif alıyorum."
+            }
+        ];
+
+        let progressData = {};
+        let currentDay = 1;
+
+        // Sayfa yüklendiğinde çalışır
+        window.onload = function() {
+            updateTodayDate();
+            
+            // GitHub ayarları var mı kontrol et
+            if (checkGitHubSettings()) {
+                // Ayarlar varsa verileri yükle
+                loadProgressFromGitHub();
+            }
+            
+            updateDayProgram();
+            generateChainGrid();
+        };
+
+        function updateTodayDate() {
+            const today = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('todayDate').textContent = today.toLocaleDateString('tr-TR', options);
+        }
+
+        function updateDayProgram() {
+            const today = new Date();
+            const dayOfWeek = today.getDay(); // 0 = Pazar, 1 = Pazartesi, ...
+            const programIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Pazartesi = 0, Pazar = 6
+            
+            const program = weeklyProgram[programIndex];
+            document.getElementById('dayTitle').textContent = program.title;
+            document.getElementById('programContent').textContent = program.content;
+            document.getElementById('focusPoint').textContent = program.focus;
+            document.getElementById('closingWords').placeholder = `"${program.closing}"`;
+            
+            currentDay = programIndex + 1;
+        }
+
+        function toggleCheck(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('completed');
+            } else {
+                element.classList.remove('completed');
+            }
+        }
+
+        function selectMood(button) {
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+        }
+
+        function saveTodayProgress() {
+            // GitHub ayarları kontrolü
+            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
+                alert('❌ GitHub ayarları eksik! Lütfen önce ayarları yapın.');
+                resetGitHubSettings();
+                return;
+            }
+            
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Checkbox durumlarını topla
+            const checkboxes = {
+                fluteBox: document.getElementById('flute-box').checked,
+                openingWords: document.getElementById('opening-words').checked,
+                deepBreath: document.getElementById('deep-breath').checked,
+                musicListen: document.getElementById('music-listen').checked,
+                firstNote: document.getElementById('first-note').checked,
+                exerciseDone: document.getElementById('exercise-done').checked
+            };
+            
+            // Tamamlanma oranını hesapla
+            const completedCount = Object.values(checkboxes).filter(Boolean).length;
+            const completionRate = Math.round((completedCount / 6) * 100);
+            
+            // Mood
+            const selectedMood = document.querySelector('.mood-btn.selected');
+            const mood = selectedMood ? selectedMood.dataset.mood : '';
+            
+            const todayData = {
+                date: today,
+                day: currentDay,
+                checkboxes: checkboxes,
+                completionRate: completionRate,
+                whatIDid: document.getElementById('whatIDid').value,
+                challenges: document.getElementById('challenges').value,
+                progress: document.getElementById('progress').value,
+                reward: document.getElementById('reward').value,
+                closingWords: document.getElementById('closingWords').value,
+                mood: mood,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Veriyi kaydet
+            progressData[today] = todayData;
+            
+            // GitHub'a yükle
+            const dataToSave = JSON.stringify(progressData, null, 2);
+            writeToFile(dataToSave);
+            
+            // UI'ı güncelle
+            updateChainGrid();
+            updateStats();
+            
+            showNotification('📊 İlerleme kaydedildi ve GitHub\'a yüklendi!');
+        }
+
+        async function writeToFile(mymydata) {
+            const filename = myemail;
+            const message = mymydata;
+
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        sha = data.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                let utf8Content = unescape(encodeURIComponent(message));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: sha ? 'Flüt ilerlemesi güncellendi' : 'Flüt ilerlemesi oluşturuldu',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    return true;
+                } else {
+                    throw new Error('GitHub upload failed');
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('❌ GitHub\'a yüklenirken hata oluştu!');
+                return false;
+            }
+        }
+
+        async function loadProgressFromGitHub() {
+            // GitHub ayarları kontrolü
+            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
+                console.log('GitHub ayarları eksik, yükleme yapılamıyor.');
+                return;
+            }
+            
+            const filename = myemail;
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    
+                    progressData = JSON.parse(utf8Content);
+                    
+                    // Bugünün verisi varsa formu doldur
+                    const today = new Date().toISOString().split('T')[0];
+                    if (progressData[today]) {
+                        fillFormWithTodayData(progressData[today]);
+                    }
+                    
+                    updateChainGrid();
+                    updateStats();
+                    showNotification('📥 İlerleme GitHub\'dan yüklendi!');
+                } else {
+                    // İlk kez kullanıyorsa boş data
+                    progressData = {};
+                    updateChainGrid();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('❌ GitHub\'dan yüklenirken hata oluştu!');
+            }
+        }
+
+        function fillFormWithTodayData(data) {
+            // Checkbox'ları işaretle
+            Object.keys(data.checkboxes).forEach(key => {
+                const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                const checkbox = document.getElementById(elementId);
+                const item = checkbox.closest('.checklist-item');
+                
+                if (data.checkboxes[key]) {
+                    checkbox.checked = true;
+                    item.classList.add('completed');
+                }
+            });
+            
+            // Text alanları doldur
+            document.getElementById('whatIDid').value = data.whatIDid || '';
+            document.getElementById('challenges').value = data.challenges || '';
+            document.getElementById('progress').value = data.progress || '';
+            document.getElementById('reward').value = data.reward || '';
+            document.getElementById('closingWords').value = data.closingWords || '';
+            
+            // Mood seç
+            if (data.mood) {
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    if (btn.dataset.mood === data.mood) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function generateChainGrid() {
+            const grid = document.getElementById('chainGrid');
+            grid.innerHTML = '';
+            
+            // Son 28 günü göster (4 hafta)
+            const today = new Date();
+            for (let i = 27; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'chain-day';
+                dayElement.textContent = date.getDate();
+                dayElement.title = date.toLocaleDateString('tr-TR');
+                
+                // Bugün mü?
+                if (i === 0) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Veri var mı?
+                if (progressData[dateStr]) {
+                    if (progressData[dateStr].completionRate >= 80) {
+                        dayElement.classList.add('completed');
+                    } else if (progressData[dateStr].completionRate >= 30) {
+                        dayElement.classList.add('missed');
+                    } else {
+                        dayElement.classList.add('empty');
+                    }
+                } else {
+                    dayElement.classList.add('empty');
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function updateChainGrid() {
+            generateChainGrid();
+        }
+
+        function updateStats() {
+            const dates = Object.keys(progressData).sort();
+            let currentStreak = 0;
+            let totalDays = dates.length;
+            let completedDays = 0;
+            
+            // Toplam tamamlanan günler
+            dates.forEach(date => {
+                if (progressData[date].completionRate >= 80) {
+                    completedDays++;
+                }
+            });
+            
+            // Mevcut zincir
+            const today = new Date();
+            for (let i = 0; i < 30; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(checkDate.getDate() - i);
+                const dateStr = checkDate.toISOString().split('T')[0];
+                
+                if (progressData[dateStr] && progressData[dateStr].completionRate >= 80) {
+                    currentStreak++;
+                } else {
+                    break;
+                }
+            }
+            
+            // Başarı oranı
+            const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+            
+            // UI'ı güncelle
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('totalDays').textContent = totalDays;
+            document.getElementById('completionRate').textContent = completionRate;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Başlangıç sözü göster
+        function showOpeningQuote() {
+            const quotes = [
+                "Ben müzik üreten biriyim. Bugün flütle keyifli bir yolculuğa çıkıyorum.",
+                "Ben müzik üreten biriyim. Müzik ruhumu besler, flüt benim sesimdir.",
+                "Ben müzik üreten biriyim. Her nota bir nefes, her nefes bir ilerleme.",
+                "Ben müzik üreten biriyim. Bugün flütle birlikte büyüyeceğim.",
+                "Ben müzik üreten biriyim. Müzik yapmak benim hakkım, flüt benim aracım."
+            ];
+            
+            const today = new Date();
+            const quoteIndex = today.getDate() % quotes.length;
+            
+            alert('🎶 Bugünkü Başlangıç Sözün:\n\n"' + quotes[quoteIndex] + '"');
+        }
+
+        // Motivasyon mesajları
+        function getMotivationalMessage(completionRate) {
+            if (completionRate === 100) {
+                return "🌟 Mükemmel! Bugün tam bir flüt ustasıydın!";
+            } else if (completionRate >= 80) {
+                return "🎉 Harika iş çıkardın! Flüt yolculuğunda ileriyorsun!";
+            } else if (completionRate >= 50) {
+                return "👍 İyi gidiyor! Yarın daha da iyi olacak!";
+            } else if (completionRate >= 30) {
+                return "🌱 Başlangıç yapmış olmak bile büyük bir adım!";
+            } else {
+                return "💪 Her büyük yolculuk tek adımla başlar. Yarın yeniden!";
+            }
+        }
+
+        // Haftalık özet göster
+        function showWeeklySummary() {
+            const today = new Date();
+            const lastWeek = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                if (progressData[dateStr]) {
+                    lastWeek.push(progressData[dateStr]);
+                }
+            }
+            
+            if (lastWeek.length === 0) {
+                alert('🎼 Henüz haftalık veri yok. Bugün başla!');
+                return;
+            }
+            
+            const avgCompletion = lastWeek.reduce((sum, day) => sum + day.completionRate, 0) / lastWeek.length;
+            const totalDays = lastWeek.length;
+            const perfectDays = lastWeek.filter(day => day.completionRate === 100).length;
+            
+            alert(`📊 Son ${totalDays} Günün Özeti:\n\n` +
+                  `⭐ Ortalama Tamamlama: %${Math.round(avgCompletion)}\n` +
+                  `🎯 Mükemmel Günler: ${perfectDays}/${totalDays}\n` +
+                  `🔥 Devam et! Sen harikasın! 🎶`);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTodayProgress();
+            }
+            if (e.ctrlKey && e.key === 'l') {
+                e.preventDefault();
+                loadProgressFromGitHub();
+            }
+        });
+
+        // Sayfa kapanırken otomatik kaydet
+        window.addEventListener('beforeunload', function(e) {
+            const hasData = document.getElementById('whatIDid').value || 
+                          document.getElementById('challenges').value || 
+                          document.getElementById('progress').value;
+            
+            if (hasData) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+
+        // Başlangıç sözü butonu ekle
+        function addOpeningQuoteButton() {
+            const checklistItem = document.querySelector('#opening-words').closest('.checklist-item');
+            const button = document.createElement('button');
+            button.textContent = '💬';
+            button.onclick = showOpeningQuote;
+            button.style.cssText = 'background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; margin-left: auto;';
+            checklistItem.appendChild(button);
+        }
+
+        // Haftalık özet butonu ekle
+        setTimeout(() => {
+            addOpeningQuoteButton();
+            
+            const saveSection = document.querySelector('.save-section');
+            const summaryButton = document.createElement('button');
+            summaryButton.className = 'btn secondary';
+            summaryButton.textContent = '📊 Haftalık Özet';
+            summaryButton.onclick = showWeeklySummary;
+            saveSection.appendChild(summaryButton);
+            
+            // GitHub ayarlarını değiştirme butonu
+            const settingsButton = document.createElement('button');
+            settingsButton.className = 'btn';
+            settingsButton.style.background = 'linear-gradient(45deg, #fd79a8, #e84393)';
+            settingsButton.textContent = '⚙️ GitHub Ayarları';
+            settingsButton.onclick = resetGitHubSettings;
+            saveSection.appendChild(settingsButton);
+        }, 100);
+
+        // Her gün saat 20:30'da hatırlatma
+        function checkReminderTime() {
+            const now = new Date();
+            const reminderTime = new Date();
+            reminderTime.setHours(20, 30, 0, 0);
+            
+            if (now.getTime() >= reminderTime.getTime() && now.getTime() < reminderTime.getTime() + 30 * 60 * 1000) {
+                const today = new Date().toISOString().split('T')[0];
+                if (!progressData[today]) {
+                    showNotification('🎶 Flüt vakti! Bugünkü egzersizini yapmaya ne dersin?');
+                }
+            }
+        }
+
+        // Her dakika kontrol et
+        setInterval(checkReminderTime, 60000);
+
+        // Ses efektleri için basit bir sistem
+        function playSuccessSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                oscillator.frequency.setValueAtTime(520, context.currentTime);
+                oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(880, context.currentTime + 0.2);
+                
+                gainNode.gain.setValueAtTime(0.3, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.3);
+            } catch (e) {
+                // Ses çalmazsa sessizce devam et
+            }
+        }
+
+        // Checkbox işaretlendiğinde ses çal
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' && e.target.checked) {
+                playSuccessSound();
+            }
+        });
+
+        // Motivasyon mesajı göster kayıt sonrası
+        const originalSaveTodayProgress = saveTodayProgress;
+        saveTodayProgress = function() {
+            const result = originalSaveTodayProgress();
+            
+            setTimeout(() => {
+                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+                const completionRate = Math.round((checkedCount / checkboxes.length) * 100);
+                
+                const motivationalMsg = getMotivationalMessage(completionRate);
+                showNotification(motivationalMsg);
+            }, 1000);
+        };
+
+        // İlk yükleme mesajı
+        setTimeout(() => {
+            if (Object.keys(progressData).length === 0) {
+                showNotification('🎶 Hoş geldin! İlk günün için hazır mısın?');
+            } else {
+                showNotification('🎵 Devam ediyoruz! Bugün de harika olacak!');
+            }
+        }, 2000);
+
+    </script>
+</body>
+</html>

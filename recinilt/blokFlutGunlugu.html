@@ -145,6 +145,10 @@
             border-color: #667eea;
         }
 
+        .text-area.short {
+            min-height: 60px;
+        }
+
         .save-section {
             background: #fff3cd;
             padding: 20px;
@@ -173,6 +177,10 @@
 
         .btn.secondary {
             background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
         }
 
         .progress-chain {
@@ -215,9 +223,9 @@
             color: white;
         }
 
-        .chain-day.missed {
-            background: #ffeb3b;
-            color: #333;
+        .chain-day.partial {
+            background: #ff9800;
+            color: white;
         }
 
         .chain-day.empty {
@@ -286,7 +294,7 @@
             background: white;
             padding: 30px;
             border-radius: 20px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
@@ -297,6 +305,67 @@
             margin-bottom: 20px;
             text-align: center;
         }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b6b;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        @media (max-width: 768px) {
             .container {
                 margin: 10px;
                 border-radius: 15px;
@@ -317,7 +386,18 @@
             .ritual-checklist {
                 grid-template-columns: 1fr;
             }
-        
+
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -341,42 +421,53 @@
             </div>
         </div>
 
-        <!-- GitHub Ayarları Modal -->
-        <div id="githubModal" class="modal" style="display: block;">
+        <!-- Kayıt Seçimi Modal -->
+        <div id="storageModal" class="modal" style="display: none;">
             <div class="modal-content">
-                <h2>⚙️ GitHub Ayarları</h2>
-                <p>İlerlemenizi GitHub'da saklamak için bilgileri girin:</p>
+                <h2>💾 Kayıt Yöntemi Seçimi</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Flüt ilerlemenizi nerede saklamak istiyorsunuz?</p>
                 
-                <div style="margin: 15px 0;">
-                    <label><strong>👤 GitHub Kullanıcı Adı:</strong></label>
-                    <input type="text" id="githubUser" class="text-area" placeholder="örnek: ahmet123" style="min-height: 40px;">
+                <div class="storage-selection">
+                    <div class="storage-option" onclick="selectStorage('local')">
+                        <h3>💻 Yerel Kayıt</h3>
+                        <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                        <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                    </div>
+                    
+                    <div class="storage-option" onclick="selectStorage('github')">
+                        <h3>☁️ GitHub Kayıt</h3>
+                        <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                    </div>
                 </div>
                 
-                <div style="margin: 15px 0;">
-                    <label><strong>📁 Repository (Depo) Adı:</strong></label>
-                    <input type="text" id="githubRepo" class="text-area" placeholder="örnek: flute-progress" style="min-height: 40px;">
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <label><strong>🔑 GitHub Token:</strong></label>
-                    <input type="password" id="githubToken" class="text-area" placeholder="ghp_xxxxxxxxxxxxxxxxx" style="min-height: 40px;">
-                    <small style="color: #666; display: block; margin-top: 5px;">
-                        Token almak için: GitHub → Settings → Developer settings → Personal access tokens → Generate new token
-                    </small>
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <label><strong>📝 Dosya Adı:</strong></label>
-                    <input type="text" id="githubFilename" class="text-area" placeholder="flute-progress" style="min-height: 40px;">
+                <div id="githubLogin" style="display: none;" class="github-login">
+                    <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>👤 Kullanıcı Adı:</strong></label>
+                        <input type="text" id="loginUsername" class="text-area short" placeholder="Kullanıcı adınızı girin">
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>🔒 Şifre:</strong></label>
+                        <input type="password" id="loginPassword" class="text-area short" placeholder="Şifrenizi girin">
+                    </div>
                 </div>
                 
                 <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn" onclick="saveGitHubSettings()">✅ Ayarları Kaydet ve Devam</button>
+                    <button class="btn" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
                 </div>
-                
-                <div style="text-align: center; margin-top: 15px;">
-                    <button class="btn secondary" onclick="loadExistingData()">📥 Var Olan Verileri Yükle</button>
+            </div>
+        </div>
+
+        <!-- Geçmiş Modal -->
+        <div id="historyModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>📚 Geçmiş Flüt Çalışmalarım</h2>
+                    <button onclick="closeHistory()" class="btn danger" style="padding: 8px 15px; font-size: 14px;">Kapat</button>
                 </div>
+                <div id="historyContent"></div>
             </div>
         </div>
 
@@ -394,7 +485,7 @@
 
                 <div class="day-program" id="dayProgram">
                     <h4>📚 Bugünkü Program:</h4>
-                    <p id="programContent">Tüm 8 notayı sırayla yukarı–aşağı çal. Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa.</p>
+                    <p id="programContent">Tüm 8 notayı sırayla yukarı—aşağı çal. Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa.</p>
                     <p><strong>Odak:</strong> <span id="focusPoint">Nefes kontrolü, temiz ses.</span></p>
                 </div>
 
@@ -406,6 +497,7 @@
                     <div class="checklist-item" onclick="toggleCheck(this)">
                         <input type="checkbox" id="opening-words">
                         <span>🗣️ Başlangıç sözümü söyledim</span>
+                        <button onclick="showOpeningQuote()" style="background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; margin-left: auto;">💬</button>
                     </div>
                     <div class="checklist-item" onclick="toggleCheck(this)">
                         <input type="checkbox" id="deep-breath">
@@ -463,9 +555,12 @@
             </div>
 
             <div class="save-section">
-                <p><strong>💾 İlerlemeyi kaydet ve GitHub'a yükle</strong></p>
+                <p><strong id="storageInfo">💾 Flüt ilerlemeni kaydet</strong></p>
                 <button class="btn" onclick="saveTodayProgress()">📊 Bugünü Kaydet</button>
-                <button class="btn secondary" onclick="loadProgressFromGitHub()">📥 GitHub'dan Yükle</button>
+                <button class="btn secondary" onclick="loadProgress()">📥 Veri Yükle</button>
+                <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Çalışmalar</button>
+                <button class="btn secondary" onclick="showWeeklySummary()">📈 Haftalık Özet</button>
+                <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
             </div>
 
             <div class="progress-chain">
@@ -474,7 +569,7 @@
                     <!-- Zincir günleri buraya dinamik olarak eklenecek -->
                 </div>
                 <p style="text-align: center; margin-top: 15px; color: #666;">
-                    <small>✅ Tamamlandı | ⚠️ Kısmen | ❌ Boş</small>
+                    <small>✅ Tam Çalışma | 🟨 Kısmi | ⭕ Boş</small>
                 </p>
             </div>
         </div>
@@ -482,76 +577,34 @@
 
     <div class="notification" id="notification"></div>
 
+    <script src="5t-github-parametreleri.js"></script>
     <script>
-        // GitHub ayarları (kullanıcı tarafından girilecek)
-        let kullaniciAdi = "";
-        let repoAdi = "";
-        let token = "";
-        let myemail = "";
-
-        // Ayarları kaydet
-        function saveGitHubSettings() {
-            kullaniciAdi = document.getElementById('githubUser').value.trim();
-            repoAdi = document.getElementById('githubRepo').value.trim();
-            token = document.getElementById('githubToken').value.trim();
-            myemail = document.getElementById('githubFilename').value.trim();
-            
-            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
-                alert('❌ Lütfen tüm alanları doldurun!');
-                return;
-            }
-            
-            // Ayarları tarayıcıda sakla (güvenli değil ama pratik)
-            const settings = { kullaniciAdi, repoAdi, token, myemail };
-            localStorage.setItem('flute-github-settings', JSON.stringify(settings));
-            
-            // Modal'ı gizle
-            document.getElementById('githubModal').style.display = 'none';
-            
-            // Bildirim göster
-            showNotification('⚙️ GitHub ayarları kaydedildi!');
-            
-            // Verileri yüklemeyi dene
-            setTimeout(loadProgressFromGitHub, 500);
-        }
+        document.getElementById('storageModal').style.display = 'none';
         
-        // Var olan verileri yükle
-        function loadExistingData() {
-            saveGitHubSettings();
-        }
-        
-        // Sayfa yüklendiğinde ayarları kontrol et
-        function checkGitHubSettings() {
-            const savedSettings = localStorage.getItem('flute-github-settings');
-            if (savedSettings) {
-                const settings = JSON.parse(savedSettings);
-                kullaniciAdi = settings.kullaniciAdi;
-                repoAdi = settings.repoAdi;
-                token = settings.token;
-                myemail = settings.myemail;
-                
-                // Modal'ı gizle
-                document.getElementById('githubModal').style.display = 'none';
-                return true;
-            }
-            return false;
-        }
-        
-        // Ayarları sıfırla
-        function resetGitHubSettings() {
-            localStorage.removeItem('flute-github-settings');
-            document.getElementById('githubModal').style.display = 'block';
-            kullaniciAdi = "";
-            repoAdi = "";
-            token = "";
-            myemail = "";
+        function clearAllFormFields() {
+            // Form alanlarını temizle
+            document.getElementById('whatIDid').value = '';
+            document.getElementById('challenges').value = '';
+            document.getElementById('progress').value = '';
+            document.getElementById('reward').value = '';
+            document.getElementById('closingWords').value = '';
+            
+            // Checkbox'ları temizle
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.checklist-item').classList.remove('completed');
+            });
+            
+            // Mood seçimini temizle
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            currentMood = "";
         }
 
         // 7 günlük program
         const weeklyProgram = [
             {
                 title: "Gün 1 - Isınma + Sekiz Nota Tekrarı",
-                content: "Tüm 8 notayı sırayla yukarı–aşağı çal (La–Si–Do–Re–Mi–Fa–Sol–La). Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa (iki kısa, bir uzun).",
+                content: "Tüm 8 notayı sırayla yukarı—aşağı çal (La—Si—Do—Re—Mi—Fa—Sol—La). Her notayı 4 vuruş tut. Basit ritim: ta-ta-taa (iki kısa, bir uzun).",
                 focus: "Nefes kontrolü, temiz ses",
                 closing: "Bugün temelimi güçlendirdim."
             },
@@ -593,21 +646,41 @@
             }
         ];
 
+        // Kayıt yöntemi ve ayarları
+        let storageMethod = 'local';
+        // 5t-github-parametreleri.js dosyasından parametreler alınacak
+        // Bu değişkenler external dosyadan gelecek: kullaniciAdi, repoAdi, token, dosyaAdi
+
+        // Kullanıcı yönetimi
+        let currentUser = null;
+        let userDatabase = {};
+
+        // Veri yapıları
         let progressData = {};
         let currentDay = 1;
+        let currentMood = "";
+        
+        let globalStats = {
+            totalDays: parseInt(localStorage.getItem('flute-totalDays') || '0'),
+            currentStreak: parseInt(localStorage.getItem('flute-currentStreak') || '0'),
+            lastPracticeDate: localStorage.getItem('flute-lastPracticeDate') || ''
+        };
 
         // Sayfa yüklendiğinde çalışır
         window.onload = function() {
             updateTodayDate();
+            updateDayProgram();
             
-            // GitHub ayarları var mı kontrol et
-            if (checkGitHubSettings()) {
-                // Ayarlar varsa verileri yükle
-                loadProgressFromGitHub();
+            // Kayıt ayarlarını kontrol et, yoksa modal aç
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'block';
+            } else {
+                // Ayarlar varsa direkt yükle
+                loadProgress();
             }
             
-            updateDayProgram();
             generateChainGrid();
+            updateStats();
         };
 
         function updateTodayDate() {
@@ -635,479 +708,737 @@
             currentDay = programIndex + 1;
         }
 
-        function toggleCheck(element) {
-            const checkbox = element.querySelector('input[type="checkbox"]');
-            checkbox.checked = !checkbox.checked;
+        // Kayıt yöntemi seçimi
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
             
-            if (checkbox.checked) {
-                element.classList.add('completed');
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
             } else {
-                element.classList.remove('completed');
+                githubLogin.style.display = 'none';
             }
         }
 
-        function selectMood(button) {
-            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-        }
-
-        function saveTodayProgress() {
-            // GitHub ayarları kontrolü
-            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
-                alert('❌ GitHub ayarları eksik! Lütfen önce ayarları yapın.');
-                resetGitHubSettings();
-                return;
-            }
-            
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Checkbox durumlarını topla
-            const checkboxes = {
-                fluteBox: document.getElementById('flute-box').checked,
-                openingWords: document.getElementById('opening-words').checked,
-                deepBreath: document.getElementById('deep-breath').checked,
-                musicListen: document.getElementById('music-listen').checked,
-                firstNote: document.getElementById('first-note').checked,
-                exerciseDone: document.getElementById('exercise-done').checked
-            };
-            
-            // Tamamlanma oranını hesapla
-            const completedCount = Object.values(checkboxes).filter(Boolean).length;
-            const completionRate = Math.round((completedCount / 6) * 100);
-            
-            // Mood
-            const selectedMood = document.querySelector('.mood-btn.selected');
-            const mood = selectedMood ? selectedMood.dataset.mood : '';
-            
-            const todayData = {
-                date: today,
-                day: currentDay,
-                checkboxes: checkboxes,
-                completionRate: completionRate,
-                whatIDid: document.getElementById('whatIDid').value,
-                challenges: document.getElementById('challenges').value,
-                progress: document.getElementById('progress').value,
-                reward: document.getElementById('reward').value,
-                closingWords: document.getElementById('closingWords').value,
-                mood: mood,
-                timestamp: new Date().toISOString()
-            };
-            
-            // Veriyi kaydet
-            progressData[today] = todayData;
-            
-            // GitHub'a yükle
-            const dataToSave = JSON.stringify(progressData, null, 2);
-            writeToFile(dataToSave);
-            
-            // UI'ı güncelle
-            updateChainGrid();
-            updateStats();
-            
-            showNotification('📊 İlerleme kaydedildi ve GitHub\'a yüklendi!');
-        }
-
-        async function writeToFile(mymydata) {
-            const filename = myemail;
-            const message = mymydata;
-
-            try {
-                let sha = null;
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
                 try {
-                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            progressData = userDatabase[username].fluteProgress || {};
+                            globalStats = userDatabase[username].fluteStats || globalStats;
+                            
+                            // GitHub ayarlarını kaydet
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('flute-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            loadTodayData();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
                         }
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        sha = data.sha;
-                    }
-                } catch (err) {
-                    // Dosya yoksa hata alırız, normal
-                }
-
-                let utf8Content = unescape(encodeURIComponent(message));
-                let encodedContent = btoa(utf8Content);
-
-                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        message: sha ? 'Flüt ilerlemesi güncellendi' : 'Flüt ilerlemesi oluşturuldu',
-                        content: encodedContent,
-                        sha: sha
-                    })
-                });
-
-                if (updateResponse.ok) {
-                    return true;
-                } else {
-                    throw new Error('GitHub upload failed');
-                }
-            } catch (error) {
-                console.error('Hata:', error);
-                showNotification('❌ GitHub\'a yüklenirken hata oluştu!');
-                return false;
-            }
-        }
-
-        async function loadProgressFromGitHub() {
-            // GitHub ayarları kontrolü
-            if (!kullaniciAdi || !repoAdi || !token || !myemail) {
-                console.log('GitHub ayarları eksik, yükleme yapılamıyor.');
-                return;
-            }
-            
-            const filename = myemail;
-            
-            try {
-                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${filename}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    let content = data.content;
-                    let decodedContent = atob(content);
-                    let utf8Content = decodeURIComponent(escape(decodedContent));
-                    
-                    progressData = JSON.parse(utf8Content);
-                    
-                    // Bugünün verisi varsa formu doldur
-                    const today = new Date().toISOString().split('T')[0];
-                    if (progressData[today]) {
-                        fillFormWithTodayData(progressData[today]);
-                    }
-                    
-                    updateChainGrid();
-                    updateStats();
-                    showNotification('📥 İlerleme GitHub\'dan yüklendi!');
-                } else {
-                    // İlk kez kullanıyorsa boş data
-                    progressData = {};
-                    updateChainGrid();
-                    updateStats();
-                }
-            } catch (error) {
-                console.error('Hata:', error);
-                showNotification('❌ GitHub\'dan yüklenirken hata oluştu!');
-            }
-        }
-
-        function fillFormWithTodayData(data) {
-            // Checkbox'ları işaretle
-            Object.keys(data.checkboxes).forEach(key => {
-                const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-                const checkbox = document.getElementById(elementId);
-                const item = checkbox.closest('.checklist-item');
-                
-                if (data.checkboxes[key]) {
-                    checkbox.checked = true;
-                    item.classList.add('completed');
-                }
-            });
-            
-            // Text alanları doldur
-            document.getElementById('whatIDid').value = data.whatIDid || '';
-            document.getElementById('challenges').value = data.challenges || '';
-            document.getElementById('progress').value = data.progress || '';
-            document.getElementById('reward').value = data.reward || '';
-            document.getElementById('closingWords').value = data.closingWords || '';
-            
-            // Mood seç
-            if (data.mood) {
-                document.querySelectorAll('.mood-btn').forEach(btn => {
-                    if (btn.dataset.mood === data.mood) {
-                        btn.classList.add('selected');
-                    }
-                });
-            }
-        }
-
-        function generateChainGrid() {
-            const grid = document.getElementById('chainGrid');
-            grid.innerHTML = '';
-            
-            // Son 28 günü göster (4 hafta)
-            const today = new Date();
-            for (let i = 27; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                const dayElement = document.createElement('div');
-                dayElement.className = 'chain-day';
-                dayElement.textContent = date.getDate();
-                dayElement.title = date.toLocaleDateString('tr-TR');
-                
-                // Bugün mü?
-                if (i === 0) {
-                    dayElement.classList.add('today');
-                }
-                
-                // Veri var mı?
-                if (progressData[dateStr]) {
-                    if (progressData[dateStr].completionRate >= 80) {
-                        dayElement.classList.add('completed');
-                    } else if (progressData[dateStr].completionRate >= 30) {
-                        dayElement.classList.add('missed');
                     } else {
-                        dayElement.classList.add('empty');
-                    }
-                } else {
-                    dayElement.classList.add('empty');
-                }
-                
-                grid.appendChild(dayElement);
-            }
-        }
+                        userDatabase[username] = {
+                            password: password,
+                            fluteProgress: {},
+                            fluteStats: {...globalStats},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        progressData = {};
+                        // Yerel verileri temizle
+                        localStorage.removeItem('flute-progress-data');
+                        clearAllFormFields();
+                       
+                       await saveUserDatabase();
+                       
+                       // Yeni kullanıcı ayarlarını kaydet
+                       const settings = { 
+                           method: storageMethod, 
+                           username: currentUser 
+                       };
+                       localStorage.setItem('flute-storage-settings', JSON.stringify(settings));
+                       
+                       showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                       document.getElementById('storageModal').style.display = 'none';
+                       updateStorageInfo();
+                   }
+               } catch (error) {
+                   console.error('GitHub kullanıcı doğrulama hatası:', error);
+                   showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                   storageMethod = 'local';
+                   
+                   // Hata durumunda yerel ayar kaydet
+                   const settings = { method: 'local' };
+                   localStorage.setItem('flute-storage-settings', JSON.stringify(settings));
+                   
+                   document.getElementById('storageModal').style.display = 'none';
+                   updateStorageInfo();
+               }
+           } else {
+               // Yerel kayıt seçildi
+               const settings = { method: storageMethod };
+               localStorage.setItem('flute-storage-settings', JSON.stringify(settings));
+               
+               showNotification('💻 Yerel kayıt seçildi!');
+               document.getElementById('storageModal').style.display = 'none';
+               updateStorageInfo();
+               setTimeout(loadProgress, 500);
+           }
+       }
 
-        function updateChainGrid() {
-            generateChainGrid();
-        }
+       async function loadUserDatabase() {
+           try {
+               const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                   headers: {
+                       'Authorization': `token ${token}`,
+                       'Accept': 'application/vnd.github.v3+json'
+                   }
+               });
+               
+               if (response.ok) {
+                   const data = await response.json();
+                   let content = data.content;
+                   let decodedContent = atob(content);
+                   let utf8Content = decodeURIComponent(escape(decodedContent));
+                   userDatabase = JSON.parse(utf8Content);
+               } else {
+                   userDatabase = {};
+               }
+           } catch (error) {
+               userDatabase = {};
+               throw error;
+           }
+       }
 
-        function updateStats() {
-            const dates = Object.keys(progressData).sort();
-            let currentStreak = 0;
-            let totalDays = dates.length;
-            let completedDays = 0;
-            
-            // Toplam tamamlanan günler
-            dates.forEach(date => {
-                if (progressData[date].completionRate >= 80) {
-                    completedDays++;
-                }
-            });
-            
-            // Mevcut zincir
-            const today = new Date();
-            for (let i = 0; i < 30; i++) {
-                const checkDate = new Date(today);
-                checkDate.setDate(checkDate.getDate() - i);
-                const dateStr = checkDate.toISOString().split('T')[0];
-                
-                if (progressData[dateStr] && progressData[dateStr].completionRate >= 80) {
-                    currentStreak++;
-                } else {
-                    break;
-                }
-            }
-            
-            // Başarı oranı
-            const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-            
-            // UI'ı güncelle
-            document.getElementById('currentStreak').textContent = currentStreak;
-            document.getElementById('totalDays').textContent = totalDays;
-            document.getElementById('completionRate').textContent = completionRate;
-        }
+       async function saveUserDatabase() {
+           try {
+               let sha = null;
+               try {
+                   const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                       headers: {
+                           'Authorization': `token ${token}`,
+                           'Accept': 'application/vnd.github.v3+json'
+                       }
+                   });
 
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
-        }
+                   if (response.ok) {
+                       const fileData = await response.json();
+                       sha = fileData.sha;
+                   }
+               } catch (err) {
+                   // Dosya yoksa hata alırız, normal
+               }
 
-        // Başlangıç sözü göster
-        function showOpeningQuote() {
-            const quotes = [
-                "Ben müzik üreten biriyim. Bugün flütle keyifli bir yolculuğa çıkıyorum.",
-                "Ben müzik üreten biriyim. Müzik ruhumu besler, flüt benim sesimdir.",
-                "Ben müzik üreten biriyim. Her nota bir nefes, her nefes bir ilerleme.",
-                "Ben müzik üreten biriyim. Bugün flütle birlikte büyüyeceğim.",
-                "Ben müzik üreten biriyim. Müzik yapmak benim hakkım, flüt benim aracım."
-            ];
-            
-            const today = new Date();
-            const quoteIndex = today.getDate() % quotes.length;
-            
-            alert('🎶 Bugünkü Başlangıç Sözün:\n\n"' + quotes[quoteIndex] + '"');
-        }
+               const jsonData = JSON.stringify(userDatabase, null, 2);
+               let utf8Content = unescape(encodeURIComponent(jsonData));
+               let encodedContent = btoa(utf8Content);
 
-        // Motivasyon mesajları
-        function getMotivationalMessage(completionRate) {
-            if (completionRate === 100) {
-                return "🌟 Mükemmel! Bugün tam bir flüt ustasıydın!";
-            } else if (completionRate >= 80) {
-                return "🎉 Harika iş çıkardın! Flüt yolculuğunda ileriyorsun!";
-            } else if (completionRate >= 50) {
-                return "👍 İyi gidiyor! Yarın daha da iyi olacak!";
-            } else if (completionRate >= 30) {
-                return "🌱 Başlangıç yapmış olmak bile büyük bir adım!";
-            } else {
-                return "💪 Her büyük yolculuk tek adımla başlar. Yarın yeniden!";
-            }
-        }
+               const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                   method: 'PUT',
+                   headers: {
+                       'Authorization': `token ${token}`,
+                       'Accept': 'application/vnd.github.v3+json'
+                   },
+                   body: JSON.stringify({
+                       message: 'Flüt ilerlemesi kullanıcı veritabanı güncellendi',
+                       content: encodedContent,
+                       sha: sha
+                   })
+               });
 
-        // Haftalık özet göster
-        function showWeeklySummary() {
-            const today = new Date();
-            const lastWeek = [];
-            
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                if (progressData[dateStr]) {
-                    lastWeek.push(progressData[dateStr]);
-                }
-            }
-            
-            if (lastWeek.length === 0) {
-                alert('🎼 Henüz haftalık veri yok. Bugün başla!');
-                return;
-            }
-            
-            const avgCompletion = lastWeek.reduce((sum, day) => sum + day.completionRate, 0) / lastWeek.length;
-            const totalDays = lastWeek.length;
-            const perfectDays = lastWeek.filter(day => day.completionRate === 100).length;
-            
-            alert(`📊 Son ${totalDays} Günün Özeti:\n\n` +
-                  `⭐ Ortalama Tamamlama: %${Math.round(avgCompletion)}\n` +
-                  `🎯 Mükemmel Günler: ${perfectDays}/${totalDays}\n` +
-                  `🔥 Devam et! Sen harikasın! 🎶`);
-        }
+               if (!updateResponse.ok) {
+                   throw new Error('GitHub kullanıcı veritabanı güncelleme hatası');
+               }
+           } catch (error) {
+               console.error('GitHub kullanıcı veritabanı kaydetme hatası:', error);
+               throw error;
+           }
+       }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveTodayProgress();
-            }
-            if (e.ctrlKey && e.key === 'l') {
-                e.preventDefault();
-                loadProgressFromGitHub();
-            }
-        });
+       function checkStorageSettings() {
+           const savedSettings = localStorage.getItem('flute-storage-settings');
+           if (savedSettings) {
+               const settings = JSON.parse(savedSettings);
+               storageMethod = settings.method;
+               
+               // GitHub seçilmişse kullanıcı bilgilerini de yükle
+               if (settings.method === 'github' && settings.username) {
+                   currentUser = settings.username;
+               }
+               
+               updateStorageInfo();
+               return true; // Ayarlar mevcut
+           }
+           return false; // Ayarlar yok, modal açılsın
+       }
 
-        // Sayfa kapanırken otomatik kaydet
-        window.addEventListener('beforeunload', function(e) {
-            const hasData = document.getElementById('whatIDid').value || 
-                          document.getElementById('challenges').value || 
-                          document.getElementById('progress').value;
-            
-            if (hasData) {
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        });
+       function updateStorageInfo() {
+           const info = document.getElementById('storageInfo');
+           if (storageMethod === 'github') {
+               info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+           } else {
+               info.textContent = '💻 Yerel kayıt';
+           }
+       }
+       
+       function changeStorageMethod() {
+           // Ayarları sıfırla
+           localStorage.removeItem('flute-storage-settings');
+           
+           // Modal seçimlerini sıfırla
+           document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+           document.getElementById('githubLogin').style.display = 'none';
+           document.getElementById('loginUsername').value = '';
+           document.getElementById('loginPassword').value = '';
+           
+           // Modal aç
+           document.getElementById('storageModal').style.display = 'block';
+           
+           // Varsayılanları sıfırla
+           storageMethod = 'local';
+           currentUser = null;
+       }
 
-        // Başlangıç sözü butonu ekle
-        function addOpeningQuoteButton() {
-            const checklistItem = document.querySelector('#opening-words').closest('.checklist-item');
-            const button = document.createElement('button');
-            button.textContent = '💬';
-            button.onclick = showOpeningQuote;
-            button.style.cssText = 'background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; margin-left: auto;';
-            checklistItem.appendChild(button);
-        }
+       function loadTodayData() {
+           const today = new Date().toISOString().split('T')[0];
+           if (progressData[today]) {
+               fillFormWithTodayData(progressData[today]);
+           }
+           updateChainGrid();
+           updateStats();
+       }
 
-        // Haftalık özet butonu ekle
-        setTimeout(() => {
-            addOpeningQuoteButton();
-            
-            const saveSection = document.querySelector('.save-section');
-            const summaryButton = document.createElement('button');
-            summaryButton.className = 'btn secondary';
-            summaryButton.textContent = '📊 Haftalık Özet';
-            summaryButton.onclick = showWeeklySummary;
-            saveSection.appendChild(summaryButton);
-            
-            // GitHub ayarlarını değiştirme butonu
-            const settingsButton = document.createElement('button');
-            settingsButton.className = 'btn';
-            settingsButton.style.background = 'linear-gradient(45deg, #fd79a8, #e84393)';
-            settingsButton.textContent = '⚙️ GitHub Ayarları';
-            settingsButton.onclick = resetGitHubSettings;
-            saveSection.appendChild(settingsButton);
-        }, 100);
+       function showOpeningQuote() {
+           const quotes = [
+               "Ben müzik üreten biriyim. Bugün flütle keyifli bir yolculuğa çıkıyorum.",
+               "Ben müzik üreten biriyim. Müzik ruhumu besler, flüt benim sesimdir.",
+               "Ben müzik üreten biriyim. Her nota bir nefes, her nefes bir ilerleme.",
+               "Ben müzik üreten biriyim. Bugün flütle birlikte büyüyeceğim.",
+               "Ben müzik üreten biriyim. Müzik yapmak benim hakkım, flüt benim aracım."
+           ];
+           
+           const today = new Date();
+           const quoteIndex = today.getDate() % quotes.length;
+           
+           alert('🎶 Bugünkü Başlangıç Sözün:\n\n"' + quotes[quoteIndex] + '"');
+       }
 
-        // Her gün saat 20:30'da hatırlatma
-        function checkReminderTime() {
-            const now = new Date();
-            const reminderTime = new Date();
-            reminderTime.setHours(20, 30, 0, 0);
-            
-            if (now.getTime() >= reminderTime.getTime() && now.getTime() < reminderTime.getTime() + 30 * 60 * 1000) {
-                const today = new Date().toISOString().split('T')[0];
-                if (!progressData[today]) {
-                    showNotification('🎶 Flüt vakti! Bugünkü egzersizini yapmaya ne dersin?');
-                }
-            }
-        }
+       function toggleCheck(element) {
+           const checkbox = element.querySelector('input[type="checkbox"]');
+           if (element.querySelector('button')) {
+               if (event.target.tagName === 'BUTTON') return;
+           }
+           
+           checkbox.checked = !checkbox.checked;
+           
+           if (checkbox.checked) {
+               element.classList.add('completed');
+               playSuccessSound();
+           } else {
+               element.classList.remove('completed');
+           }
+       }
 
-        // Her dakika kontrol et
-        setInterval(checkReminderTime, 60000);
+       function selectMood(button) {
+           document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+           button.classList.add('selected');
+           currentMood = button.dataset.mood;
+       }
 
-        // Ses efektleri için basit bir sistem
-        function playSuccessSound() {
-            try {
-                const context = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = context.createOscillator();
-                const gainNode = context.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(context.destination);
-                
-                oscillator.frequency.setValueAtTime(520, context.currentTime);
-                oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
-                oscillator.frequency.setValueAtTime(880, context.currentTime + 0.2);
-                
-                gainNode.gain.setValueAtTime(0.3, context.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
-                
-                oscillator.start(context.currentTime);
-                oscillator.stop(context.currentTime + 0.3);
-            } catch (e) {
-                // Ses çalmazsa sessizce devam et
-            }
-        }
+       async function saveTodayProgress() {
+           const today = new Date().toISOString().split('T')[0];
+           
+           // Checkbox durumlarını topla
+           const checkboxes = {
+               fluteBox: document.getElementById('flute-box').checked,
+               openingWords: document.getElementById('opening-words').checked,
+               deepBreath: document.getElementById('deep-breath').checked,
+               musicListen: document.getElementById('music-listen').checked,
+               firstNote: document.getElementById('first-note').checked,
+               exerciseDone: document.getElementById('exercise-done').checked
+           };
+           
+           // Zorunlu alanları kontrol et
+           const requiredFields = ['whatIDid'];
+           const missingFields = requiredFields.filter(field => !document.getElementById(field).value.trim());
+           
+           if (missingFields.length > 0) {
+               alert('⚠ Lütfen "Yaptıklarım" bölümünü doldurun!');
+               return;
+           }
+           
+           // Tamamlanma oranını hesapla
+           const completedCount = Object.values(checkboxes).filter(Boolean).length;
+           const completionRate = Math.round((completedCount / 6) * 100);
+           
+           const todayData = {
+               date: today,
+               day: currentDay,
+               checkboxes: checkboxes,
+               completionRate: completionRate,
+               whatIDid: document.getElementById('whatIDid').value,
+               challenges: document.getElementById('challenges').value,
+               progress: document.getElementById('progress').value,
+               reward: document.getElementById('reward').value,
+               closingWords: document.getElementById('closingWords').value,
+               mood: currentMood,
+               timestamp: new Date().toISOString()
+           };
+           
+           progressData[today] = todayData;
+           
+           // İstatistikleri güncelle
+           globalStats.totalDays++;
+           
+           const yesterday = new Date();
+           yesterday.setDate(yesterday.getDate() - 1);
+           const yesterdayStr = yesterday.toISOString().split('T')[0];
+           
+           if (globalStats.lastPracticeDate === yesterdayStr || globalStats.lastPracticeDate === today) {
+               globalStats.currentStreak++;
+           } else if (globalStats.lastPracticeDate === today) {
+               // Bugün zaten çalışma yapmış
+           } else {
+               globalStats.currentStreak = 1;
+           }
+           
+           globalStats.lastPracticeDate = today;
+           
+           // Kaydet
+           if (storageMethod === 'github' && currentUser) {
+               await saveToGitHub();
+           } else {
+               saveToLocal(progressData);
+           }
+           
+           updateChainGrid();
+           updateStats();
+           saveStatsToLocal();
+           
+           const motivationalMsg = getMotivationalMessage(completionRate);
+           showNotification('📊 Flüt ilerlemesi kaydedildi! ' + motivationalMsg);
+       }
 
-        // Checkbox işaretlendiğinde ses çal
-        document.addEventListener('change', function(e) {
-            if (e.target.type === 'checkbox' && e.target.checked) {
-                playSuccessSound();
-            }
-        });
+       function saveToLocal(data) {
+           localStorage.setItem('flute-progress-data', JSON.stringify(data));
+       }
 
-        // Motivasyon mesajı göster kayıt sonrası
-        const originalSaveTodayProgress = saveTodayProgress;
-        saveTodayProgress = function() {
-            const result = originalSaveTodayProgress();
-            
-            setTimeout(() => {
-                const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
-                const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-                const completionRate = Math.round((checkedCount / checkboxes.length) * 100);
-                
-                const motivationalMsg = getMotivationalMessage(completionRate);
-                showNotification(motivationalMsg);
-            }, 1000);
-        };
+       async function saveToGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               userDatabase[currentUser].fluteProgress = progressData;
+               userDatabase[currentUser].fluteStats = globalStats;
+               userDatabase[currentUser].lastUpdated = new Date().toISOString();
+               
+               await saveUserDatabase();
+           } catch (error) {
+               console.error('GitHub hatası:', error);
+               showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+               saveToLocal(progressData);
+           }
+       }
 
-        // İlk yükleme mesajı
-        setTimeout(() => {
-            if (Object.keys(progressData).length === 0) {
-                showNotification('🎶 Hoş geldin! İlk günün için hazır mısın?');
-            } else {
-                showNotification('🎵 Devam ediyoruz! Bugün de harika olacak!');
-            }
-        }, 2000);
+       function loadProgress() {
+           if (storageMethod === 'github' && currentUser) {
+               loadFromGitHub();
+           } else {
+               loadFromLocal();
+           }
+       }
 
-    </script>
+       function loadFromLocal() {
+           const savedData = localStorage.getItem('flute-progress-data');
+           if (savedData) {
+               progressData = JSON.parse(savedData);
+               
+               const today = new Date().toISOString().split('T')[0];
+               if (progressData[today]) {
+                   fillFormWithTodayData(progressData[today]);
+               }
+               
+               updateChainGrid();
+               updateStats();
+               showNotification('💻 Yerel veriler yüklendi!');
+           } else {
+               progressData = {};
+               updateChainGrid();
+               updateStats();
+           }
+       }
+
+       async function loadFromGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               if (userDatabase[currentUser] && userDatabase[currentUser].fluteProgress) {
+                   progressData = userDatabase[currentUser].fluteProgress;
+                   globalStats = userDatabase[currentUser].fluteStats || globalStats;
+                   
+                   const today = new Date().toISOString().split('T')[0];
+                   if (progressData[today]) {
+                       fillFormWithTodayData(progressData[today]);
+                   }
+                   
+                   updateChainGrid();
+                   updateStats();
+                   showNotification('☁️ GitHub\'dan veriler yüklendi!');
+               } else {
+                   progressData = {};
+                   updateChainGrid();
+                   updateStats();
+                   showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+               }
+           } catch (error) {
+               console.error('GitHub yükleme hatası:', error);
+               showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+               loadFromLocal();
+           }
+       }
+
+       function fillFormWithTodayData(data) {
+           // Checkbox'ları işaretle
+           Object.keys(data.checkboxes).forEach(key => {
+               const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+               const checkbox = document.getElementById(elementId);
+               if (checkbox) {
+                   const item = checkbox.closest('.checklist-item');
+                   
+                   if (data.checkboxes[key]) {
+                       checkbox.checked = true;
+                       item.classList.add('completed');
+                   }
+               }
+           });
+           
+           // Text alanları doldur
+           document.getElementById('whatIDid').value = data.whatIDid || '';
+           document.getElementById('challenges').value = data.challenges || '';
+           document.getElementById('progress').value = data.progress || '';
+           document.getElementById('reward').value = data.reward || '';
+           document.getElementById('closingWords').value = data.closingWords || '';
+           
+           // Mood seç
+           if (data.mood) {
+               currentMood = data.mood;
+               document.querySelectorAll('.mood-btn').forEach(btn => {
+                   if (btn.dataset.mood === data.mood) {
+                       btn.classList.add('selected');
+                   }
+               });
+           }
+       }
+
+       function generateChainGrid() {
+           const grid = document.getElementById('chainGrid');
+           grid.innerHTML = '';
+           
+           // Son 28 günü göster (4 hafta)
+           const today = new Date();
+           for (let i = 27; i >= 0; i--) {
+               const date = new Date(today);
+               date.setDate(date.getDate() - i);
+               const dateStr = date.toISOString().split('T')[0];
+               
+               const dayElement = document.createElement('div');
+               dayElement.className = 'chain-day';
+               dayElement.textContent = date.getDate();
+               dayElement.title = date.toLocaleDateString('tr-TR');
+               
+               // Bugün mü?
+               if (i === 0) {
+                   dayElement.classList.add('today');
+               }
+               
+               // Veri var mı?
+               if (progressData[dateStr]) {
+                   if (progressData[dateStr].completionRate >= 80) {
+                       dayElement.classList.add('completed');
+                   } else if (progressData[dateStr].completionRate >= 40) {
+                       dayElement.classList.add('partial');
+                   } else {
+                       dayElement.classList.add('empty');
+                   }
+                   
+                   dayElement.addEventListener('click', () => showDayDetails(dateStr, progressData[dateStr]));
+               } else {
+                   dayElement.classList.add('empty');
+               }
+               
+               grid.appendChild(dayElement);
+           }
+       }
+
+       function updateChainGrid() {
+           generateChainGrid();
+       }
+
+       function updateStats() {
+           document.getElementById('currentStreak').textContent = globalStats.currentStreak;
+           document.getElementById('totalDays').textContent = globalStats.totalDays;
+           
+           const dates = Object.keys(progressData);
+           const completedCount = dates.filter(date => progressData[date].completionRate >= 80).length;
+           const completionRate = dates.length > 0 ? Math.round((completedCount / dates.length) * 100) : 0;
+           document.getElementById('completionRate').textContent = completionRate;
+       }
+
+       function saveStatsToLocal() {
+           localStorage.setItem('flute-totalDays', globalStats.totalDays.toString());
+           localStorage.setItem('flute-currentStreak', globalStats.currentStreak.toString());
+           localStorage.setItem('flute-lastPracticeDate', globalStats.lastPracticeDate);
+       }
+
+       function showHistory() {
+           const modal = document.getElementById('historyModal');
+           const content = document.getElementById('historyContent');
+           
+           const dates = Object.keys(progressData).sort().reverse();
+           
+           if (dates.length === 0) {
+               content.innerHTML = '<p style="text-align: center; color: #666;">Henüz çalışma geçmişi bulunmuyor.</p>';
+           } else {
+               let historyHTML = '';
+               dates.forEach(date => {
+                   const practice = progressData[date];
+                   const formattedDate = new Date(date).toLocaleDateString('tr-TR');
+                   historyHTML += `
+                       <div class="history-item" onclick="loadHistoryItem('${date}')">
+                           <h4>${formattedDate} - ${getMoodText(practice.mood)}</h4>
+                           <p style="color: #666; font-size: 0.9em;">Tamamlanma: %${practice.completionRate} | Gün: ${practice.day}</p>
+                           <p style="margin-top: 8px;"><strong>Program:</strong> ${weeklyProgram[practice.day - 1].title}</p>
+                       </div>
+                   `;
+               });
+               content.innerHTML = historyHTML;
+           }
+           
+           modal.style.display = 'flex';
+       }
+
+       function closeHistory() {
+           document.getElementById('historyModal').style.display = 'none';
+       }
+
+       function loadHistoryItem(date) {
+           const selectedPractice = progressData[date];
+           fillFormWithTodayData(selectedPractice);
+           closeHistory();
+           showNotification(`📅 ${new Date(date).toLocaleDateString('tr-TR')} tarihli çalışma yüklendi`);
+       }
+
+       function showDayDetails(date, data) {
+           alert(`📅 ${new Date(date).toLocaleDateString('tr-TR')}\n\n` +
+                 `📊 Tamamlanma: %${data.completionRate}\n` +
+                 `🎵 Program: ${weeklyProgram[data.day - 1].title}\n` +
+                 `😊 Ruh Hali: ${getMoodText(data.mood)}\n\n` +
+                 `📝 Yaptıkları: ${data.whatIDid.substring(0, 100)}${data.whatIDid.length > 100 ? '...' : ''}`);
+       }
+
+       function getMoodText(mood) {
+           const moodMap = {
+               'happy': '😊 Mutlu',
+               'neutral': '😐 Nötr',
+               'sad': '🙁 Üzgün',
+               'excited': '🤩 Heyecanlı',
+               'tired': '😴 Yorgun'
+           };
+           return moodMap[mood] || 'Belirtilmedi';
+       }
+
+       function showWeeklySummary() {
+           const today = new Date();
+           const lastWeek = [];
+           
+           for (let i = 6; i >= 0; i--) {
+               const date = new Date(today);
+               date.setDate(date.getDate() - i);
+               const dateStr = date.toISOString().split('T')[0];
+               
+               if (progressData[dateStr]) {
+                   lastWeek.push(progressData[dateStr]);
+               }
+           }
+           
+           if (lastWeek.length === 0) {
+               alert('🎼 Henüz haftalık veri yok. Bugün başla!');
+               return;
+           }
+           
+           const avgCompletion = lastWeek.reduce((sum, day) => sum + day.completionRate, 0) / lastWeek.length;
+           const totalDays = lastWeek.length;
+           const perfectDays = lastWeek.filter(day => day.completionRate === 100).length;
+           
+           alert(`📊 Son ${totalDays} Günün Özeti:\n\n` +
+                 `⭐ Ortalama Tamamlama: %${Math.round(avgCompletion)}\n` +
+                 `🎯 Mükemmel Günler: ${perfectDays}/${totalDays}\n` +
+                 `🔥 Devam et! Sen harikasın! 🎶`);
+       }
+
+       function getMotivationalMessage(completionRate) {
+           if (completionRate === 100) {
+               return "🌟 Mükemmel! Bugün tam bir flüt ustasıydın!";
+           } else if (completionRate >= 80) {
+               return "🎉 Harika iş çıkardın! Flüt yolculuğunda ilerliyorsun!";
+           } else if (completionRate >= 50) {
+               return "👍 İyi gidiyor! Yarın daha da iyi olacak!";
+           } else if (completionRate >= 30) {
+               return "🌱 Başlangıç yapmış olmak bile büyük bir adım!";
+           } else {
+               return "💪 Her büyük yolculuk tek adımla başlar. Yarın yeniden!";
+           }
+       }
+
+       function showNotification(message) {
+           const notification = document.getElementById('notification');
+           notification.textContent = message;
+           notification.classList.add('show');
+           
+           setTimeout(() => {
+               notification.classList.remove('show');
+           }, 4000);
+       }
+
+       function playSuccessSound() {
+           try {
+               const context = new (window.AudioContext || window.webkitAudioContext)();
+               const oscillator = context.createOscillator();
+               const gainNode = context.createGain();
+               
+               oscillator.connect(gainNode);
+               gainNode.connect(context.destination);
+               
+               oscillator.frequency.setValueAtTime(520, context.currentTime);
+               oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
+               oscillator.frequency.setValueAtTime(880, context.currentTime + 0.2);
+               
+               gainNode.gain.setValueAtTime(0.3, context.currentTime);
+               gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.3);
+               
+               oscillator.start(context.currentTime);
+               oscillator.stop(context.currentTime + 0.3);
+           } catch (e) {
+               // Ses çalmazsa sessizce devam et
+           }
+       }
+
+       // Klavye kısayolları
+       document.addEventListener('keydown', function(e) {
+           if (e.ctrlKey && e.key === 's') {
+               e.preventDefault();
+               saveTodayProgress();
+           }
+           if (e.ctrlKey && e.key === 'h') {
+               e.preventDefault();
+               showHistory();
+           }
+           if (e.key === 'Escape') {
+               closeHistory();
+           }
+       });
+
+       // Otomatik kaydetme (her dakika kontrol)
+       setInterval(() => {
+           const hasData = document.getElementById('whatIDid').value || 
+                         document.getElementById('challenges').value || 
+                         document.getElementById('progress').value;
+           
+           if (hasData) {
+               const today = new Date().toISOString().split('T')[0];
+               const autoSave = {
+                   date: today,
+                   day: currentDay,
+                   whatIDid: document.getElementById('whatIDid').value,
+                   challenges: document.getElementById('challenges').value,
+                   progress: document.getElementById('progress').value,
+                   reward: document.getElementById('reward').value,
+                   closingWords: document.getElementById('closingWords').value,
+                   autoSaved: true,
+                   lastSaved: new Date().toISOString()
+               };
+               localStorage.setItem('flute-autoSave', JSON.stringify(autoSave));
+           }
+       }, 60000);
+
+       // Sayfa yüklendiğinde otomatik kaydı kontrol et
+       function checkAutoSave() {
+           const autoSave = localStorage.getItem('flute-autoSave');
+           if (autoSave) {
+               const data = JSON.parse(autoSave);
+               const today = new Date().toISOString().split('T')[0];
+               
+               if (data.date === today && confirm('Otomatik kaydedilmiş bir çalışma bulundu. Yüklemek ister misiniz?')) {
+                   document.getElementById('whatIDid').value = data.whatIDid || '';
+                   document.getElementById('challenges').value = data.challenges || '';
+                   document.getElementById('progress').value = data.progress || '';
+                   document.getElementById('reward').value = data.reward || '';
+                   document.getElementById('closingWords').value = data.closingWords || '';
+               } else {
+                   localStorage.removeItem('flute-autoSave');
+               }
+           }
+       }
+
+       // Sayfa kapatılırken uyarı
+       window.addEventListener('beforeunload', function(e) {
+           const hasData = document.getElementById('whatIDid').value && 
+                         !document.getElementById('exercise-done').checked;
+           
+           if (hasData) {
+               e.preventDefault();
+               e.returnValue = '';
+               return 'Tamamlanmamış flüt çalışması var. Ayrılmak istediğinizden emin misiniz?';
+           }
+       });
+
+       // İlk yükleme kontrolleri
+       setTimeout(() => {
+           checkAutoSave();
+           
+           if (Object.keys(progressData).length === 0) {
+               showNotification('🎶 Hoş geldin! İlk gününün için hazır mısın?');
+           } else {
+               showNotification('🎵 Devam ediyoruz! Bugün de harika olacak!');
+           }
+       }, 2000);
+
+       // Günlük hatırlatma (saat 20:30'da)
+       function checkReminderTime() {
+           const now = new Date();
+           const reminderTime = new Date();
+           reminderTime.setHours(20, 30, 0, 0);
+           
+           if (now.getTime() >= reminderTime.getTime() && now.getTime() < reminderTime.getTime() + 60 * 60 * 1000) {
+               const today = new Date().toISOString().split('T')[0];
+               if (!progressData[today]) {
+                   showNotification('🎶 Flüt vakti! Bugünkü egzersizini yapmaya ne dersin?');
+               }
+           }
+       }
+
+       // Her saat kontrol et
+       setInterval(checkReminderTime, 3600000);
+   </script>
 </body>
 </html>
