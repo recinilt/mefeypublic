@@ -872,6 +872,39 @@
    <script src="5t-github-parametreleri.js"></script>
    <script>
     document.getElementById('storageModal').style.display = 'none';
+    function clearAllFormFields() {
+            // Form alanlarını temizle
+            document.getElementById('todayTopic').value = '';
+            document.getElementById('infoSection').value = '';
+            document.getElementById('dataSection').value = '';
+            document.getElementById('tefekkur').value = '';
+            document.getElementById('tedabbur').value = '';
+            document.getElementById('teakkul').value = '';
+            document.getElementById('tefakkuh').value = '';
+            document.getElementById('tezekkur').value = '';
+            document.getElementById('surprises').value = '';
+            document.getElementById('difficulties').value = '';
+            document.getElementById('growth').value = '';
+            document.getElementById('nextSteps').value = '';
+            document.getElementById('reward').value = '';
+            document.getElementById('closingWords').value = '';
+            
+            // Checkbox'ları temizle
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.checklist-item').classList.remove('completed');
+            });
+            
+            // Mood seçimini temizle
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            currentMood = "";
+            
+            // Final knowledge'ı temizle
+            document.getElementById('finalKnowledge').innerHTML = '<p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>';
+            
+            // Progress'i sıfırla
+            updateProgress();
+        }
        // Global değişkenler
        const motivationQuotes = [
            "Ben bir FBS'yi 5T ile kullanarak kalbi cilalatma uzmanıyım. Rabbimle başbaşayım.",
@@ -987,7 +1020,7 @@
                             analysisData = userDatabase[username].analyses || {};
                             globalStats = userDatabase[username].stats || globalStats;
                             
-                            // GitHub ayarlarını kaydet
+                            // BURAYA EKLEME - GitHub ayarlarını kaydet
                             const settings = { 
                                 method: storageMethod, 
                                 username: currentUser 
@@ -1003,42 +1036,27 @@
                             return;
                         }
                     } else {
-                        // YENİ KULLANICI - Önce formu temizle
-                        clearAllFormData();
-                        
                         userDatabase[username] = {
                             password: password,
                             analyses: {},
-                            stats: {
-                                totalAnalyses: 0,
-                                currentStreak: 0,
-                                currentNurLevel: 50,
-                                lastAnalysisDate: ''
-                            },
+                            stats: {...globalStats},
                             createdDate: new Date().toISOString()
                         };
                         
                         currentUser = username;
                         analysisData = {};
-                        globalStats = {
-                            totalAnalyses: 0,
-                            currentStreak: 0,
-                            currentNurLevel: 50,
-                            lastAnalysisDate: ''
-                        };
+                        // Yerel verileri temizle
+                        localStorage.removeItem('5t-analysis-data');
+                        clearAllFormFields();
                         
                         await saveUserDatabase();
                         
-                        // Yeni kullanıcı ayarlarını kaydet
+                        // BURAYA EKLEME - Yeni kullanıcı ayarlarını kaydet
                         const settings = { 
                             method: storageMethod, 
                             username: currentUser 
                         };
                         localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
-                        
-                        // İstatistikleri güncelle
-                        updateStats();
-                        updateChainGrid();
                         
                         showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
                         document.getElementById('storageModal').style.display = 'none';
@@ -1049,7 +1067,7 @@
                     showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
                     storageMethod = 'local';
                     
-                    // Hata durumunda yerel ayar kaydet
+                    // BURAYA EKLEME - Hata durumunda yerel ayar kaydet
                     const settings = { method: 'local' };
                     localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
                     
@@ -1069,7 +1087,6 @@
         }
 
 
-        
        async function loadUserDatabase() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
