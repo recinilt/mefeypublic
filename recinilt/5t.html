@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 5T Günlük Defterim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .streak-display {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .streak-item {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .streak-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .today-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .day-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .day-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .ritual-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .checklist-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checklist-item.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+
+        .t-sections {
+            display: grid;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .t-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+        }
+
+        .t-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .t-guide {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .text-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .text-area.short {
+            min-height: 60px;
+        }
+
+        .save-section {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+
+        .progress-chain {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .chain-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chain-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        .chain-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chain-day.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .chain-day.partial {
+            background: #ff9800;
+            color: white;
+        }
+
+        .chain-day.empty {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .chain-day.today {
+            border: 3px solid #667eea;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        .reflection-section {
+            background: #f0f8ff;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+        }
+
+        .knowledge-section {
+            background: #f0fff0;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            border-left: 5px solid #27ae60;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .info-box {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .mood-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .mood-btn {
+            font-size: 2em;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .mood-btn:hover, .mood-btn.selected {
+            background: #e3f2fd;
+            transform: scale(1.2);
+        }
+
+        .progress-indicator {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .ritual-checklist {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 5T Günlük Defterim</h1>
+            <p>Fuat Basar Sema Metodolojisi ile günlük tekamül</p>
+            <div class="streak-display">
+                <div class="streak-item">
+                    <span class="streak-number" id="currentStreak">0</span>
+                    <small>Güncel Zincir</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="totalAnalyses">0</span>
+                    <small>Toplam 5T</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="nurLevel">50V</span>
+                    <small>Nur Seviyesi</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="completionRate">0</span>
+                    <small>% Başarı</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- GitHub Ayarları Modal -->
+        <div id="githubModal" class="modal" style="display: block;">
+            <div class="modal-content">
+                <h2>⚙️ GitHub Ayarları</h2>
+                <p>5T günlüğünüzü GitHub'da saklamak için bilgileri girin:</p>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>👤 GitHub Kullanıcı Adı:</strong></label>
+                    <input type="text" id="githubUser" class="text-area short" placeholder="örnek: ahmet123">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>📁 Repository (Depo) Adı:</strong></label>
+                    <input type="text" id="githubRepo" class="text-area short" placeholder="örnek: 5t-gunlugum">
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>🔑 GitHub Token:</strong></label>
+                    <input type="password" id="githubToken" class="text-area short" placeholder="ghp_xxxxxxxxxxxxxxxxx">
+                    <small style="color: #666; display: block; margin-top: 5px;">
+                        Token almak için: GitHub → Settings → Developer settings → Personal access tokens → Generate new token
+                    </small>
+                </div>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>📝 Dosya Adı:</strong></label>
+                    <input type="text" id="githubFilename" class="text-area short" placeholder="5t-gunlugum.json">
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="saveGitHubSettings()">✅ Ayarları Kaydet ve Devam</button>
+                </div>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="btn secondary" onclick="loadExistingData()">📥 Var Olan Verileri Yükle</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="today-section">
+                <div class="day-info">
+                    <div>
+                        <div class="day-title">Bugünkü 5T Analizi</div>
+                        <div id="todayDate"></div>
+                    </div>
+                    <div class="progress-indicator">
+                        <strong>İlerleme</strong>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <small id="progressText">0/8 adım tamamlandı</small>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>📚 5T Metodolojisi Hatırlatması:</h4>
+                    <p><strong>TEFEKKÜR:</strong> Derin düşünme - konuyu etraflıca ele alma</p>
+                    <p><strong>TEDABBÜR:</strong> Arka plana bakma - gizli faktörleri görme</p>
+                    <p><strong>TEAKKUL:</strong> Bağlantıları kurma - olayları birbirine bağlama</p>
+                    <p><strong>TEFAKKUH:</strong> İnce sonuçlar çıkarma - detaylı analiz</p>
+                    <p><strong>TEZEKKÜR:</strong> Yaşam tarzına dönüştürme - uygulamaya geçirme</p>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <label><strong>🎯 Bugün analiz etmek istediğim konu/durum:</strong></label>
+                    <textarea class="text-area" id="todayTopic" placeholder="Analiz etmek istediğiniz durumu, problemi veya konuyu yazın..."></textarea>
+                </div>
+
+                <div class="warning-box">
+                    <strong>Önemli Hatırlatma:</strong> Her aşamada hem olumlu hem olumsuz faktörleri yazın. Kimseyi koruma refleksi göstermeyin. Gerçeklik neyse onu yazın. Nötr kalın, taraf tutmayın.
+                </div>
+
+                <div class="ritual-checklist">
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="topic-defined">
+                        <span>🎯 Analiz konumu net olarak belirledim</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="mind-clear">
+                        <span>🧘 Zihnimde netlik sağladım, hazırım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="tefekkur-done">
+                        <span>💭 TEFEKKÜR aşamasını tamamladım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="tedabbur-done">
+                        <span>🔍 TEDABBÜR aşamasını tamamladım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="teakkul-done">
+                        <span>🔗 TEAKKUL aşamasını tamamladım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="tefakkuh-done">
+                        <span>⚖️ TEFAKKUH aşamasını tamamladım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="tezekkur-done">
+                        <span>🌟 TEZEKKÜR aşamasını tamamladım</span>
+                    </div>
+                    <div class="checklist-item" onclick="toggleCheck(this)">
+                        <input type="checkbox" id="analysis-complete">
+                        <span>✅ 5T analizimi tamamen tamamladım</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="t-sections">
+                <div class="t-section">
+                    <h3>1️⃣ TEFEKKÜR - Derin Düşünme</h3>
+                    <div class="t-guide">
+                        <strong>Rehber:</strong> Bu konu hakkında derinlemesine düşünün. Sadece yüzeysel değil, etraflıca düşünme yapın. Hem olumlu hem olumsuz tüm açıları değerlendirin. İlk izlenimlerinizin ötesine geçin.
+                    </div>
+                    <textarea class="text-area" id="tefekkur" placeholder="Tefekkür sonuçlarınızı yazın..."></textarea>
+                </div>
+
+                <div class="t-section">
+                    <h3>2️⃣ TEDABBÜR - Arka Plana Bakma</h3>
+                    <div class="t-guide">
+                        <strong>Rehber:</strong> Olayın derinindeki etkenleri görün. Sadece görünen kısıma değil, arkasındaki derinliğe bakın. Gizli faktörleri, arka plan dinamiklerini, manipülasyon ve çıkar hesaplarını analiz edin. Olumsuz ihtimalleri de mutlaka yazın.
+                    </div>
+                    <textarea class="text-area" id="tedabbur" placeholder="Tedabbür sonuçlarınızı yazın..."></textarea>
+                </div>
+
+                <div class="t-section">
+                    <h3>3️⃣ TEAKKUL - Bağlantıları Kurma</h3>
+                    <div class="t-guide">
+                        <strong>Rehber:</strong> Tefekkür ve tedabbür ettiğiniz konular arasındaki bağlantıyı kurun. Olaylar arasındaki ilişkileri, sebep-sonuç zincirlerini, zaman-mekan-insan bağlantılarını görün.
+                    </div>
+                    <textarea class="text-area" id="teakkul" placeholder="Teakkul sonuçlarınızı yazın..."></textarea>
+                </div>
+
+                <div class="t-section">
+                    <h3>4️⃣ TEFAKKUH - İnce Sonuçlar Çıkarma</h3>
+                    <div class="t-guide">
+                        <strong>Rehber:</strong> İnce sonuçlar çıkarın. Detaylı analiz ederek pratik sonuçlara ulaşın. Risk değerlendirmesi, fırsat analizi, adalet-zulüm boyutunu ele alın. "Bu durumda ne yapmalıyım?" sorusunu cevaplayın.
+                    </div>
+                    <textarea class="text-area" id="tefakkuh" placeholder="Tefakkuh sonuçlarınızı yazın..."></textarea>
+                </div>
+
+                <div class="t-section">
+                    <h3>5️⃣ TEZEKKÜR - Yaşam Tarzına Dönüştürme</h3>
+                    <div class="t-guide">
+                        <strong>Rehber:</strong> Çıkardığınız sonuçları yaşam tarzına dönüştürün. Hem kendi davranışlarınızı hem de başkalarına vereceğiniz öğütleri belirleyin. Kimsenin zarar görmeyeceği win-win çözümler geliştirin.
+                    </div>
+                    <textarea class="text-area" id="tezekkur" placeholder="Tezekkür sonuçlarınızı yazın..."></textarea>
+                </div>
+            </div>
+
+            <div class="reflection-section">
+                <h3>💡 Kişisel Yansıma</h3>
+                
+                <div style="margin: 15px 0;">
+                    <label><strong>🎯 Bu analizde hangi noktalar beni en çok şaşırttı?</strong></label>
+                    <textarea class="text-area" id="surprises" placeholder="Beklemediğim sonuçlar, şaşırtıcı bağlantılar..."></textarea>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>⚠️ En zor olan aşama hangisiydi ve neden?</strong></label>
+                    <textarea class="text-area" id="difficulties" placeholder="Hangi aşamada zorlandım, neden?"></textarea>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>🌱 Bu analiz beni nasıl geliştirdi?</strong></label>
+                    <textarea class="text-area" id="growth" placeholder="Ne öğrendim, hangi farkındalıklar kazandım?"></textarea>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>📅 Sonraki adımlarım neler?</strong></label>
+                    <textarea class="text-area" id="nextSteps" placeholder="Bu analizin sonucunda yapacağım şeyler..."></textarea>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>😊 Ruh halim:</strong></label>
+                    <div class="mood-selector">
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="very-happy">🤩</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="happy">😊</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="neutral">😐</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="thoughtful">🤔</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="concerned">😟</button>
+                        <button class="mood-btn" onclick="selectMood(this)" data-mood="tired">😴</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="knowledge-section">
+                <h3>💎 KNOWLEDGE (Final Sonuç)</h3>
+                <div id="finalKnowledge">
+                    <p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>
+                </div>
+            </div>
+
+            <div class="save-section">
+                <p><strong>💾 5T Analizini kaydet ve GitHub'a yükle</strong></p>
+                <button class="btn" onclick="saveTodayAnalysis()">📊 Bugünü Kaydet</button>
+                <button class="btn secondary" onclick="loadAnalysisFromGitHub()">📥 GitHub'dan Yükle</button>
+                <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Analizler</button>
+                <button class="btn secondary" onclick="showWeeklySummary()">📈 Haftalık Özet</button>
+                <button class="btn danger" onclick="resetGitHubSettings()">⚙️ GitHub Ayarları</button>
+            </div>
+
+            <div class="progress-chain">
+                <h3 class="chain-title">🔥 5T Analiz Zinciri</h3>
+                <div class="chain-grid" id="chainGrid">
+                    <!-- Zincir günleri buraya dinamik olarak eklenecek -->
+                </div>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    <small>✅ Tam Analiz | 🟨 Kısmi | ⭕ Boş</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geçmiş Modal -->
+    <div id="historyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📚 Geçmiş 5T Analizlerim</h2>
+                <button onclick="closeHistory()" class="btn danger" style="padding: 8px 15px; font-size: 14px;">Kapat</button>
+            </div>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // GitHub ayarları
+        let kullaniciAdi = "";
+        let repoAdi = "";
+        let token = "";
+        let dosyaAdi = "";
+
+        // Veri yapısı
+        let analysisData = {};
+        let currentMood = "";
+        
+        let globalStats = {
+            totalAnalyses: parseInt(localStorage.getItem('5t-totalAnalyses') || '0'),
+            currentStreak: parseInt(localStorage.getItem('5t-currentStreak') || '0'),
+            currentNurLevel: parseInt(localStorage.getItem('5t-currentNurLevel') || '50'),
+            lastAnalysisDate: localStorage.getItem('5t-lastAnalysisDate') || ''
+        };
+
+        // Sayfa yüklendiğinde çalışır
+        window.onload = function() {
+            updateTodayDate();
+            
+            if (checkGitHubSettings()) {
+                loadAnalysisFromGitHub();
+            }
+            
+            generateChainGrid();
+            updateStats();
+            updateProgress();
+        };
+
+        function updateTodayDate() {
+            const today = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            document.getElementById('todayDate').textContent = today.toLocaleDateString('tr-TR', options);
+        }
+
+        function saveGitHubSettings() {
+            kullaniciAdi = document.getElementById('githubUser').value.trim();
+            repoAdi = document.getElementById('githubRepo').value.trim();
+            token = document.getElementById('githubToken').value.trim();
+            dosyaAdi = document.getElementById('githubFilename').value.trim();
+            
+            if (!kullaniciAdi || !repoAdi || !token || !dosyaAdi) {
+                alert('⚠ Lütfen tüm alanları doldurun!');
+                return;
+            }
+            
+            const settings = { kullaniciAdi, repoAdi, token, dosyaAdi };
+            localStorage.setItem('5t-github-settings', JSON.stringify(settings));
+            
+            // Modal'ı gizle
+            document.getElementById('githubModal').style.display = 'none';
+            
+            // Bildirim göster
+            showNotification('⚙️ GitHub ayarları kaydedildi!');
+            
+            // Verileri yüklemeyi dene
+            setTimeout(loadAnalysisFromGitHub, 500);
+        }
+        
+        function loadExistingData() {
+            saveGitHubSettings();
+        }
+        
+        function checkGitHubSettings() {
+            const savedSettings = localStorage.getItem('5t-github-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                kullaniciAdi = settings.kullaniciAdi;
+                repoAdi = settings.repoAdi;
+                token = settings.token;
+                dosyaAdi = settings.dosyaAdi;
+                
+                document.getElementById('githubModal').style.display = 'none';
+                return true;
+            }
+            return false;
+        }
+        
+        function resetGitHubSettings() {
+            localStorage.removeItem('5t-github-settings');
+            document.getElementById('githubModal').style.display = 'block';
+            kullaniciAdi = "";
+            repoAdi = "";
+            token = "";
+            dosyaAdi = "";
+        }
+
+        function toggleCheck(element) {
+            const checkbox = element.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            
+            if (checkbox.checked) {
+                element.classList.add('completed');
+                playSuccessSound();
+            } else {
+                element.classList.remove('completed');
+            }
+            
+            updateProgress();
+        }
+
+        function selectMood(button) {
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            currentMood = button.dataset.mood;
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('.ritual-checklist input[type="checkbox"]');
+            const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+            const total = checkboxes.length;
+            const percentage = Math.round((completed / total) * 100);
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${completed}/${total} adım tamamlandı`;
+        }
+
+        function saveTodayAnalysis() {
+            if (!kullaniciAdi || !repoAdi || !token || !dosyaAdi) {
+                alert('⚠ GitHub ayarları eksik! Lütfen önce ayarları yapın.');
+                resetGitHubSettings();
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Form verilerini topla
+            const formData = {
+                todayTopic: document.getElementById('todayTopic').value,
+                tefekkur: document.getElementById('tefekkur').value,
+                tedabbur: document.getElementById('tedabbur').value,
+                teakkul: document.getElementById('teakkul').value,
+                tefakkuh: document.getElementById('tefakkuh').value,
+                tezekkur: document.getElementById('tezekkur').value,
+                surprises: document.getElementById('surprises').value,
+                difficulties: document.getElementById('difficulties').value,
+                growth: document.getElementById('growth').value,
+                nextSteps: document.getElementById('nextSteps').value
+            };
+            
+            // Boş alan kontrolü
+            const requiredFields = ['todayTopic', 'tefekkur', 'tedabbur', 'teakkul', 'tefakkuh', 'tezekkur'];
+            const missingFields = requiredFields.filter(field => !formData[field].trim());
+            
+            if (missingFields.length > 0) {
+                alert('⚠ Lütfen 5T analizinin tüm aşamalarını tamamlayın!');
+                return;
+            }
+            
+            // Checkbox durumlarını topla
+            const checkboxes = {
+                topicDefined: document.getElementById('topic-defined').checked,
+                mindClear: document.getElementById('mind-clear').checked,
+                tefekkurDone: document.getElementById('tefekkur-done').checked,
+                tedabburDone: document.getElementById('tedabbur-done').checked,
+                teakkulDone: document.getElementById('teakkul-done').checked,
+                tefakkuhDone: document.getElementById('tefakkuh-done').checked,
+                tezekkurDone: document.getElementById('tezekkur-done').checked,
+                analysisComplete: document.getElementById('analysis-complete').checked
+            };
+            
+            // Tamamlanma oranını hesapla
+            const completedCount = Object.values(checkboxes).filter(Boolean).length;
+            const completionRate = Math.round((completedCount / 8) * 100);
+            
+            const todayData = {
+                date: today,
+                ...formData,
+                checkboxes: checkboxes,
+                completionRate: completionRate,
+                mood: currentMood,
+                timestamp: new Date().toISOString(),
+                nurLevel: globalStats.currentNurLevel
+            };
+            
+            // Veriyi kaydet
+            analysisData[today] = todayData;
+            
+            // Final knowledge oluştur
+            generateFinalKnowledge(todayData);
+            
+            // İstatistikleri güncelle
+            globalStats.totalAnalyses++;
+            
+            // Streak hesapla
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            if (globalStats.lastAnalysisDate === yesterdayStr || globalStats.lastAnalysisDate === today) {
+                globalStats.currentStreak++;
+            } else if (globalStats.lastAnalysisDate === today) {
+                // Bugün zaten analiz yapmış
+            } else {
+                globalStats.currentStreak = 1;
+            }
+            
+            globalStats.lastAnalysisDate = today;
+            
+            // Nur seviyesi artır (her 3 analizde bir)
+            if (globalStats.totalAnalyses % 3 === 0) {
+                globalStats.currentNurLevel += 10;
+                showNotification(`✨ Nur seviyeniz ${globalStats.currentNurLevel}V'a yükseldi!`);
+            }
+            
+            // GitHub'a yükle
+            const dataToSave = JSON.stringify(analysisData, null, 2);
+            writeToFile(dataToSave);
+            
+            // UI'yı güncelle
+            updateChainGrid();
+            updateStats();
+            saveStatsToLocal();
+            
+            showNotification('📊 5T analizi kaydedildi ve GitHub\'a yüklendi!');
+        }
+
+        function generateFinalKnowledge(data) {
+            const knowledge = `
+                <div class="success-box">
+                    <h4>📋 Analiz Özeti</h4>
+                    <p><strong>Konu:</strong> ${data.todayTopic.substring(0, 200)}${data.todayTopic.length > 200 ? '...' : ''}</p>
+                    <p><strong>Tamamlanma:</strong> %${data.completionRate} (${Object.values(data.checkboxes).filter(Boolean).length}/8 adım)</p>
+                    <p><strong>Ruh Hali:</strong> ${getMoodText(data.mood)}</p>
+                </div>
+                
+                <h4>🎯 Ana Çıkarımlar:</h4>
+                <p><strong>Tefekkür:</strong> ${extractKeyPoint(data.tefekkur)}</p>
+                <p><strong>Tedabbür:</strong> ${extractKeyPoint(data.tedabbur)}</p>
+                <p><strong>Teakkul:</strong> ${extractKeyPoint(data.teakkul)}</p>
+                <p><strong>Tefakkuh:</strong> ${extractKeyPoint(data.tefakkuh)}</p>
+                <p><strong>Tezekkür:</strong> ${extractKeyPoint(data.tezekkur)}</p>
+                
+                ${data.nextSteps ? `<h4>📅 Sonraki Adımlar:</h4><p>${data.nextSteps}</p>` : ''}
+                
+                <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                    <strong>💡 Bu analiz INFO → DATA → KNOWLEDGE sürecini tamamladı.</strong><br>
+                    <small>Artık bu konuda eyleme geçebilecek duruma geldiniz.</small>
+                </div>
+            `;
+            
+            document.getElementById('finalKnowledge').innerHTML = knowledge;
+        }
+
+        function extractKeyPoint(text) {
+            if (!text || text.trim().length === 0) return 'Belirtilmedi';
+            const sentences = text.split('.').filter(s => s.trim().length > 20);
+            return sentences[0] ? sentences[0].trim() + '.' : text.substring(0, 150) + '...';
+        }
+
+        function getMoodText(mood) {
+            const moodMap = {
+                'very-happy': '🤩 Çok Mutlu',
+                'happy': '😊 Mutlu',
+                'neutral': '😐 Nötr',
+                'thoughtful': '🤔 Düşünceli',
+                'concerned': '😟 Endişeli',
+                'tired': '😴 Yorgun'
+            };
+            return moodMap[mood] || 'Belirtilmedi';
+        }
+
+        async function writeToFile(data) {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                let utf8Content = unescape(encodeURIComponent(data));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: sha ? '5T günlüğü güncellendi' : '5T günlüğü oluşturuldu',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (updateResponse.ok) {
+                    return true;
+                } else {
+                    throw new Error('GitHub upload failed');
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('⚠ GitHub\'a yüklenirken hata oluştu!');
+                return false;
+            }
+        }
+
+        async function loadAnalysisFromGitHub() {
+            if (!kullaniciAdi || !repoAdi || !token || !dosyaAdi) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    
+                    analysisData = JSON.parse(utf8Content);
+                    
+                    // Bugünün verisi varsa formu doldur
+                    const today = new Date().toISOString().split('T')[0];
+                    if (analysisData[today]) {
+                        fillFormWithTodayData(analysisData[today]);
+                    }
+                    
+                    updateChainGrid();
+                    updateStats();
+                    showNotification('📥 Veriler GitHub\'dan yüklendi!');
+                } else {
+                    // İlk kez kullanıyorsa boş data
+                    analysisData = {};
+                    updateChainGrid();
+                    updateStats();
+                }
+            } catch (error) {
+                console.error('Hata:', error);
+                showNotification('⚠ GitHub\'dan yüklenirken hata oluştu!');
+            }
+        }
+
+        function fillFormWithTodayData(data) {
+            // Form alanlarını doldur
+            document.getElementById('todayTopic').value = data.todayTopic || '';
+            document.getElementById('tefekkur').value = data.tefekkur || '';
+            document.getElementById('tedabbur').value = data.tedabbur || '';
+            document.getElementById('teakkul').value = data.teakkul || '';
+            document.getElementById('tefakkuh').value = data.tefakkuh || '';
+            document.getElementById('tezekkur').value = data.tezekkur || '';
+            document.getElementById('surprises').value = data.surprises || '';
+            document.getElementById('difficulties').value = data.difficulties || '';
+            document.getElementById('growth').value = data.growth || '';
+            document.getElementById('nextSteps').value = data.nextSteps || '';
+            
+            // Checkbox'ları işaretle
+            if (data.checkboxes) {
+                Object.keys(data.checkboxes).forEach(key => {
+                    const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                    const checkbox = document.getElementById(elementId);
+                    if (checkbox) {
+                        const item = checkbox.closest('.checklist-item');
+                        
+                        if (data.checkboxes[key]) {
+                            checkbox.checked = true;
+                            item.classList.add('completed');
+                        }
+                    }
+                });
+            }
+            
+            // Mood seç
+            if (data.mood) {
+                currentMood = data.mood;
+                document.querySelectorAll('.mood-btn').forEach(btn => {
+                    if (btn.dataset.mood === data.mood) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+            
+            // Final knowledge oluştur
+            if (data.tezekkur) {
+                generateFinalKnowledge(data);
+            }
+            
+            updateProgress();
+        }
+
+        function generateChainGrid() {
+            const grid = document.getElementById('chainGrid');
+            grid.innerHTML = '';
+            
+            // Son 28 günü göster (4 hafta)
+            const today = new Date();
+            for (let i = 27; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'chain-day';
+                dayElement.textContent = date.getDate();
+                dayElement.title = date.toLocaleDateString('tr-TR');
+                
+                // Bugün mü?
+                if (i === 0) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Veri var mı?
+                if (analysisData[dateStr]) {
+                    if (analysisData[dateStr].completionRate >= 80) {
+                        dayElement.classList.add('completed');
+                    } else if (analysisData[dateStr].completionRate >= 40) {
+                        dayElement.classList.add('partial');
+                    } else {
+                        dayElement.classList.add('empty');
+                    }
+                    
+                    // Tıklanabilir yap
+                    dayElement.addEventListener('click', () => showDayDetails(dateStr, analysisData[dateStr]));
+                } else {
+                    dayElement.classList.add('empty');
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function updateChainGrid() {
+            generateChainGrid();
+        }
+
+        function updateStats() {
+            document.getElementById('currentStreak').textContent = globalStats.currentStreak;
+            document.getElementById('totalAnalyses').textContent = globalStats.totalAnalyses;
+            document.getElementById('nurLevel').textContent = globalStats.currentNurLevel + 'V';
+            
+            // Başarı oranı hesapla
+            const dates = Object.keys(analysisData);
+            const completedCount = dates.filter(date => analysisData[date].completionRate >= 80).length;
+            const completionRate = dates.length > 0 ? Math.round((completedCount / dates.length) * 100) : 0;
+            document.getElementById('completionRate').textContent = completionRate;
+        }
+
+        function saveStatsToLocal() {
+            localStorage.setItem('5t-totalAnalyses', globalStats.totalAnalyses.toString());
+            localStorage.setItem('5t-currentStreak', globalStats.currentStreak.toString());
+            localStorage.setItem('5t-currentNurLevel', globalStats.currentNurLevel.toString());
+            localStorage.setItem('5t-lastAnalysisDate', globalStats.lastAnalysisDate);
+        }
+
+        function showHistory() {
+            const modal = document.getElementById('historyModal');
+            const content = document.getElementById('historyContent');
+            
+            const dates = Object.keys(analysisData).sort().reverse();
+            
+            if (dates.length === 0) {
+                content.innerHTML = '<p style="text-align: center; color: #666;">Henüz analiz geçmişi bulunmuyor.</p>';
+            } else {
+                let historyHTML = '';
+                dates.forEach(date => {
+                    const analysis = analysisData[date];
+                    const formattedDate = new Date(date).toLocaleDateString('tr-TR');
+                    historyHTML += `
+                        <div class="history-item" onclick="loadHistoryItem('${date}')">
+                            <h4>${formattedDate} - ${getMoodText(analysis.mood)}</h4>
+                            <p style="color: #666; font-size: 0.9em;">Tamamlanma: %${analysis.completionRate} | Nur: ${analysis.nurLevel}V</p>
+                            <p style="margin-top: 8px;"><strong>Konu:</strong> ${analysis.todayTopic.substring(0, 100)}${analysis.todayTopic.length > 100 ? '...' : ''}</p>
+                        </div>
+                    `;
+                });
+                content.innerHTML = historyHTML;
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').style.display = 'none';
+        }
+
+        function loadHistoryItem(date) {
+            const selectedAnalysis = analysisData[date];
+            fillFormWithTodayData(selectedAnalysis);
+            closeHistory();
+            showNotification(`📅 ${new Date(date).toLocaleDateString('tr-TR')} tarihli analiz yüklendi`);
+        }
+
+        function showDayDetails(date, data) {
+            alert(`📅 ${new Date(date).toLocaleDateString('tr-TR')}\n\n` +
+                  `📊 Tamamlanma: %${data.completionRate}\n` +
+                  `💎 Nur Seviyesi: ${data.nurLevel}V\n` +
+                  `😊 Ruh Hali: ${getMoodText(data.mood)}\n\n` +
+                  `🎯 Konu: ${data.todayTopic.substring(0, 100)}${data.todayTopic.length > 100 ? '...' : ''}`);
+        }
+
+        function showWeeklySummary() {
+            const today = new Date();
+            const lastWeek = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                if (analysisData[dateStr]) {
+                    lastWeek.push(analysisData[dateStr]);
+                }
+            }
+            
+            if (lastWeek.length === 0) {
+                alert('📊 Henüz haftalık veri yok. Bugün başla!');
+                return;
+            }
+            
+            const avgCompletion = lastWeek.reduce((sum, day) => sum + day.completionRate, 0) / lastWeek.length;
+            const totalDays = lastWeek.length;
+            const perfectDays = lastWeek.filter(day => day.completionRate === 100).length;
+            const avgNur = lastWeek.reduce((sum, day) => sum + day.nurLevel, 0) / lastWeek.length;
+            
+            alert(`📈 Son ${totalDays} Günün Özeti:\n\n` +
+                  `⭐ Ortalama Tamamlama: %${Math.round(avgCompletion)}\n` +
+                  `🎯 Mükemmel Günler: ${perfectDays}/${totalDays}\n` +
+                  `💎 Ortalama Nur: ${Math.round(avgNur)}V\n` +
+                  `🔥 Devam et! 5T metodolojisinde ilerliyorsun!`);
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function playSuccessSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                oscillator.frequency.setValueAtTime(520, context.currentTime);
+                oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.2);
+            } catch (e) {
+                // Ses çalmazsa sessizce devam et
+            }
+        }
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveTodayAnalysis();
+            }
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                showHistory();
+            }
+            if (e.key === 'Escape') {
+                closeHistory();
+            }
+        });
+
+        // Otomatik kaydetme (her dakika kontrol)
+        setInterval(() => {
+            const hasData = document.getElementById('todayTopic').value || 
+                          document.getElementById('tefekkur').value || 
+                          document.getElementById('tedabbur').value;
+            
+            if (hasData) {
+                const today = new Date().toISOString().split('T')[0];
+                const autoSave = {
+                    date: today,
+                    todayTopic: document.getElementById('todayTopic').value,
+                    tefekkur: document.getElementById('tefekkur').value,
+                    tedabbur: document.getElementById('tedabbur').value,
+                    teakkul: document.getElementById('teakkul').value,
+                    tefakkuh: document.getElementById('tefakkuh').value,
+                    tezekkur: document.getElementById('tezekkur').value,
+                    autoSaved: true,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem('5t-autoSave', JSON.stringify(autoSave));
+            }
+        }, 60000);
+
+        // Sayfa yüklendiğinde otomatik kaydı kontrol et
+        function checkAutoSave() {
+            const autoSave = localStorage.getItem('5t-autoSave');
+            if (autoSave) {
+                const data = JSON.parse(autoSave);
+                const today = new Date().toISOString().split('T')[0];
+                
+                if (data.date === today && confirm('Otomatik kaydedilmiş bir analiz bulundu. Yüklemek ister misiniz?')) {
+                    document.getElementById('todayTopic').value = data.todayTopic || '';
+                    document.getElementById('tefekkur').value = data.tefekkur || '';
+                    document.getElementById('tedabbur').value = data.tedabbur || '';
+                    document.getElementById('teakkul').value = data.teakkul || '';
+                    document.getElementById('tefakkuh').value = data.tefakkuh || '';
+                    document.getElementById('tezekkur').value = data.tezekkur || '';
+                } else {
+                    localStorage.removeItem('5t-autoSave');
+                }
+            }
+        }
+
+        // Sayfa kapatılırken uyarı
+        window.addEventListener('beforeunload', function(e) {
+            const hasData = document.getElementById('todayTopic').value && 
+                          document.getElementById('tefekkur').value &&
+                          !document.getElementById('analysis-complete').checked;
+            
+            if (hasData) {
+                e.preventDefault();
+                e.returnValue = '';
+                return 'Tamamlanmamış 5T analizi var. Ayrılmak istediğinizden emin misiniz?';
+            }
+        });
+
+        // İlk yükleme kontrolleri
+        setTimeout(() => {
+            checkAutoSave();
+            
+            if (Object.keys(analysisData).length === 0) {
+                showNotification('🧠 Hoş geldin! İlk 5T analizin için hazır mısın?');
+            } else {
+                showNotification('🌟 Devam ediyoruz! Bugün de harika bir analiz yapalım!');
+            }
+        }, 2000);
+
+        // Günlük hatırlatma (saat 20:00'da)
+        function checkReminderTime() {
+            const now = new Date();
+            const reminderTime = new Date();
+            reminderTime.setHours(20, 0, 0, 0);
+            
+            if (now.getTime() >= reminderTime.getTime() && now.getTime() < reminderTime.getTime() + 60 * 60 * 1000) {
+                const today = new Date().toISOString().split('T')[0];
+                if (!analysisData[today]) {
+                    showNotification('🧠 5T vakti! Bugünkü analizini yapmaya ne dersin?');
+                }
+            }
+        }
+
+        // Her saat kontrol et
+        setInterval(checkReminderTime, 3600000);
+    </script>
+</body>
+</html>
