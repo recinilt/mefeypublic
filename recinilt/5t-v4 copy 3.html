@@ -987,7 +987,7 @@
                             analysisData = userDatabase[username].analyses || {};
                             globalStats = userDatabase[username].stats || globalStats;
                             
-                            // GitHub ayarlarını kaydet
+                            // BURAYA EKLEME - GitHub ayarlarını kaydet
                             const settings = { 
                                 method: storageMethod, 
                                 username: currentUser 
@@ -1003,42 +1003,24 @@
                             return;
                         }
                     } else {
-                        // YENİ KULLANICI - Önce formu temizle
-                        clearAllFormData();
-                        
                         userDatabase[username] = {
                             password: password,
                             analyses: {},
-                            stats: {
-                                totalAnalyses: 0,
-                                currentStreak: 0,
-                                currentNurLevel: 50,
-                                lastAnalysisDate: ''
-                            },
+                            stats: {...globalStats},
                             createdDate: new Date().toISOString()
                         };
                         
                         currentUser = username;
                         analysisData = {};
-                        globalStats = {
-                            totalAnalyses: 0,
-                            currentStreak: 0,
-                            currentNurLevel: 50,
-                            lastAnalysisDate: ''
-                        };
                         
                         await saveUserDatabase();
                         
-                        // Yeni kullanıcı ayarlarını kaydet
+                        // BURAYA EKLEME - Yeni kullanıcı ayarlarını kaydet
                         const settings = { 
                             method: storageMethod, 
                             username: currentUser 
                         };
                         localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
-                        
-                        // İstatistikleri güncelle
-                        updateStats();
-                        updateChainGrid();
                         
                         showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
                         document.getElementById('storageModal').style.display = 'none';
@@ -1049,7 +1031,7 @@
                     showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
                     storageMethod = 'local';
                     
-                    // Hata durumunda yerel ayar kaydet
+                    // BURAYA EKLEME - Hata durumunda yerel ayar kaydet
                     const settings = { method: 'local' };
                     localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
                     
@@ -1069,7 +1051,6 @@
         }
 
 
-        
        async function loadUserDatabase() {
             try {
                 const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
