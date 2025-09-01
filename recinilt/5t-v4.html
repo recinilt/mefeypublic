@@ -1429,7 +1429,8 @@
            tabOrder.forEach(tab => {
                if (tabData[tab] && tabData[tab].trim()) {
                    knowledgeContent += `<h4>${tabTitles[tab]}</h4>\n`;
-                   knowledgeContent += `${tabData[tab].substring(0, 500)}${tabData[tab].length > 500 ? '...' : ''}\n\n`;
+                   //knowledgeContent += `${tabData[tab].substring(0, 500)}${tabData[tab].length > 500 ? '...' : ''}\n\n`;
+                   knowledgeContent += `${tabData[tab]}\n\n`;
                }
            });
            
