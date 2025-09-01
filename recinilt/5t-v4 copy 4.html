@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>🧠 5T Günlük Defterim</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           min-height: 100vh;
+           padding: 20px;
+       }
+
+       .container {
+           max-width: 1000px;
+           margin: 0 auto;
+           background: white;
+           border-radius: 20px;
+           box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+           overflow: hidden;
+       }
+
+       .header {
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           color: white;
+           text-align: center;
+           padding: 30px;
+       }
+
+       .header h1 {
+           font-size: 2.5em;
+           margin-bottom: 10px;
+       }
+
+       .streak-display {
+           background: rgba(255,255,255,0.2);
+           border-radius: 15px;
+           padding: 15px;
+           margin-top: 20px;
+           display: flex;
+           justify-content: space-around;
+           flex-wrap: wrap;
+       }
+
+       .streak-item {
+           text-align: center;
+           margin: 5px;
+       }
+
+       .streak-number {
+           font-size: 2em;
+           font-weight: bold;
+           display: block;
+       }
+
+       .main-content {
+           padding: 30px;
+       }
+
+       .today-section {
+           background: #f8f9fa;
+           border-radius: 15px;
+           padding: 25px;
+           margin-bottom: 30px;
+           border-left: 5px solid #667eea;
+       }
+
+       .day-info {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 20px;
+           flex-wrap: wrap;
+       }
+
+       .day-title {
+           font-size: 1.8em;
+           color: #333;
+           margin-bottom: 10px;
+       }
+
+       .ritual-checklist {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+           gap: 15px;
+           margin-bottom: 20px;
+       }
+
+       .checklist-item {
+           background: white;
+           padding: 15px;
+           border-radius: 10px;
+           box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+           display: flex;
+           align-items: center;
+           gap: 10px;
+           cursor: pointer;
+           transition: all 0.3s ease;
+       }
+
+       .checklist-item:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+       }
+
+       .checklist-item input[type="checkbox"] {
+           width: 20px;
+           height: 20px;
+           cursor: pointer;
+       }
+
+       .checklist-item.completed {
+           background: #e8f5e8;
+           border-left: 4px solid #4caf50;
+       }
+
+       .t-sections {
+           display: grid;
+           gap: 20px;
+           margin: 30px 0;
+       }
+
+       .t-section {
+           background: white;
+           border-radius: 15px;
+           padding: 25px;
+           box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+           border-left: 5px solid #667eea;
+       }
+
+       .t-section h3 {
+           color: #667eea;
+           margin-bottom: 15px;
+           font-size: 1.3em;
+       }
+
+       .t-guide {
+           background: #e3f2fd;
+           padding: 15px;
+           border-radius: 10px;
+           margin-bottom: 15px;
+           font-size: 0.95em;
+           line-height: 1.5;
+       }
+
+       .detailed-guide {
+           background: #f0f8ff;
+           padding: 20px;
+           border-radius: 10px;
+           margin-bottom: 15px;
+           border-left: 4px solid #3498db;
+       }
+
+       .guide-points {
+           margin-left: 15px;
+           margin-top: 10px;
+       }
+
+       .guide-points li {
+           margin-bottom: 8px;
+           line-height: 1.4;
+       }
+
+       .text-area {
+           width: 100%;
+           padding: 15px;
+           border: 2px solid #e0e0e0;
+           border-radius: 10px;
+           font-size: 16px;
+           font-family: inherit;
+           resize: vertical;
+           min-height: 120px;
+           transition: border-color 0.3s ease;
+       }
+
+       .text-area:focus {
+           outline: none;
+           border-color: #667eea;
+       }
+
+       .text-area.short {
+           min-height: 60px;
+       }
+
+       .save-section {
+           background: #fff3cd;
+           padding: 20px;
+           border-radius: 10px;
+           margin-top: 20px;
+           text-align: center;
+       }
+
+       .btn {
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           color: white;
+           border: none;
+           padding: 15px 30px;
+           border-radius: 25px;
+           font-size: 16px;
+           font-weight: bold;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           margin: 5px;
+       }
+
+       .btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+       }
+
+       .btn.secondary {
+           background: linear-gradient(45deg, #74b9ff, #0984e3);
+       }
+
+       .btn.danger {
+           background: linear-gradient(45deg, #e17055, #d63031);
+       }
+
+       .progress-chain {
+           background: white;
+           border-radius: 15px;
+           padding: 25px;
+           margin-top: 20px;
+       }
+
+       .chain-title {
+           font-size: 1.5em;
+           color: #333;
+           margin-bottom: 15px;
+           text-align: center;
+       }
+
+       .chain-grid {
+           display: grid;
+           grid-template-columns: repeat(7, 1fr);
+           gap: 5px;
+           max-width: 350px;
+           margin: 0 auto;
+       }
+
+       .chain-day {
+           width: 40px;
+           height: 40px;
+           border-radius: 8px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-size: 12px;
+           font-weight: bold;
+           cursor: pointer;
+           transition: all 0.2s ease;
+       }
+
+       .chain-day.completed {
+           background: #4caf50;
+           color: white;
+       }
+
+       .chain-day.partial {
+           background: #ff9800;
+           color: white;
+       }
+
+       .chain-day.empty {
+           background: #f5f5f5;
+           color: #999;
+       }
+
+       .chain-day.today {
+           border: 3px solid #667eea;
+       }
+
+       .notification {
+           position: fixed;
+           top: 20px;
+           right: 20px;
+           background: #4caf50;
+           color: white;
+           padding: 15px 25px;
+           border-radius: 10px;
+           box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+           transform: translateX(400px);
+           transition: transform 0.3s ease;
+           z-index: 1000;
+       }
+
+       .notification.show {
+           transform: translateX(0);
+       }
+
+       .modal {
+           position: fixed;
+           top: 0;
+           left: 0;
+           width: 100%;
+           height: 100%;
+           background: rgba(0,0,0,0.8);
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           z-index: 2000;
+       }
+
+       .modal-content {
+           background: white;
+           padding: 30px;
+           border-radius: 20px;
+           max-width: 600px;
+           width: 90%;
+           max-height: 80vh;
+           overflow-y: auto;
+       }
+
+       .modal-content h2 {
+           color: #333;
+           margin-bottom: 20px;
+           text-align: center;
+       }
+
+       .history-item {
+           background: #f8f9fa;
+           padding: 15px;
+           border-radius: 8px;
+           margin: 10px 0;
+           border-left: 4px solid #667eea;
+           cursor: pointer;
+       }
+
+       .history-item:hover {
+           background: #e9ecef;
+       }
+
+       .reflection-section {
+           background: #f0f8ff;
+           border-radius: 15px;
+           padding: 25px;
+           margin: 20px 0;
+           border-left: 5px solid #3498db;
+       }
+
+       .knowledge-section {
+           background: #f0fff0;
+           border-radius: 15px;
+           padding: 25px;
+           margin: 20px 0;
+           border-left: 5px solid #27ae60;
+       }
+
+       .warning-box {
+           background: #fff3cd;
+           border-left: 4px solid #ffc107;
+           padding: 15px;
+           border-radius: 5px;
+           margin: 15px 0;
+       }
+
+       .info-box {
+           background: #d1ecf1;
+           border-left: 4px solid #17a2b8;
+           padding: 15px;
+           border-radius: 5px;
+           margin: 15px 0;
+       }
+
+       .success-box {
+           background: #d4edda;
+           border-left: 4px solid #28a745;
+           padding: 15px;
+           border-radius: 5px;
+           margin: 15px 0;
+       }
+
+       .mood-selector {
+           display: flex;
+           justify-content: center;
+           gap: 10px;
+           margin: 15px 0;
+       }
+
+       .mood-btn {
+           font-size: 2em;
+           border: none;
+           background: none;
+           cursor: pointer;
+           padding: 5px;
+           border-radius: 50%;
+           transition: all 0.2s ease;
+       }
+
+       .mood-btn:hover, .mood-btn.selected {
+           background: #e3f2fd;
+           transform: scale(1.2);
+       }
+
+       .progress-indicator {
+           background: #f8f9fa;
+           border-radius: 10px;
+           padding: 15px;
+           margin: 15px 0;
+           text-align: center;
+       }
+
+       .progress-bar {
+           width: 100%;
+           height: 10px;
+           background: #e0e0e0;
+           border-radius: 5px;
+           margin: 10px 0;
+       }
+
+       .progress-fill {
+           height: 100%;
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           border-radius: 5px;
+           transition: width 0.5s ease;
+       }
+
+       .motivation-section {
+           background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+           border-radius: 15px;
+           padding: 20px;
+           margin: 20px 0;
+           text-align: center;
+           color: #8b4513;
+           font-style: italic;
+           font-weight: bold;
+       }
+
+       .closing-rituals {
+           background: #e8f5e8;
+           border-radius: 15px;
+           padding: 25px;
+           margin: 20px 0;
+           border-left: 5px solid #27ae60;
+       }
+
+       .storage-selection {
+           display: flex;
+           justify-content: center;
+           gap: 20px;
+           margin: 20px 0;
+           flex-wrap: wrap;
+       }
+
+       .storage-option {
+           background: white;
+           border: 3px solid #ddd;
+           border-radius: 15px;
+           padding: 20px;
+           cursor: pointer;
+           text-align: center;
+           min-width: 200px;
+           transition: all 0.3s ease;
+       }
+
+       .storage-option:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+       }
+
+       .storage-option.selected {
+           border-color: #667eea;
+           background: #f0f8ff;
+       }
+
+       .storage-option h3 {
+           color: #333;
+           margin-bottom: 10px;
+       }
+
+       .storage-option p {
+           color: #666;
+           font-size: 0.9em;
+       }
+
+       .github-login {
+           background: #f8f9fa;
+           padding: 20px;
+           border-radius: 10px;
+           margin-top: 20px;
+       }
+
+       @media (max-width: 768px) {
+           .container {
+               margin: 10px;
+               border-radius: 15px;
+           }
+           
+           .header {
+               padding: 20px;
+           }
+           
+           .header h1 {
+               font-size: 2em;
+           }
+           
+           .main-content {
+               padding: 20px;
+           }
+           
+           .ritual-checklist {
+               grid-template-columns: 1fr;
+           }
+
+           .storage-selection {
+               flex-direction: column;
+               align-items: center;
+           }
+
+           .storage-option {
+               min-width: auto;
+               width: 100%;
+               max-width: 300px;
+           }
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="header">
+           <h1>🧠 5T Günlük Defterim</h1>
+           <h3>İmtihan Sistemi: Yetki-İmkan-Sorumluluk Üçlüsü</h3>
+           <p>Her dünya hayatı koordinatında adalet prensibiyle çalışan yapışık üçüz kardeşler.</p>
+           <ul>
+            <li>Yetki ne kadar büyükse, imkan o kadar büyük olmalı.</li>
+            <li>İmkan ne kadar büyükse, sorumluluk o kadar büyük.</li>
+            <li>Bu üçü asla birbirinden ayrılmamalı</li>
+           </ul>
+           
+           <h3>Fuat Basar Sema Metodolojisi ile günlük tekamül.</h3>
+           <div class="streak-display">
+               <div class="streak-item">
+                   <span class="streak-number" id="currentStreak">0</span>
+                   <small>Güncel Zincir</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="totalAnalyses">0</span>
+                   <small>Toplam 5T</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="nurLevel">50V</span>
+                   <small>Nur Seviyesi</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="completionRate">0</span>
+                   <small>% Başarı</small>
+               </div>
+           </div>
+       </div>
+
+       <!-- Kayıt Seçimi Modal -->
+       <div id="storageModal" class="modal" style="display: none;">
+           <div class="modal-content">
+               <h2>💾 Kayıt Yöntemi Seçimi</h2>
+               <p style="text-align: center; margin-bottom: 30px;">5T analizlerinizi nerede saklamak istiyorsunuz?</p>
+               
+               <div class="storage-selection">
+                   <div class="storage-option" onclick="selectStorage('local')">
+                       <h3>💻 Yerel Kayıt</h3>
+                       <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                       <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                   </div>
+                   
+                   <div class="storage-option" onclick="selectStorage('github')">
+                       <h3>☁️ GitHub Kayıt</h3>
+                       <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                   </div>
+               </div>
+               
+               <div id="githubLogin" style="display: none;" class="github-login">
+                   <h3 style="text-align: center; margin-bottom: 20px;">🔐 GitHub Giriş</h3>
+                   
+                   <div style="margin: 15px 0;">
+                       <label><strong>👤 Kullanıcı Adı:</strong></label>
+                       <input type="text" id="loginUsername" class="text-area short" placeholder="Kullanıcı adınızı girin">
+                   </div>
+                   
+                   <div style="margin: 15px 0;">
+                       <label><strong>🔑 Şifre:</strong></label>
+                       <input type="password" id="loginPassword" class="text-area short" placeholder="Şifrenizi girin">
+                   </div>
+               </div>
+               
+               <div style="text-align: center; margin-top: 30px;">
+                   <button class="btn" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+               </div>
+           </div>
+       </div>
+
+       <div class="main-content">
+           <div class="today-section">
+               <div class="day-info">
+                   <div>
+                       <div class="day-title">Bugünkü 5T Analizi</div>
+                       <div id="todayDate"></div>
+                   </div>
+                   <div class="progress-indicator">
+                       <strong>İlerleme</strong>
+                       <div class="progress-bar">
+                           <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                       </div>
+                       <small id="progressText">0/9 adım tamamlandı</small>
+                   </div>
+               </div>
+
+               <div class="motivation-section" id="dailyMotivation">
+                   <!-- Günlük motivasyon cümlesi buraya gelecek -->
+               </div>
+
+               <div class="info-box">
+                   <h4>📚 5T Metodolojisi Hatırlatması:</h4>
+                   <p><strong>TEFEKKÜR:</strong> Derin düşünme - konuyu etraflıca ele alma</p>
+                   <p><strong>TEDABBÜR:</strong> Arka plana bakma - gizli faktörleri görme</p>
+                   <p><strong>TEAKKUL:</strong> Bağlantıları kurma - olayları birbirine bağlama</p>
+                   <p><strong>TEFAKKUH:</strong> İnce sonuçlar çıkarma - detaylı analiz</p>
+                   <p><strong>TEZEKKÜR:</strong> Yaşam tarzına dönüştürme - uygulamaya geçirme</p>
+               </div>
+
+               <div style="margin: 20px 0;">
+                   <label><strong>🎯 Bugün analiz etmek istediğim konu/durum:</strong></label>
+                   <textarea class="text-area" id="todayTopic" placeholder="Örnek: İş yerinde 2 yıldır terfi alamıyorum. Aynı pozisyonda takılı kaldım ve bu durum beni hem maddi hem manevi olarak etkiliyor. Başka departmanlardaki arkadaşlarım terfi alırken ben hala aynı yerdeyim."></textarea>
+               </div>
+
+               <div class="info-box">
+                   <h4>📋 INFO → DATA → KNOWLEDGE Süreci</h4>
+                   <p><strong>INFO:</strong> Ham bilgi - dağınık, hemen ulaşılabilen bilgiler</p>
+                   <p><strong>DATA:</strong> İşlenmiş veri - sınıflandırılmış, düzenlenmiş bilgi</p>
+                   <p><strong>KNOWLEDGE:</strong> 5T sürecinden geçirilerek faydaya dönüştürülmüş bilgi</p>
+               </div>
+
+               <div style="margin: 20px 0;">
+                   <label><strong>📥 INFO (Ham Bilgi):</strong></label>
+                   <textarea class="text-area" id="infoSection" placeholder="Örnek: 2019'da işe başladım. Ahmet 6 ay sonra geldi ama geçen ay terfi aldı. Müdürüm genelde sessiz, nadiren geri bildirim verir. Maaşım piyasa ortalamasının altında. İş arkadaşları 'sabırlı ol' diyor. Annem 'işini değiştir' diyor. Geçen hafta yine terfi listesinde yoktum."></textarea>
+               </div>
+
+               <div style="margin: 20px 0;">
+                   <label><strong>📊 DATA (İşlenmiş Veri):</strong></label>
+                   <textarea class="text-area" id="dataSection" placeholder="Örnek: Zaman çizelgesi: 5 yıl aynı pozisyon, 2 terfi fırsatı kaçırıldı. Performans değerlendirmeleri: yeterli ama özel değil. Maaş karşılaştırması: %15 düşük. Sosyal çevre tavsiyeleri: çelişkili. Şirket politikaları: net kriterler yok. Kişisel durum: motivasyon düşük, gelecek kaygısı var."></textarea>
+               </div>
+
+               <div class="warning-box">
+                   <strong>Metodolojik Uyarı:</strong> INFO üzerinden acele yorum yapmayın. Önce işleme süreci (DATA) gereklidir. Sonra 5T ile KNOWLEDGE'a dönüştürün.
+               </div>
+
+               <div class="warning-box">
+                   <strong>Önemli Hatırlatma:</strong> Her aşamada hem olumlu hem olumsuz faktörleri yazın. Kimseyi koruma refleksi göstermeyin. Gerçeklik neyse onu yazın. Nötr kalın, taraf tutmayın.
+               </div>
+
+               <div class="ritual-checklist">
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="topic-defined">
+                       <span>🎯 Analiz konumu net olarak belirledim</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="opening-words">
+                       <span>🗣️ Başlangıç sözümü söyledim</span>
+                       <button onclick="showOpeningQuote()" style="background: #667eea; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; margin-left: auto;">💬</button>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="deep-breath">
+                       <span>🌬️ 3 derin nefes aldım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="prayer-done">
+                       <span>🤲 Duamı ettim (20sn)</span>
+                       <button onclick="showPrayer()" style="background: #27ae60; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; margin-left: auto;">🤲</button>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="thxomnn-said">
+                       <span>🌟 Thxomnn dedim</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="tefekkur-done">
+                       <span>💭 TEFEKKÜR aşamasını tamamladım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="tedabbur-done">
+                       <span>🔍 TEDABBÜR aşamasını tamamladım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="teakkul-done">
+                       <span>🔗 TEAKKUL aşamasını tamamladım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="tefakkuh-done">
+                       <span>⚖️ TEFAKKUH aşamasını tamamladım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="tezekkur-done">
+                       <span>🌟 TEZEKKÜR aşamasını tamamladım</span>
+                   </div>
+                   <div class="checklist-item" onclick="toggleCheck(this)">
+                       <input type="checkbox" id="analysis-complete">
+                       <span>✅ 5T analizimi tamamen tamamladım</span>
+                   </div>
+               </div>
+           </div>
+
+           <div class="t-sections">
+               <div class="t-section">
+                   <h3>1️⃣ TEFEKKÜR - Derin Düşünme</h3>
+                   <div class="detailed-guide">
+                       <strong>Rehber:</strong> Bu konu hakkında derinlemesine düşünün. Sadece yüzeysel değil, etraflıca düşünme yapın.
+                       <ul class="guide-points">
+                           <li>Bu durum hakkında ilk düşüncelerim nelerdir?</li>
+                           <li>Bu konunun farklı yönleri neler olabilir?</li>
+                           <li>Bu durumun benim değerlerim ve prensiplerimdeki yeri nedir?</li>
+                           <li>Hangi yönleri daha dikkatli incelenmeli?</li>
+                           <li>İlk izlenimlerimin ötesinde ne gözden kaçıyor olabilir?</li>
+                           <li>Bu durumla daha önce karşılaştım mı, benzer örnekler var mı?</li>
+                       </ul>
+                   </div>
+                   <textarea class="text-area" id="tefekkur" placeholder="Örnek: Bu durumun kökleri neler? Gerçekten sadece terfi alamama mı sorun yoksa kendimi değersiz hissetmem mi? İş performansım objektif olarak nasıl? Başkalarıyla kıyaslamam adil mi? Bu durum beni nasıl etkiliyor - sadece maddi mi, ego da var mı? Şirket kültürü nasıl, liyakat sistemi var mı? Ben neyi değiştirebirim, neyi değiştiremem?"></textarea>
+               </div>
+
+               <div class="t-section">
+                   <h3>2️⃣ TEDABBÜR - Arka Plana Bakma</h3>
+                   <div class="detailed-guide">
+                       <strong>Rehber:</strong> Olayın derinindeki etkenleri görün. Sadece görünen kısıma değil, arkasındaki derinliğe bakın.
+                       <ul class="guide-points">
+                           <li><strong>Olumlu İhtimaller:</strong> Bu durumun arkasında iyi niyetli sebepler olabilir mi?</li>
+                           <li><strong>Olumsuz İhtimaller:</strong> Gizli ajandalar, manipülasyon ve çıkar hesapları var mı?</li>
+                           <li><strong>Sistemik Faktörler:</strong> Bu durumu yaratan daha büyük sistem ve yapılar neler?</li>
+                           <li>Sosyal baskılar, toplumsal normlar etkili mi?</li>
+                           <li>Geçmiş deneyimler ve travmalar rol oynuyor mu?</li>
+                           <li>Ekonomik zorunluluklar, ego, kibir veya korku gibi faktörler var mı?</li>
+                       </ul>
+                   </div>
+                   <textarea class="text-area" id="tedabbur" placeholder="Örnek: Olumlu ihtimaller: Belki şirket mali sıkıntıda, terfiler dondurulmuş. Müdürüm beni korumaya çalışıyor olabilir. Olumsuz ihtimaller: İletişim eksikliğim var, kendimi pazarlayamıyorum. Siyasi oyunları bilmiyorum, network kuramıyorum. Sistemik faktörler: Şirketin kayırmacı kültürü, liyakat sistemi zayıf. Cinsiyet/yaş ayrımcılığı olabilir. Ekonomik durum: Enflasyon altında eziliyor, başka iş bulma riski var."></textarea>
+                </div>
+
+                <div class="t-section">
+                    <h3>3️⃣ TEAKKUL - Bağlantıları Kurma</h3>
+                    <div class="detailed-guide">
+                        <strong>Rehber:</strong> Tefekkür ve tedabbür ettiğiniz konular arasındaki bağlantıyı kurun.
+                        <ul class="guide-points">
+                            <li><strong>Zaman Bağlantıları:</strong> Bu durum önceki hangi olaylarla bağlantılı?</li>
+                           <li><strong>İnsan Bağlantıları:</strong> Bu durumdan kimler etkileniyor?</li>
+                           <li><strong>Sebep-Sonuç Zincirleri:</strong> Bu durumun gerçek sebepleri neler?</li>
+                           <li><strong>Değer Sistemleri:</strong> Hangi ahlaki ilkelerle çelişiyor/uyumlu?</li>
+                           <li>Adalet-zulüm ekseninde nasıl değerlendirilebilir?</li>
+                           <li>Uzun vadeli iyilik-kötülük dengesine etkisi nedir?</li>
+                       </ul>
+                   </div>
+                   <textarea class="text-area" id="teakkul" placeholder="Örnek: Zaman bağlantısı: 2019 başlangıç - 2024 hala aynı yer. Ahmet'in 6 ay sonra gelip terfi alması ile benim 5 yıl beklemem arasındaki tezat. İnsan bağlantısı: Müdürümle iletişim eksikliği, HR ile görüşmemem, network kurmamam. Sebep-sonuç: Sessiz kalmam → görünürlüğüm düşük → terfi alamama. Değer sistemleri: Liyakat vs kayırmacılık. Adalet: Ben çabalıyorum ama sistematik adaletsizlik var. Uzun vade: Bu durum özgüvenime zarar veriyor, kariyer hedeflerimi tehdit ediyor."></textarea>
+               </div>
+
+               <div class="t-section">
+                   <h3>4️⃣ TEFAKKUH - İnce Sonuçlar Çıkarma</h3>
+                   <div class="detailed-guide">
+                       <strong>Rehber:</strong> İnce sonuçlar çıkarın. Detaylı analiz ederek pratik sonuçlara ulaşın.
+                       <ul class="guide-points">
+                           <li><strong>Stratejik Çıkarımlar:</strong> Bu durumla ilgili hangi yaklaşım benimsenmelidir?</li>
+                           <li><strong>Risk Değerlendirmesi:</strong> En büyük tehlikeler neler?</li>
+                           <li><strong>Fırsat Analizi:</strong> Hangi pozitif gelişmeler çıkarılabilir?</li>
+                           <li><strong>Adalet ve Hikmet:</strong> Hak-batıl ayrımında bu durum nerede konumlanıyor?</li>
+                           <li>Kimsenin zarara uğramayacağı win-win çözümler var mı?</li>
+                           <li>En az zarar ilkesi nasıl uygulanabilir?</li>
+                       </ul>
+                   </div>
+                   <textarea class="text-area" id="tefakkuh" placeholder="Örnek: Stratejik yaklaşım: Müdürümle 1:1 görüşme talep etmeli, performans kriterlerini netleştirmeli. Risk analizi: Sesimi çıkarırsam 'sorunlu çalışan' damgası yereim. Sessiz kalırsam 5 yıl daha bekleyebilirim. Fırsat analizi: Bu deneyim beni güçlendirebilir, iletişim becerilerim gelişebilir. Başka şirketlere CV göndermek için motivasyon. Win-win çözüm: Şirketimde sorumluluklarımı artırarak değerimi kanıtlayabilirim. Adalet boyutu: Liyakat sisteminin iyileştirilmesi için HR'la görüşebilirim."></textarea>
+               </div>
+
+               <div class="t-section">
+                   <h3>5️⃣ TEZEKKÜR - Yaşam Tarzına Dönüştürme</h3>
+                   <div class="detailed-guide">
+                       <strong>Rehber:</strong> Çıkardığınız sonuçları yaşam tarzına dönüştürün.
+                       <ul class="guide-points">
+                           <li><strong>Bireysel Uygulama:</strong> Gelecekte benzer durumlarla nasıl davranmalıyım?</li>
+                           <li><strong>Sosyal Uygulama:</strong> Çevremdeki insanlara nasıl örneklik edebilirim?</li>
+                           <li><strong>Paradigma Değişiklikleri:</strong> Hangi görüşlerimi değiştirmem gerekiyor?</li>
+                           <li>Hangi davranış kalıplarımı gözden geçirmeliyim?</li>
+                           <li>Başkalarına vereceğim öğütler neler olmalı?</li>
+                           <li>Bu yeni anlayışla hayatımın hangi alanlarını yeniden düzenlemeliyim?</li>
+                       </ul>
+                   </div>
+                   <textarea class="text-area" id="tezekkur" placeholder="Örnek: Bireysel uygulama: Müdürümle gelecek hafta randevu alacağım. Performans kriterlerini öğrenip eksiklerimi tamamlayacağım. İletişim becerilerimi geliştireceğim. Sosyal uygulama: İş arkadaşlarıma da bu konuda destek olacağım, bilgi paylaşacağım. Paradigma değişimi: Sessizce beklemek yerine proaktif davranacağım. Mağduriyet yerine çözüm odaklı düşünmeyi öğrendim. Şirket kültürünü değiştirmek için küçük adımlar atabilirim. Bu deneyim beni daha güçlü yaptı."></textarea>
+               </div>
+           </div>
+
+           <div class="reflection-section">
+               <h3>💡 Kişisel Yansıma</h3>
+               
+               <div style="margin: 15px 0;">
+                   <label><strong>🎯 Bu analizde hangi noktalar beni en çok şaşırttı?</strong></label>
+                   <textarea class="text-area" id="surprises" placeholder="Örnek: En çok şaşıran şey aslında problemi kendimde aramam oldu. Hep sistemi suçlarken, aslında iletişim konusunda eksiklerimin olduğunu fark ettim. Müdürümün kötü niyetli olduğunu düşünürken belki de beni korumaya çalışıyor olabileceği ihtimali hiç aklıma gelmemişti."></textarea>
+               </div>
+
+               <div style="margin: 15px 0;">
+                   <label><strong>⚠️ En zor olan aşama hangisiydi ve neden?</strong></label>
+                   <textarea class="text-area" id="difficulties" placeholder="Örnek: TEDABBÜR aşaması en zordu çünkü olumsuz ihtimalleri yazmak zorundaydı. Kendimle ilgili eksiklikleri kabul etmek ego'ma dokundu. Özellikle 'kendimi pazarlayamıyorum' yazmak gerçekten zordu ama gerekli bir farkındalıktı."></textarea>
+               </div>
+
+               <div style="margin: 15px 0;">
+                   <label><strong>🌱 Bu analiz beni nasıl geliştirdi?</strong></label>
+                   <textarea class="text-area" id="growth" placeholder="Örnek: Mağduriyet psikolojisinden çıkıp çözüm odaklı düşünmeyi öğrendim. Problemi sadece dışsal faktörlerde aramak yerine kendi katkımı da sorguladım. 5T sayesinde duruma çok boyutlu bakabiliyorum. Artık acele karar vermek yerine sistemik düşünüyorum."></textarea>
+               </div>
+
+               <div style="margin: 15px 0;">
+                   <label><strong>📅 Sonraki adımlarım neler?</strong></label>
+                   <textarea class="text-area" id="nextSteps" placeholder="Örnek: 1) Gelecek pazartesi müdürümle randevu alacağım. 2) Performans kriterlerini öğrenip eksiklerimi listeleyeceğim. 3) İletişim becerileri için online kurs almaya başlayacağım. 4) İş arkadaşlarımla network kurmak için sosyal aktivitelere katılacağım. 5) 3 ay sonra durumu tekrar değerlendireceğim."></textarea>
+               </div>
+
+               <div style="margin: 15px 0;">
+                   <label><strong>😊 Ruh halim:</strong></label>
+                   <div class="mood-selector">
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="very-happy">🤩</button>
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="happy">😊</button>
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="neutral">😐</button>
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="thoughtful">🤔</button>
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="concerned">😟</button>
+                       <button class="mood-btn" onclick="selectMood(this)" data-mood="tired">😴</button>
+                   </div>
+               </div>
+           </div>
+
+           <div class="closing-rituals">
+               <h3>🙏 Kapanış Ritüelleri</h3>
+               
+               <div style="margin: 15px 0;">
+                   <label><strong>🎁 Bugünkü ödülüm:</strong></label>
+                   <textarea class="text-area short" id="reward" placeholder="Örnek: Bu analizi tamamladığım için kendime güzel bir yemek ısmarlayacağım ve sevdiğim diziden bir bölüm izleyeceğim."></textarea>
+               </div>
+
+               <div style="margin: 15px 0;">
+                   <label><strong>💬 Kapanış sözüm:</strong></label>
+                   <textarea class="text-area" id="closingWords" placeholder="Örnek: Thxomnn… Bu analiz bana çok şey öğretti. Bütün övgülerim, minnettarlığım, hayranlığım, derin saygım ve meveddem O'nadır (Bütüne'dir). FBS'mi kullanarak kalbimi biraz daha parlatabildiğim için minnettar hissediyorum."></textarea>
+                   <button onclick="showClosingQuote()" style="background: #27ae60; color: white; border: none; border-radius: 8px; padding: 8px 15px; margin-top: 8px; cursor: pointer;">💬 Örnek Kapanış Sözü</button>
+               </div>
+           </div>
+
+           <div class="knowledge-section">
+               <h3>💎 KNOWLEDGE (Final Sonuç)</h3>
+               <div id="finalKnowledge">
+                   <p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>
+               </div>
+           </div>
+
+           <div class="save-section">
+               <p><strong id="storageInfo">💾 5T Analizini kaydet</strong></p>
+               <button class="btn" onclick="saveTodayAnalysis()">📊 Bugünü Kaydet</button>
+               <button class="btn secondary" onclick="loadAnalysis()">📥 Veri Yükle</button>
+               <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Analizler</button>
+               <button class="btn secondary" onclick="showWeeklySummary()">📈 Haftalık Özet</button>
+               <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+           </div>
+
+           <div class="progress-chain">
+               <h3 class="chain-title">🔥 5T Analiz Zinciri</h3>
+               <div class="chain-grid" id="chainGrid">
+                   <!-- Zincir günleri buraya dinamik olarak eklenecek -->
+               </div>
+               <p style="text-align: center; margin-top: 15px; color: #666;">
+                   <small>✅ Tam Analiz | 🟨 Kısmi | ⭕ Boş</small>
+               </p>
+           </div>
+       </div>
+   </div>
+
+   <!-- Geçmiş Modal -->
+   <div id="historyModal" class="modal" style="display: none;">
+       <div class="modal-content">
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+               <h2>📚 Geçmiş 5T Analizlerim</h2>
+               <button onclick="closeHistory()" class="btn danger" style="padding: 8px 15px; font-size: 14px;">Kapat</button>
+           </div>
+           <div id="historyContent"></div>
+       </div>
+   </div>
+
+   <div class="notification" id="notification"></div>
+
+   <script src="5t-github-parametreleri.js"></script>
+   <script>
+    document.getElementById('storageModal').style.display = 'none';
+    function clearAllFormFields() {
+            // Form alanlarını temizle
+            document.getElementById('todayTopic').value = '';
+            document.getElementById('infoSection').value = '';
+            document.getElementById('dataSection').value = '';
+            document.getElementById('tefekkur').value = '';
+            document.getElementById('tedabbur').value = '';
+            document.getElementById('teakkul').value = '';
+            document.getElementById('tefakkuh').value = '';
+            document.getElementById('tezekkur').value = '';
+            document.getElementById('surprises').value = '';
+            document.getElementById('difficulties').value = '';
+            document.getElementById('growth').value = '';
+            document.getElementById('nextSteps').value = '';
+            document.getElementById('reward').value = '';
+            document.getElementById('closingWords').value = '';
+            
+            // Checkbox'ları temizle
+            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+                cb.closest('.checklist-item').classList.remove('completed');
+            });
+            
+            // Mood seçimini temizle
+            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+            currentMood = "";
+            
+            // Final knowledge'ı temizle
+            document.getElementById('finalKnowledge').innerHTML = '<p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>';
+            
+            // Progress'i sıfırla
+            updateProgress();
+        }
+       // Global değişkenler
+       const motivationQuotes = [
+           "Ben bir FBS'yi 5T ile kullanarak kalbi cilalatma uzmanıyım. Rabbimle başbaşayım.",
+           "Eğer FBS'nin karşılığını dosdoğru verirseniz, nur seviyeniz artar ve daha karmaşık konuları çözebilir hale gelirsiniz.",
+           "İnsanın kendi tercihine bağlı olmayan hiçbir şey tekamül imtihanının sonucunu belirleyici değildir.",
+           "Bu dünyada kim olacağımızı kader belirler, ne olacağımızı kendimiz.",
+           "FBS + El Kitab Vahyi (Tanrı, Ahiret, Anlam) + Ümmül Kitab. Anlam arayışının bütün araçları elimizde.",
+           "Gerçek ateist olmaya çalışmak, gerçek agnostik olmaya çalışmak. Hangi inancın mensubuysan gerçek mensubu olmaya çalışmak.",
+           "360 derecelik çember prensibi: Hangi koordinattan yola çıkarsanız çıkın aynı merkeze varış.",
+           "Denizler mürekkep olsa, bütün ağaçlar kalem olsa bitmez. Hepsinin Ümmül kitapta ketebe edilmiş olması.",
+           "İman kelimesi güvenmek anlamına gelir. Aynı kökten: emin, mümin, emanet.",
+           "Info → Data → Knowledge sürecine dikkat edin. Acele etmeyin.",
+           "Birinci, ikinci, üçüncü derece konular vardır. Birinci derece konularda 5t yapmaya gerek kalmadan FBS direkt cevabı verir. Özellikle ikinci ve üçüncü derece konularda 5T'yi eksiksiz uygulayın.",
+           "Gözlemleyen, Gözlemlenen değildir, olamaz.",
+           "Hakikatte kendisinin başına gelen sorun, problem, depresyon diye bir şey yoktur. Hakikatteki sen çook “uzaklarda” Gözlemcisin sadece.",
+           "3000 yıl yaşamıyoruz abi. Şurada en fazla yaşayacağımız 30-40 sene. Zaman kısa, sadece kendimizden sorumluyuz.",
+           "Herkes evinin önünü süpürürse mahalle tertemiz olur. = Ümm-ül kitap sosyoloji birinci ayet.",
+           "Ekşi sütten tatlı kaymak çıkmaz. = Ümm-ül kitap sosyoloji suresi ikinci ayet",
+           "Bazen Hak Yoldan Çıkmamak İçin Her Şeyden Çıkmak Gerekir. Kuran musafından bile çıkmak gerekebilir, putlaştırmamak adına. Çünkü hak yol apaçık belli, kodlanmış her birimize. Hepimiz görüyoruz o yolu, dosdoğru görüyoruz.",
+           "Abdesti alacaksın ama öyle bir alacaksın ki bir aldın mı ikinci şans yok. Tutacaksın abdesti.",
+           "Dinin özünü yok etmişler, gündemde bile almamışlar, basit ahlaki kurallar deyip geçmişler, şekilciliğe tapmışlar. 100 gram (kodlanan?) kaldırıp yerine 100 bin ton (ritüeller vb?) koymuşlar.",
+           "'Rabbimin bana rızık olarak verdiklerinden isteyenin, istemeyenin, yetimin, dulun, yoksulun, yolda kalmışın, mağdurun, açın sürekli belirli bir payı vardır', 'Onun ölçüsü yoktur, benimle ilgili bir meseledir ve ben bununla imtihan olmaktayım', 'Sürekli vermek zorundayım'",
+           "El-birr: 'takvada zirve, erdemlilikte zirve yaşantısı, Allah'ın övündüğü kulu",
+           "Temel felsefesi: 'FBS'nin şükrünü eda etmek' = 'Ona karşılığını dosdoğru vermek' = 'Kendisine ulaşan tüm önermeleri kullanarak apaçık ayıklamak, batılları reddetmek ve hakka tabi olup onlar üzere yaşamak'. Bu süreç 'dünya hayatının %80'ini üç talakla boşamayı göze almak' gerektirir. Konuşmacı bu oranı 'şakacı anlatım' olarak nitelendirse de, ciddi bir fedakarlık gerektirdiğini belirtir.",
+           "Tanrı kavramı: FBS'ye yüklenmiş el-insanın dünya hayatındaki Tanrı anlayışı. Din (Eddin): Bunun el-gayb kısmı olan yeniden diriliş ve ahiret. El-kitap vahyi: Peygamberlere indirilen özel vahiy türü. Peygamberlik: Vahiy tebliği müessesesi",
+           "'Mustafa bana zulmen tokat attı. Ben ona 'tevbe ve istighfar et' dedim.' Tevbe kısmı: Yaptığın fiil için Allah'tan af talep etme (geçmişle ilgili). İstighfar kısmı: 'Allah'ım bir daha yapmamam için beni örtü ile kapla, korunmaya devam et' (gelecekle ilgili)",
+           "Muhammed peygamber yaşarken bir ayet tarihsel oldu deme hakkını kendinde buluyorsun da, 1400 yıl sonra birisi gelip 'Kuran'ın şu ayetleri o günün şartıyla ilgili' dediğinde adamın niye kellesini almaya kalkıyorsunuz?",
+            "Hak olan bir değil bir trilyon soru da sorulsa asla kırılmaz, eğilmez bile. Ama batıl olan bir soru da iki soru da çatır çatır kırılır.",
+           "Zalimun (Zalimler): Cehennemlikler. Muktesidun (Mümin-muttakiler)(71-95 alanlar): Cennetlikler. Sabikun (95-100 alanlar): Cennetliklerin içindeki çok çok yüksek derece kazananlar",
+           "İktisatlı olmak: 'Tam ölçüye göre davranan' demektir. Konuşmacı aile hayatından örnek verir: Annelerin 'oğlum iktisatlı harca paranı' demesinin ne cimrilik yapma ne de saçıp savurma anlamına geldiğini, 'tam ölçüye göre, tam ihtiyaç kadar harca' anlamına geldiğini açıklar.",
+           "Yüzlerce binlerce soru üretip hepsine tek tek cevap bulmak yerine, o konuyla ilgili kök paradigmayı oluşturacak temel kavramları konuşmak.",
+           "Herhangi bir konuda üretilen binlerce soru, aslında merkezdeki bir veya birkaç anahtar kilit kavrama doğru anlam yüklenmesiyle otomatik olarak cevaplanmış olur. Bu yaklaşımı 'bataklığı kurutmak' olarak tarif eder - bataklık kurutulduğunda sineklerin tümü çekilip gider.",
+           "Gömleğin en alttaki düğmesini yanlış iliklersen bütün düğmeler yanlış iliklenir.",
+           "Bir konu hakkında on bin yıldır tartışılıyorsa orada ya soru yanlış soruluyordur ya da konunun tartışıldığı alan yanlış bir alanda tartışılıyordur. Bu tespite örnek olarak bilmek/bilmemenin konusu olan bir alanın güvenme/güvenmeme alanında tartışılması veya tam tersini verir. Bu yaklaşım, İslami kavramlardaki binlerce yıllık tartışmaların neden çözümsüz kaldığının temel sebebini açıklar.",
+           "İnsan ve cin şeytanlarının dosdoğru gerçeği hak etmiş kişilere asla vesvese veremeyeceği, onlara 'mesh' diyemeyeceği inancı.",
+           "Hiç kimsenin kimseye 'zerre fayda sağlayamayacağına' ve 'zerre zarar verebileceğine' dair kesin inanç. Herkesin kendi hak edişiyle bir yere vardığı veya varamadığı, diğer tüm enstrümanların ise sadece araç ve vesile olduğu ilkesi.",
+           "Söylediklerinize dikkat edin; düşüncelere dönüşür…Düşüncelerinize dikkat edin; duygularınıza dönüşür…Duygularınıza dikkat edin; davranışlarınıza dönüşür…Davranışlarınıza dikkat edin; alışkanlıklarınıza dönüşür…Alışkanlıklarınıza dikkat edin; değerlerinize dönüşür…Değerlerinize dikkat edin; karakterinize dönüşür…Karakterinize dikkat edin; kaderinize dönüşür… Mahatma GANDHİ",
+           "SEN'in Nur'un, benim kalbimin ışığıdır. Thxomnn..",
+           "Hak-batıl, adalet-zulüm, iyi-kötü ayrımını net yapın.",
+           "Tefekkür: Derin düşünme. Tedabbür: Arka plana bakma. Teakkul: Bağlantıları kurma.",
+           "Tefakkuh: İnce sonuçlar çıkarma. Tezekkür: Yaşam tarzına dönüştürme.",
+           "Nur'un dereceleri vardır: 50V, 100V, 200V, 500V, 1000V'a çıkarılabilir.",
+           "Kalp FBS'nin kullanımına göre aldığı şekildir. Fırıl fırıl değişip dönüşen.",
+           "Tercih edene vaat: Tekamül ederek Tanrı'nın katında melek statüsü, ebedi hayat.",
+           "Bu DUNya'da hiç bir yere doğru. (5T ile FBS'yi kullanarak Kalbimi parlatarak) Göklerin ardından, el Hayat'a doğru inş. İllâ Hû. Thxomnn.."
+       ];
+
+       // Kayıt yöntemi ve ayarları
+       let storageMethod = 'local';
+       // 5t-github-parametreleri.js dosyasından parametreler alınacak
+// Bu değişkenler external dosyadan gelecek: kullaniciAdi, repoAdi, token, dosyaAdi
+
+       // Kullanıcı yönetimi
+       let currentUser = null;
+       let userDatabase = {};
+
+       // Veri yapıları
+       let analysisData = {};
+       let currentMood = "";
+       
+       let globalStats = {
+           totalAnalyses: parseInt(localStorage.getItem('5t-totalAnalyses') || '0'),
+           currentStreak: parseInt(localStorage.getItem('5t-currentStreak') || '0'),
+           currentNurLevel: parseInt(localStorage.getItem('5t-currentNurLevel') || '50'),
+           lastAnalysisDate: localStorage.getItem('5t-lastAnalysisDate') || ''
+       };
+
+       // Sayfa yüklendiğinde çalışır
+       window.onload = function() {
+            updateTodayDate();
+            showDailyMotivation();
+            
+            // Kayıt ayarlarını kontrol et, yoksa modal aç
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'block';
+            } else {
+                // Ayarlar varsa direkt yükle
+                loadAnalysis();
+            }
+            
+            generateChainGrid();
+            updateStats();
+            updateProgress();
+        };
+
+       function updateTodayDate() {
+           const today = new Date();
+           const options = { 
+               weekday: 'long', 
+               year: 'numeric', 
+               month: 'long', 
+               day: 'numeric' 
+           };
+           document.getElementById('todayDate').textContent = today.toLocaleDateString('tr-TR', options);
+       }
+
+       function showDailyMotivation() {
+           const today = new Date();
+           //const dayOfYear = Math.floor((today - new Date(today.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+           //const quoteIndex = dayOfYear % motivationQuotes.length;
+           //const quote = motivationQuotes[quoteIndex];
+           const quote = motivationQuotes[Math.floor(Math.random() * motivationQuotes.length)];
+           document.getElementById('dailyMotivation').innerHTML = `💡 ${quote}`;
+       }
+
+       // Kayıt yöntemi seçimi
+       function selectStorage(method) {
+           document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+           event.target.closest('.storage-option').classList.add('selected');
+           storageMethod = method;
+           
+           const githubLogin = document.getElementById('githubLogin');
+           if (method === 'github') {
+               githubLogin.style.display = 'block';
+           } else {
+               githubLogin.style.display = 'none';
+           }
+       }
+
+       async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            analysisData = userDatabase[username].analyses || {};
+                            globalStats = userDatabase[username].stats || globalStats;
+                            
+                            // BURAYA EKLEME - GitHub ayarlarını kaydet
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            loadTodayData();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            analyses: {},
+                            stats: {...globalStats},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        analysisData = {};
+                        // Yerel verileri temizle
+                        localStorage.removeItem('5t-analysis-data');
+                        clearAllFormFields();
+                        
+                        await saveUserDatabase();
+                        
+                        // BURAYA EKLEME - Yeni kullanıcı ayarlarını kaydet
+                        const settings = { 
+                            method: storageMethod, 
+                            username: currentUser 
+                        };
+                        localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+                    
+                    // BURAYA EKLEME - Hata durumunda yerel ayar kaydet
+                    const settings = { method: 'local' };
+                    localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                // Yerel kayıt seçildi
+                const settings = { method: storageMethod };
+                localStorage.setItem('5t-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadAnalysis, 500);
+            }
+        }
+
+
+       async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+
+       async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Site kullanıcı veritabanı güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub kullanıcı veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub kullanıcı veritabanı kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+
+       function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('5t-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                // GitHub seçilmişse kullanıcı bilgilerini de yükle
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true; // Ayarlar mevcut
+            }
+            return false; // Ayarlar yok, modal açılsın
+        }
+
+
+       function updateStorageInfo() {
+           const info = document.getElementById('storageInfo');
+           if (storageMethod === 'github') {
+               info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+           } else {
+               info.textContent = '💻 Yerel kayıt';
+           }
+       }
+       
+       function changeStorageMethod() {
+            // Ayarları sıfırla
+            localStorage.removeItem('5t-storage-settings');
+            
+            // Modal seçimlerini sıfırla
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Modal aç
+            document.getElementById('storageModal').style.display = 'block';
+            
+            // Varsayılanları sıfırla
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+       function loadTodayData() {
+           const today = new Date().toISOString().split('T')[0];
+           if (analysisData[today]) {
+               fillFormWithTodayData(analysisData[today]);
+           }
+           updateChainGrid();
+           updateStats();
+       }
+
+       function showOpeningQuote() {
+           const quote = "Ben bir FBS'yi 5T ile kullanarak kalbi cilalatma uzmanıyım, Rabbimle başbaşayım.";
+           alert('🗣️ Başlangıç Sözü:\n\n"' + quote + '"');
+       }
+
+       function showPrayer() {
+           const prayer = `🤲 Dua:
+
+"Tanrım, bana bu dünyada değiştirebileceğim şeyler için güç ve cesaret, değiştiremeyeceğim şeyler için sabır ve sekinet ver. Ve en önemlisi, ikisi arasındaki farkı fark edecek hikmet ver. 
+
+Sen'in Nur'un benim kalbimin ışığıdır. İlmimi hidayetimi artır lütfen Rabbim, bana lütfettiğin FBS'mi 5T ile kullanarak kalbimi parlatmamda yardım eyle lütfen. 
+
+Thxomnn..."`;
+           
+           alert(prayer);
+       }
+
+       function showClosingQuote() {
+           const quote = "Thxomnn… bütün övgülerim, minnettarlığım, hayranlığım, derin saygım ve meveddem O'nadır (Bütüne'dir).";
+           document.getElementById('closingWords').value = quote;
+       }
+
+       function toggleCheck(element) {
+           const checkbox = element.querySelector('input[type="checkbox"]');
+           if (element.querySelector('button')) {
+               if (event.target.tagName === 'BUTTON') return;
+           }
+           
+           checkbox.checked = !checkbox.checked;
+           
+           if (checkbox.checked) {
+               element.classList.add('completed');
+               playSuccessSound();
+           } else {
+               element.classList.remove('completed');
+           }
+           
+           updateProgress();
+       }
+
+       function selectMood(button) {
+           document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+           button.classList.add('selected');
+           currentMood = button.dataset.mood;
+       }
+
+       function updateProgress() {
+           const checkboxes = document.querySelectorAll('.ritual-checklist input[type="checkbox"]');
+           const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
+           const total = checkboxes.length;
+           const percentage = Math.round((completed / total) * 100);
+           
+           document.getElementById('progressFill').style.width = percentage + '%';
+           document.getElementById('progressText').textContent = `${completed}/${total} adım tamamlandı`;
+       }
+
+       async function saveTodayAnalysis() {
+           const today = new Date().toISOString().split('T')[0];
+           
+           const formData = {
+               todayTopic: document.getElementById('todayTopic').value,
+               infoSection: document.getElementById('infoSection').value,
+               dataSection: document.getElementById('dataSection').value,
+               tefekkur: document.getElementById('tefekkur').value,
+               tedabbur: document.getElementById('tedabbur').value,
+               teakkul: document.getElementById('teakkul').value,
+               tefakkuh: document.getElementById('tefakkuh').value,
+               tezekkur: document.getElementById('tezekkur').value,
+               surprises: document.getElementById('surprises').value,
+               difficulties: document.getElementById('difficulties').value,
+               growth: document.getElementById('growth').value,
+               nextSteps: document.getElementById('nextSteps').value,
+               reward: document.getElementById('reward').value,
+               closingWords: document.getElementById('closingWords').value
+           };
+           
+           const requiredFields = ['todayTopic', 'tefekkur', 'tedabbur', 'teakkul', 'tefakkuh', 'tezekkur'];
+           const missingFields = requiredFields.filter(field => !formData[field].trim());
+           
+           if (missingFields.length > 0) {
+               alert('⚠ Lütfen 5T analizinin tüm aşamalarını tamamlayın!');
+               return;
+           }
+           
+           const checkboxes = {
+               topicDefined: document.getElementById('topic-defined').checked,
+               openingWords: document.getElementById('opening-words').checked,
+               deepBreath: document.getElementById('deep-breath').checked,
+               prayerDone: document.getElementById('prayer-done').checked,
+               thxomnnSaid: document.getElementById('thxomnn-said').checked,
+               tefekkurDone: document.getElementById('tefekkur-done').checked,
+               tedabburDone: document.getElementById('tedabbur-done').checked,
+               teakkulDone: document.getElementById('teakkul-done').checked,
+               tefakkuhDone: document.getElementById('tefakkuh-done').checked,
+               tezekkurDone: document.getElementById('tezekkur-done').checked,
+               analysisComplete: document.getElementById('analysis-complete').checked
+           };
+           
+           const completedCount = Object.values(checkboxes).filter(Boolean).length;
+           const completionRate = Math.round((completedCount / 11) * 100);
+           
+           const todayData = {
+               date: today,
+               ...formData,
+               checkboxes: checkboxes,
+               completionRate: completionRate,
+               mood: currentMood,
+               timestamp: new Date().toISOString(),
+               nurLevel: globalStats.currentNurLevel
+           };
+           
+           analysisData[today] = todayData;
+           generateFinalKnowledge(todayData);
+           
+           // İstatistikleri güncelle
+           globalStats.totalAnalyses++;
+           
+           const yesterday = new Date();
+           yesterday.setDate(yesterday.getDate() - 1);
+           const yesterdayStr = yesterday.toISOString().split('T')[0];
+           
+           if (globalStats.lastAnalysisDate === yesterdayStr || globalStats.lastAnalysisDate === today) {
+               globalStats.currentStreak++;
+           } else if (globalStats.lastAnalysisDate === today) {
+               // Bugün zaten analiz yapmış
+           } else {
+               globalStats.currentStreak = 1;
+           }
+           
+           globalStats.lastAnalysisDate = today;
+           
+           if (globalStats.totalAnalyses % 3 === 0) {
+               globalStats.currentNurLevel += 10;
+               showNotification(`✨ Nur seviyeniz ${globalStats.currentNurLevel}V'a yükseldi!`);
+           }
+           
+           // Kaydet
+           if (storageMethod === 'github' && currentUser) {
+               await saveToGitHub();
+           } else {
+               saveToLocal(analysisData);
+           }
+           
+           updateChainGrid();
+           updateStats();
+           saveStatsToLocal();
+           
+           showNotification('📊 5T analizi kaydedildi!');
+       }
+
+       function saveToLocal(data) {
+           localStorage.setItem('5t-analysis-data', JSON.stringify(data));
+       }
+
+       async function saveToGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               userDatabase[currentUser].analyses = analysisData;
+               userDatabase[currentUser].stats = globalStats;
+               userDatabase[currentUser].lastUpdated = new Date().toISOString();
+               
+               await saveUserDatabase();
+           } catch (error) {
+               console.error('GitHub hatası:', error);
+               showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+               saveToLocal(analysisData);
+           }
+       }
+
+       function loadAnalysis() {
+           if (storageMethod === 'github' && currentUser) {
+               loadFromGitHub();
+           } else {
+               loadFromLocal();
+           }
+       }
+
+       function loadFromLocal() {
+           const savedData = localStorage.getItem('5t-analysis-data');
+           if (savedData) {
+               analysisData = JSON.parse(savedData);
+               
+               const today = new Date().toISOString().split('T')[0];
+               if (analysisData[today]) {
+                   fillFormWithTodayData(analysisData[today]);
+               }
+               
+               updateChainGrid();
+               updateStats();
+               showNotification('💻 Yerel veriler yüklendi!');
+           } else {
+               analysisData = {};
+               updateChainGrid();
+               updateStats();
+           }
+       }
+
+       async function loadFromGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               if (userDatabase[currentUser] && userDatabase[currentUser].analyses) {
+                   analysisData = userDatabase[currentUser].analyses;
+                   globalStats = userDatabase[currentUser].stats || globalStats;
+                   
+                   const today = new Date().toISOString().split('T')[0];
+                   if (analysisData[today]) {
+                       fillFormWithTodayData(analysisData[today]);
+                   }
+                   
+                   updateChainGrid();
+                   updateStats();
+                   showNotification('☁️ GitHub\'dan veriler yüklendi!');
+               } else {
+                   analysisData = {};
+                   updateChainGrid();
+                   updateStats();
+                   showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+               }
+           } catch (error) {
+               console.error('GitHub yükleme hatası:', error);
+               showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+               loadFromLocal();
+           }
+       }
+
+       function fillFormWithTodayData(data) {
+           document.getElementById('todayTopic').value = data.todayTopic || '';
+           document.getElementById('infoSection').value = data.infoSection || '';
+           document.getElementById('dataSection').value = data.dataSection || '';
+           document.getElementById('tefekkur').value = data.tefekkur || '';
+           document.getElementById('tedabbur').value = data.tedabbur || '';
+           document.getElementById('teakkul').value = data.teakkul || '';
+           document.getElementById('tefakkuh').value = data.tefakkuh || '';
+           document.getElementById('tezekkur').value = data.tezekkur || '';
+           document.getElementById('surprises').value = data.surprises || '';
+           document.getElementById('difficulties').value = data.difficulties || '';
+           document.getElementById('growth').value = data.growth || '';
+           document.getElementById('nextSteps').value = data.nextSteps || '';
+           document.getElementById('reward').value = data.reward || '';
+           document.getElementById('closingWords').value = data.closingWords || '';
+           
+           if (data.checkboxes) {
+               Object.keys(data.checkboxes).forEach(key => {
+                   const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                   const checkbox = document.getElementById(elementId);
+                   if (checkbox) {
+                       const item = checkbox.closest('.checklist-item');
+                       
+                       if (data.checkboxes[key]) {
+                           checkbox.checked = true;
+                           item.classList.add('completed');
+                       }
+                   }
+               });
+           }
+           
+           if (data.mood) {
+               currentMood = data.mood;
+               document.querySelectorAll('.mood-btn').forEach(btn => {
+                   if (btn.dataset.mood === data.mood) {
+                       btn.classList.add('selected');
+                   }
+               });
+           }
+           
+           if (data.tezekkur) {
+               generateFinalKnowledge(data);
+           }
+           
+           updateProgress();
+       }
+
+       function generateFinalKnowledge(data) {
+           const knowledge = `
+               <div class="success-box">
+                   <h4>📋 Analiz Özeti</h4>
+                   <p><strong>Konu:</strong><br>${formatText(data.todayTopic, 200)}</p>
+                   <p><strong>Tamamlanma:</strong> %${data.completionRate} (${Object.values(data.checkboxes).filter(Boolean).length}/11 adım)</p>
+                   <p><strong>Ruh Hali:</strong> ${getMoodText(data.mood)}</p>
+                   ${data.reward ? `<p><strong>Ödül:</strong><br>${formatText(data.reward)}</p>` : ''}
+               </div>
+
+               ${data.infoSection || data.dataSection ? `
+               <h4>📋 INFO → DATA → KNOWLEDGE Süreci:</h4>
+               ${data.infoSection ? `<p><strong>INFO (Ham Bilgi):</strong><br>${formatText(extractKeyPoint(data.infoSection))}</p>` : ''}
+               ${data.dataSection ? `<p><strong>DATA (İşlenmiş):</strong><br>${formatText(extractKeyPoint(data.dataSection))}</p>` : ''}
+               ` : ''}
+               
+               <h4>🎯 5T Ana Çıkarımları:</h4>
+               <p><strong>Tefekkür:</strong><br>${formatText(extractKeyPoint(data.tefekkur))}</p>
+               <p><strong>Tedabbür:</strong><br>${formatText(extractKeyPoint(data.tedabbur))}</p>
+               <p><strong>Teakkul:</strong><br>${formatText(extractKeyPoint(data.teakkul))}</p>
+               <p><strong>Tefakkuh:</strong><br>${formatText(extractKeyPoint(data.tefakkuh))}</p>
+               <p><strong>Tezekkür:</strong><br>${formatText(extractKeyPoint(data.tezekkur))}</p>
+               
+               ${data.nextSteps ? `<h4>📅 Sonraki Adımlar:</h4><p>${formatText(data.nextSteps)}</p>` : ''}
+               
+               <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                   <strong>💡 Bu analiz INFO → DATA → KNOWLEDGE sürecini tamamladı.</strong><br>
+                   <small>Artık bu konuda eyleme geçebilecek duruma geldiniz.</small>
+               </div>
+               
+               ${data.closingWords ? `<div style="background: #f0fff0; padding: 10px; border-radius: 5px; margin-top: 10px; font-style: italic;"><strong>Kapanış:</strong><br>${formatText(data.closingWords)}</div>` : ''}
+           `;
+           
+           document.getElementById('finalKnowledge').innerHTML = knowledge;
+       }
+
+       function formatText(text, maxLength = null) {
+           if (!text || text.trim().length === 0) return 'Belirtilmedi';
+           
+           // Satır sonlarını <br> etiketine dönüştür
+           let formatted = text.replace(/\n/g, '<br>');
+           
+           if (maxLength && formatted.length > maxLength) {
+               formatted = formatted.substring(0, maxLength) + '...';
+           }
+           
+           return formatted;
+       }
+
+       function extractKeyPoint(text) {
+           if (!text || text.trim().length === 0) return 'Belirtilmedi';
+           const sentences = text.split('.').filter(s => s.trim().length > 20);
+           return sentences[0] ? sentences[0].trim() + '.' : text.substring(0, 150) + '...';
+       }
+
+       function getMoodText(mood) {
+           const moodMap = {
+               'very-happy': '🤩 Çok Mutlu',
+               'happy': '😊 Mutlu',
+               'neutral': '😐 Nötr',
+               'thoughtful': '🤔 Düşünceli',
+               'concerned': '😟 Endişeli',
+               'tired': '😴 Yorgun'
+           };
+           return moodMap[mood] || 'Belirtilmedi';
+       }
+
+       function generateChainGrid() {
+           const grid = document.getElementById('chainGrid');
+           grid.innerHTML = '';
+           
+           const today = new Date();
+           for (let i = 27; i >= 0; i--) {
+               const date = new Date(today);
+               date.setDate(date.getDate() - i);
+               const dateStr = date.toISOString().split('T')[0];
+               
+               const dayElement = document.createElement('div');
+               dayElement.className = 'chain-day';
+               dayElement.textContent = date.getDate();
+               dayElement.title = date.toLocaleDateString('tr-TR');
+               
+               if (i === 0) {
+                   dayElement.classList.add('today');
+               }
+               
+               if (analysisData[dateStr]) {
+                   if (analysisData[dateStr].completionRate >= 80) {
+                       dayElement.classList.add('completed');
+                   } else if (analysisData[dateStr].completionRate >= 40) {
+                       dayElement.classList.add('partial');
+                   } else {
+                       dayElement.classList.add('empty');
+                   }
+                   
+                   dayElement.addEventListener('click', () => showDayDetails(dateStr, analysisData[dateStr]));
+               } else {
+                   dayElement.classList.add('empty');
+               }
+               
+               grid.appendChild(dayElement);
+           }
+       }
+
+       function updateChainGrid() {
+           generateChainGrid();
+       }
+
+       function updateStats() {
+           document.getElementById('currentStreak').textContent = globalStats.currentStreak;
+           document.getElementById('totalAnalyses').textContent = globalStats.totalAnalyses;
+           document.getElementById('nurLevel').textContent = globalStats.currentNurLevel + 'V';
+           
+           const dates = Object.keys(analysisData);
+           const completedCount = dates.filter(date => analysisData[date].completionRate >= 80).length;
+           const completionRate = dates.length > 0 ? Math.round((completedCount / dates.length) * 100) : 0;
+           document.getElementById('completionRate').textContent = completionRate;
+       }
+
+       function saveStatsToLocal() {
+           localStorage.setItem('5t-totalAnalyses', globalStats.totalAnalyses.toString());
+           localStorage.setItem('5t-currentStreak', globalStats.currentStreak.toString());
+           localStorage.setItem('5t-currentNurLevel', globalStats.currentNurLevel.toString());
+           localStorage.setItem('5t-lastAnalysisDate', globalStats.lastAnalysisDate);
+       }
+
+       function showHistory() {
+           const modal = document.getElementById('historyModal');
+           const content = document.getElementById('historyContent');
+           
+           const dates = Object.keys(analysisData).sort().reverse();
+           
+           if (dates.length === 0) {
+               content.innerHTML = '<p style="text-align: center; color: #666;">Henüz analiz geçmişi bulunmuyor.</p>';
+           } else {
+               let historyHTML = '';
+               dates.forEach(date => {
+                   const analysis = analysisData[date];
+                   const formattedDate = new Date(date).toLocaleDateString('tr-TR');
+                   historyHTML += `
+                       <div class="history-item" onclick="loadHistoryItem('${date}')">
+                           <h4>${formattedDate} - ${getMoodText(analysis.mood)}</h4>
+                           <p style="color: #666; font-size: 0.9em;">Tamamlanma: %${analysis.completionRate} | Nur: ${analysis.nurLevel}V</p>
+                           <p style="margin-top: 8px;"><strong>Konu:</strong> ${analysis.todayTopic.substring(0, 100)}${analysis.todayTopic.length > 100 ? '...' : ''}</p>
+                       </div>
+                   `;
+               });
+               content.innerHTML = historyHTML;
+           }
+           
+           modal.style.display = 'flex';
+       }
+
+       function closeHistory() {
+           document.getElementById('historyModal').style.display = 'none';
+       }
+
+       function loadHistoryItem(date) {
+           const selectedAnalysis = analysisData[date];
+           fillFormWithTodayData(selectedAnalysis);
+           closeHistory();
+           showNotification(`📅 ${new Date(date).toLocaleDateString('tr-TR')} tarihli analiz yüklendi`);
+       }
+
+       function showDayDetails(date, data) {
+           alert(`📅 ${new Date(date).toLocaleDateString('tr-TR')}\n\n` +
+                 `📊 Tamamlanma: %${data.completionRate}\n` +
+                 `💎 Nur Seviyesi: ${data.nurLevel}V\n` +
+                 `😊 Ruh Hali: ${getMoodText(data.mood)}\n\n` +
+                 `🎯 Konu: ${data.todayTopic.substring(0, 100)}${data.todayTopic.length > 100 ? '...' : ''}`);
+       }
+
+       function showWeeklySummary() {
+           const today = new Date();
+           const lastWeek = [];
+           
+           for (let i = 6; i >= 0; i--) {
+               const date = new Date(today);
+               date.setDate(date.getDate() - i);
+               const dateStr = date.toISOString().split('T')[0];
+               
+               if (analysisData[dateStr]) {
+                   lastWeek.push(analysisData[dateStr]);
+               }
+           }
+           
+           if (lastWeek.length === 0) {
+               alert('📊 Henüz haftalık veri yok. Bugün başla!');
+               return;
+           }
+           
+           const avgCompletion = lastWeek.reduce((sum, day) => sum + day.completionRate, 0) / lastWeek.length;
+           const totalDays = lastWeek.length;
+           const perfectDays = lastWeek.filter(day => day.completionRate === 100).length;
+           const avgNur = lastWeek.reduce((sum, day) => sum + day.nurLevel, 0) / lastWeek.length;
+           
+           alert(`📈 Son ${totalDays} Günün Özeti:\n\n` +
+                 `⭐ Ortalama Tamamlama: %${Math.round(avgCompletion)}\n` +
+                 `🎯 Mükemmel Günler: ${perfectDays}/${totalDays}\n` +
+                 `💎 Ortalama Nur: ${Math.round(avgNur)}V\n` +
+                 `🔥 Devam et! 5T metodolojisinde ilerliyorsun!`);
+       }
+
+       function showNotification(message) {
+           const notification = document.getElementById('notification');
+           notification.textContent = message;
+           notification.classList.add('show');
+           
+           setTimeout(() => {
+               notification.classList.remove('show');
+           }, 4000);
+       }
+
+       function playSuccessSound() {
+           try {
+               const context = new (window.AudioContext || window.webkitAudioContext)();
+               const oscillator = context.createOscillator();
+               const gainNode = context.createGain();
+               
+               oscillator.connect(gainNode);
+               gainNode.connect(context.destination);
+               
+               oscillator.frequency.setValueAtTime(520, context.currentTime);
+               oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
+               
+               gainNode.gain.setValueAtTime(0.1, context.currentTime);
+               gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+               
+               oscillator.start(context.currentTime);
+               oscillator.stop(context.currentTime + 0.2);
+           } catch (e) {
+               // Ses çalmazsa sessizce devam et
+           }
+       }
+
+       // Klavye kısayolları
+       document.addEventListener('keydown', function(e) {
+           if (e.ctrlKey && e.key === 's') {
+               e.preventDefault();
+               saveTodayAnalysis();
+           }
+           if (e.ctrlKey && e.key === 'h') {
+               e.preventDefault();
+               showHistory();
+           }
+           if (e.key === 'Escape') {
+               closeHistory();
+           }
+       });
+
+       // Otomatik kaydetme (her dakika kontrol)
+       setInterval(() => {
+           const hasData = document.getElementById('todayTopic').value || 
+                         document.getElementById('infoSection').value ||
+                         document.getElementById('dataSection').value ||
+                         document.getElementById('tefekkur').value || 
+                         document.getElementById('tedabbur').value;
+           
+           if (hasData) {
+               const today = new Date().toISOString().split('T')[0];
+               const autoSave = {
+                   date: today,
+                   todayTopic: document.getElementById('todayTopic').value,
+                   infoSection: document.getElementById('infoSection').value,
+                   dataSection: document.getElementById('dataSection').value,
+                   tefekkur: document.getElementById('tefekkur').value,
+                   tedabbur: document.getElementById('tedabbur').value,
+                   teakkul: document.getElementById('teakkul').value,
+                   tefakkuh: document.getElementById('tefakkuh').value,
+                   tezekkur: document.getElementById('tezekkur').value,
+                   autoSaved: true,
+                   lastSaved: new Date().toISOString()
+               };
+               localStorage.setItem('5t-autoSave', JSON.stringify(autoSave));
+           }
+       }, 60000);
+
+       // Sayfa yüklendiğinde otomatik kaydı kontrol et
+       function checkAutoSave() {
+           const autoSave = localStorage.getItem('5t-autoSave');
+           if (autoSave) {
+               const data = JSON.parse(autoSave);
+               const today = new Date().toISOString().split('T')[0];
+               
+               if (data.date === today && confirm('Otomatik kaydedilmiş bir analiz bulundu. Yüklemek ister misiniz?')) {
+                   document.getElementById('todayTopic').value = data.todayTopic || '';
+                   document.getElementById('infoSection').value = data.infoSection || '';
+                   document.getElementById('dataSection').value = data.dataSection || '';
+                   document.getElementById('tefekkur').value = data.tefekkur || '';
+                   document.getElementById('tedabbur').value = data.tedabbur || '';
+                   document.getElementById('teakkul').value = data.teakkul || '';
+                   document.getElementById('tefakkuh').value = data.tefakkuh || '';
+                   document.getElementById('tezekkur').value = data.tezekkur || '';
+               } else {
+                   localStorage.removeItem('5t-autoSave');
+               }
+           }
+       }
+
+       // Sayfa kapatılırken uyarı
+       window.addEventListener('beforeunload', function(e) {
+           const hasData = document.getElementById('todayTopic').value && 
+                         document.getElementById('tefekkur').value &&
+                         !document.getElementById('analysis-complete').checked;
+           
+           if (hasData) {
+               e.preventDefault();
+               e.returnValue = '';
+               return 'Tamamlanmamış 5T analizi var. Ayrılmak istediğinizden emin misiniz?';
+           }
+       });
+
+       // İlk yükleme kontrolleri
+       setTimeout(() => {
+           checkAutoSave();
+           
+           if (Object.keys(analysisData).length === 0) {
+               showNotification('Hoş geldin! İlk 5T analizin için hazır mısın?');
+           } else {
+               showNotification('Devam ediyoruz! Bugün de harika bir analiz yapalım!');
+           }
+       }, 2000);
+
+       // Günlük hatırlatma (saat 20:00'da)
+       function checkReminderTime() {
+           const now = new Date();
+           const reminderTime = new Date();
+           reminderTime.setHours(20, 0, 0, 0);
+           
+           if (now.getTime() >= reminderTime.getTime() && now.getTime() < reminderTime.getTime() + 60 * 60 * 1000) {
+               const today = new Date().toISOString().split('T')[0];
+               if (!analysisData[today]) {
+                   showNotification('5T vakti! Bugünkü analizini yapmaya ne dersin?');
+               }
+           }
+       }
+
+       // Her saat kontrol et
+       setInterval(checkReminderTime, 3600000);
+   </script>
+</body>
+</html>

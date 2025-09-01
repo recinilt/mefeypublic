@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>🧠 5T Günlük Defterim - Sekmeli Versiyon</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           min-height: 100vh;
+           padding: 20px;
+       }
+
+       .container {
+           max-width: 1200px;
+           margin: 0 auto;
+           background: white;
+           border-radius: 20px;
+           box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+           overflow: hidden;
+       }
+
+       .header {
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           color: white;
+           text-align: center;
+           padding: 30px;
+       }
+
+       .header h1 {
+           font-size: 2.5em;
+           margin-bottom: 10px;
+       }
+
+       .streak-display {
+           background: rgba(255,255,255,0.2);
+           border-radius: 15px;
+           padding: 15px;
+           margin-top: 20px;
+           display: flex;
+           justify-content: space-around;
+           flex-wrap: wrap;
+       }
+
+       .streak-item {
+           text-align: center;
+           margin: 5px;
+       }
+
+       .streak-number {
+           font-size: 2em;
+           font-weight: bold;
+           display: block;
+       }
+
+       .main-content {
+           padding: 30px;
+       }
+
+       .today-section {
+           background: #f8f9fa;
+           border-radius: 15px;
+           padding: 25px;
+           margin-bottom: 30px;
+           border-left: 5px solid #667eea;
+       }
+
+       .day-info {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 20px;
+           flex-wrap: wrap;
+       }
+
+       .day-title {
+           font-size: 1.8em;
+           color: #333;
+           margin-bottom: 10px;
+       }
+
+       /* Sekme Stilleri */
+       .tab-container {
+           margin-top: 30px;
+       }
+
+       .tab-nav {
+           display: flex;
+           flex-wrap: wrap;
+           border-bottom: 3px solid #ddd;
+           background: #f8f9fa;
+           border-radius: 10px 10px 0 0;
+           padding: 10px 10px 0 10px;
+       }
+
+       .tab-button {
+           background: #e9ecef;
+           border: none;
+           padding: 15px 20px;
+           margin-right: 5px;
+           border-radius: 10px 10px 0 0;
+           font-size: 14px;
+           font-weight: bold;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           position: relative;
+       }
+
+       .tab-button:hover {
+           background: #dee2e6;
+           transform: translateY(-2px);
+       }
+
+       .tab-button.active {
+           background: #667eea;
+           color: white;
+           border-bottom: 3px solid #667eea;
+       }
+
+       .tab-content {
+           display: none;
+           background: white;
+           border: 1px solid #ddd;
+           border-top: none;
+           border-radius: 0 0 15px 15px;
+           padding: 30px;
+           min-height: 400px;
+       }
+
+       .tab-content.active {
+           display: block;
+       }
+
+       /* Soru ve Cevap Alanları */
+       .question-section {
+           margin-bottom: 25px;
+           padding: 20px;
+           background: #f8f9fa;
+           border-radius: 10px;
+           border-left: 4px solid #667eea;
+       }
+
+       .question-section h4 {
+           color: #667eea;
+           margin-bottom: 15px;
+           font-size: 1.1em;
+           line-height: 1.4;
+       }
+
+       .question-section textarea {
+           width: 100%;
+           padding: 12px;
+           border: 2px solid #e0e0e0;
+           border-radius: 8px;
+           font-size: 14px;
+           font-family: inherit;
+           resize: vertical;
+           min-height: 80px;
+           transition: border-color 0.3s ease;
+       }
+
+       .question-section textarea:focus {
+           outline: none;
+           border-color: #667eea;
+           box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+       }
+
+       .add-question-btn {
+           background: #28a745;
+           color: white;
+           border: none;
+           padding: 12px 20px;
+           border-radius: 8px;
+           font-size: 14px;
+           font-weight: bold;
+           cursor: pointer;
+           margin: 10px 0;
+           transition: background 0.3s ease;
+       }
+
+       .add-question-btn:hover {
+           background: #218838;
+       }
+
+       .summary-section {
+           background: #e3f2fd;
+           padding: 20px;
+           border-radius: 10px;
+           margin-top: 30px;
+           border-left: 5px solid #2196f3;
+       }
+
+       .summary-section h4 {
+           color: #1976d2;
+           margin-bottom: 15px;
+       }
+
+       .summary-content {
+           background: white;
+           padding: 15px;
+           border-radius: 8px;
+           min-height: 100px;
+           border: 1px solid #ddd;
+           white-space: pre-wrap;
+           font-size: 14px;
+           line-height: 1.5;
+       }
+
+       .guide-box {
+           background: #fff3cd;
+           border-left: 4px solid #ffc107;
+           padding: 15px;
+           border-radius: 5px;
+           margin-bottom: 20px;
+       }
+
+       .info-box {
+           background: #d1ecf1;
+           border-left: 4px solid #17a2b8;
+           padding: 15px;
+           border-radius: 5px;
+           margin: 15px 0;
+       }
+
+       .warning-box {
+           background: #f8d7da;
+           border-left: 4px solid #dc3545;
+           padding: 15px;
+           border-radius: 5px;
+           margin: 15px 0;
+       }
+
+       .progress-indicator {
+           background: #f8f9fa;
+           border-radius: 10px;
+           padding: 15px;
+           margin: 15px 0;
+           text-align: center;
+       }
+
+       .progress-bar {
+           width: 100%;
+           height: 10px;
+           background: #e0e0e0;
+           border-radius: 5px;
+           margin: 10px 0;
+       }
+
+       .progress-fill {
+           height: 100%;
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           border-radius: 5px;
+           transition: width 0.5s ease;
+           width: 0%;
+       }
+
+       .save-section {
+           background: #d4edda;
+           padding: 20px;
+           border-radius: 10px;
+           margin-top: 30px;
+           text-align: center;
+       }
+
+       .btn {
+           background: linear-gradient(45deg, #667eea, #764ba2);
+           color: white;
+           border: none;
+           padding: 15px 30px;
+           border-radius: 25px;
+           font-size: 16px;
+           font-weight: bold;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           margin: 5px;
+       }
+
+       .btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+       }
+
+       .btn.secondary {
+           background: linear-gradient(45deg, #74b9ff, #0984e3);
+       }
+
+       .btn.success {
+           background: linear-gradient(45deg, #55a3ff, #003d82);
+       }
+
+       @media (max-width: 768px) {
+           .container {
+               margin: 10px;
+               border-radius: 15px;
+           }
+           
+           .header {
+               padding: 20px;
+           }
+           
+           .header h1 {
+               font-size: 2em;
+           }
+           
+           .main-content {
+               padding: 20px;
+           }
+           
+           .tab-nav {
+               flex-direction: column;
+           }
+           
+           .tab-button {
+               margin: 2px 0;
+               border-radius: 8px;
+           }
+       }
+   </style>
+</head>
+<body>
+   <div class="container">
+       <div class="header">
+           <h1>🧠 5T Günlük Defterim</h1>
+           <h3>Fuat Basar Sema Metodolojisi ile Günlük Tekamül</h3>
+           <div class="streak-display">
+               <div class="streak-item">
+                   <span class="streak-number" id="currentStreak">0</span>
+                   <small>Güncel Zincir</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="totalAnalyses">0</span>
+                   <small>Toplam 5T</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="nurLevel">50V</span>
+                   <small>Nur Seviyesi</small>
+               </div>
+               <div class="streak-item">
+                   <span class="streak-number" id="completionRate">0</span>
+                   <small>% Başarı</small>
+               </div>
+           </div>
+       </div>
+
+       <div class="main-content">
+           <div class="today-section">
+               <div class="day-info">
+                   <div>
+                       <div class="day-title">Bugünkü 5T Analizi</div>
+                       <div id="todayDate"></div>
+                   </div>
+                   <div class="progress-indicator">
+                       <strong>İlerleme</strong>
+                       <div class="progress-bar">
+                           <div class="progress-fill" id="progressFill"></div>
+                       </div>
+                       <small id="progressText">0/7 sekme tamamlandı</small>
+                   </div>
+               </div>
+
+               <div class="info-box">
+                   <h4>📚 5T Metodolojisi Hatırlatması:</h4>
+                   <p><strong>INFO:</strong> Ham bilgi toplama - dağınık, kapsamlı</p>
+                   <p><strong>DATA:</strong> Bilgileri sınıflandırma - düzenleme</p>
+                   <p><strong>TEFEKKÜR:</strong> Derin düşünme - analiz</p>
+                   <p><strong>TEDABBÜR:</strong> Arka plana bakma - sistemik görüş</p>
+                   <p><strong>TEAKKUL:</strong> Bağlantıları kurma - zincir oluşturma</p>
+                   <p><strong>TEFAKKUH:</strong> İnce sonuçlar çıkarma - detaylı değerlendirme</p>
+                   <p><strong>TEZEKKÜR:</strong> Yaşam tarzına dönüştürme - uygulama</p>
+               </div>
+
+               <div style="margin: 20px 0;">
+                   <label><strong>🎯 Bugün analiz etmek istediğim konu/durum:</strong></label>
+                   <textarea id="todayTopic" style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; min-height: 100px; font-size: 16px;" placeholder="Analiz edeceğiniz konuyu buraya yazın..."></textarea>
+               </div>
+           </div>
+
+           <div class="tab-container">
+               <div class="tab-nav">
+                   <button class="tab-button active" onclick="openTab(event, 'info-tab')">📥 INFO</button>
+                   <button class="tab-button" onclick="openTab(event, 'data-tab')">📊 DATA</button>
+                   <button class="tab-button" onclick="openTab(event, 'tefekkur-tab')">💭 TEFEKKÜR</button>
+                   <button class="tab-button" onclick="openTab(event, 'tedabbur-tab')">🔍 TEDABBÜR</button>
+                   <button class="tab-button" onclick="openTab(event, 'teakkul-tab')">🔗 TEAKKUL</button>
+                   <button class="tab-button" onclick="openTab(event, 'tefakkuh-tab')">⚖️ TEFAKKUH</button>
+                   <button class="tab-button" onclick="openTab(event, 'tezekkur-tab')">🌟 TEZEKKÜR</button>
+                   <button class="tab-button" onclick="openTab(event, 'knowledge-tab')">💎 KNOWLEDGE</button>
+               </div>
+
+               <!-- INFO SEKMESI -->
+               <div id="info-tab" class="tab-content active">
+                   <div class="guide-box">
+                       <h4>📥 INFO (Ham Bilgi) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Konu hakkında aklınıza gelen her türlü ham bilgiyi, gözlemi, deneyimi toplamak. Henüz sınıflandırma yapmayın, sadece biriktirin.</p>
+                   </div>
+                   
+                   <div id="info-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('info')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 INFO Özeti</h4>
+                       <div id="info-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- DATA SEKMESI -->
+               <div id="data-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>📊 DATA (Sınıflandırılmış Veri) Rehberi</h4>
+                       <p><strong>Hedef:</strong> INFO'da topladığınız ham bilgileri kategorilere ayırmak, düzenlemek ve işleme hazır hale getirmek.</p>
+                   </div>
+                   
+                   <div id="data-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('data')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 DATA Özeti</h4>
+                       <div id="data-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- TEFEKKÜR SEKMESI -->
+               <div id="tefekkur-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>💭 TEFEKKÜR (Derin Düşünme) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Konuyu derinlemesine düşünmek, etraflıca analiz etmek. Sadece yüzeysel değil, derin bir inceleme yapmak.</p>
+                   </div>
+                   
+                   <div id="tefekkur-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('tefekkur')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 TEFEKKÜR Özeti</h4>
+                       <div id="tefekkur-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- TEDABBÜR SEKMESI -->
+               <div id="tedabbur-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>🔍 TEDABBÜR (Arka Plana Bakma) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Olayın derinindeki etkenleri görmek. Görünmeyen faktörleri, sistemik nedenleri keşfetmek.</p>
+                   </div>
+                   
+                   <div id="tedabbur-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('tedabbur')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 TEDABBÜR Özeti</h4>
+                       <div id="tedabbur-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- TEAKKUL SEKMESI -->
+               <div id="teakkul-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>🔗 TEAKKUL (Bağlantıları Kurma) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Tefekkür ve tedabbür edilen konular arasındaki bağlantıları kurmak, sebep-sonuç zincirlerini oluşturmak.</p>
+                   </div>
+                   
+                   <div id="teakkul-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('teakkul')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 TEAKKUL Özeti</h4>
+                       <div id="teakkul-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- TEFAKKUH SEKMESI -->
+               <div id="tefakkuh-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>⚖️ TEFAKKUH (İnce Sonuçlar Çıkarma) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Detaylı analiz ederek ince, pratik sonuçlara ulaşmak. Uygulanabilir çıkarımlar yapmak.</p>
+                   </div>
+                   
+                   <div id="tefakkuh-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('tefakkuh')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 TEFAKKUH Özeti</h4>
+                       <div id="tefakkuh-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- TEZEKKÜR SEKMESI -->
+               <div id="tezekkur-tab" class="tab-content">
+                   <div class="guide-box">
+                       <h4>🌟 TEZEKKÜR (Yaşam Tarzına Dönüştürme) Rehberi</h4>
+                       <p><strong>Hedef:</strong> Çıkarılan sonuçları yaşam tarzına dönüştürmek, concrete eylem planları oluşturmak.</p>
+                   </div>
+                   
+                   <div id="tezekkur-questions"></div>
+                   <button class="add-question-btn" onclick="addCustomQuestion('tezekkur')">+ Kendi Sorumu Ekle</button>
+                   
+                   <div class="summary-section">
+                       <h4>📋 TEZEKKÜR Özeti</h4>
+                       <div id="tezekkur-summary" class="summary-content">Bu alana verdiğiniz cevaplar otomatik olarak toplanacak...</div>
+                   </div>
+               </div>
+
+               <!-- KNOWLEDGE SEKMESI -->
+               <div id="knowledge-tab" class="tab-content">
+                   <div class="info-box">
+                       <h4>💎 KNOWLEDGE (Final Bilgi) - INFO → DATA → 5T Sürecinin Sonucu</h4>
+                       <p>Bu sekme otomatik olarak dolar. Önceki tüm sekmelerin özetini ve final sonucunu içerir.</p>
+                   </div>
+                   
+                   <div id="final-knowledge" class="summary-content" style="min-height: 200px; background: #f0f8ff;">
+                       5T sürecini tamamladığınızda buraya otomatik özet gelecek...
+                   </div>
+               </div>
+           </div>
+
+           <div class="save-section">
+               <p><strong>💾 5T Analizini Kaydet</strong></p>
+               <button class="btn success" onclick="saveTodayAnalysis()">📊 Analizi Tamamla ve Kaydet</button>
+               <button class="btn secondary" onclick="loadAnalysis()">📥 Veri Yükle</button>
+               <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Analizler</button>
+           </div>
+       </div>
+   </div>
+
+   <script>
+       // Sorular veri tabanı
+       const questionDatabase = {
+           info: [
+               "Bu durumla ilgili aklıma ilk gelen nedir?",
+               "Bu konuda hangi somut olayları yaşadım?",
+               "Çevremdeki insanlar bu duruma nasıl tepki veriyorlar?",
+               "Bu konuda duyduğum farklı görüşler neler?",
+               "Geçmişte benzer durumlarla karşılaştım mı?",
+               "Bu durumun ortaya çıkma süreci nasıl oldu?",
+               "Bu konuda hangi duygular yaşıyorum?",
+               "Bu durumdan kimler etkileniyor?",
+               "Bu konu hakkında okuduğum/izlediğim şeyler var mı?",
+               "Bu durumla ilgili sayısal veriler (zaman, para, miktar) neler?",
+               "Bu konuda hangi seçeneklerim var?",
+               "Bu durumun olumlu yanları neler?",
+               "Bu durumun olumsuz yanları neler?",
+               "Bu konuda kimlerin fikrini aldım?",
+               "Bu durumda hangi kaynaklarım/imkanlarım var?",
+               "Bu konuda hangi engeller/zorluklar var?",
+               "Bu durumla ilgili varsayımlarım neler?",
+               "Bu konuda hangi belirsizlikler var?",
+               "Bu durumun başka insanlarda nasıl sonuçları oldu?",
+               "Bu konu hakkında içgüdülerim ne diyor?",
+               "Bu durumla ilgili hangi detaylar önemli?",
+               "Bu konuda hangi kalıpları/rutinleri fark ediyorum?",
+               "Bu durumun farklı açılardan görünümü nasıl?",
+               "Bu konuda hangi çelişkiler var?"
+           ],
+           
+           data: [
+               "Topladığım bilgileri hangi kategorilere ayırabilirim?",
+               "Hangi bilgiler birinci derecede önemli?",
+               "Hangi bilgiler ikinci derecede önemli?",
+               "Hangi bilgiler üçüncü derecede önemli?",
+               "Zaman açısından bu bilgileri nasıl sıralayabilirim?",
+               "Önem açısından bu bilgileri nasıl sıralayabilirim?",
+               "Hangi bilgiler gerçek, hangileri varsayım?",
+               "Hangi bilgiler objektif, hangileri subjektif?",
+               "Bu konudaki ana faktörler neler?",
+               "Bu konudaki yan faktörler neler?",
+               "Hangi bilgiler sebep, hangileri sonuç?",
+               "Bu durumla ilgili aktörler (kişiler) kimler?",
+               "Bu durumla ilgili unsurlar (şeyler/kavramlar) neler?",
+               "Bu konuda kontrol edebileceklerim neler?",
+               "Bu konuda kontrol edemeyeceklerim neler?",
+               "Kısa vadeli etkiler neler?",
+               "Uzun vadeli etkiler neler?",
+               "İç faktörler (benim yapabileceğim) neler?",
+               "Dış faktörler (çevresel) neler?",
+               "Bu konudaki riskler neler?",
+               "Bu konudaki fırsatlar neler?",
+               "Bu konudaki sabitler (değişmeyen) neler?",
+               "Bu konudaki değişkenler neler?",
+               "Bu konudaki güçlü yanlar neler?",
+               "Bu konudaki zayıf yanlar neler?"
+           ],
+           
+           tefekkur: [
+               "Bu durumun kökleri nerede yatıyor?",
+               "Bu konunun benim değer sistemimde yeri nedir?",
+               "Bu durum beni hangi açılardan etkiliyor?",
+               "Bu konuda en önemli soru nedir?",
+               "Bu durumun ideal çözümü nasıl olurdu?",
+               "Bu konuda hangi prensipleri gözetmem gerekiyor?",
+               "Bu durumda adalet ne gerektirir?",
+               "Bu konuda hikmet ne der?",
+               "Bu durumda hak olan nedir?",
+               "Bu konuda batıl olan nedir?",
+               "Bu durumda iyi olan nedir?",
+               "Bu konuda kötü olan nedir?",
+               "Bu durumun farklı açılardan değerlendirmesi nasıl?",
+               "Bu konuda önyargılarım neler olabilir?",
+               "Bu durumda objektif gerçek nedir?",
+               "Bu konuda duygusal yaklaşımım nasıl?",
+               "Bu durumda mantıklı yaklaşım nasıl?",
+               "Bu konuda dengeyi nasıl kurabilirim?",
+               "Bu durumun uzun vadeli sonuçları neler olabilir?",
+               "Bu konuda en büyük endişem nedir?",
+               "Bu durumda en büyük umudum nedir?",
+               "Bu konuda hangi varsayımlarımı sorgulamalıyım?",
+               "Bu durumda farklı perspektifler neler?",
+               "Bu konuda neleri göz ardı ediyor olabilirim?",
+               "Bu durumun bana öğreteceği dersler neler?"
+           ],
+           
+           tedabbur: [
+               "Bu durumun arkasındaki gizli güçler neler?",
+               "Bu konuda hangi sistemik faktörler etkili?",
+               "Bu durumu yaratan derin nedenler neler?",
+               "Bu konuda görünmeyen etkenler neler olabilir?",
+               "Bu durumda hangi çıkar hesapları olabilir?",
+               "Bu konuda hangi güç ilişkileri var?",
+               "Bu durumda kim kazanıyor, kim kaybediyor?",
+               "Bu konuda hangi manipülasyon olasılıkları var?",
+               "Bu durumun arkasında hangi korku/ego faktörleri var?",
+               "Bu konuda hangi sosyal baskılar etkili?",
+               "Bu durumda hangi kültürel faktörler rol oynuyor?",
+               "Bu konuda hangi ekonomik faktörler etkili?",
+               "Bu durumda hangi psikolojik faktörler var?",
+               "Bu konuda hangi tarihi/geçmiş etkiler var?",
+               "Bu durumda hangi ideolojik faktörler etkili?",
+               "Bu konuda hangi bağımlılık ilişkileri var?",
+               "Bu durumda hangi ego çatışmaları var?",
+               "Bu konuda hangi gizli ajandalar olabilir?",
+               "Bu durumda kimler sorumlu, kimler kurban?",
+               "Bu konuda hangi vested interest'ler var?",
+               "Bu durumda hangi kollektif travmalar etkili olabilir?",
+               "Bu konuda hangi bilinçsiz kalıplar işliyor?",
+               "Bu durumda hangi sistem korumaları var?",
+               "Bu konuda hangi değişim dirençleri var?",
+               "Bu durumun sürdürülmesinden kimin çıkarı var?"
+           ],
+           
+           teakkul: [
+               "Bu durum hangi önceki olaylarla bağlantılı?",
+               "Bu konudaki faktörler birbirini nasıl etkiliyor?",
+               "Bu durumun sebep-sonuç zinciri nasıl?",
+               "Bu olay diğer hangi olayları tetikleyebilir?",
+               "Bu durum hangi domino etkilerine yol açabilir?",
+               "Bu konudaki değişkenler arasında nasıl ilişkiler var?",
+               "Bu durum hangi paralel durumlarla benzerlik gösteriyor?",
+               "Bu olay hangi genel kuralların/yasaların örneği?",
+               "Bu durumun mikro ve makro etkileri nasıl bağlantılı?",
+               "Bu konudaki kısa vade - uzun vade bağlantısı nedir?",
+               "Bu durum hangi döngülerin parçası?",
+               "Bu olay hangi daha büyük planın parçası olabilir?",
+               "Bu konudaki farklı seviyeler (kişisel/sosyal/küresel) nasıl bağlı?",
+               "Bu durumda hangi feedback loop'lar var?",
+               "Bu olay hangi trend'lerin parçası?",
+               "Bu durum hangi yapısal değişimleri yansıtıyor?",
+               "Bu konudaki lokal ve global etkiler nasıl bağlı?",
+               "Bu durumun diğer alanlarla (aile/iş/sağlık) bağlantısı nedir?",
+               "Bu olay hangi büyük dönüşümlerin işareti?",
+               "Bu durumda hangi karmaşık sistemler etkileşiyor?",
+               "Bu konudaki simetri ve asimetri ilişkileri neler?",
+               "Bu durumun öncül ve sonuç ilişkileri nasıl?",
+               "Bu olay hangi zincir reaksiyonları başlatabilir?",
+               "Bu konudaki merkez ve çevre dinamikleri nasıl?",
+               "Bu durumun doğrusal ve döngüsel etkileri neler?"
+           ],
+           
+           tefakkuh: [
+               "Bu analizden çıkardığım ana sonuç nedir?",
+               "Bu durumda en kritik nokta neresi?",
+               "Bu konuda en stratejik yaklaşım ne olmalı?",
+               "Bu durumda öncelik sıram nasıl olmalı?",
+               "Bu konuda hangi riskleri göze alabilirim?",
+               "Bu durumda en az zarar prensibi nasıl uygulanır?",
+               "Bu konuda win-win çözümler mümkün mü?",
+               "Bu durumda adaletin gerektirdiği nedir?",
+               "Bu konuda hikmetin gösterdiği yol nedir?",
+               "Bu durumda hangi prensiplerden taviz veremem?",
+               "Bu konuda hangi prensiplerden taviz verebilirim?",
+               "Bu durumda timing (zaman) faktörü nasıl?",
+               "Bu konuda hangi yaklaşım en etkili olur?",
+               "Bu durumda hangi yaklaşım en az yan etkili?",
+               "Bu konuda kısa vadeli stratejim ne olmalı?",
+               "Bu durumda uzun vadeli stratejim ne olmalı?",
+               "Bu konuda hangi sınırları çizmem gerekiyor?",
+               "Bu durumda hangi tavizleri verebilirim?",
+               "Bu konuda communication stratejim nasıl olmalı?",
+               "Bu durumda hangi güçlü yanlarımı kullanmalıyım?",
+               "Bu konuda hangi zayıf yanlarımı kapatmalıyım?",
+               "Bu durumda hangi fırsatları değerlendirmeliyim?",
+               "Bu konuda hangi tehditlere karşı hazırlıklı olmalıyım?",
+               "Bu durumda başarı kriterlerim neler?",
+               "Bu konuda hangi noktada pes etmeyi düşünmeliyim?"
+           ],
+           
+           tezekkur: [
+               "Bu konuda günlük yaşamımda neyi değiştirmem gerekiyor?",
+               "Bu durumla ilgili hemen başlayacağım eylemler neler?",
+               "Bu konuda gelecek hafta yapacağım 3 somut adım nedir?",
+               "Bu durumla ilgili kıracağım kötü alışkanlıklar neler?",
+               "Bu konuda edinmem gereken yeni alışkanlıklar neler?",
+               "Bu durumla ilgili iletişim tarzımı nasıl değiştirmeliyim?",
+               "Bu konuda hangi insanlarla görüşme sıklığımı değiştirmeli?",
+               "Bu durumla ilgili zaman yönetimimi nasıl düzenlemeliyim?",
+               "Bu konuda para/kaynak kullanımımı nasıl revize etmeliyim?",
+               "Bu durumla ilgili öğrenmem gereken yeni beceriler neler?",
+               "Bu konuda çevremdekilere nasıl örnek olabilirim?",
+               "Bu durumla ilgili başkalarına vereceğim öğütler neler?",
+               "Bu konuda paradigma değişikliklerim neler?",
+               "Bu durumla ilgili reddedeceğim eski inançlarım neler?",
+               "Bu konuda benimseyeceğim yeni yaklaşımlar neler?",
+               "Bu durumla ilgili ev/iş düzenimde yapacağım değişiklikler?",
+               "Bu konuda sosyal çevremde yapacağım değişiklikler neler?",
+               "Bu durumla ilgili tüketim alışkanlıklarımda değişikler?",
+               "Bu konuda bilgi kaynaklarımı nasıl revize etmeliyim?",
+               "Bu durumla ilgili eğlence/dinlenme tarzımı nasıl değiştirmeli?",
+               "Bu konuda sağlık alışkanlıklarımda yapacağım değişikler?",
+               "Bu durumla ilgili aile ilişkilerimde yapacağım düzenlemeler?",
+               "Bu konuda iş hayatımda uygulayacağım yeni prensipler?",
+               "Bu durumla ilgili kişisel gelişim planım nasıl olmalı?",
+               "Bu konuda 5 farklı zaman/mekanda uygulama örnekleri neler?"
+           ]
+       };
+
+       let questionCounter = {};
+       let tabData = {};
+
+       // Sayfa yüklendiğinde
+       window.onload = function() {
+           updateTodayDate();
+           initializeQuestions();
+           updateProgress();
+       };
+
+       function updateTodayDate() {
+           const today = new Date();
+           const options = { 
+               weekday: 'long', 
+               year: 'numeric', 
+               month: 'long', 
+               day: 'numeric' 
+           };
+           document.getElementById('todayDate').textContent = today.toLocaleDateString('tr-TR', options);
+       }
+
+       function initializeQuestions() {
+           Object.keys(questionDatabase).forEach(tab => {
+               questionCounter[tab] = 0;
+               tabData[tab] = {};
+               loadQuestions(tab);
+           });
+       }
+
+       function loadQuestions(tabName) {
+           const container = document.getElementById(`${tabName}-questions`);
+           const questions = questionDatabase[tabName];
+           
+           container.innerHTML = '';
+           
+           questions.forEach((question, index) => {
+               createQuestionSection(container, question, tabName, index);
+           });
+       }
+
+       function createQuestionSection(container, question, tabName, index) {
+           const section = document.createElement('div');
+           section.className = 'question-section';
+           
+           const questionId = `${tabName}-q${index}`;
+           
+           section.innerHTML = `
+               <h4>${question}</h4>
+               <textarea id="${questionId}" placeholder="Cevabınızı buraya yazın..." onblur="updateSummary('${tabName}')"></textarea>
+           `;
+           
+           container.appendChild(section);
+       }
+
+       function addCustomQuestion(tabName) {
+           const customQuestion = prompt("Kendi sorunuzu yazın:");
+           if (customQuestion && customQuestion.trim()) {
+               const container = document.getElementById(`${tabName}-questions`);
+               const currentQuestions = questionDatabase[tabName].length;
+               
+               // Soruyu veritabanına ekle
+               questionDatabase[tabName].push(customQuestion.trim());
+               
+               // UI'da oluştur
+               createQuestionSection(container, customQuestion.trim(), tabName, currentQuestions);
+               
+               alert("✅ Yeni soru eklendi!");
+           }
+       }
+
+       function updateSummary(tabName) {
+           const summaryContainer = document.getElementById(`${tabName}-summary`);
+           let summaryText = '';
+           
+           const questions = document.querySelectorAll(`#${tabName}-questions textarea`);
+           questions.forEach((textarea, index) => {
+               if (textarea.value.trim()) {
+                   const questionText = textarea.previousElementSibling.textContent;
+                   summaryText += `\n🔸 ${questionText}\n${textarea.value.trim()}\n`;
+               }
+           });
+           
+           tabData[tabName] = summaryText;
+           summaryContainer.textContent = summaryText || `${tabName.toUpperCase()} sekmesindeki sorulara cevap verdikçe buraya otomatik olarak toplanacak...`;
+           
+           updateProgress();
+           updateKnowledgeTab();
+       }
+
+       function updateProgress() {
+           let completedTabs = 0;
+           const totalTabs = 7;
+           
+           Object.keys(tabData).forEach(tab => {
+               if (tab !== 'knowledge' && tabData[tab] && tabData[tab].trim().length > 50) {
+                   completedTabs++;
+               }
+           });
+           
+           const progressPercentage = Math.round((completedTabs / totalTabs) * 100);
+           document.getElementById('progressFill').style.width = progressPercentage + '%';
+           document.getElementById('progressText').textContent = `${completedTabs}/${totalTabs} sekme tamamlandı`;
+       }
+
+       function updateKnowledgeTab() {
+           const knowledgeContainer = document.getElementById('final-knowledge');
+           
+           let knowledgeContent = '';
+           
+           // Başlık ve genel bilgi
+           const topic = document.getElementById('todayTopic').value;
+           if (topic) {
+               knowledgeContent += `<h3>🎯 Analiz Konusu</h3>\n${topic}\n\n`;
+           }
+           
+           knowledgeContent += `<h3>📊 INFO → DATA → 5T Süreci Özeti</h3>\n\n`;
+           
+           // Her sekmenin özetini ekle
+           const tabOrder = ['info', 'data', 'tefekkur', 'tedabbur', 'teakkul', 'tefakkuh', 'tezekkur'];
+           const tabTitles = {
+               info: '📥 INFO (Ham Bilgi)',
+               data: '📊 DATA (Sınıflandırılmış Veri)', 
+               tefekkur: '💭 TEFEKKÜR (Derin Düşünme)',
+               tedabbur: '🔍 TEDABBÜR (Arka Plana Bakma)',
+               teakkul: '🔗 TEAKKUL (Bağlantıları Kurma)',
+               tefakkuh: '⚖️ TEFAKKUH (İnce Sonuçlar)',
+               tezekkur: '🌟 TEZEKKÜR (Yaşam Tarzına Dönüştürme)'
+           };
+           
+           tabOrder.forEach(tab => {
+               if (tabData[tab] && tabData[tab].trim()) {
+                   knowledgeContent += `<h4>${tabTitles[tab]}</h4>\n`;
+                   knowledgeContent += `${tabData[tab].substring(0, 500)}${tabData[tab].length > 500 ? '...' : ''}\n\n`;
+               }
+           });
+           
+           // Final değerlendirme
+           if (Object.keys(tabData).filter(tab => tabData[tab] && tabData[tab].trim()).length >= 5) {
+               knowledgeContent += `<div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                   <h4>✅ 5T Analizi Tamamlandı!</h4>
+                   <p>INFO → DATA → KNOWLEDGE sürecini başarıyla tamamladınız. Bu analiz artık eyleme dönüştürülmeye hazır.</p>
+                   <p><strong>Bir sonraki adım:</strong> TEZEKKÜR sekmesindeki eylem planlarınızı uygulamaya başlayın.</p>
+               </div>`;
+           } else {
+               knowledgeContent += `<div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                   <h4>⏳ Analiz Devam Ediyor...</h4>
+                   <p>Daha fazla sekmeyi tamamlayarak analizinizi derinleştirin.</p>
+               </div>`;
+           }
+           
+           knowledgeContainer.innerHTML = knowledgeContent.replace(/\n/g, '<br>');
+       }
+
+       function openTab(evt, tabName) {
+           // Tüm sekmeleri gizle
+           const tabContents = document.getElementsByClassName('tab-content');
+           for (let i = 0; i < tabContents.length; i++) {
+               tabContents[i].classList.remove('active');
+           }
+           
+           // Tüm butonların active sınıfını kaldır
+           const tabButtons = document.getElementsByClassName('tab-button');
+           for (let i = 0; i < tabButtons.length; i++) {
+               tabButtons[i].classList.remove('active');
+           }
+           
+           // Seçilen sekmeyi göster ve butonunu aktif yap
+           document.getElementById(tabName).classList.add('active');
+           evt.currentTarget.classList.add('active');
+       }
+
+       function saveTodayAnalysis() {
+           const today = new Date().toISOString().split('T')[0];
+           const topic = document.getElementById('todayTopic').value;
+           
+           if (!topic.trim()) {
+               alert('⚠️ Lütfen analiz konunuzu yazın!');
+               return;
+           }
+           
+           let completedTabs = 0;
+           Object.keys(tabData).forEach(tab => {
+               if (tab !== 'knowledge' && tabData[tab] && tabData[tab].trim().length > 50) {
+                   completedTabs++;
+               }
+           });
+           
+           if (completedTabs < 5) {
+               alert('⚠️ En az 5 sekmeyi tamamlayarak kapsamlı bir analiz yapın!');
+               return;
+           }
+           
+           const analysisData = {
+               date: today,
+               topic: topic,
+               tabData: tabData,
+               completedTabs: completedTabs,
+               timestamp: new Date().toISOString()
+           };
+           
+           // LocalStorage'a kaydet
+           let savedAnalyses = JSON.parse(localStorage.getItem('5t-analyses') || '{}');
+           savedAnalyses[today] = analysisData;
+           localStorage.setItem('5t-analyses', JSON.stringify(savedAnalyses));
+           
+           alert('✅ 5T analizi başarıyla kaydedildi!');
+           updateStats();
+       }
+
+       function loadAnalysis() {
+           const savedAnalyses = JSON.parse(localStorage.getItem('5t-analyses') || '{}');
+           const today = new Date().toISOString().split('T')[0];
+           
+           if (savedAnalyses[today]) {
+               const todayData = savedAnalyses[today];
+               document.getElementById('todayTopic').value = todayData.topic || '';
+               
+               // Tab verilerini yükle
+               if (todayData.tabData) {
+                   tabData = todayData.tabData;
+                   
+                   // Her sekmedeki cevapları geri yükle
+                   Object.keys(tabData).forEach(tab => {
+                       const summaryContainer = document.getElementById(`${tab}-summary`);
+                       if (summaryContainer) {
+                           summaryContainer.textContent = tabData[tab] || '';
+                       }
+                   });
+               }
+               
+               updateProgress();
+               updateKnowledgeTab();
+               alert('📥 Bugünün analizi yüklendi!');
+           } else {
+               alert('ℹ️ Bugün için kayıtlı analiz bulunamadı.');
+           }
+       }
+
+       function showHistory() {
+           const savedAnalyses = JSON.parse(localStorage.getItem('5t-analyses') || '{}');
+           const dates = Object.keys(savedAnalyses).sort().reverse();
+           
+           if (dates.length === 0) {
+               alert('📚 Henüz kaydedilmiş analiz bulunmuyor.');
+               return;
+           }
+           
+           let historyText = '📚 Geçmiş 5T Analizleri:\n\n';
+           dates.slice(0, 10).forEach(date => {
+               const analysis = savedAnalyses[date];
+               const formattedDate = new Date(date).toLocaleDateString('tr-TR');
+               historyText += `📅 ${formattedDate}\n`;
+               historyText += `🎯 ${analysis.topic.substring(0, 80)}...\n`;
+               historyText += `📊 ${analysis.completedTabs}/7 sekme\n\n`;
+           });
+           
+           alert(historyText);
+       }
+
+       function updateStats() {
+           const savedAnalyses = JSON.parse(localStorage.getItem('5t-analyses') || '{}');
+           const totalAnalyses = Object.keys(savedAnalyses).length;
+           
+           document.getElementById('totalAnalyses').textContent = totalAnalyses;
+           
+           // Diğer istatistikler buraya eklenebilir
+           const avgCompletion = totalAnalyses > 0 ? 
+               Math.round(Object.values(savedAnalyses).reduce((sum, analysis) => sum + (analysis.completedTabs || 0), 0) / totalAnalyses * 100 / 7) : 0;
+           
+           document.getElementById('completionRate').textContent = avgCompletion;
+       }
+
+       // İlk yükleme
+       setTimeout(updateStats, 1000);
+   </script>
+</body>
+</html>
