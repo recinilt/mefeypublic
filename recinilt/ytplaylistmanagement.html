@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Playlist Yöneticisi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .api-key-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e1e5f2;
+        }
+
+        .api-key-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], input[type="url"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e5f2;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            min-width: 250px;
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .update-btn {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            margin-left: 10px;
+        }
+
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .channel-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .channel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .channel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .channel-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin-right: 15px;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+
+        .channel-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+        }
+
+        .channel-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .playlists-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .playlists-container.expanded {
+            max-height: 1000px;
+        }
+
+        .playlist-item {
+            background: #f8f9ff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .playlist-item:hover {
+            background: #e8ecff;
+            transform: translateX(5px);
+        }
+
+        .playlist-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .playlist-thumbnail {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .playlist-info {
+            flex: 1;
+        }
+
+        .playlist-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .playlist-info p {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .videos-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 15px;
+        }
+
+        .videos-container.expanded {
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .video-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .video-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .video-thumbnail {
+            width: 80px;
+            height: 60px;
+            border-radius: 8px;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .video-info {
+            flex: 1;
+        }
+
+        .video-info h5 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 0.95rem;
+        }
+
+        .video-info p {
+            color: #666;
+            font-size: 0.8rem;
+        }
+
+        .watch-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 15px;
+        }
+
+        .counter-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .counter-btn.minus {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+        }
+
+        .counter-btn.plus {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .counter-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .watch-count {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            background: #f0f2ff;
+            padding: 6px 12px;
+            border-radius: 15px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 350px;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification h4 {
+            margin-bottom: 8px;
+        }
+
+        .notification ul {
+            margin-left: 15px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .new-video-badge {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input[type="text"], input[type="url"] {
+                min-width: 100%;
+            }
+            
+            .channels-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 YouTube Playlist Yöneticisi</h1>
+        
+        <div class="api-key-section">
+            <h3>🔑 API Ayarları</h3>
+            <p style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #1565c0; line-height: 1.5;">
+                <strong>📝 API Anahtarı Nasıl Alınır:</strong><br>
+                1. <a href="https://console.cloud.google.com/" target="_blank" style="color: #1976d2;">Google Cloud Console</a>'a gidin<br>
+                2. Yeni proje oluşturun veya mevcut projeyi seçin<br>
+                3. "API'ler ve Hizmetler" → "Kütüphane" → "YouTube Data API v3" etkinleştirin<br>
+                4. "Kimlik bilgileri" → "Kimlik bilgisi oluştur" → "API anahtarı" seçin
+            </p>
+            <div class="input-group">
+                <input type="text" id="apiKey" placeholder="YouTube Data API v3 anahtarınızı girin">
+                <button onclick="saveApiKey()">API Anahtarını Kaydet</button>
+            </div>
+            
+            <div class="input-group">
+                <input type="url" id="channelInput" placeholder="YouTube kanal URL'sini veya ID'sini girin">
+                <button onclick="addChannel()">Kanal Ekle</button>
+                <button class="update-btn" onclick="updateAllChannels()">Tüm Kanalları Güncelle</button>
+            </div>
+        </div>
+
+        <div id="channelsContainer" class="channels-grid"></div>
+    </div>
+
+    <div id="notification" class="notification">
+        <h4>🆕 Yeni Videolar Bulundu!</h4>
+        <ul id="newVideosList"></ul>
+    </div>
+
+    <script>
+        let apiKey = '';
+        let channels = [];
+        let watchCounts = {};
+
+        // Sayfa yüklendiğinde verileri yükle
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            displayChannels();
+        });
+
+        function loadData() {
+            apiKey = localStorage.getItem('youtube-api-key') || '';
+            channels = JSON.parse(localStorage.getItem('youtube-channels') || '[]');
+            watchCounts = JSON.parse(localStorage.getItem('youtube-watch-counts') || '{}');
+            
+            if (apiKey) {
+                document.getElementById('apiKey').value = apiKey;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('youtube-api-key', apiKey);
+            localStorage.setItem('youtube-channels', JSON.stringify(channels));
+            localStorage.setItem('youtube-watch-counts', JSON.stringify(watchCounts));
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('apiKey');
+            apiKey = input.value.trim();
+            
+            if (!apiKey) {
+                showError('Lütfen geçerli bir API anahtarı girin!');
+                return;
+            }
+            
+            saveData();
+            showNotification('API anahtarı başarıyla kaydedildi!', []);
+        }
+
+        function extractChannelId(url) {
+            // YouTube kanal URL'sinden ID çıkarma
+            const patterns = [
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/channel\/(UC[\w-]+)/,
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/c\/([\w-]+)/,
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/user\/([\w-]+)/,
+                /(?:https?:\/\/)?(?:www\.)?youtube\.com\/@([\w-]+)/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            
+            // Sadece ID girilmişse
+            if (url.match(/^UC[\w-]+$/)) return url;
+            
+            return null;
+        }
+
+        async function getChannelIdFromCustomUrl(customUrl) {
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(customUrl)}&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    return data.items[0].snippet.channelId;
+                }
+            } catch (error) {
+                console.error('Kanal ID bulunamadı:', error);
+            }
+            return null;
+        }
+
+        async function addChannel() {
+            if (!apiKey) {
+                showError('Önce API anahtarını kaydetmelisiniz!');
+                return;
+            }
+
+            const input = document.getElementById('channelInput');
+            const channelUrl = input.value.trim();
+            
+            if (!channelUrl) {
+                showError('Lütfen bir kanal URL\'si girin!');
+                return;
+            }
+
+            try {
+                showLoading();
+                let channelId = extractChannelId(channelUrl);
+                
+                // Eğer custom URL ise, kanal ID'sini bul
+                if (!channelId) {
+                    channelId = await getChannelIdFromCustomUrl(channelUrl);
+                }
+                
+                if (!channelId) {
+                    showError('Geçersiz YouTube kanal URL\'si!');
+                    hideLoading();
+                    return;
+                }
+
+                // Kanal zaten ekli mi kontrol et
+                if (channels.some(ch => ch.id === channelId)) {
+                    showError('Bu kanal zaten ekli!');
+                    hideLoading();
+                    return;
+                }
+
+                const channelData = await fetchChannelData(channelId);
+                const playlists = await fetchChannelPlaylists(channelId);
+                
+                const channel = {
+                    id: channelId,
+                    title: channelData.title,
+                    description: channelData.description,
+                    thumbnail: channelData.thumbnail,
+                    playlists: playlists,
+                    addedAt: new Date().toISOString()
+                };
+
+                channels.push(channel);
+                saveData();
+                
+                input.value = '';
+                displayChannels();
+                hideLoading();
+                
+                showNotification('Kanal başarıyla eklendi!', []);
+
+            } catch (error) {
+                console.error('Kanal eklenirken hata:', error);
+                showError('Kanal eklenirken bir hata oluştu: ' + error.message);
+                hideLoading();
+            }
+        }
+
+        async function fetchChannelData(channelId) {
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`);
+            const data = await response.json();
+            
+            if (!response.ok || !data.items || data.items.length === 0) {
+                throw new Error(data.error?.message || 'Kanal bulunamadı');
+            }
+
+            const channel = data.items[0];
+            return {
+                title: channel.snippet.title,
+                description: channel.snippet.description,
+                thumbnail: channel.snippet.thumbnails.medium.url,
+                subscriberCount: channel.statistics.subscriberCount
+            };
+        }
+
+        async function fetchChannelPlaylists(channelId) {
+            const playlists = [];
+            let nextPageToken = '';
+            
+            do {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Playlistler alınamadı');
+                }
+
+                for (let playlist of data.items) {
+                    const videos = await fetchPlaylistVideos(playlist.id);
+                    playlists.push({
+                        id: playlist.id,
+                        title: playlist.snippet.title,
+                        description: playlist.snippet.description,
+                        thumbnail: playlist.snippet.thumbnails.medium?.url || playlist.snippet.thumbnails.default.url,
+                        videoCount: playlist.contentDetails.itemCount,
+                        videos: videos
+                    });
+                }
+                
+                nextPageToken = data.nextPageToken || '';
+            } while (nextPageToken);
+            
+            return playlists;
+        }
+
+        async function fetchPlaylistVideos(playlistId) {
+            const videos = [];
+            let nextPageToken = '';
+            
+            do {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    console.error('Playlist videoları alınamadı:', data.error);
+                    break;
+                }
+
+                for (let item of data.items) {
+                    videos.push({
+                        id: item.snippet.resourceId.videoId,
+                        title: item.snippet.title,
+                        description: item.snippet.description,
+                        thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
+                        publishedAt: item.snippet.publishedAt,
+                        position: item.snippet.position
+                    });
+                }
+                
+                nextPageToken = data.nextPageToken || '';
+            } while (nextPageToken);
+            
+            return videos;
+        }
+
+        function displayChannels() {
+            const container = document.getElementById('channelsContainer');
+            
+            if (channels.length === 0) {
+                container.innerHTML = '<div class="loading">Henüz hiç kanal eklenmemiş. Yukarıdan yeni kanal ekleyebilirsiniz.</div>';
+                return;
+            }
+
+            container.innerHTML = channels.map(channel => `
+                <div class="channel-card">
+                    <div class="channel-header" onclick="toggleChannelPlaylists('${channel.id}')">
+                        <img src="${channel.thumbnail}" alt="${channel.title}" class="channel-thumbnail">
+                        <div class="channel-info">
+                            <h3>${channel.title}</h3>
+                            <p>${channel.playlists.length} playlist</p>
+                        </div>
+                    </div>
+                    <div class="playlists-container" id="playlists-${channel.id}">
+                        ${channel.playlists.map(playlist => `
+                            <div class="playlist-item">
+                                <div class="playlist-header" onclick="togglePlaylistVideos('${playlist.id}')">
+                                    <img src="${playlist.thumbnail}" alt="${playlist.title}" class="playlist-thumbnail">
+                                    <div class="playlist-info">
+                                        <h4>${playlist.title}</h4>
+                                        <p>${playlist.videoCount} video</p>
+                                    </div>
+                                </div>
+                                <div class="videos-container" id="videos-${playlist.id}">
+                                    ${playlist.videos.map(video => `
+                                        <div class="video-item">
+                                            <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+                                            <div class="video-info">
+                                                <h5>${video.title}</h5>
+                                                <p>Yayınlanma: ${new Date(video.publishedAt).toLocaleDateString('tr-TR')}</p>
+                                            </div>
+                                            ${video.isNew ? '<span class="new-video-badge">YENİ</span>' : ''}
+                                            <div class="watch-counter">
+                                                <button class="counter-btn minus" onclick="updateWatchCount('${video.id}', -1)">−</button>
+                                                <span class="watch-count">${watchCounts[video.id] || 0}</span>
+                                                <button class="counter-btn plus" onclick="updateWatchCount('${video.id}', 1)">+</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleChannelPlaylists(channelId) {
+            const container = document.getElementById(`playlists-${channelId}`);
+            container.classList.toggle('expanded');
+        }
+
+        function togglePlaylistVideos(playlistId) {
+            const container = document.getElementById(`videos-${playlistId}`);
+            container.classList.toggle('expanded');
+        }
+
+        function updateWatchCount(videoId, change) {
+            if (!watchCounts[videoId]) {
+                watchCounts[videoId] = 0;
+            }
+            
+            watchCounts[videoId] = Math.max(0, watchCounts[videoId] + change);
+            saveData();
+            displayChannels();
+        }
+
+        async function updateAllChannels() {
+            if (!apiKey) {
+                showError('Önce API anahtarını kaydetmelisiniz!');
+                return;
+            }
+
+            if (channels.length === 0) {
+                showError('Güncellenecek kanal bulunamadı!');
+                return;
+            }
+
+            try {
+                showLoading();
+                const newVideos = [];
+
+                for (let channel of channels) {
+                    const updatedPlaylists = await fetchChannelPlaylists(channel.id);
+                    
+                    // Yeni videoları bul
+                    for (let updatedPlaylist of updatedPlaylists) {
+                        const oldPlaylist = channel.playlists.find(p => p.id === updatedPlaylist.id);
+                        
+                        if (oldPlaylist) {
+                            const oldVideoIds = new Set(oldPlaylist.videos.map(v => v.id));
+                            const newPlaylistVideos = updatedPlaylist.videos.filter(v => !oldVideoIds.has(v.id));
+                            
+                            // Yeni videoları işaretle
+                            newPlaylistVideos.forEach(video => {
+                                video.isNew = true;
+                                newVideos.push({
+                                    channelTitle: channel.title,
+                                    playlistTitle: updatedPlaylist.title,
+                                    videoTitle: video.title
+                                });
+                            });
+                        }
+                    }
+                    
+                    channel.playlists = updatedPlaylists;
+                }
+
+                saveData();
+                displayChannels();
+                hideLoading();
+
+                if (newVideos.length > 0) {
+                    showNotification('Yeni videolar bulundu!', newVideos);
+                } else {
+                    showNotification('Güncelleme tamamlandı - Yeni video bulunamadı.', []);
+                }
+
+            } catch (error) {
+                console.error('Güncelleme hatası:', error);
+                showError('Kanallar güncellenirken bir hata oluştu: ' + error.message);
+                hideLoading();
+            }
+        }
+
+        function showNotification(message, newVideos) {
+            const notification = document.getElementById('notification');
+            const videosList = document.getElementById('newVideosList');
+            
+            notification.querySelector('h4').textContent = message;
+            
+            if (newVideos.length > 0) {
+                videosList.innerHTML = newVideos.slice(0, 5).map(video => 
+                    `<li><strong>${video.channelTitle}</strong> - ${video.playlistTitle}: ${video.videoTitle}</li>`
+                ).join('');
+                
+                if (newVideos.length > 5) {
+                    videosList.innerHTML += `<li>... ve ${newVideos.length - 5} video daha</li>`;
+                }
+            } else {
+                videosList.innerHTML = '';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        function showError(message) {
+            const container = document.getElementById('channelsContainer');
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            container.insertBefore(errorDiv, container.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function showLoading() {
+            const container = document.getElementById('channelsContainer');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'loading';
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.innerHTML = '⏳ Yükleniyor...';
+            
+            container.appendChild(loadingDiv);
+        }
+
+        function hideLoading() {
+            const loading = document.getElementById('loading-indicator');
+            if (loading) {
+                loading.remove();
+            }
+        }
+    </script>
+</body>
+</html>
