@@ -382,11 +382,6 @@
         
         <div class="api-key-section">
             <h3>🔑 API Ayarları</h3>
-            <p style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #856404; line-height: 1.5; border-left: 4px solid #ffc107;">
-                <strong>⚠️ CORS Sorunu Çözümü:</strong><br>
-                Uygulama önce <strong>CodeTabs</strong>, sonra <strong>AllOrigins</strong>, ardından <strong>CORS-Anywhere</strong> proxy'lerini dener.<br>
-                Eğer çalışmazsa: Chrome'u <code>--disable-web-security</code> ile başlatın veya CORS eklentisi kurun.
-            </p>
             <p style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #1565c0; line-height: 1.5;">
                 <strong>📝 API Anahtarı Nasıl Alınır:</strong><br>
                 1. <a href="https://console.cloud.google.com/" target="_blank" style="color: #1976d2;">Google Cloud Console</a>'a gidin<br>
@@ -475,27 +470,15 @@
         }
 
         async function getChannelIdFromCustomUrl(customUrl) {
-            const apiUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(customUrl)}&key=${apiKey}`;
-            
-            const proxies = [
-                'https://api.codetabs.com/v1/proxy?quest=',
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/'
-            ];
-            
-            for (let proxy of proxies) {
-                try {
-                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
-                    
-                    if (data.items && data.items.length > 0) {
-                        return data.items[0].snippet.channelId;
-                    }
-                } catch (error) {
-                    console.log(`${proxy} proxy'si başarısız:`, error.message);
-                    continue;
+            try {
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=channel&q=${encodeURIComponent(customUrl)}&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    return data.items[0].snippet.channelId;
                 }
+            } catch (error) {
+                console.error('Kanal ID bulunamadı:', error);
             }
             return null;
         }
@@ -565,92 +548,47 @@
         }
 
         async function fetchChannelData(channelId) {
-            const apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`;
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`);
+            const data = await response.json();
             
-            // Farklı proxy'leri sırayla dene
-            const proxies = [
-                'https://api.codetabs.com/v1/proxy?quest=',
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/'
-            ];
-            
-            for (let proxy of proxies) {
-                try {
-                    console.log(`${proxy} proxy'si deneniyor...`);
-                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
-                    const response = await fetch(proxyUrl);
-                    const data = await response.json();
-                    
-                    if (!response.ok || !data.items || data.items.length === 0) {
-                        throw new Error(data.error?.message || 'Kanal bulunamadı');
-                    }
-
-                    console.log(`${proxy} proxy'si başarılı!`);
-                    const channel = data.items[0];
-                    return {
-                        title: channel.snippet.title,
-                        description: channel.snippet.description,
-                        thumbnail: channel.snippet.thumbnails.medium.url,
-                        subscriberCount: channel.statistics.subscriberCount
-                    };
-                } catch (error) {
-                    console.log(`${proxy} proxy'si başarısız:`, error.message);
-                    continue;
-                }
+            if (!response.ok || !data.items || data.items.length === 0) {
+                throw new Error(data.error?.message || 'Kanal bulunamadı');
             }
-            
-            // Tüm proxy'ler başarısız olursa
-            throw new Error('CORS hatası: Tüm proxy servisleri başarısız oldu. Bu uygulamayı localhost\'ta veya kendi sunucunuzda çalıştırmanız gerekiyor. Alternatif olarak, tarayıcı eklentisi ile CORS\'u devre dışı bırakabilirsiniz.');
+
+            const channel = data.items[0];
+            return {
+                title: channel.snippet.title,
+                description: channel.snippet.description,
+                thumbnail: channel.snippet.thumbnails.medium.url,
+                subscriberCount: channel.statistics.subscriberCount
+            };
         }
 
         async function fetchChannelPlaylists(channelId) {
             const playlists = [];
             let nextPageToken = '';
             
-            const proxies = [
-                'https://api.codetabs.com/v1/proxy?quest=',
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/'
-            ];
-            
             do {
-                let success = false;
-                for (let proxy of proxies) {
-                    try {
-                        const apiUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
-                        const proxyUrl = proxy + encodeURIComponent(apiUrl);
-                        const response = await fetch(proxyUrl);
-                        const data = await response.json();
-                        
-                        if (!response.ok) {
-                            throw new Error(data.error?.message || 'Playlistler alınamadı');
-                        }
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`);
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error?.message || 'Playlistler alınamadı');
+                }
 
-                        for (let playlist of data.items) {
-                            const videos = await fetchPlaylistVideos(playlist.id);
-                            playlists.push({
-                                id: playlist.id,
-                                title: playlist.snippet.title,
-                                description: playlist.snippet.description,
-                                thumbnail: playlist.snippet.thumbnails.medium?.url || playlist.snippet.thumbnails.default.url,
-                                videoCount: playlist.contentDetails.itemCount,
-                                videos: videos
-                            });
-                        }
-                        
-                        nextPageToken = data.nextPageToken || '';
-                        success = true;
-                        break;
-                    } catch (error) {
-                        console.log(`${proxy} proxy'si başarısız:`, error.message);
-                        continue;
-                    }
+                for (let playlist of data.items) {
+                    const videos = await fetchPlaylistVideos(playlist.id);
+                    playlists.push({
+                        id: playlist.id,
+                        title: playlist.snippet.title,
+                        description: playlist.snippet.description,
+                        thumbnail: playlist.snippet.thumbnails.medium?.url || playlist.snippet.thumbnails.default.url,
+                        videoCount: playlist.contentDetails.itemCount,
+                        videos: videos
+                    });
                 }
                 
-                if (!success) {
-                    console.error('Tüm proxy\'ler başarısız oldu');
-                    break;
-                }
+                nextPageToken = data.nextPageToken || '';
             } while (nextPageToken);
             
             return playlists;
@@ -660,49 +598,27 @@
             const videos = [];
             let nextPageToken = '';
             
-            const proxies = [
-                'https://api.codetabs.com/v1/proxy?quest=',
-                'https://api.allorigins.win/raw?url=',
-                'https://cors-anywhere.herokuapp.com/'
-            ];
-            
             do {
-                let success = false;
-                for (let proxy of proxies) {
-                    try {
-                        const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
-                        const proxyUrl = proxy + encodeURIComponent(apiUrl);
-                        const response = await fetch(proxyUrl);
-                        const data = await response.json();
-                        
-                        if (!response.ok) {
-                            throw new Error('Playlist videoları alınamadı');
-                        }
-
-                        for (let item of data.items) {
-                            videos.push({
-                                id: item.snippet.resourceId.videoId,
-                                title: item.snippet.title,
-                                description: item.snippet.description,
-                                thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-                                publishedAt: item.snippet.publishedAt,
-                                position: item.snippet.position
-                            });
-                        }
-                        
-                        nextPageToken = data.nextPageToken || '';
-                        success = true;
-                        break;
-                    } catch (error) {
-                        console.log(`${proxy} proxy'si başarısız:`, error.message);
-                        continue;
-                    }
-                }
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`);
+                const data = await response.json();
                 
-                if (!success) {
-                    console.error('Tüm proxy\'ler başarısız oldu');
+                if (!response.ok) {
+                    console.error('Playlist videoları alınamadı:', data.error);
                     break;
                 }
+
+                for (let item of data.items) {
+                    videos.push({
+                        id: item.snippet.resourceId.videoId,
+                        title: item.snippet.title,
+                        description: item.snippet.description,
+                        thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
+                        publishedAt: item.snippet.publishedAt,
+                        position: item.snippet.position
+                    });
+                }
+                
+                nextPageToken = data.nextPageToken || '';
             } while (nextPageToken);
             
             return videos;
