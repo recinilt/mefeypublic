@@ -26,7 +26,6 @@
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            min-height: auto;
         }
 
         h1 {
@@ -182,11 +181,13 @@
         }
 
         .playlists-container {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
         }
 
         .playlists-container.expanded {
-            display: block;
+            max-height: 1000px;
         }
 
         .playlist-item {
@@ -233,12 +234,15 @@
         }
 
         .videos-container {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             margin-top: 15px;
         }
 
         .videos-container.expanded {
-            display: block;
+            max-height: 800px;
+            overflow-y: auto;
         }
 
         .video-item {
@@ -449,10 +453,6 @@
             .watch-counter {
                 margin: 0;
                 align-self: center;
-            }
-
-            .videos-list {
-                max-height: 500px;
             }
         }
 
@@ -908,7 +908,6 @@
         }
 
         function updateWatchCount(videoId, change) {
-            event.stopPropagation();
             if (!watchCounts[videoId]) {
                 watchCounts[videoId] = 0;
             }

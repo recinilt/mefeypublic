@@ -26,7 +26,6 @@
             padding: 30px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
-            min-height: auto;
         }
 
         h1 {
@@ -101,25 +100,10 @@
             margin-left: 10px;
         }
 
-        .delete-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            padding: 8px 12px;
-            font-size: 14px;
-            border-radius: 20px;
-            margin-left: 10px;
-            min-width: auto;
-        }
-
-        .delete-btn:hover {
-            background: linear-gradient(45deg, #ee5a24, #c44c2c);
-            box-shadow: 0 8px 25px rgba(238, 90, 36, 0.3);
-        }
-
-        /* Kanalları tek satırda göster */
-        .channels-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
             margin-top: 30px;
         }
 
@@ -130,7 +114,6 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             border: 2px solid transparent;
-            width: 100%;
         }
 
         .channel-card:hover {
@@ -142,15 +125,8 @@
         .channel-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            margin-bottom: 15px;
             cursor: pointer;
-            width: 100%;
-        }
-
-        .channel-main-info {
-            display: flex;
-            align-items: center;
-            flex: 1;
         }
 
         .channel-thumbnail {
@@ -160,7 +136,6 @@
             margin-right: 15px;
             object-fit: cover;
             border: 3px solid #667eea;
-            flex-shrink: 0;
         }
 
         .channel-info h3 {
@@ -174,19 +149,14 @@
             font-size: 0.9rem;
         }
 
-        .channel-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-        }
-
         .playlists-container {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
         }
 
         .playlists-container.expanded {
-            display: block;
+            max-height: 1000px;
         }
 
         .playlist-item {
@@ -233,12 +203,15 @@
         }
 
         .videos-container {
-            display: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
             margin-top: 15px;
         }
 
         .videos-container.expanded {
-            display: block;
+            max-height: 800px;
+            overflow-y: auto;
         }
 
         .video-item {
@@ -263,7 +236,6 @@
             border-radius: 8px;
             margin-right: 15px;
             object-fit: cover;
-            flex-shrink: 0;
         }
 
         .video-info {
@@ -286,7 +258,6 @@
             align-items: center;
             gap: 8px;
             margin-left: 15px;
-            flex-shrink: 0;
         }
 
         .counter-btn {
@@ -386,14 +357,9 @@
             100% { opacity: 1; }
         }
 
-        /* Mobil ve tablet responsive */
         @media (max-width: 768px) {
             .container {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 2rem;
+                padding: 20px;
             }
             
             .input-group {
@@ -404,80 +370,8 @@
                 min-width: 100%;
             }
             
-            button {
-                margin: 0;
-            }
-            
-            .update-btn {
-                margin-left: 0;
-                margin-top: 10px;
-            }
-            
-            .channel-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .channel-main-info {
-                width: 100%;
-            }
-            
-            .channel-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-            
-            .channel-thumbnail {
-                width: 50px;
-                height: 50px;
-            }
-            
-            .video-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .video-thumbnail {
-                width: 100%;
-                height: auto;
-                max-width: 200px;
-                align-self: center;
-            }
-            
-            .watch-counter {
-                margin: 0;
-                align-self: center;
-            }
-
-            .videos-list {
-                max-height: 500px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 10px;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .channel-info h3 {
-                font-size: 1.1rem;
-            }
-            
-            .playlist-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-            
-            .playlist-thumbnail {
-                width: 40px;
-                height: 40px;
+            .channels-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -490,10 +384,8 @@
             <h3>🔑 API Ayarları</h3>
             <p style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #856404; line-height: 1.5; border-left: 4px solid #ffc107;">
                 <strong>⚠️ CORS Sorunu Çözümü:</strong><br>
-                Proxy'ler çalışmadığı için uygulama demo modda çalışacak. Gerçek veri için:<br>
-                1. <strong>Chrome CORS Eklentisi:</strong> "CORS Unblock" veya "Disable CORS" kurun<br>
-                2. <strong>Chrome Terminal:</strong> <code>chrome --disable-web-security --user-data-dir=/tmp/chrome_dev</code><br>
-                3. <strong>Localhost:</strong> Bu HTML dosyasını bir web sunucusunda çalıştırın
+                Uygulama sırayla <strong>CORSProxy.io</strong>, <strong>AllOrigins</strong>, <strong>CORS-Anywhere</strong> ve <strong>ThingProxy</strong>'yi dener.<br>
+                Eğer çalışmazsa: Chrome'u <code>--disable-web-security</code> ile başlatın veya CORS eklentisi kurun.
             </p>
             <p style="background: #e3f2fd; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; color: #1565c0; line-height: 1.5;">
                 <strong>📝 API Anahtarı Nasıl Alınır:</strong><br>
@@ -514,7 +406,7 @@
             </div>
         </div>
 
-        <div id="channelsContainer" class="channels-container"></div>
+        <div id="channelsContainer" class="channels-grid"></div>
     </div>
 
     <div id="notification" class="notification">
@@ -633,9 +525,9 @@
                 }
                 
                 if (!channelId) {
-                    // Demo kanal ID'si oluştur
-                    channelId = 'UC' + Math.random().toString(36).substring(2, 15);
-                    console.log('Demo kanal ID oluşturuldu:', channelId);
+                    showError('Geçersiz YouTube kanal URL\'si!');
+                    hideLoading();
+                    return;
                 }
 
                 // Kanal zaten ekli mi kontrol et
@@ -654,8 +546,7 @@
                     description: channelData.description,
                     thumbnail: channelData.thumbnail,
                     playlists: playlists,
-                    addedAt: new Date().toISOString(),
-                    isDemo: channelData.title.includes('Demo') // Demo kanalı işaretle
+                    addedAt: new Date().toISOString()
                 };
 
                 channels.push(channel);
@@ -665,11 +556,7 @@
                 displayChannels();
                 hideLoading();
                 
-                if (channel.isDemo) {
-                    showNotification('Demo kanal eklendi! CORS sorunu nedeniyle gerçek veri gösterilemiyor.', []);
-                } else {
-                    showNotification('Kanal başarıyla eklendi!', []);
-                }
+                showNotification('Kanal başarıyla eklendi!', []);
 
             } catch (error) {
                 console.error('Kanal eklenirken hata:', error);
@@ -678,167 +565,151 @@
             }
         }
 
-        function deleteChannel(channelId) {
-            if (confirm('Bu kanalı silmek istediğinizden emin misiniz?')) {
-                const channelIndex = channels.findIndex(ch => ch.id === channelId);
-                if (channelIndex !== -1) {
-                    const deletedChannel = channels[channelIndex];
-                    channels.splice(channelIndex, 1);
-                    
-                    // Bu kanala ait video izlenme sayılarını da temizle
-                    deletedChannel.playlists.forEach(playlist => {
-                        playlist.videos.forEach(video => {
-                            delete watchCounts[video.id];
-                        });
-                    });
-                    
-                    saveData();
-                    displayChannels();
-                    showNotification(`${deletedChannel.title} kanalı silindi!`, []);
-                }
-            }
-        }
-
         async function fetchChannelData(channelId) {
-            // Önce doğrudan API'yi dene
-            try {
-                console.log('Doğrudan YouTube API deneniyor...');
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`);
-                const data = await response.json();
-                
-                if (!response.ok || !data.items || data.items.length === 0) {
-                    throw new Error(data.error?.message || 'Kanal bulunamadı');
-                }
+            const apiUrl = `https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&id=${channelId}&key=${apiKey}`;
+            
+            // Farklı proxy'leri sırayla dene
+            const proxies = [
+                'https://corsproxy.io/?',
+                'https://api.allorigins.win/raw?url=',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://thingproxy.freeboard.io/fetch/'
+            ];
+            
+            for (let proxy of proxies) {
+                try {
+                    console.log(`${proxy} proxy'si deneniyor...`);
+                    const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                    const response = await fetch(proxyUrl);
+                    const data = await response.json();
+                    
+                    if (!response.ok || !data.items || data.items.length === 0) {
+                        throw new Error(data.error?.message || 'Kanal bulunamadı');
+                    }
 
-                console.log('Doğrudan API başarılı!');
-                const channel = data.items[0];
-                return {
-                    title: channel.snippet.title,
-                    description: channel.snippet.description,
-                    thumbnail: channel.snippet.thumbnails.medium.url,
-                    subscriberCount: channel.statistics.subscriberCount
-                };
-            } catch (directError) {
-                console.log('Doğrudan API başarısız:', directError.message);
-                
-                // CORS hatası ise demo veri sun
-                if (directError.message.includes('CORS') || directError.message.includes('Failed to fetch')) {
-                    console.log('CORS hatası tespit edildi, demo veri sunuluyor...');
+                    console.log(`${proxy} proxy'si başarılı!`);
+                    const channel = data.items[0];
                     return {
-                        title: `Demo Kanal (${channelId.substring(0, 8)})`,
-                        description: 'Bu bir demo kanal. CORS sorunu nedeniyle gerçek veri alınamadı.',
-                        thumbnail: 'https://via.placeholder.com/240x240/667eea/ffffff?text=Demo+Kanal',
-                        subscriberCount: '1000000'
+                        title: channel.snippet.title,
+                        description: channel.snippet.description,
+                        thumbnail: channel.snippet.thumbnails.medium.url,
+                        subscriberCount: channel.statistics.subscriberCount
                     };
+                } catch (error) {
+                    console.log(`${proxy} proxy'si başarısız:`, error.message);
+                    continue;
                 }
-                
-                throw directError;
             }
+            
+            // Tüm proxy'ler başarısız olursa
+            throw new Error('CORS hatası: Tüm proxy servisleri başarısız oldu. Bu uygulamayı localhost\'ta veya kendi sunucunuzda çalıştırmanız gerekiyor. Alternatif olarak, tarayıcı eklentisi ile CORS\'u devre dışı bırakabilirsiniz.');
         }
 
         async function fetchChannelPlaylists(channelId) {
-            try {
-                console.log('Doğrudan API ile playlistler alınıyor...');
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&key=${apiKey}`);
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.error?.message || 'Playlistler alınamadı');
-                }
+            const playlists = [];
+            let nextPageToken = '';
+            
+            const proxies = [
+                'https://corsproxy.io/?',
+                'https://api.allorigins.win/raw?url=',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://thingproxy.freeboard.io/fetch/'
+            ];
+            
+            do {
+                let success = false;
+                for (let proxy of proxies) {
+                    try {
+                        const apiUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet,contentDetails&channelId=${channelId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
+                        const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error(data.error?.message || 'Playlistler alınamadı');
+                        }
 
-                const playlists = [];
-                for (let playlist of data.items) {
-                    const videos = await fetchPlaylistVideos(playlist.id);
-                    playlists.push({
-                        id: playlist.id,
-                        title: playlist.snippet.title,
-                        description: playlist.snippet.description,
-                        thumbnail: playlist.snippet.thumbnails.medium?.url || playlist.snippet.thumbnails.default.url,
-                        videoCount: playlist.contentDetails.itemCount,
-                        videos: videos
-                    });
+                        for (let playlist of data.items) {
+                            const videos = await fetchPlaylistVideos(playlist.id);
+                            playlists.push({
+                                id: playlist.id,
+                                title: playlist.snippet.title,
+                                description: playlist.snippet.description,
+                                thumbnail: playlist.snippet.thumbnails.medium?.url || playlist.snippet.thumbnails.default.url,
+                                videoCount: playlist.contentDetails.itemCount,
+                                videos: videos
+                            });
+                        }
+                        
+                        nextPageToken = data.nextPageToken || '';
+                        success = true;
+                        break;
+                    } catch (error) {
+                        console.log(`${proxy} proxy'si başarısız:`, error.message);
+                        continue;
+                    }
                 }
                 
-                return playlists;
-            } catch (error) {
-                console.log('Doğrudan API başarısız, demo playlist sunuluyor:', error.message);
-                
-                // Demo playlist'ler döndür
-                return [
-                    {
-                        id: 'demo-playlist-1',
-                        title: 'Demo Playlist A',
-                        description: 'Bu bir demo playlist. CORS sorunu nedeniyle gerçek veri alınamadı.',
-                        thumbnail: 'https://via.placeholder.com/480x360/4ecdc4/ffffff?text=Playlist+A',
-                        videoCount: 5,
-                        videos: [
-                            {
-                                id: 'demo-video-1',
-                                title: 'Demo Video 1 - JavaScript Temelleri',
-                                description: 'Bu bir demo video açıklaması',
-                                thumbnail: 'https://via.placeholder.com/320x180/ff6b6b/ffffff?text=Video+1',
-                                publishedAt: new Date().toISOString(),
-                                position: 0
-                            },
-                            {
-                                id: 'demo-video-2',
-                                title: 'Demo Video 2 - API Kullanımı',
-                                description: 'Bu bir demo video açıklaması',
-                                thumbnail: 'https://via.placeholder.com/320x180/4ecdc4/ffffff?text=Video+2',
-                                publishedAt: new Date().toISOString(),
-                                position: 1
-                            }
-                        ]
-                    },
-                    {
-                        id: 'demo-playlist-2',
-                        title: 'Demo Playlist B',
-                        description: 'İkinci demo playlist',
-                        thumbnail: 'https://via.placeholder.com/480x360/764ba2/ffffff?text=Playlist+B',
-                        videoCount: 3,
-                        videos: [
-                            {
-                                id: 'demo-video-3',
-                                title: 'Demo Video 3 - React Hooks',
-                                description: 'React konulu demo video',
-                                thumbnail: 'https://via.placeholder.com/320x180/667eea/ffffff?text=Video+3',
-                                publishedAt: new Date().toISOString(),
-                                position: 0
-                            }
-                        ]
-                    }
-                ];
-            }
+                if (!success) {
+                    console.error('Tüm proxy\'ler başarısız oldu');
+                    break;
+                }
+            } while (nextPageToken);
+            
+            return playlists;
         }
 
         async function fetchPlaylistVideos(playlistId) {
-            try {
-                console.log('Doğrudan API ile videolar alınıyor...');
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${apiKey}`);
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error('Playlist videoları alınamadı');
-                }
+            const videos = [];
+            let nextPageToken = '';
+            
+            const proxies = [
+                'https://corsproxy.io/?',
+                'https://api.allorigins.win/raw?url=',
+                'https://cors-anywhere.herokuapp.com/',
+                'https://thingproxy.freeboard.io/fetch/'
+            ];
+            
+            do {
+                let success = false;
+                for (let proxy of proxies) {
+                    try {
+                        const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${apiKey}`;
+                        const proxyUrl = proxy + encodeURIComponent(apiUrl);
+                        const response = await fetch(proxyUrl);
+                        const data = await response.json();
+                        
+                        if (!response.ok) {
+                            throw new Error('Playlist videoları alınamadı');
+                        }
 
-                const videos = [];
-                for (let item of data.items) {
-                    videos.push({
-                        id: item.snippet.resourceId.videoId,
-                        title: item.snippet.title,
-                        description: item.snippet.description,
-                        thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
-                        publishedAt: item.snippet.publishedAt,
-                        position: item.snippet.position
-                    });
+                        for (let item of data.items) {
+                            videos.push({
+                                id: item.snippet.resourceId.videoId,
+                                title: item.snippet.title,
+                                description: item.snippet.description,
+                                thumbnail: item.snippet.thumbnails.medium?.url || item.snippet.thumbnails.default.url,
+                                publishedAt: item.snippet.publishedAt,
+                                position: item.snippet.position
+                            });
+                        }
+                        
+                        nextPageToken = data.nextPageToken || '';
+                        success = true;
+                        break;
+                    } catch (error) {
+                        console.log(`${proxy} proxy'si başarısız:`, error.message);
+                        continue;
+                    }
                 }
                 
-                return videos;
-            } catch (error) {
-                console.log('Video fetch başarısız, demo videolar döndürülüyor:', error.message);
-                // Demo veriler zaten playlist'te var, boş array döndür
-                return [];
-            }
+                if (!success) {
+                    console.error('Tüm proxy\'ler başarısız oldu');
+                    break;
+                }
+            } while (nextPageToken);
+            
+            return videos;
         }
 
         function displayChannels() {
@@ -851,16 +722,11 @@
 
             container.innerHTML = channels.map(channel => `
                 <div class="channel-card">
-                    <div class="channel-header">
-                        <div class="channel-main-info" onclick="toggleChannelPlaylists('${channel.id}')">
-                            <img src="${channel.thumbnail}" alt="${channel.title}" class="channel-thumbnail">
-                            <div class="channel-info">
-                                <h3>${channel.title} ${channel.isDemo ? '(DEMO)' : ''}</h3>
-                                <p>${channel.playlists.length} playlist ${channel.isDemo ? '• Gerçek veri için CORS\'u düzeltin' : ''}</p>
-                            </div>
-                        </div>
-                        <div class="channel-actions">
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteChannel('${channel.id}')">🗑️ Sil</button>
+                    <div class="channel-header" onclick="toggleChannelPlaylists('${channel.id}')">
+                        <img src="${channel.thumbnail}" alt="${channel.title}" class="channel-thumbnail">
+                        <div class="channel-info">
+                            <h3>${channel.title}</h3>
+                            <p>${channel.playlists.length} playlist</p>
                         </div>
                     </div>
                     <div class="playlists-container" id="playlists-${channel.id}">
@@ -908,7 +774,6 @@
         }
 
         function updateWatchCount(videoId, change) {
-            event.stopPropagation();
             if (!watchCounts[videoId]) {
                 watchCounts[videoId] = 0;
             }
@@ -998,7 +863,7 @@
             
             setTimeout(() => {
                 notification.classList.remove('show');
-            }, 5000);
+            }, 95000);
         }
 
         function showError(message) {
@@ -1011,7 +876,7 @@
             
             setTimeout(() => {
                 errorDiv.remove();
-            }, 5000);
+            }, 95000);
         }
 
         function showLoading() {
