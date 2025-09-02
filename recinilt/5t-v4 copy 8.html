@@ -684,40 +684,6 @@
               border-radius: 8px;
           }
       }
-
-      .free-text-section {
-    background: #f0f8ff;
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 25px;
-    border-left: 4px solid #667eea;
-}
-
-.free-text-area {
-    width: 100%;
-    min-height: 120px;
-    max-height: none;
-    padding: 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 16px;
-    font-family: inherit;
-    resize: vertical;
-    transition: border-color 0.3s ease;
-    line-height: 1.6;
-}
-
-.free-text-area:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.free-text-area::placeholder {
-    color: #999;
-    font-style: italic;
-}
-
   </style>
 </head>
 <body>
@@ -890,21 +856,11 @@
                   </div>
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('info')">➕ Kendi Sorumu Ekle</button>
-
-                    <div class="free-text-section">
-                        <h4>📝 Serbest Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Bu alana istediğin kadar uzun notlar yazabilir, aklına gelen her şeyi özgürce ifade edebilirsin.</p>
-                        <textarea class="free-text-area" 
-                                id="info-freetext" 
-                                placeholder="INFO ile ilgili aklına gelen her şeyi buraya yaz... Bir konuyu derinlemesine açıklamak istiyorsan, ek bilgiler varsa, farklı örnekler düşünüyorsan - hepsi buraya..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="info"></textarea>
-                    </div>
-
-                    <div class="collected-answers" id="info-collected" style="display: none;">
-                        <h4>📝 Toplanan Ham Bilgiler</h4>
-                        <div class="answer-list"></div>
-                    </div>
+                  
+                  <div class="collected-answers" id="info-collected" style="display: none;">
+                      <h4>📝 Toplanan Ham Bilgiler</h4>
+                      <div class="answer-list"></div>
+                  </div>
               </div>
 
               <!-- DATA Tab -->
@@ -920,16 +876,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('data')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>📊 Serbest Data Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Bilgileri düzenlerken aklına gelen ek analizler, farklı gruplandırma yöntemleri, özel durumlar...</p>
-                        <textarea class="free-text-area" 
-                                id="data-freetext" 
-                                placeholder="DATA düzenleme sürecinde aklına gelen ek notlar..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="data"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="data-collected" style="display: none;">
                       <h4>📊 Düzenlenmiş Veriler</h4>
                       <div class="answer-list"></div>
@@ -957,16 +903,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('tefekkur')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>💭 Derin Düşünce Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Konuyu düşünürken aklına gelen uzun soluklu fikirler, derin analizler, farklı bakış açıları...</p>
-                        <textarea class="free-text-area" 
-                                id="tefekkur-freetext" 
-                                placeholder="Bu konu hakkında derinlemesine düşünürken aklıma gelenler..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="tefekkur"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="tefekkur-collected" style="display: none;">
                       <h4>💭 Derin Düşünce Notlarım</h4>
                       <div class="answer-list"></div>
@@ -994,16 +930,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('tedabbur')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>🔍 Arka Plan Analiz Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Durumun arkasında görebileceğin gizli faktörler, sistemik analizler, derinlemesine arka plan değerlendirmeleri...</p>
-                        <textarea class="free-text-area" 
-                                id="tedabbur-freetext" 
-                                placeholder="Bu durumun arka planında gördüklerim, hissettiğim gizli faktörler..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="tedabbur"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="tedabbur-collected" style="display: none;">
                       <h4>🔍 Arka Plan Analizlerim</h4>
                       <div class="answer-list"></div>
@@ -1031,16 +957,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('teakkul')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>🔗 Bağlantı Analiz Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Bu durumun diğer yaşam alanlarıyla bağlantıları, zincir etkiler, sistem düşüncesi notların...</p>
-                        <textarea class="free-text-area" 
-                                id="teakkul-freetext" 
-                                placeholder="Bu durumun hayatımın diğer alanlarıyla nasıl bağlantılı olduğu, sebep-sonuç zincirleri..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="teakkul"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="teakkul-collected" style="display: none;">
                       <h4>🔗 Bağlantı Haritalarım</h4>
                       <div class="answer-list"></div>
@@ -1068,16 +984,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('tefakkuh')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>⚖️ Detaylı Sonuç Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">İnce analizlerden çıkardığın detaylı sonuçlar, stratejik düşünceler, uzun vadeli değerlendirmeler...</p>
-                        <textarea class="free-text-area" 
-                                id="tefakkuh-freetext" 
-                                placeholder="Bu analiz sonucunda vardığım detaylı sonuçlar, stratejik kararlar..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="tefakkuh"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="tefakkuh-collected" style="display: none;">
                       <h4>⚖️ İnce Sonuçlarım</h4>
                       <div class="answer-list"></div>
@@ -1105,16 +1011,6 @@
                   
                   <button class="add-question-btn" onclick="addCustomQuestion('tezekkur')">➕ Kendi Sorumu Ekle</button>
                   
-                  <div class="free-text-section">
-                        <h4>🌟 Yaşam Dönüşüm Notlarım</h4>
-                        <p style="color: #666; font-size: 14px; margin-bottom: 10px;">Bu analizin yaşam tarzına nasıl yansıyacağı, detaylı aksiyon planları, paradigma değişiklikleri...</p>
-                        <textarea class="free-text-area" 
-                                id="tezekkur-freetext" 
-                                placeholder="Bu analiz sonrasında hayatımda nasıl değişiklikler yapacağım, davranış dönüşümleri..."
-                                oninput="updateKnowledgeLive(); autoResize(this)"
-                                data-tab="tezekkur"></textarea>
-                    </div>
-
                   <div class="collected-answers" id="tezekkur-collected" style="display: none;">
                       <h4>🌟 Yaşam Tarzı Değişikliklerim</h4>
                       <div class="answer-list"></div>
@@ -1229,11 +1125,6 @@
       //const repoAdi = "5t-analiz-data";
       //const dosyaAdi = "user-database.json";
       //const token = "YOUR_GITHUB_TOKEN";
-
-      function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.max(120, textarea.scrollHeight) + 'px';
-        }
 
       // Her sekme için soru veritabanı
       const questionDatabase = {
@@ -1552,12 +1443,6 @@
                     });
                 }
                 tabData[tabName] = answers;
-                
-                // Serbest metin alanlarını ekle
-                const freeTextElement = document.getElementById(tabName + '-freetext');
-                if (freeTextElement) {
-                    tabData[tabName + '_freetext'] = freeTextElement.value;
-                }
             });
             
             // Checkbox durumları
@@ -1589,7 +1474,6 @@
             };
         }
 
-
         function generateLiveKnowledge(data) {
             let knowledge = `
                 <div class="info-box">
@@ -1603,8 +1487,6 @@
             // 5T Sekmelerinin dolu olanlarını göster
             let hasContent = false;
             Object.keys(data.tabData).forEach(tabName => {
-                if (tabName.endsWith('_freetext')) return; // Serbest metin alanlarını ayrı işleyeceğiz
-                
                 const answers = data.tabData[tabName];
                 if (answers && answers.length > 0) {
                     hasContent = true;
@@ -1632,43 +1514,7 @@
                         `;
                     });
                     
-                    // Serbest metin varsa ekle
-                    const freeTextKey = tabName + '_freetext';
-                    if (data.tabData[freeTextKey] && data.tabData[freeTextKey].trim()) {
-                        knowledge += `
-                            <div style="background: #f0f8ff; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 3px solid #3498db;">
-                                <strong>📝 Serbest Notlar:</strong><br>
-                                ${formatText(data.tabData[freeTextKey])}
-                            </div>
-                        `;
-                    }
-                    
                     knowledge += '</div>';
-                } else {
-                    // Sadece serbest metin varsa onu göster
-                    const freeTextKey = tabName + '_freetext';
-                    if (data.tabData[freeTextKey] && data.tabData[freeTextKey].trim()) {
-                        hasContent = true;
-                        const tabTitle = {
-                            'info': '📥 INFO - Ham Bilgiler',
-                            'data': '📊 DATA - Düzenlenmiş Veriler', 
-                            'tefekkur': '💭 TEFEKKÜR - Derin Düşünceler',
-                            'tedabbur': '🔍 TEDABBÜR - Arka Plan Analizi',
-                            'teakkul': '🔗 TEAKKUL - Bağlantı Kurma',
-                            'tefakkuh': '⚖️ TEFAKKUH - İnce Sonuçlar',
-                            'tezekkur': '🌟 TEZEKKÜR - Yaşam Tarzı Dönüşümü'
-                        }[tabName] || tabName.toUpperCase();
-                        
-                        knowledge += `
-                            <div class="success-box" style="margin: 15px 0;">
-                                <h4>${tabTitle}</h4>
-                                <div style="background: #f0f8ff; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 3px solid #3498db;">
-                                    <strong>📝 Serbest Notlar:</strong><br>
-                                    ${formatText(data.tabData[freeTextKey])}
-                                </div>
-                            </div>
-                        `;
-                    }
                 }
             });
             
@@ -1863,64 +1709,54 @@
       }
 
       function clearAllFormFields() {
-            // Form alanlarını temizle
-            document.getElementById('todayTopic').value = '';
-            document.getElementById('surprises').value = '';
-            document.getElementById('difficulties').value = '';
-            document.getElementById('growth').value = '';
-            document.getElementById('nextSteps').value = '';
-            document.getElementById('reward').value = '';
-            document.getElementById('closingWords').value = '';
-            
-            // Tab içeriklerini temizle
-            Object.keys(questionDatabase).forEach(tabName => {
-                const questionsSection = document.getElementById(tabName + '-questions');
-                const collectedSection = document.getElementById(tabName + '-collected');
-                
-                // Tüm input'ları temizle
-                questionsSection.querySelectorAll('.question-input').forEach(input => {
-                    input.value = '';
-                    input.style.display = 'none';
-                    input.style.backgroundColor = '';
-                });
-                
-                // Ok işaretlerini düzelt
-                questionsSection.querySelectorAll('.question-text span').forEach(arrow => {
-                    arrow.textContent = '▼';
-                });
-                
-                // Collected answers'ı temizle
-                const answerList = collectedSection.querySelector('.answer-list');
-                answerList.innerHTML = '';
-                collectedSection.style.display = 'none';
-            });
-            
-            // Checkbox'ları temizle
-            document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
-                cb.checked = false;
-                cb.closest('.checklist-item').classList.remove('completed');
-            });
-            
-            // Mood seçimini temizle
-            document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
-            currentMood = "";
-            
-            // Serbest metin alanlarını temizle
-            Object.keys(questionDatabase).forEach(tabName => {
-                const freeTextElement = document.getElementById(tabName + '-freetext');
-                if (freeTextElement) {
-                    freeTextElement.value = '';
-                    freeTextElement.style.height = '120px';
-                }
-            });
-            
-            // Final knowledge'ı temizle
-            document.getElementById('finalKnowledge').innerHTML = '<p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>';
-            
-            // Progress'i sıfırla
-            updateProgress();
-        }
-
+          // Form alanlarını temizle
+          document.getElementById('todayTopic').value = '';
+          document.getElementById('surprises').value = '';
+          document.getElementById('difficulties').value = '';
+          document.getElementById('growth').value = '';
+          document.getElementById('nextSteps').value = '';
+          document.getElementById('reward').value = '';
+          document.getElementById('closingWords').value = '';
+          
+          // Tab içeriklerini temizle
+          Object.keys(questionDatabase).forEach(tabName => {
+              const questionsSection = document.getElementById(tabName + '-questions');
+              const collectedSection = document.getElementById(tabName + '-collected');
+              
+              // Tüm input'ları temizle
+              questionsSection.querySelectorAll('.question-input').forEach(input => {
+                  input.value = '';
+                  input.style.display = 'none';
+                  input.style.backgroundColor = '';
+              });
+              
+              // Ok işaretlerini düzelt
+              questionsSection.querySelectorAll('.question-text span').forEach(arrow => {
+                  arrow.textContent = '▼';
+              });
+              
+              // Collected answers'ı temizle
+              const answerList = collectedSection.querySelector('.answer-list');
+              answerList.innerHTML = '';
+              collectedSection.style.display = 'none';
+          });
+          
+          // Checkbox'ları temizle
+          document.querySelectorAll('.checklist-item input[type="checkbox"]').forEach(cb => {
+              cb.checked = false;
+              cb.closest('.checklist-item').classList.remove('completed');
+          });
+          
+          // Mood seçimini temizle
+          document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('selected'));
+          currentMood = "";
+          
+          // Final knowledge'ı temizle
+          document.getElementById('finalKnowledge').innerHTML = '<p>5T analizinizi tamamladığınızda buraya otomatik özet gelecek.</p>';
+          
+          // Progress'i sıfırla
+          updateProgress();
+      }
 
       function updateTodayDate() {
           const today = new Date();
@@ -2438,84 +2274,69 @@ Thxomnn..."`;
 
       // FORM DOLDURMA FONKSİYONUNU GÜNCELLE
       function fillFormWithAnalysisData(analysis) {
-            // Önce formu temizle
-            clearAllFormFields();
-            
-            // Veriyi doldur
-            document.getElementById('todayTopic').value = analysis.todayTopic || '';
-            document.getElementById('surprises').value = analysis.surprises || '';
-            document.getElementById('difficulties').value = analysis.difficulties || '';
-            document.getElementById('growth').value = analysis.growth || '';
-            document.getElementById('nextSteps').value = analysis.nextSteps || '';
-            document.getElementById('reward').value = analysis.reward || '';
-            document.getElementById('closingWords').value = analysis.closingWords || '';
-            
-            // Tab verilerini yükle
-            if (analysis.tabData) {
-                Object.keys(analysis.tabData).forEach(tabName => {
-                    if (tabName.endsWith('_freetext')) return; // Serbest metin alanlarını ayrı işleyeceğiz
-                    
-                    const answers = analysis.tabData[tabName];
-                    if (answers && answers.length > 0) {
-                        const collectedSection = document.getElementById(tabName + '-collected');
-                        const answerList = collectedSection.querySelector('.answer-list');
-                        answerList.innerHTML = '';
-                        
-                        answers.forEach(item => {
-                            const answerDiv = document.createElement('div');
-                            answerDiv.className = 'answer-item';
-                            answerDiv.dataset.question = item.question;
-                            answerDiv.innerHTML = `<strong>S:</strong> ${item.question}<br><strong>C:</strong> ${item.answer}`;
-                            answerList.appendChild(answerDiv);
-                        });
-                        
-                        collectedSection.style.display = 'block';
-                    }
-                });
-            }
-            
-            // Serbest metin alanlarını doldur
-            if (analysis.tabData) {
-                Object.keys(questionDatabase).forEach(tabName => {
-                    const freeTextKey = tabName + '_freetext';
-                    const freeTextElement = document.getElementById(tabName + '-freetext');
-                    if (freeTextElement && analysis.tabData[freeTextKey]) {
-                        freeTextElement.value = analysis.tabData[freeTextKey];
-                        autoResize(freeTextElement);
-                    }
-                });
-            }
-            
-            // Checkbox'ları ayarla
-            if (analysis.checkboxes) {
-                Object.keys(analysis.checkboxes).forEach(key => {
-                    const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
-                    const checkbox = document.getElementById(elementId);
-                    if (checkbox) {
-                        const item = checkbox.closest('.checklist-item');
-                        
-                        if (analysis.checkboxes[key]) {
-                            checkbox.checked = true;
-                            item.classList.add('completed');
-                        }
-                    }
-                });
-            }
-            
-            // Mood ayarla
-            if (analysis.mood) {
-                currentMood = analysis.mood;
-                document.querySelectorAll('.mood-btn').forEach(btn => {
-                    if (btn.dataset.mood === analysis.mood) {
-                        btn.classList.add('selected');
-                    }
-                });
-            }
-            
-            generateFinalKnowledge(analysis);
-            updateProgress();
-        }
-
+          // Önce formu temizle
+          clearAllFormFields();
+          
+          // Veriyi doldur
+          document.getElementById('todayTopic').value = analysis.todayTopic || '';
+          document.getElementById('surprises').value = analysis.surprises || '';
+          document.getElementById('difficulties').value = analysis.difficulties || '';
+          document.getElementById('growth').value = analysis.growth || '';
+          document.getElementById('nextSteps').value = analysis.nextSteps || '';
+          document.getElementById('reward').value = analysis.reward || '';
+          document.getElementById('closingWords').value = analysis.closingWords || '';
+          
+          // Tab verilerini yükle
+          if (analysis.tabData) {
+              Object.keys(analysis.tabData).forEach(tabName => {
+                  const answers = analysis.tabData[tabName];
+                  if (answers && answers.length > 0) {
+                      const collectedSection = document.getElementById(tabName + '-collected');
+                      const answerList = collectedSection.querySelector('.answer-list');
+                      answerList.innerHTML = '';
+                      
+                      answers.forEach(item => {
+                          const answerDiv = document.createElement('div');
+                          answerDiv.className = 'answer-item';
+                          answerDiv.dataset.question = item.question;
+                          answerDiv.innerHTML = `<strong>S:</strong> ${item.question}<br><strong>C:</strong> ${item.answer}`;
+                          answerList.appendChild(answerDiv);
+                      });
+                      
+                      collectedSection.style.display = 'block';
+                  }
+              });
+          }
+          
+          // Checkbox'ları ayarla
+          if (analysis.checkboxes) {
+              Object.keys(analysis.checkboxes).forEach(key => {
+                  const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                  const checkbox = document.getElementById(elementId);
+                  if (checkbox) {
+                      const item = checkbox.closest('.checklist-item');
+                      
+                      if (analysis.checkboxes[key]) {
+                          checkbox.checked = true;
+                          item.classList.add('completed');
+                      }
+                  }
+              });
+          }
+          
+          // Mood ayarla
+          if (analysis.mood) {
+              currentMood = analysis.mood;
+              document.querySelectorAll('.mood-btn').forEach(btn => {
+                  if (btn.dataset.mood === analysis.mood) {
+                      btn.classList.add('selected');
+                  }
+              });
+          }
+          
+          generateFinalKnowledge(analysis);
+          updateProgress();
+      }
 
       function saveToLocal(data) {
           localStorage.setItem('5t-analysis-data', JSON.stringify(data));
@@ -2627,8 +2448,6 @@ Thxomnn..."`;
             
             if (data.tabData) {
                 Object.keys(data.tabData).forEach(tabName => {
-                    if (tabName.endsWith('_freetext')) return; // Serbest metin alanlarını ayrı işleyeceğiz
-                    
                     const answers = data.tabData[tabName];
                     if (answers && answers.length > 0) {
                         const tabTitle = {
@@ -2653,42 +2472,7 @@ Thxomnn..."`;
                             `;
                         });
                         
-                        // Serbest metin varsa ekle
-                        const freeTextKey = tabName + '_freetext';
-                        if (data.tabData[freeTextKey] && data.tabData[freeTextKey].trim()) {
-                            knowledge += `
-                                <div style="background: #f0f8ff; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 3px solid #3498db;">
-                                    <strong>📝 Serbest Notlar:</strong><br>
-                                    ${formatTextForKnowledge(data.tabData[freeTextKey])}
-                                </div>
-                            `;
-                        }
-                        
                         knowledge += '</div>';
-                    } else {
-                        // Sadece serbest metin varsa onu göster
-                        const freeTextKey = tabName + '_freetext';
-                        if (data.tabData[freeTextKey] && data.tabData[freeTextKey].trim()) {
-                            const tabTitle = {
-                                'info': '📥 INFO (Ham Bilgiler)',
-                                'data': '📊 DATA (Düzenlenmiş Veriler)', 
-                                'tefekkur': '💭 TEFEKKÜR (Derin Düşünceler)',
-                                'tedabbur': '🔍 TEDABBÜR (Arka Plan)',
-                                'teakkul': '🔗 TEAKKUL (Bağlantılar)',
-                                'tefakkuh': '⚖️ TEFAKKUH (İnce Sonuçlar)',
-                                'tezekkur': '🌟 TEZEKKÜR (Yaşam Tarzı)'
-                            }[tabName] || tabName.toUpperCase();
-                            
-                            knowledge += `<div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;">`;
-                            knowledge += `<p><strong>${tabTitle}:</strong></p>`;
-                            knowledge += `
-                                <div style="background: #f0f8ff; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 3px solid #3498db;">
-                                    <strong>📝 Serbest Notlar:</strong><br>
-                                    ${formatTextForKnowledge(data.tabData[freeTextKey])}
-                                </div>
-                            `;
-                            knowledge += '</div>';
-                        }
                     }
                 });
             }
@@ -2708,8 +2492,7 @@ Thxomnn..."`;
             
             document.getElementById('finalKnowledge').innerHTML = knowledge;
         }
-      
-        function formatText(text, maxLength = null) {
+      function formatText(text, maxLength = null) {
             if (!text || text.trim().length === 0) return 'Belirtilmedi';
             
             let formatted = text.replace(/\n/g, '<br>');
