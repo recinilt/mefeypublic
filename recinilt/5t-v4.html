@@ -2434,71 +2434,77 @@ Thxomnn..."`;
       }
 
       function generateFinalKnowledge(data) {
-          let knowledge = `
-              <div class="success-box">
-                  <h4>📋 Analiz Özeti</h4>
-                  <p><strong>Konu:</strong><br>${formatText(data.todayTopic, 200)}</p>
-                  <p><strong>Tamamlanma:</strong> %${data.completionRate} (${Object.values(data.checkboxes).filter(Boolean).length}/6 adım)</p>
-                  <p><strong>Ruh Hali:</strong> ${getMoodText(data.mood)}</p>
-                  ${data.reward ? `<p><strong>Ödül:</strong><br>${formatText(data.reward)}</p>` : ''}
-              </div>
-              
-              <h4>🎯 5T Analiz Sonuçları:</h4>
-          `;
-          
-          if (data.tabData) {
-              Object.keys(data.tabData).forEach(tabName => {
-                  const answers = data.tabData[tabName];
-                  if (answers && answers.length > 0) {
-                      const tabTitle = {
-                          'info': '📥 INFO (Ham Bilgiler)',
-                          'data': '📊 DATA (Düzenlenmiş Veriler)', 
-                          'tefekkur': '💭 TEFEKKÜR (Derin Düşünceler)',
-                          'tedabbur': '🔍 TEDABBÜR (Arka Plan)',
-                          'teakkul': '🔗 TEAKKUL (Bağlantılar)',
-                          'tefakkuh': '⚖️ TEFAKKUH (İnce Sonuçlar)',
-                          'tezekkur': '🌟 TEZEKKÜR (Yaşam Tarzı)'
-                      }[tabName] || tabName.toUpperCase();
-                      
-                      knowledge += `<p><strong>${tabTitle}:</strong><br>`;
-                      answers.slice(0, 3).forEach(item => {
-                          knowledge += `• ${formatText(item.answer, 100)}<br>`;
-                      });
-                      if (answers.length > 3) {
-                          knowledge += `<small>... ve ${answers.length - 3} cevap daha</small><br>`;
-                      }
-                      knowledge += '</p>';
-                  }
-              });
-          }
-          
-          if (data.nextSteps) {
-              knowledge += `<h4>📅 Sonraki Adımlar:</h4><p>${formatText(data.nextSteps)}</p>`;
-          }
-          
-          knowledge += `
-              <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
-                  <strong>💡 Bu analiz INFO → DATA → KNOWLEDGE sürecini tamamladı.</strong><br>
-                  <small>Artık bu konuda eyleme geçebilecek duruma geldiniz.</small>
-              </div>
-              
-              ${data.closingWords ? `<div style="background: #f0fff0; padding: 10px; border-radius: 5px; margin-top: 10px; font-style: italic;"><strong>Kapanış:</strong><br>${formatText(data.closingWords)}</div>` : ''}
-          `;
-          
-          document.getElementById('finalKnowledge').innerHTML = knowledge;
-      }
-
+            let knowledge = `
+                <div class="success-box">
+                    <h4>📋 Analiz Özeti</h4>
+                    <p><strong>Konu:</strong><br>${formatTextForKnowledge(data.todayTopic)}</p>
+                    <p><strong>Tamamlanma:</strong> %${data.completionRate} (${Object.values(data.checkboxes).filter(Boolean).length}/6 adım)</p>
+                    <p><strong>Ruh Hali:</strong> ${getMoodText(data.mood)}</p>
+                    ${data.reward ? `<p><strong>Ödül:</strong><br>${formatTextForKnowledge(data.reward)}</p>` : ''}
+                </div>
+                
+                <h4>🎯 5T Analiz Sonuçları:</h4>
+            `;
+            
+            if (data.tabData) {
+                Object.keys(data.tabData).forEach(tabName => {
+                    const answers = data.tabData[tabName];
+                    if (answers && answers.length > 0) {
+                        const tabTitle = {
+                            'info': '📥 INFO (Ham Bilgiler)',
+                            'data': '📊 DATA (Düzenlenmiş Veriler)', 
+                            'tefekkur': '💭 TEFEKKÜR (Derin Düşünceler)',
+                            'tedabbur': '🔍 TEDABBÜR (Arka Plan)',
+                            'teakkul': '🔗 TEAKKUL (Bağlantılar)',
+                            'tefakkuh': '⚖️ TEFAKKUH (İnce Sonuçlar)',
+                            'tezekkur': '🌟 TEZEKKÜR (Yaşam Tarzı)'
+                        }[tabName] || tabName.toUpperCase();
+                        
+                        knowledge += `<div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 10px; border-left: 4px solid #667eea;">`;
+                        knowledge += `<p><strong>${tabTitle}:</strong></p>`;
+                        
+                        answers.forEach((item, index) => {
+                            knowledge += `
+                                <div style="margin: 10px 0; padding: 10px; background: white; border-radius: 5px; border-left: 3px solid #27ae60;">
+                                    <strong>S${index + 1}:</strong> ${formatTextForKnowledge(item.question)}<br>
+                                    <strong>C:</strong> ${formatTextForKnowledge(item.answer)}
+                                </div>
+                            `;
+                        });
+                        
+                        knowledge += '</div>';
+                    }
+                });
+            }
+            
+            if (data.nextSteps) {
+                knowledge += `<h4>📅 Sonraki Adımlar:</h4><div style="padding: 10px; background: #e3f2fd; border-radius: 5px;">${formatTextForKnowledge(data.nextSteps)}</div>`;
+            }
+            
+            knowledge += `
+                <div style="background: #f0f8ff; padding: 10px; border-radius: 5px; margin-top: 15px;">
+                    <strong>💡 Bu analiz INFO → DATA → KNOWLEDGE sürecini tamamladı.</strong><br>
+                    <small>Artık bu konuda eyleme geçebilecek duruma geldiniz.</small>
+                </div>
+                
+                ${data.closingWords ? `<div style="background: #f0fff0; padding: 10px; border-radius: 5px; margin-top: 10px; font-style: italic;"><strong>Kapanış:</strong><br>${formatTextForKnowledge(data.closingWords)}</div>` : ''}
+            `;
+            
+            document.getElementById('finalKnowledge').innerHTML = knowledge;
+        }
       function formatText(text, maxLength = null) {
-          if (!text || text.trim().length === 0) return 'Belirtilmedi';
-          
-          let formatted = text.replace(/\n/g, '<br>');
-          
-          if (maxLength && formatted.length > maxLength) {
-              formatted = formatted.substring(0, maxLength) + '...';
-          }
-          
-          return formatted;
-      }
+            if (!text || text.trim().length === 0) return 'Belirtilmedi';
+            
+            let formatted = text.replace(/\n/g, '<br>');
+            
+            // Sadece çok uzun metinler için (5000+ karakter) kısaltma uygula
+            if (maxLength && formatted.length > maxLength && maxLength < 5000) {
+                formatted = formatted.substring(0, maxLength) + '...';
+            }
+            
+            return formatted;
+        }
+
 
       function getMoodText(mood) {
           const moodMap = {
@@ -2751,6 +2757,23 @@ Thxomnn..."`;
           }
       }, 2000);
 
+      function formatTextForKnowledge(text) {
+            if (!text || text.trim().length === 0) return 'Belirtilmedi';
+            
+            let formatted = text.replace(/\n/g, '<br>');
+            
+            // Çok uzun metinlerde (2000+ karakter) sadece başlangıcı göster
+            if (formatted.length > 2000) {
+                const truncated = formatted.substring(0, 2000) + '...';
+                return `
+                    <div style="max-height: 200px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        ${formatted}
+                    </div>
+                `;
+            }
+            
+            return formatted;
+        }
   </script>
 </body>
 </html>
