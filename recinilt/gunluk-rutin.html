@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌅🌙 Günlük Rutinlerim</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .streak-display {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .streak-item {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .streak-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .routine-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .task-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .task-item.completed {
+            background: #e8f5e8;
+            border-left: 4px solid #4caf50;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #4caf50;
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+        }
+
+        .task-item:hover .delete-btn {
+            display: block;
+        }
+
+        .add-task-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 10px;
+        }
+
+        .add-task-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .add-task-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .add-task-btn:hover {
+            background: #219a52;
+        }
+
+        .progress-section {
+            background: #fff3cd;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .chain-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            max-width: 350px;
+            margin: 20px auto;
+        }
+
+        .chain-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .chain-day.completed {
+            background: #4caf50;
+            color: white;
+        }
+
+        .chain-day.partial {
+            background: #ff9800;
+            color: white;
+        }
+
+        .chain-day.empty {
+            background: #f5f5f5;
+            color: #999;
+        }
+
+        .chain-day.today {
+            border: 3px solid #667eea;
+        }
+
+        .storage-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .actions-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌅🌙 Günlük Rutinlerim</h1>
+            <p>Sabah ve akşam rutinlerini takip et, zinciri kırma!</p>
+            
+            <div class="streak-display">
+                <div class="streak-item">
+                    <span class="streak-number" id="currentStreak">0</span>
+                    <small>Güncel Zincir</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="totalDays">0</span>
+                    <small>Toplam Gün</small>
+                </div>
+                <div class="streak-item">
+                    <span class="streak-number" id="completionRate">0</span>
+                    <small>% Başarı</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kayıt Seçimi Modal -->
+        <div id="storageModal" class="storage-modal" style="display: none;">
+            <div class="modal-content">
+                <h2>💾 Kayıt Yöntemi Seçimi</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Rutinlerinizi nerede saklamak istiyorsunuz?</p>
+                
+                <div class="storage-selection">
+                    <div class="storage-option" onclick="selectStorage('local')">
+                        <h3>💻 Yerel Kayıt</h3>
+                        <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                        <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                    </div>
+                    
+                    <div class="storage-option" onclick="selectStorage('github')">
+                        <h3>☁️ GitHub Kayıt</h3>
+                        <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                    </div>
+                </div>
+                
+                <div id="githubLogin" class="github-login">
+                    <h3 style="text-align: center; margin-bottom: 20px;">🔐 GitHub Giriş</h3>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>👤 Kullanıcı Adı:</strong></label>
+                        <input type="text" id="loginUsername" class="input-field" placeholder="Kullanıcı adınızı girin">
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>🔑 Şifre:</strong></label>
+                        <input type="password" id="loginPassword" class="input-field" placeholder="Şifrenizi girin">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="progress-section">
+                <h3>📊 Günlük İlerleme</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <p id="progressText">0/0 görev tamamlandı</p>
+            </div>
+
+            <!-- Sabah Rutini -->
+            <div class="routine-section">
+                <div class="section-title">
+                    🌅 Sabah Rutini
+                </div>
+                <div class="task-list" id="morningTasks">
+                    <!-- Görevler buraya dinamik olarak eklenecek -->
+                </div>
+                <div class="add-task-section">
+                    <input type="text" class="add-task-input" id="morningTaskInput" placeholder="Yeni sabah görevi ekle...">
+                    <button class="add-task-btn" onclick="addTask('morning')">➕ Ekle</button>
+                </div>
+            </div>
+
+            <!-- Akşam Rutini -->
+            <div class="routine-section">
+                <div class="section-title">
+                    🌙 Akşam Rutini
+                </div>
+                <div class="task-list" id="eveningTasks">
+                    <!-- Görevler buraya dinamik olarak eklenecek -->
+                </div>
+                <div class="add-task-section">
+                    <input type="text" class="add-task-input" id="eveningTaskInput" placeholder="Yeni akşam görevi ekle...">
+                    <button class="add-task-btn" onclick="addTask('evening')">➕ Ekle</button>
+                </div>
+            </div>
+
+            <!-- Zincir Görünümü -->
+            <div class="routine-section">
+                <h3 style="text-align: center; margin-bottom: 15px;">🔥 28 Günlük Zincir</h3>
+                <div class="chain-grid" id="chainGrid">
+                    <!-- Zincir günleri buraya dinamik olarak eklenecek -->
+                </div>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    <small>✅ Tam | 🟨 Kısmi | ⭕ Boş</small>
+                </p>
+            </div>
+
+            <div class="actions-section">
+                <p><strong id="storageInfo">💾 Kaydet</strong></p>
+                <button class="btn" onclick="saveData()">💾 Kaydet</button>
+                <button class="btn secondary" onclick="resetDay()">🔄 Günü Sıfırla</button>
+                <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="routine-github-params.js"></script>
+    <script>
+        // GitHub parametreleri (routine-github-params.js içeriğinden alınıyor)
+        // const kullaniciAdi = "YOUR_USERNAME";
+        // const repoAdi = "routine-data";
+        // const dosyaAdi = "user-database.json";
+        // const token = "YOUR_GITHUB_TOKEN";
+
+        // Global değişkenler
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+        
+        let routineData = {
+            morning: [],
+            evening: []
+        };
+        
+        let dailyData = {}; // { "2024-01-01": { morning: [true, false, ...], evening: [true, true, ...] } }
+        
+        let globalStats = {
+            currentStreak: parseInt(localStorage.getItem('routine-currentStreak') || '0'),
+            totalDays: parseInt(localStorage.getItem('routine-totalDays') || '0'),
+            lastCompletionDate: localStorage.getItem('routine-lastCompletionDate') || ''
+        };
+
+        // Sayfa yüklendiğinde çalışır
+        window.onload = function() {
+            // Kayıt ayarlarını kontrol et, yoksa modal aç
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'flex';
+            } else {
+                // Ayarlar varsa direkt yükle
+                loadData();
+            }
+            
+            generateChainGrid();
+            updateStats();
+            updateProgress();
+        };
+
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            routineData = userDatabase[username].routines || { morning: [], evening: [] };
+                            dailyData = userDatabase[username].dailyData || {};
+                            globalStats = userDatabase[username].stats || globalStats;
+                            
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('routine-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            loadTodayData();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            routines: { morning: [], evening: [] },
+                            dailyData: {},
+                            stats: {...globalStats},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        routineData = { morning: [], evening: [] };
+                        dailyData = {};
+                        localStorage.removeItem('routine-data');
+                        localStorage.removeItem('routine-daily-data');
+                        
+                        await saveUserDatabase();
+                        
+                        const settings = { 
+                            method: storageMethod, 
+                            username: currentUser 
+                        };
+                        localStorage.setItem('routine-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                        initializeDefaultTasks();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+                    
+                    const settings = { method: 'local' };
+                    localStorage.setItem('routine-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                const settings = { method: storageMethod };
+                localStorage.setItem('routine-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadData, 500);
+            }
+        }
+
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Rutin veritabanı güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub rutin veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub rutin veritabanı kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('routine-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('routine-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').style.display = 'flex';
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+        function initializeDefaultTasks() {
+            // Varsayılan görevleri ekle
+            routineData.morning = [
+                'Su içmek (1 bardak)',
+                'Dua/Meditasyon (5 dk)',
+                'Egzersiz/Yürüyüş',
+                'Kahvaltı yapmak',
+                'Günün planını yapmak'
+            ];
+            
+            routineData.evening = [
+                'Günü değerlendirmek',
+                'Yarın için hazırlık',
+                'Kitap okumak',
+                'Telefonu kapatmak',
+                'Dua/Şükür (5 dk)'
+            ];
+            
+            renderTasks();
+            saveData();
+        }
+
+        function loadTodayData() {
+            renderTasks();
+            updateChainGrid();
+            updateStats();
+        }
+
+        function loadData() {
+            if (storageMethod === 'github' && currentUser) {
+                loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            const savedRoutines = localStorage.getItem('routine-data');
+            const savedDailyData = localStorage.getItem('routine-daily-data');
+            
+            if (savedRoutines) {
+                routineData = JSON.parse(savedRoutines);
+            } else {
+                initializeDefaultTasks();
+                return;
+            }
+            
+            if (savedDailyData) {
+                dailyData = JSON.parse(savedDailyData);
+            }
+            
+            renderTasks();
+            updateChainGrid();
+            updateStats();
+            showNotification('💻 Yerel veriler yüklendi!');
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser]) {
+                    routineData = userDatabase[currentUser].routines || { morning: [], evening: [] };
+                    dailyData = userDatabase[currentUser].dailyData || {};
+                    globalStats = userDatabase[currentUser].stats || globalStats;
+                    
+                    if (routineData.morning.length === 0 && routineData.evening.length === 0) {
+                        initializeDefaultTasks();
+                    } else {
+                        renderTasks();
+                        updateChainGrid();
+                        updateStats();
+                        showNotification('☁️ GitHub\'dan veriler yüklendi!');
+                    }
+                } else {
+                    initializeDefaultTasks();
+                    showNotification('⚠ GitHub\'da veri bulunamadı. Varsayılanlar yüklendi!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+                loadFromLocal();
+            }
+        }
+
+        function addTask(type) {
+            const inputId = type + 'TaskInput';
+            const input = document.getElementById(inputId);
+            const taskText = input.value.trim();
+            
+            if (taskText) {
+                routineData[type].push(taskText);
+                input.value = '';
+                renderTasks();
+                saveData();
+                showNotification('✅ Yeni görev eklendi!');
+            }
+        }
+
+        function deleteTask(type, index) {
+            if (confirm('Bu görevi silmek istediğinden emin misin?')) {
+                routineData[type].splice(index, 1);
+                renderTasks();
+                saveData();
+                showNotification('🗑️ Görev silindi');
+            }
+        }
+
+        function renderTasks() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayData = dailyData[today] || { morning: [], evening: [] };
+            
+            // Sabah görevleri
+            const morningContainer = document.getElementById('morningTasks');
+            morningContainer.innerHTML = '';
+            routineData.morning.forEach((task, index) => {
+                const taskElement = createTaskElement(task, 'morning', index, todayData.morning[index] || false);
+                morningContainer.appendChild(taskElement);
+            });
+            
+            // Akşam görevleri
+            const eveningContainer = document.getElementById('eveningTasks');
+            eveningContainer.innerHTML = '';
+            routineData.evening.forEach((task, index) => {
+                const taskElement = createTaskElement(task, 'evening', index, todayData.evening[index] || false);
+                eveningContainer.appendChild(taskElement);
+            });
+            
+            updateProgress();
+        }
+
+        function createTaskElement(taskText, type, index, isCompleted) {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = `task-item ${isCompleted ? 'completed' : ''}`;
+            
+            taskDiv.innerHTML = `
+                <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} 
+                       onchange="toggleTask('${type}', ${index})">
+                <span class="task-text">${taskText}</span>
+                <button class="delete-btn" onclick="deleteTask('${type}', ${index})" title="Görevi Sil">🗑️</button>
+            `;
+            
+            return taskDiv;
+        }
+
+        function toggleTask(type, index) {
+            const today = new Date().toISOString().split('T')[0];
+            
+            if (!dailyData[today]) {
+                dailyData[today] = { morning: [], evening: [] };
+            }
+            
+            // Array boyutunu eşitle
+            while (dailyData[today][type].length <= index) {
+                dailyData[today][type].push(false);
+            }
+            
+            dailyData[today][type][index] = !dailyData[today][type][index];
+            
+            renderTasks();
+            updateChainGrid();
+            updateStats();
+            saveData();
+            
+            if (dailyData[today][type][index]) {
+                playSuccessSound();
+            }
+        }
+
+        function updateProgress() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayData = dailyData[today] || { morning: [], evening: [] };
+            
+            const totalTasks = routineData.morning.length + routineData.evening.length;
+            let completedTasks = 0;
+            
+            // Sabah görevleri sayısı
+            for (let i = 0; i < routineData.morning.length; i++) {
+                if (todayData.morning[i]) completedTasks++;
+            }
+            
+            // Akşam görevleri sayısı
+            for (let i = 0; i < routineData.evening.length; i++) {
+                if (todayData.evening[i]) completedTasks++;
+            }
+            
+            const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${completedTasks}/${totalTasks} görev tamamlandı`;
+        }
+
+        function generateChainGrid() {
+            const grid = document.getElementById('chainGrid');
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            for (let i = 27; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'chain-day';
+                dayElement.textContent = date.getDate();
+                dayElement.title = date.toLocaleDateString('tr-TR');
+                
+                if (i === 0) {
+                    dayElement.classList.add('today');
+                }
+                
+                const dayData = dailyData[dateStr];
+                if (dayData) {
+                    const morningTotal = routineData.morning.length;
+                    const eveningTotal = routineData.evening.length;
+                    const totalTasks = morningTotal + eveningTotal;
+                    
+                    let completedTasks = 0;
+                    
+                    // Sabah tamamlanma oranı
+                    for (let j = 0; j < morningTotal; j++) {
+                        if (dayData.morning[j]) completedTasks++;
+                    }
+                    
+                    // Akşam tamamlanma oranı
+                    for (let j = 0; j < eveningTotal; j++) {
+                        if (dayData.evening[j]) completedTasks++;
+                    }
+                    
+                    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) : 0;
+                    
+                    if (completionRate >= 0.8) {
+                        dayElement.classList.add('completed');
+                    } else if (completionRate >= 0.4) {
+                        dayElement.classList.add('partial');
+                    } else {
+                        dayElement.classList.add('empty');
+                    }
+                    
+                    dayElement.addEventListener('click', () => showDayDetails(dateStr, dayData, completionRate));
+                } else {
+                    dayElement.classList.add('empty');
+                }
+                
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function updateChainGrid() {
+            generateChainGrid();
+            calculateStreak();
+        }
+
+        function calculateStreak() {
+            const today = new Date();
+            let streak = 0;
+            let totalDays = Object.keys(dailyData).length;
+            
+            // Bugünden geriye doğru kontrol et
+            for (let i = 0; i < 365; i++) { // Maksimum 1 yıl geriye
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayData = dailyData[dateStr];
+                if (dayData) {
+                    const morningTotal = routineData.morning.length;
+                    const eveningTotal = routineData.evening.length;
+                    const totalTasks = morningTotal + eveningTotal;
+                    
+                    let completedTasks = 0;
+                    
+                    for (let j = 0; j < morningTotal; j++) {
+                        if (dayData.morning[j]) completedTasks++;
+                    }
+                    
+                    for (let j = 0; j < eveningTotal; j++) {
+                        if (dayData.evening[j]) completedTasks++;
+                    }
+                    
+                    const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) : 0;
+                    
+                    if (completionRate >= 0.8) { // %80 ve üzeri başarılı sayılır
+                        streak++;
+                    } else {
+                        break; // Zincir kırıldı
+                    }
+                } else {
+                    if (i === 0) {
+                        // Bugün hiç veri yok, devam et
+                        continue;
+                    } else {
+                        break; // Zincir kırıldı
+                    }
+                }
+            }
+            
+            globalStats.currentStreak = streak;
+            globalStats.totalDays = totalDays;
+            globalStats.lastCompletionDate = new Date().toISOString().split('T')[0];
+            
+            saveStatsToLocal();
+        }
+
+        function showDayDetails(date, dayData, completionRate) {
+            const formattedDate = new Date(date).toLocaleDateString('tr-TR');
+            let message = `📅 ${formattedDate}\n📊 Tamamlanma: %${Math.round(completionRate * 100)}\n\n`;
+            
+            message += "🌅 Sabah:\n";
+            routineData.morning.forEach((task, index) => {
+                const status = dayData.morning[index] ? "✅" : "❌";
+                message += `${status} ${task}\n`;
+            });
+            
+            message += "\n🌙 Akşam:\n";
+            routineData.evening.forEach((task, index) => {
+                const status = dayData.evening[index] ? "✅" : "❌";
+                message += `${status} ${task}\n`;
+            });
+            
+            alert(message);
+        }
+
+        function updateStats() {
+            document.getElementById('currentStreak').textContent = globalStats.currentStreak;
+            document.getElementById('totalDays').textContent = globalStats.totalDays;
+            
+            // Genel başarı oranını hesapla
+            const allDays = Object.keys(dailyData);
+            let totalCompletionRate = 0;
+            
+            allDays.forEach(date => {
+                const dayData = dailyData[date];
+                const morningTotal = routineData.morning.length;
+                const eveningTotal = routineData.evening.length;
+                const totalTasks = morningTotal + eveningTotal;
+                
+                let completedTasks = 0;
+                
+                for (let j = 0; j < morningTotal; j++) {
+                    if (dayData.morning[j]) completedTasks++;
+                }
+                
+                for (let j = 0; j < eveningTotal; j++) {
+                    if (dayData.evening[j]) completedTasks++;
+                }
+                
+                totalCompletionRate += totalTasks > 0 ? (completedTasks / totalTasks) : 0;
+            });
+            
+            const avgCompletionRate = allDays.length > 0 ? Math.round((totalCompletionRate / allDays.length) * 100) : 0;
+            document.getElementById('completionRate').textContent = avgCompletionRate;
+        }
+
+        function resetDay() {
+            if (confirm('Bugünün tüm görevlerini sıfırlamak istediğinden emin misin?')) {
+                const today = new Date().toISOString().split('T')[0];
+                dailyData[today] = { 
+                    morning: new Array(routineData.morning.length).fill(false),
+                    evening: new Array(routineData.evening.length).fill(false)
+                };
+                renderTasks();
+                updateChainGrid();
+                updateStats();
+                saveData();
+                showNotification('🔄 Gün sıfırlandı');
+            }
+        }
+
+        async function saveData() {
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                saveToLocal();
+            }
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('routine-data', JSON.stringify(routineData));
+            localStorage.setItem('routine-daily-data', JSON.stringify(dailyData));
+            saveStatsToLocal();
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].routines = routineData;
+                userDatabase[currentUser].dailyData = dailyData;
+                userDatabase[currentUser].stats = globalStats;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+                showNotification('☁️ GitHub\'a kaydedildi');
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+                saveToLocal();
+            }
+        }
+
+        function saveStatsToLocal() {
+            localStorage.setItem('routine-currentStreak', globalStats.currentStreak.toString());
+            localStorage.setItem('routine-totalDays', globalStats.totalDays.toString());
+            localStorage.setItem('routine-lastCompletionDate', globalStats.lastCompletionDate);
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        function playSuccessSound() {
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = context.createOscillator();
+                const gainNode = context.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(context.destination);
+                
+                oscillator.frequency.setValueAtTime(520, context.currentTime);
+                oscillator.frequency.setValueAtTime(660, context.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.1, context.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.2);
+                
+                oscillator.start(context.currentTime);
+                oscillator.stop(context.currentTime + 0.2);
+            } catch (e) {
+                // Ses çalmazsa sessizce devam et
+            }
+        }
+
+        // Enter tuşu ile görev ekleme
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.id === 'morningTaskInput') {
+                    addTask('morning');
+                } else if (activeElement.id === 'eveningTaskInput') {
+                    addTask('evening');
+                }
+            }
+            
+            // Ctrl+S ile kaydetme
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveData();
+            }
+        });
+
+        // İlk yükleme kontrolleri
+        setTimeout(() => {
+            const totalTasks = routineData.morning.length + routineData.evening.length;
+            
+            if (totalTasks === 0) {
+                showNotification('🌟 Hoş geldin! İlk rutinlerini ekleyerek başla!');
+            } else {
+                showNotification('🚀 Devam ediyoruz! Bugün de harika rutinler yapalım!');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
