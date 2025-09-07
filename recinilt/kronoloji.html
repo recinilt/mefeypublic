@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕐 Kronolojik Sıralayıcı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        /* Storage Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        /* Timeline Section */
+        .timeline-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .timeline-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #00b894, #00a085);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-field.short {
+            min-height: 40px;
+        }
+
+        /* Timeline Items */
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+        }
+
+        .timeline-item {
+            position: relative;
+            background: white;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .timeline-item h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .timeline-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .timeline-item .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .timeline-item .controls .btn {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+
+        /* Add Step Form */
+        .add-step-form {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #2196f3;
+        }
+
+        .add-step-form h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        /* Topic Selection */
+        .topic-selection {
+            background: #f0f8ff;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .topic-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .topic-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .topic-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .topic-item.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .storage-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .timeline-controls {
+                flex-direction: column;
+            }
+
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕐 Kronolojik Sıralayıcı</h1>
+            <p>Konuları ve tarihsel olayları kronolojik sıraya koyma sitesi</p>
+        </div>
+
+        <!-- Kayıt Seçimi Modal -->
+        <div id="storageModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h2>💾 Kayıt Yöntemi Seçimi</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Kronolojik sıralamalarınızı nerede saklamak istiyorsunuz?</p>
+                
+                <div class="storage-selection">
+                    <div class="storage-option" onclick="selectStorage('local')">
+                        <h3>💻 Yerel Kayıt</h3>
+                        <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                        <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                    </div>
+                    
+                    <div class="storage-option" onclick="selectStorage('github')">
+                        <h3>☁️ GitHub Kayıt</h3>
+                        <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                    </div>
+                </div>
+                
+                <div id="githubLogin" style="display: none;" class="github-login">
+                    <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>👤 Kullanıcı Adı:</strong></label>
+                        <input type="text" id="loginUsername" class="input-field short" placeholder="Kullanıcı adınızı girin">
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>🔑 Şifre:</strong></label>
+                        <input type="password" id="loginPassword" class="input-field short" placeholder="Şifrenizi girin">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="storage-info">
+                <p><strong id="storageInfo">💾 Kronolojik sıralamalarınızı kaydet</strong></p>
+                <button class="btn" onclick="saveAllTopics()">📊 Tüm Konuları Kaydet</button>
+                <button class="btn secondary" onclick="loadTopics()">📥 Veri Yükle</button>
+                <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+            </div>
+
+            <div class="topic-selection">
+                <h3>📚 Konu Seçimi</h3>
+                <div class="timeline-controls">
+                    <input type="text" id="newTopicName" class="input-field" placeholder="Yeni konu adı girin..." style="flex: 1;">
+                    <button class="btn success" onclick="createNewTopic()">➕ Yeni Konu Oluştur</button>
+                </div>
+                
+                <div class="topic-list" id="topicList">
+                    <!-- Konular buraya dinamik olarak eklenecek -->
+                </div>
+            </div>
+
+            <div class="timeline-section" id="timelineSection" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 id="currentTopicTitle">Seçili Konu</h3>
+                    <button class="btn danger" onclick="deleteTopic()">🗑️ Konuyu Sil</button>
+                </div>
+
+                <div class="timeline-controls">
+                    <button class="btn" onclick="showAddStepForm()">➕ Yeni Adım Ekle</button>
+                    <button class="btn secondary" onclick="saveCurrentTopic()">💾 Konuyu Kaydet</button>
+                </div>
+
+                <div id="addStepForm" class="add-step-form" style="display: none;">
+                    <h4>Yeni Adım Ekle</h4>
+                    <input type="text" id="stepTitle" class="input-field" placeholder="Adım başlığı...">
+                    <textarea id="stepContent" class="input-field" placeholder="Adım açıklaması..." rows="3"></textarea>
+                    <input type="text" id="stepDate" class="input-field" placeholder="Tarih (opsiyonel)...">
+                    <div>
+                        <button class="btn success" onclick="addStep()">✅ Adım Ekle</button>
+                        <button class="btn" onclick="hideAddStepForm()">❌ İptal</button>
+                    </div>
+                </div>
+
+                <div class="timeline" id="timeline">
+                    <!-- Timeline adımları buraya dinamik olarak eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="5t-github-parametreleri.js"></script>
+    <script>
+        // Ana değişkenler
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+        let topics = {};
+        let currentTopic = null;
+        let editingStepIndex = -1;
+
+        // Sayfa yüklendiğinde çalışır
+        window.onload = function() {
+            document.getElementById('storageModal').style.display = 'none';
+            
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'block';
+            } else {
+                loadTopics();
+            }
+            
+            updateTopicList();
+        };
+
+        // Kayıt yöntemi seçimi
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            topics = userDatabase[username].topicsData || {};
+                            
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('timeline-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            updateTopicList();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            topicsData: {},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        topics = {};
+                        localStorage.removeItem('timeline-topics');
+                       
+                       await saveUserDatabase();
+                       
+                       const settings = { 
+                           method: storageMethod, 
+                           username: currentUser 
+                       };
+                       localStorage.setItem('timeline-storage-settings', JSON.stringify(settings));
+                       
+                       showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                       document.getElementById('storageModal').style.display = 'none';
+                       updateStorageInfo();
+                       updateTopicList();
+                   }
+               } catch (error) {
+                   console.error('GitHub kullanıcı doğrulama hatası:', error);
+                   showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                   storageMethod = 'local';
+                   
+                   const settings = { method: 'local' };
+                   localStorage.setItem('timeline-storage-settings', JSON.stringify(settings));
+                   
+                   document.getElementById('storageModal').style.display = 'none';
+                   updateStorageInfo();
+               }
+           } else {
+               const settings = { method: storageMethod };
+               localStorage.setItem('timeline-storage-settings', JSON.stringify(settings));
+               
+               showNotification('💻 Yerel kayıt seçildi!');
+               document.getElementById('storageModal').style.display = 'none';
+               updateStorageInfo();
+               setTimeout(loadTopics, 500);
+           }
+       }
+
+       async function loadUserDatabase() {
+           try {
+               const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/timeline-topics.json`, {
+                   headers: {
+                       'Authorization': `token ${token}`,
+                       'Accept': 'application/vnd.github.v3+json'
+                   }
+               });
+               
+               if (response.ok) {
+                   const data = await response.json();
+                   let content = data.content;
+                   let decodedContent = atob(content);
+                   let utf8Content = decodeURIComponent(escape(decodedContent));
+                   userDatabase = JSON.parse(utf8Content);
+               } else {
+                   userDatabase = {};
+               }
+           } catch (error) {
+               userDatabase = {};
+               throw error;
+           }
+       }
+
+       async function saveUserDatabase() {
+           try {
+               let sha = null;
+               try {
+                   const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/timeline-topics.json`, {
+                       headers: {
+                           'Authorization': `token ${token}`,
+                           'Accept': 'application/vnd.github.v3+json'
+                       }
+                   });
+
+                   if (response.ok) {
+                       const fileData = await response.json();
+                       sha = fileData.sha;
+                   }
+               } catch (err) {
+                   // Dosya yoksa hata alırız, normal
+               }
+
+               const jsonData = JSON.stringify(userDatabase, null, 2);
+               let utf8Content = unescape(encodeURIComponent(jsonData));
+               let encodedContent = btoa(utf8Content);
+
+               const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/timeline-topics.json`, {
+                   method: 'PUT',
+                   headers: {
+                       'Authorization': `token ${token}`,
+                       'Accept': 'application/vnd.github.v3+json'
+                   },
+                   body: JSON.stringify({
+                       message: 'Kronolojik konular kullanıcı veritabanı güncellendi',
+                       content: encodedContent,
+                       sha: sha
+                   })
+               });
+
+               if (!updateResponse.ok) {
+                   throw new Error('GitHub kullanıcı veritabanı güncelleme hatası');
+               }
+           } catch (error) {
+               console.error('GitHub kullanıcı veritabanı kaydetme hatası:', error);
+               throw error;
+           }
+       }
+
+       function checkStorageSettings() {
+           const savedSettings = localStorage.getItem('timeline-storage-settings');
+           if (savedSettings) {
+               const settings = JSON.parse(savedSettings);
+               storageMethod = settings.method;
+               
+               if (settings.method === 'github' && settings.username) {
+                   currentUser = settings.username;
+               }
+               
+               updateStorageInfo();
+               return true;
+           }
+           return false;
+       }
+
+       function updateStorageInfo() {
+           const info = document.getElementById('storageInfo');
+           if (storageMethod === 'github') {
+               info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+           } else {
+               info.textContent = '💻 Yerel kayıt';
+           }
+       }
+       
+       function changeStorageMethod() {
+           localStorage.removeItem('timeline-storage-settings');
+           
+           document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+           document.getElementById('githubLogin').style.display = 'none';
+           document.getElementById('loginUsername').value = '';
+           document.getElementById('loginPassword').value = '';
+           
+           document.getElementById('storageModal').style.display = 'block';
+           
+           storageMethod = 'local';
+           currentUser = null;
+       }
+
+       // Konu yönetimi
+       function createNewTopic() {
+           const topicName = document.getElementById('newTopicName').value.trim();
+           if (!topicName) {
+               alert('⚠ Lütfen konu adı girin!');
+               return;
+           }
+           
+           if (topics[topicName]) {
+               alert('⚠ Bu konu zaten mevcut!');
+               return;
+           }
+           
+           topics[topicName] = {
+               name: topicName,
+               steps: [],
+               createdDate: new Date().toISOString()
+           };
+           
+           document.getElementById('newTopicName').value = '';
+           updateTopicList();
+           selectTopic(topicName);
+           showNotification(`✅ "${topicName}" konusu oluşturuldu!`);
+       }
+
+       function updateTopicList() {
+           const topicList = document.getElementById('topicList');
+           topicList.innerHTML = '';
+           
+           Object.keys(topics).forEach(topicName => {
+               const topicItem = document.createElement('div');
+               topicItem.className = 'topic-item';
+               topicItem.onclick = () => selectTopic(topicName);
+               
+               topicItem.innerHTML = `
+                   <h4>${topicName}</h4>
+                   <p>${topics[topicName].steps.length} adım</p>
+                   <small>Oluşturulma: ${new Date(topics[topicName].createdDate).toLocaleDateString('tr-TR')}</small>
+               `;
+               
+               topicList.appendChild(topicItem);
+           });
+       }
+
+       function selectTopic(topicName) {
+           currentTopic = topicName;
+           
+           document.querySelectorAll('.topic-item').forEach(item => item.classList.remove('selected'));
+           event.target.closest('.topic-item').classList.add('selected');
+           
+           document.getElementById('currentTopicTitle').textContent = topicName;
+           document.getElementById('timelineSection').style.display = 'block';
+           
+           updateTimeline();
+       }
+
+       function deleteTopic() {
+           if (!currentTopic) return;
+           
+           if (confirm(`"${currentTopic}" konusunu silmek istediğinizden emin misiniz?`)) {
+               delete topics[currentTopic];
+               currentTopic = null;
+               
+               document.getElementById('timelineSection').style.display = 'none';
+               updateTopicList();
+               showNotification('🗑️ Konu silindi!');
+           }
+       }
+
+       // Adım yönetimi
+       function showAddStepForm() {
+           document.getElementById('addStepForm').style.display = 'block';
+           editingStepIndex = -1;
+           clearStepForm();
+       }
+
+       function hideAddStepForm() {
+           document.getElementById('addStepForm').style.display = 'none';
+           editingStepIndex = -1;
+           clearStepForm();
+       }
+
+       function clearStepForm() {
+           document.getElementById('stepTitle').value = '';
+           document.getElementById('stepContent').value = '';
+           document.getElementById('stepDate').value = '';
+       }
+
+       function addStep() {
+           const title = document.getElementById('stepTitle').value.trim();
+           const content = document.getElementById('stepContent').value.trim();
+           const date = document.getElementById('stepDate').value.trim();
+           
+           if (!title) {
+               alert('⚠ Lütfen adım başlığı girin!');
+               return;
+           }
+           
+           const step = {
+               title: title,
+               content: content,
+               date: date,
+               createdDate: new Date().toISOString()
+           };
+           
+           if (editingStepIndex >= 0) {
+               topics[currentTopic].steps[editingStepIndex] = step;
+               showNotification('✅ Adım güncellendi!');
+           } else {
+               topics[currentTopic].steps.push(step);
+               showNotification('✅ Adım eklendi!');
+           }
+           
+           hideAddStepForm();
+           updateTimeline();
+       }
+
+       function updateTimeline() {
+           if (!currentTopic || !topics[currentTopic]) return;
+           
+           const timeline = document.getElementById('timeline');
+           timeline.innerHTML = '';
+           
+           topics[currentTopic].steps.forEach((step, index) => {
+               const timelineItem = document.createElement('div');
+               timelineItem.className = 'timeline-item';
+               
+               timelineItem.innerHTML = `
+                   <h3>${step.title}</h3>
+                   ${step.date ? `<p style="color: #888; font-size: 0.9em; margin-bottom: 10px;">📅 ${step.date}</p>` : ''}
+                   <p>${step.content}</p>
+                   <div class="controls">
+                       <button class="btn secondary" onclick="editStep(${index})">✏️ Düzenle</button>
+                       <button class="btn" onclick="insertStepBefore(${index})">⬆️ Öncesine Ekle</button>
+                       <button class="btn" onclick="insertStepAfter(${index})">⬇️ Sonrasına Ekle</button>
+                       <button class="btn secondary" onclick="moveStepUp(${index})">⬆️ Yukarı</button>
+                       <button class="btn secondary" onclick="moveStepDown(${index})">⬇️ Aşağı</button>
+                       <button class="btn danger" onclick="deleteStep(${index})">🗑️ Sil</button>
+                   </div>
+               `;
+               
+               timeline.appendChild(timelineItem);
+           });
+       }
+
+       function editStep(index) {
+           const step = topics[currentTopic].steps[index];
+           
+           document.getElementById('stepTitle').value = step.title;
+           document.getElementById('stepContent').value = step.content;
+           document.getElementById('stepDate').value = step.date;
+           
+           editingStepIndex = index;
+           document.getElementById('addStepForm').style.display = 'block';
+           
+           showNotification('✏️ Düzenleme modunda!');
+       }
+
+       function insertStepBefore(index) {
+           showAddStepForm();
+           editingStepIndex = -2 - index; // Negatif değer ile before insert'i belirtiyoruz
+       }
+
+       function insertStepAfter(index) {
+           showAddStepForm();
+           editingStepIndex = -3 - index; // Daha negatif değer ile after insert'i belirtiyoruz
+       }
+
+       function moveStepUp(index) {
+           if (index === 0) return;
+           
+           const steps = topics[currentTopic].steps;
+           [steps[index], steps[index - 1]] = [steps[index - 1], steps[index]];
+           
+           updateTimeline();
+           showNotification('⬆️ Adım yukarı taşındı!');
+       }
+
+       function moveStepDown(index) {
+           const steps = topics[currentTopic].steps;
+           if (index === steps.length - 1) return;
+           
+           [steps[index], steps[index + 1]] = [steps[index + 1], steps[index]];
+           
+           updateTimeline();
+           showNotification('⬇️ Adım aşağı taşındı!');
+       }
+
+       function deleteStep(index) {
+           if (confirm('Bu adımı silmek istediğinizden emin misiniz?')) {
+               topics[currentTopic].steps.splice(index, 1);
+               updateTimeline();
+               showNotification('🗑️ Adım silindi!');
+           }
+       }
+
+       // Kaydetme ve yükleme
+       async function saveAllTopics() {
+           if (storageMethod === 'github' && currentUser) {
+               await saveToGitHub();
+           } else {
+               saveToLocal();
+           }
+           
+           showNotification('💾 Tüm konular kaydedildi!');
+       }
+
+       function saveCurrentTopic() {
+           if (!currentTopic) {
+               alert('⚠ Lütfen önce bir konu seçin!');
+               return;
+           }
+           
+           if (storageMethod === 'github' && currentUser) {
+               saveToGitHub();
+           } else {
+               saveToLocal();
+           }
+           
+           showNotification(`💾 "${currentTopic}" konusu kaydedildi!`);
+       }
+
+       function saveToLocal() {
+           localStorage.setItem('timeline-topics', JSON.stringify(topics));
+       }
+
+       async function saveToGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               userDatabase[currentUser].topicsData = topics;
+               userDatabase[currentUser].lastUpdated = new Date().toISOString();
+               
+               await saveUserDatabase();
+           } catch (error) {
+               console.error('GitHub hatası:', error);
+               showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+               saveToLocal();
+           }
+       }
+
+       function loadTopics() {
+           if (storageMethod === 'github' && currentUser) {
+               loadFromGitHub();
+           } else {
+               loadFromLocal();
+           }
+       }
+
+       function loadFromLocal() {
+           const savedData = localStorage.getItem('timeline-topics');
+           if (savedData) {
+               try {
+                   topics = JSON.parse(savedData);
+                   updateTopicList();
+                   showNotification('💻 Yerel veriler yüklendi!');
+               } catch (error) {
+                   console.error('Yerel veri okuma hatası:', error);
+                   topics = {};
+                   updateTopicList();
+               }
+           } else {
+               topics = {};
+               updateTopicList();
+           }
+       }
+
+       async function loadFromGitHub() {
+           try {
+               await loadUserDatabase();
+               
+               if (userDatabase[currentUser] && userDatabase[currentUser].topicsData) {
+                   topics = userDatabase[currentUser].topicsData;
+                   updateTopicList();
+                   showNotification('☁️ GitHub\'dan veriler yüklendi!');
+               } else {
+                   topics = {};
+                   updateTopicList();
+                   showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+               }
+           } catch (error) {
+               console.error('GitHub yükleme hatası:', error);
+               showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+               loadFromLocal();
+           }
+       }
+
+       // Yardımcı fonksiyonlar
+       function showNotification(message) {
+           const notification = document.getElementById('notification');
+           notification.textContent = message;
+           notification.classList.add('show');
+           
+           setTimeout(() => {
+               notification.classList.remove('show');
+           }, 4000);
+       }
+
+       // Klavye kısayolları
+       document.addEventListener('keydown', function(e) {
+           if (e.ctrlKey && e.key === 's') {
+               e.preventDefault();
+               if (currentTopic) {
+                   saveCurrentTopic();
+               } else {
+                   saveAllTopics();
+               }
+           }
+           if (e.ctrlKey && e.key === 'n') {
+               e.preventDefault();
+               const newTopicInput = document.getElementById('newTopicName');
+               newTopicInput.focus();
+           }
+           if (e.key === 'Escape') {
+               hideAddStepForm();
+           }
+       });
+
+       // Otomatik kaydetme (her 2 dakikada bir)
+       setInterval(() => {
+           if (Object.keys(topics).length > 0) {
+               const autoSave = {
+                   topics: topics,
+                   currentTopic: currentTopic,
+                   lastSaved: new Date().toISOString()
+               };
+               localStorage.setItem('timeline-autoSave', JSON.stringify(autoSave));
+           }
+       }, 120000);
+
+       // Sayfa yüklendiğinde otomatik kaydı kontrol et
+       function checkAutoSave() {
+           const autoSave = localStorage.getItem('timeline-autoSave');
+           if (autoSave) {
+               const data = JSON.parse(autoSave);
+               const lastSaved = new Date(data.lastSaved);
+               const now = new Date();
+               const diffMinutes = (now - lastSaved) / (1000 * 60);
+               
+               if (diffMinutes < 30 && Object.keys(data.topics).length > 0) {
+                   if (confirm('Otomatik kaydedilmiş konular bulundu. Yüklemek ister misiniz?')) {
+                       topics = data.topics;
+                       if (data.currentTopic && topics[data.currentTopic]) {
+                           selectTopic(data.currentTopic);
+                       }
+                       updateTopicList();
+                       showNotification('🔄 Otomatik kayıt yüklendi!');
+                   }
+               }
+               localStorage.removeItem('timeline-autoSave');
+           }
+       }
+
+       // Sayfa kapatılırken uyarı
+       window.addEventListener('beforeunload', function(e) {
+           const hasUnsavedData = currentTopic && topics[currentTopic] && 
+                                topics[currentTopic].steps.length > 0 &&
+                                !localStorage.getItem('timeline-topics');
+           
+           if (hasUnsavedData) {
+               e.preventDefault();
+               e.returnValue = '';
+               return 'Kaydedilmemiş kronolojik sıralama var. Ayrılmak istediğinizden emin misiniz?';
+           }
+       });
+
+       // İlk yükleme kontrolleri
+       setTimeout(() => {
+           checkAutoSave();
+           
+           if (Object.keys(topics).length === 0) {
+               showNotification('🕐 Hoş geldin! İlk kronolojik konunu oluşturmaya hazır mısın?');
+           } else {
+               showNotification('📚 Devam ediyoruz! Konularınız yüklendi.');
+           }
+       }, 2000);
+
+       // Gelişmiş fonksiyonlar - araya ekleme işlemi
+       function addStep() {
+           const title = document.getElementById('stepTitle').value.trim();
+           const content = document.getElementById('stepContent').value.trim();
+           const date = document.getElementById('stepDate').value.trim();
+           
+           if (!title) {
+               alert('⚠ Lütfen adım başlığı girin!');
+               return;
+           }
+           
+           const step = {
+               title: title,
+               content: content,
+               date: date,
+               createdDate: new Date().toISOString()
+           };
+           
+           if (editingStepIndex >= 0) {
+               // Normal düzenleme
+               topics[currentTopic].steps[editingStepIndex] = step;
+               showNotification('✅ Adım güncellendi!');
+           } else if (editingStepIndex <= -2) {
+               // Araya ekleme işlemleri
+               if (editingStepIndex <= -3) {
+                   // After insert (sonrasına ekle)
+                   const insertIndex = Math.abs(editingStepIndex + 3);
+                   topics[currentTopic].steps.splice(insertIndex + 1, 0, step);
+                   showNotification('✅ Adım sonrasına eklendi!');
+               } else {
+                   // Before insert (öncesine ekle)
+                   const insertIndex = Math.abs(editingStepIndex + 2);
+                   topics[currentTopic].steps.splice(insertIndex, 0, step);
+                   showNotification('✅ Adım öncesine eklendi!');
+               }
+           } else {
+               // En sona ekle
+               topics[currentTopic].steps.push(step);
+               showNotification('✅ Adım eklendi!');
+           }
+           
+           hideAddStepForm();
+           updateTimeline();
+       }
+
+   </script>
+   
+   <!-- GitHub parametreleri için ayrı js dosyası gerekli -->
+   <!-- 5t-github-parametreleri.js dosyası oluşturun ve şu içeriği ekleyin: -->
+   <!--
+   const kullaniciAdi = "your-github-username";
+   const repoAdi = "your-repo-name";
+   const token = "your-github-token";
+   const dosyaAdi = "timeline-topics.json";
+   -->
+</body>
+</html>
