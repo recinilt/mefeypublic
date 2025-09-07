@@ -235,44 +235,9 @@
             font-size: 1.2em;
         }
 
-        .timeline-item .content-preview {
+        .timeline-item p {
             color: #666;
             line-height: 1.6;
-            cursor: pointer;
-            border: 2px solid transparent;
-            padding: 10px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            max-height: 80px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .timeline-item .content-preview:hover {
-            background: #f8f9fa;
-            border-color: #e0e0e0;
-        }
-
-        .timeline-item .content-preview.collapsed::after {
-            content: '... (devamını görmek için tıklayın)';
-            color: #999;
-            font-style: italic;
-        }
-
-        .timeline-item .content-full {
-            color: #666;
-            line-height: 1.6;
-            white-space: pre-wrap;
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #667eea;
-            display: none;
-        }
-
-        .timeline-item .content-full.expanded {
-            display: block;
         }
 
         .timeline-item .controls {
@@ -476,7 +441,7 @@
                 <div id="addStepForm" class="add-step-form" style="display: none;">
                     <h4>Yeni Adım Ekle</h4>
                     <input type="text" id="stepTitle" class="input-field" placeholder="Adım başlığı...">
-                    <textarea id="stepContent" class="input-field" placeholder="Adım açıklaması..." rows="4"></textarea>
+                    <textarea id="stepContent" class="input-field" placeholder="Adım açıklaması..." rows="3"></textarea>
                     <input type="text" id="stepDate" class="input-field" placeholder="Tarih (opsiyonel)...">
                     <div>
                         <button class="btn success" onclick="addStep()">✅ Adım Ekle</button>
@@ -502,7 +467,6 @@
         let topics = {};
         let currentTopic = null;
         let editingStepIndex = -1;
-        let expandedContentIndex = -1; // Açık olan açıklama
 
         // Sayfa yüklendiğinde çalışır
         window.onload = function() {
@@ -763,7 +727,6 @@
 
        function selectTopic(topicName) {
            currentTopic = topicName;
-           expandedContentIndex = -1; // Açık olan açıklamayı kapat
            
            document.querySelectorAll('.topic-item').forEach(item => item.classList.remove('selected'));
            event.target.closest('.topic-item').classList.add('selected');
@@ -780,7 +743,6 @@
            if (confirm(`"${currentTopic}" konusunu silmek istediğinizden emin misiniz?`)) {
                delete topics[currentTopic];
                currentTopic = null;
-               expandedContentIndex = -1;
                
                document.getElementById('timelineSection').style.display = 'none';
                updateTopicList();
@@ -827,18 +789,7 @@
            if (editingStepIndex >= 0) {
                topics[currentTopic].steps[editingStepIndex] = step;
                showNotification('✅ Adım güncellendi!');
-           } else if (editingStepIndex <= -3) {
-               // After insert (sonrasına ekle)
-               const insertIndex = Math.abs(editingStepIndex + 3);
-               topics[currentTopic].steps.splice(insertIndex + 1, 0, step);
-               showNotification('✅ Adım sonrasına eklendi!');
-           } else if (editingStepIndex === -2) {
-               // Before insert (öncesine ekle)  
-               const insertIndex = Math.abs(editingStepIndex + 2);
-               topics[currentTopic].steps.splice(insertIndex, 0, step);
-               showNotification('✅ Adım öncesine eklendi!');
            } else {
-               // En sona ekle
                topics[currentTopic].steps.push(step);
                showNotification('✅ Adım eklendi!');
            }
@@ -857,20 +808,10 @@
                const timelineItem = document.createElement('div');
                timelineItem.className = 'timeline-item';
                
-               // Açıklama önizlemesi (ilk 100 karakter)
-               const contentPreview = step.content.length > 100 ? 
-                   step.content.substring(0, 100) + '...' : 
-                   step.content;
-               
                timelineItem.innerHTML = `
                    <h3>${step.title}</h3>
                    ${step.date ? `<p style="color: #888; font-size: 0.9em; margin-bottom: 10px;">📅 ${step.date}</p>` : ''}
-                   <div class="content-preview ${step.content.length > 100 ? 'collapsed' : ''}" onclick="toggleContent(${index})">
-                       ${contentPreview}
-                   </div>
-                   <div class="content-full" id="content-${index}">
-                       ${step.content}
-                   </div>
+                   <p>${step.content}</p>
                    <div class="controls">
                        <button class="btn secondary" onclick="editStep(${index})">✏️ Düzenle</button>
                        <button class="btn" onclick="insertStepBefore(${index})">⬆️ Öncesine Ekle</button>
@@ -883,31 +824,6 @@
                
                timeline.appendChild(timelineItem);
            });
-       }
-
-       // Açıklama açma/kapama fonksiyonu
-       function toggleContent(index) {
-           // Önceki açık olan açıklamayı kapat
-           if (expandedContentIndex >= 0 && expandedContentIndex !== index) {
-               const prevContent = document.getElementById(`content-${expandedContentIndex}`);
-               if (prevContent) {
-                   prevContent.classList.remove('expanded');
-               }
-           }
-           
-           // Yeni açıklamayı aç/kapat
-           const contentElement = document.getElementById(`content-${index}`);
-           if (contentElement) {
-               if (expandedContentIndex === index) {
-                   // Aynı açıklama tekrar tıklandı, kapat
-                   contentElement.classList.remove('expanded');
-                   expandedContentIndex = -1;
-               } else {
-                   // Yeni açıklama aç
-                   contentElement.classList.add('expanded');
-                   expandedContentIndex = index;
-               }
-           }
        }
 
        function editStep(index) {
@@ -925,12 +841,12 @@
 
        function insertStepBefore(index) {
            showAddStepForm();
-           editingStepIndex = -2; // Before insert için -2
+           editingStepIndex = -2 - index; // Negatif değer ile before insert'i belirtiyoruz
        }
 
        function insertStepAfter(index) {
            showAddStepForm();
-           editingStepIndex = -3 - index; // After insert için
+           editingStepIndex = -3 - index; // Daha negatif değer ile after insert'i belirtiyoruz
        }
 
        function moveStepUp(index) {
@@ -938,13 +854,6 @@
            
            const steps = topics[currentTopic].steps;
            [steps[index], steps[index - 1]] = [steps[index - 1], steps[index]];
-           
-           // Açık olan açıklama indexini güncelle
-           if (expandedContentIndex === index) {
-               expandedContentIndex = index - 1;
-           } else if (expandedContentIndex === index - 1) {
-               expandedContentIndex = index;
-           }
            
            updateTimeline();
            showNotification('⬆️ Adım yukarı taşındı!');
@@ -956,13 +865,6 @@
            
            [steps[index], steps[index + 1]] = [steps[index + 1], steps[index]];
            
-           // Açık olan açıklama indexini güncelle
-           if (expandedContentIndex === index) {
-               expandedContentIndex = index + 1;
-           } else if (expandedContentIndex === index + 1) {
-               expandedContentIndex = index;
-           }
-           
            updateTimeline();
            showNotification('⬇️ Adım aşağı taşındı!');
        }
@@ -970,14 +872,6 @@
        function deleteStep(index) {
            if (confirm('Bu adımı silmek istediğinizden emin misiniz?')) {
                topics[currentTopic].steps.splice(index, 1);
-               
-               // Açık olan açıklama indexini güncelle
-               if (expandedContentIndex === index) {
-                   expandedContentIndex = -1;
-               } else if (expandedContentIndex > index) {
-                   expandedContentIndex--;
-               }
-               
                updateTimeline();
                showNotification('🗑️ Adım silindi!');
            }
@@ -1163,6 +1057,51 @@
                showNotification('📚 Devam ediyoruz! Konularınız yüklendi.');
            }
        }, 2000);
+
+       // Gelişmiş fonksiyonlar - araya ekleme işlemi
+       function addStep() {
+           const title = document.getElementById('stepTitle').value.trim();
+           const content = document.getElementById('stepContent').value.trim();
+           const date = document.getElementById('stepDate').value.trim();
+           
+           if (!title) {
+               alert('⚠ Lütfen adım başlığı girin!');
+               return;
+           }
+           
+           const step = {
+               title: title,
+               content: content,
+               date: date,
+               createdDate: new Date().toISOString()
+           };
+           
+           if (editingStepIndex >= 0) {
+               // Normal düzenleme
+               topics[currentTopic].steps[editingStepIndex] = step;
+               showNotification('✅ Adım güncellendi!');
+           } else if (editingStepIndex <= -2) {
+               // Araya ekleme işlemleri
+               if (editingStepIndex <= -3) {
+                   // After insert (sonrasına ekle)
+                   const insertIndex = Math.abs(editingStepIndex + 3);
+                   topics[currentTopic].steps.splice(insertIndex + 1, 0, step);
+                   showNotification('✅ Adım sonrasına eklendi!');
+               } else {
+                   // Before insert (öncesine ekle)
+                   const insertIndex = Math.abs(editingStepIndex + 2);
+                   topics[currentTopic].steps.splice(insertIndex, 0, step);
+                   showNotification('✅ Adım öncesine eklendi!');
+               }
+           } else {
+               // En sona ekle
+               topics[currentTopic].steps.push(step);
+               showNotification('✅ Adım eklendi!');
+           }
+           
+           hideAddStepForm();
+           updateTimeline();
+       }
 
    </script>
    
