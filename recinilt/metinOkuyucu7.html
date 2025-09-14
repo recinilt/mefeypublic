@@ -799,15 +799,16 @@
 
         function closeReader() {
             
-            documentReader.closeReader();
+            
             // Önce pozisyonu kaydet
             this.saveReadingPosition();
-            
+            this.updateRecentFilesList();
+            documentReader.closeReader();
             document.getElementById('readerContainer').style.display = 'none';
             this.currentFile = null;
             
             // Listeyi güncelle ki yeni yüzde görünsün
-            this.updateRecentFilesList();
+            
 
             
         }
