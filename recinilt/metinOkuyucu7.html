@@ -543,8 +543,14 @@
             }
 
             closeReader() {
+                // Önce pozisyonu kaydet
+                this.saveReadingPosition();
+                // Listeyi güncelle ki yeni yüzde görünsün
+                this.updateRecentFilesList();
+
                 document.getElementById('readerContainer').style.display = 'none';
                 this.currentFile = null;
+
             }
 
             scrollToPosition(position) {
@@ -800,17 +806,6 @@
         function closeReader() {
             
             documentReader.closeReader();
-            // Önce pozisyonu kaydet
-            this.saveReadingPosition();
-            // Listeyi güncelle ki yeni yüzde görünsün
-            this.updateRecentFilesList();
-            
-            document.getElementById('readerContainer').style.display = 'none';
-            this.currentFile = null;
-            
-            
-            
-
             
         }
 
