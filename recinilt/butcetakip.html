@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelir Gider Yönetim Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-selector {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .date-inputs {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-inputs label {
+            font-weight: bold;
+        }
+
+        .date-inputs input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .generate-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .generate-btn:hover {
+            background: #45a049;
+        }
+
+        .statistics-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.income {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card.expense {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stat-card.balance {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        .stat-card.loans {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #333;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .year-tabs {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .year-tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .year-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .year-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .month-tabs {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+            gap: 10px;
+            background: #f8f9fa;
+        }
+
+        .month-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: all 0.3s;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .month-tab.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .month-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .content-area {
+            background: white;
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .budget-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .budget-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #343a40;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .section-header.income {
+            background: #28a745;
+        }
+
+        .section-header.bills {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .section-header.loans {
+            background: #dc3545;
+        }
+
+        .section-header.expenses {
+            background: #6f42c1;
+        }
+
+        .section-content {
+            padding: 15px;
+        }
+
+        .add-item-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        .add-item-form input,
+        .add-item-form select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #0056b3;
+        }
+
+        .update-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .update-btn:hover {
+            background: #1e7e34;
+        }
+
+        .items-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+            background: white;
+            margin-bottom: 5px;
+            border-radius: 3px;
+        }
+
+        .loan-item {
+            background: #fff5f5;
+            border-left: 4px solid #dc3545;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        .loan-details {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            grid-column: 1 / -1;
+        }
+
+        .summary-bar {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .summary-bar.positive {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .summary-bar.negative {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            transition: opacity 0.3s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .action-btn.report {
+            background: #17a2b8;
+        }
+
+        .action-btn.save {
+            background: #28a745;
+        }
+
+        .action-btn.load {
+            background: #007bff;
+        }
+
+        .yearly-stats {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .yearly-stats h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .year-summary {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .year-summary h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+
+        .monthly-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .month-summary {
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        .month-name {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .month-balance {
+            font-weight: bold;
+        }
+
+        .month-balance.positive {
+            color: #28a745;
+        }
+
+        .month-balance.negative {
+            color: #dc3545;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .date-inputs {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .budget-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .item-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .action-buttons {
+                position: static;
+                margin-top: 20px;
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .monthly-breakdown {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gelir Gider Yönetim Sistemi</h1>
+            <p>Kapsamlı finansal planlama ve kredi takip sistemi</p>
+        </div>
+
+        <div class="date-selector">
+            <div class="date-inputs">
+                <label for="startYear">Başlangıç Yılı:</label>
+                <input type="number" id="startYear" value="2024" min="2020" max="2040">
+
+                <label for="endYear">Bitiş Yılı:</label>
+                <input type="number" id="endYear" value="2026" min="2020" max="2040">
+
+                <button class="generate-btn" onclick="generateYearRange()">Aralığı Oluştur</button>
+            </div>
+        </div>
+
+        <div class="statistics-section">
+            <h2>Genel İstatistikler</h2>
+            <div class="stats-grid" id="generalStats">
+                <!-- İstatistikler buraya dinamik olarak eklenecek -->
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="year-tabs" id="yearTabs">
+                <!-- Yıl sekmeleri buraya dinamik olarak eklenecek -->
+            </div>
+
+            <div class="month-tabs" id="monthTabs">
+                <!-- Ay sekmeleri buraya dinamik olarak eklenecek -->
+            </div>
+
+            <div class="content-area">
+                <div id="monthlyStats" class="stats-grid">
+                    <!-- Aylık istatistikler -->
+                </div>
+
+                <div class="budget-sections">
+                    <!-- Gelirler Bölümü -->
+                    <div class="budget-section">
+                        <div class="section-header income">GELİRLER</div>
+                        <div class="section-content">
+                            <div class="add-item-form">
+                                <input type="text" id="incomeCategory" placeholder="Kategori">
+                                <input type="number" id="incomeAmount" placeholder="Tutar">
+                                <select id="incomeRepeat">
+                                    <option value="false">Tek Seferlik</option>
+                                    <option value="true">Sonraki Aylarda Devam Et</option>
+                                </select>
+                                <button class="add-btn" onclick="addIncomeItem()">Ekle</button>
+                            </div>
+                            <div class="items-list" id="incomeList"></div>
+                            <div class="summary-bar" id="incomeSummary">Toplam Gelir: ₺0</div>
+                        </div>
+                    </div>
+
+                    <!-- Faturalar Bölümü -->
+                    <div class="budget-section">
+                        <div class="section-header bills">FATURALAR</div>
+                        <div class="section-content">
+                            <div class="add-item-form">
+                                <input type="text" id="billCategory" placeholder="Fatura Türü">
+                                <input type="number" id="billAmount" placeholder="Tutar">
+                                <select id="billRepeat">
+                                    <option value="false">Tek Seferlik</option>
+                                    <option value="true">Sonraki Aylarda Devam Et</option>
+                                </select>
+                                <button class="add-btn" onclick="addBillItem()">Ekle</button>
+                            </div>
+                            <div class="items-list" id="billsList"></div>
+                            <div class="summary-bar" id="billsSummary">Toplam Faturalar: ₺0</div>
+                        </div>
+                    </div>
+
+                    <!-- Krediler Bölümü -->
+                    <div class="budget-section">
+                        <div class="section-header loans">KREDİLER</div>
+                        <div class="section-content">
+                            <div class="add-item-form">
+                                <input type="text" id="loanBank" placeholder="Banka">
+                                <input type="number" id="loanPrincipal" placeholder="Ana Para">
+                                <input type="number" id="loanMonthly" placeholder="Aylık Ödeme">
+                                <input type="number" id="loanTerms" placeholder="Toplam Taksit">
+                                <input type="number" id="loanCurrent" placeholder="Kaçıncı Taksit" value="1">
+                                <button class="add-btn" onclick="addLoanItem()">Ekle</button>
+                            </div>
+                            <div class="items-list" id="loansList"></div>
+                            <div class="summary-bar" id="loansSummary">Toplam Krediler: ₺0</div>
+                        </div>
+                    </div>
+
+                    <!-- Diğer Giderler Bölümü -->
+                    <div class="budget-section">
+                        <div class="section-header expenses">DİĞER GİDERLER</div>
+                        <div class="section-content">
+                            <div class="add-item-form">
+                                <input type="text" id="expenseCategory" placeholder="Kategori">
+                                <input type="number" id="expenseAmount" placeholder="Tutar">
+                                <select id="expenseRepeat">
+                                    <option value="false">Tek Seferlik</option>
+                                    <option value="true">Sonraki Aylarda Devam Et</option>
+                                </select>
+                                <button class="add-btn" onclick="addExpenseItem()">Ekle</button>
+                            </div>
+                            <div class="items-list" id="expensesList"></div>
+                            <div class="summary-bar" id="expensesSummary">Toplam Giderler: ₺0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-bar" id="monthlyBalance">Aylık Bakiye: ₺0</div>
+            </div>
+        </div>
+
+        <!-- Yıllık İstatistikler Bölümü -->
+        <div class="yearly-stats">
+            <h2>Yıllık İstatistikler</h2>
+            <div id="yearlyStatsContainer">
+                <!-- Yıllık istatistikler buraya dinamik olarak eklenecek -->
+            </div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-btn report" onclick="generateReport()">Rapor Oluştur</button>
+        <button class="action-btn save" onclick="saveData()">Kaydet</button>
+        <button class="action-btn load" onclick="loadData()">Yükle</button>
+    </div>
+
+    <script>
+        // Global değişkenler
+        let currentYear = new Date().getFullYear();
+        let currentMonth = new Date().getMonth() + 1;
+        let budgetData = {};
+        let yearRange = { start: 2024, end: 2026 };
+
+        // Veri yapısını initialize et
+        function initializeBudgetData() {
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                budgetData[year] = {};
+                for (let month = 1; month <= 12; month++) {
+                    budgetData[year][month] = {
+                        income: [],
+                        bills: [],
+                        loans: [],
+                        expenses: []
+                    };
+                }
+            }
+        }
+
+        // Yıl aralığını oluştur
+        function generateYearRange() {
+            const startYear = parseInt(document.getElementById('startYear').value);
+            const endYear = parseInt(document.getElementById('endYear').value);
+
+            if (startYear > endYear) {
+                alert('Başlangıç yılı bitiş yılından büyük olamaz!');
+                return;
+            }
+
+            yearRange = { start: startYear, end: endYear };
+            currentYear = startYear;
+
+            initializeBudgetData();
+            generateYearTabs();
+            generateMonthTabs();
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Yıl sekmelerini oluştur
+        function generateYearTabs() {
+            const yearTabsContainer = document.getElementById('yearTabs');
+            yearTabsContainer.innerHTML = '';
+
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                const tab = document.createElement('button');
+                tab.className = `year-tab ${year === currentYear ? 'active' : ''}`;
+                tab.textContent = year;
+                tab.onclick = () => switchYear(year);
+                yearTabsContainer.appendChild(tab);
+            }
+        }
+
+        // Ay sekmelerini oluştur
+        function generateMonthTabs() {
+            const monthTabsContainer = document.getElementById('monthTabs');
+            monthTabsContainer.innerHTML = '';
+
+            const monthNames = [
+                'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+            ];
+
+            monthNames.forEach((name, index) => {
+                const tab = document.createElement('button');
+                tab.className = `month-tab ${(index + 1) === currentMonth ? 'active' : ''}`;
+                tab.textContent = name;
+                tab.onclick = () => switchMonth(index + 1);
+                monthTabsContainer.appendChild(tab);
+            });
+        }
+
+        // Yıl değiştir
+        function switchYear(year) {
+            currentYear = year;
+            document.querySelectorAll('.year-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.year-tab').forEach(tab => {
+                if (tab.textContent == year) {
+                    tab.classList.add('active');
+                }
+            });
+            updateDisplay();
+        }
+
+        // Ay değiştir
+        function switchMonth(month) {
+            currentMonth = month;
+            document.querySelectorAll('.month-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.month-tab').forEach((tab, index) => {
+                if (index + 1 === month) {
+                    tab.classList.add('active');
+                }
+            });
+            updateDisplay();
+        }
+
+        // Tarih karşılaştırma fonksiyonu
+        function isDateAfterOrEqual(year1, month1, year2, month2) {
+            if (year1 > year2) return true;
+            if (year1 === year2 && month1 >= month2) return true;
+            return false;
+        }
+
+        // Gelir ekleme
+        function addIncomeItem() {
+            const category = document.getElementById('incomeCategory').value;
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const repeat = document.getElementById('incomeRepeat').value === 'true';
+
+            if (!category || !amount) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                category,
+                amount,
+                repeat,
+                startYear: currentYear,
+                startMonth: currentMonth
+            };
+
+            if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
+                for (let year = yearRange.start; year <= yearRange.end; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
+                            budgetData[year][month].income.push({ ...item, id: Date.now() + Math.random() });
+                        }
+                    }
+                }
+            } else {
+                budgetData[currentYear][currentMonth].income.push(item);
+            }
+
+            document.getElementById('incomeCategory').value = '';
+            document.getElementById('incomeAmount').value = '';
+            document.getElementById('incomeRepeat').value = 'false';
+
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Fatura ekleme
+        function addBillItem() {
+            const category = document.getElementById('billCategory').value;
+            const amount = parseFloat(document.getElementById('billAmount').value);
+            const repeat = document.getElementById('billRepeat').value === 'true';
+
+            if (!category || !amount) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                category,
+                amount,
+                repeat,
+                startYear: currentYear,
+                startMonth: currentMonth
+            };
+
+            if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
+                for (let year = yearRange.start; year <= yearRange.end; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
+                            budgetData[year][month].bills.push({ ...item, id: Date.now() + Math.random() });
+                        }
+                    }
+                }
+            } else {
+                budgetData[currentYear][currentMonth].bills.push(item);
+            }
+
+            document.getElementById('billCategory').value = '';
+            document.getElementById('billAmount').value = '';
+            document.getElementById('billRepeat').value = 'false';
+
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Kredi ekleme
+        function addLoanItem() {
+            const bank = document.getElementById('loanBank').value;
+            const principal = parseFloat(document.getElementById('loanPrincipal').value);
+            const monthly = parseFloat(document.getElementById('loanMonthly').value);
+            const terms = parseInt(document.getElementById('loanTerms').value);
+            const currentTerm = parseInt(document.getElementById('loanCurrent').value);
+
+            if (!bank || !principal || !monthly || !terms || !currentTerm) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            let yearCounter = currentYear;
+            let monthCounter = currentMonth;
+
+            for (let i = currentTerm; i <= terms; i++) {
+                const remainingTerms = terms - i + 1;
+                const remainingAmount = remainingTerms * monthly;
+
+                const loanItem = {
+                    id: Date.now() + i,
+                    bank,
+                    principal,
+                    monthly,
+                    terms,
+                    currentTerm: i,
+                    remainingTerms,
+                    remainingAmount,
+                    startYear: currentYear,
+                    startMonth: currentMonth
+                };
+
+                budgetData[yearCounter][monthCounter].loans.push(loanItem);
+
+                monthCounter++;
+                if (monthCounter > 12) {
+                    monthCounter = 1;
+                    yearCounter++;
+                    if (yearCounter > yearRange.end) break;
+                }
+            }
+
+            document.getElementById('loanBank').value = '';
+            document.getElementById('loanPrincipal').value = '';
+            document.getElementById('loanMonthly').value = '';
+            document.getElementById('loanTerms').value = '';
+            document.getElementById('loanCurrent').value = '1';
+
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Gider ekleme
+        function addExpenseItem() {
+            const category = document.getElementById('expenseCategory').value;
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const repeat = document.getElementById('expenseRepeat').value === 'true';
+
+            if (!category || !amount) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                category,
+                amount,
+                repeat,
+                startYear: currentYear,
+                startMonth: currentMonth
+            };
+
+            if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
+                for (let year = yearRange.start; year <= yearRange.end; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
+                            budgetData[year][month].expenses.push({ ...item, id: Date.now() + Math.random() });
+                        }
+                    }
+                }
+            } else {
+                budgetData[currentYear][currentMonth].expenses.push(item);
+            }
+
+            document.getElementById('expenseCategory').value = '';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('expenseRepeat').value = 'false';
+
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Item güncelleme
+        function updateItem(type, id) {
+            const newAmount = prompt('Yeni tutarı girin:');
+            if (!newAmount || isNaN(newAmount)) return;
+
+            const amount = parseFloat(newAmount);
+
+            // Sadece mevcut ay ve sonrasındaki kayıtları güncelle
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
+                        const items = budgetData[year][month][type];
+                        const item = items.find(item => item.category === 
+                            budgetData[currentYear][currentMonth][type].find(i => i.id === id)?.category);
+                        if (item && item.repeat) {
+                            item.amount = amount;
+                        }
+                    }
+                }
+            }
+
+            // Mevcut aydaki item'ı da güncelle
+            const currentItems = budgetData[currentYear][currentMonth][type];
+            const currentItem = currentItems.find(item => item.id === id);
+            if (currentItem) {
+                currentItem.amount = amount;
+            }
+
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Item silme
+        function deleteItem(type, id) {
+            const item = budgetData[currentYear][currentMonth][type].find(item => item.id === id);
+            
+            if (item && item.repeat) {
+                // Tekrarlanan item ise, mevcut ay ve sonrasındaki tüm kayıtları sil
+                for (let year = yearRange.start; year <= yearRange.end; year++) {
+                    for (let month = 1; month <= 12; month++) {
+                        if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
+                            budgetData[year][month][type] = budgetData[year][month][type].filter(
+                                item => item.category !== 
+                                budgetData[currentYear][currentMonth][type].find(i => i.id === id)?.category
+                            );
+                        }
+                    }
+                }
+            } else {
+                // Tek seferlik item ise sadece mevcut aydan sil
+                budgetData[currentYear][currentMonth][type] = budgetData[currentYear][currentMonth][type].filter(item => item.id !== id);
+            }
+            
+            updateDisplay();
+            updateGeneralStatistics();
+            updateYearlyStatistics();
+        }
+
+        // Para formatla
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: 'TRY'
+            }).format(amount);
+        }
+
+        // Ekranı güncelle
+        function updateDisplay() {
+            const currentData = budgetData[currentYear][currentMonth];
+
+            updateItemsList('income', currentData.income);
+            updateItemsList('bills', currentData.bills);
+            updateItemsList('loans', currentData.loans);
+            updateItemsList('expenses', currentData.expenses);
+
+            const totalIncome = currentData.income.reduce((sum, item) => sum + item.amount, 0);
+            const totalBills = currentData.bills.reduce((sum, item) => sum + item.amount, 0);
+            const totalLoans = currentData.loans.reduce((sum, item) => sum + item.monthly, 0);
+            const totalExpenses = currentData.expenses.reduce((sum, item) => sum + item.amount, 0);
+
+            const totalOutgoing = totalBills + totalLoans + totalExpenses;
+            const balance = totalIncome - totalOutgoing;
+
+            document.getElementById('incomeSummary').textContent = `Toplam Gelir: ${formatCurrency(totalIncome)}`;
+            document.getElementById('billsSummary').textContent = `Toplam Faturalar: ${formatCurrency(totalBills)}`;
+            document.getElementById('loansSummary').textContent = `Toplam Krediler: ${formatCurrency(totalLoans)}`;
+            document.getElementById('expensesSummary').textContent = `Toplam Giderler: ${formatCurrency(totalExpenses)}`;
+
+            const balanceElement = document.getElementById('monthlyBalance');
+            balanceElement.textContent = `Aylık Bakiye: ${formatCurrency(balance)}`;
+            balanceElement.className = `summary-bar ${balance >= 0 ? 'positive' : 'negative'}`;
+
+            updateMonthlyStats();
+        }
+
+        // Item listesini güncelle
+        function updateItemsList(type, items) {
+            const container = document.getElementById(`${type}List`);
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const row = document.createElement('div');
+                row.className = `item-row ${type === 'loans' ? 'loan-item' : ''}`;
+
+                if (type === 'loans') {
+                    row.innerHTML = `
+                        <div>${item.bank}</div>
+                        <div>${formatCurrency(item.monthly)}</div>
+                        <div>${item.currentTerm}/${item.terms}</div>
+                        <div>Kalan: ${formatCurrency(item.remainingAmount)}</div>
+                        <div>
+                            <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})">Sil</button>
+                        </div>
+                        <div class="loan-details">
+                            Ana Para: ${formatCurrency(item.principal)} | 
+                            Kalan Taksit: ${item.remainingTerms} |
+                            Başlangıç: ${item.startMonth}/${item.startYear}
+                        </div>
+                    `;
+                } else {
+                    row.innerHTML = `
+                        <div>${item.category}</div>
+                        <div>${formatCurrency(item.amount)}</div>
+                        <div>${item.repeat ? 'Devam Ediyor' : 'Tek Seferlik'}</div>
+                        <div>${item.repeat ? `${item.startMonth}/${item.startYear}'dan beri` : ''}</div>
+                        <div>
+                            ${item.repeat ? `<button class="update-btn" onclick="updateItem('${type}', ${item.id})">Güncelle</button>` : ''}
+                            <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})">Sil</button>
+                        </div>
+                    `;
+                }
+
+                container.appendChild(row);
+            });
+        }
+
+        // Aylık istatistikleri güncelle
+        function updateMonthlyStats() {
+            const currentData = budgetData[currentYear][currentMonth];
+
+            const totalIncome = currentData.income.reduce((sum, item) => sum + item.amount, 0);
+            const totalBills = currentData.bills.reduce((sum, item) => sum + item.amount, 0);
+            const totalLoans = currentData.loans.reduce((sum, item) => sum + item.monthly, 0);
+            const totalExpenses = currentData.expenses.reduce((sum, item) => sum + item.amount, 0);
+            const balance = totalIncome - (totalBills + totalLoans + totalExpenses);
+
+            const monthlyStatsContainer = document.getElementById('monthlyStats');
+            monthlyStatsContainer.innerHTML = `
+                <div class="stat-card income">
+                    <div class="stat-value">${formatCurrency(totalIncome)}</div>
+                    <div class="stat-label">Aylık Gelir</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-value">${formatCurrency(totalBills + totalLoans + totalExpenses)}</div>
+                    <div class="stat-label">Aylık Gider</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-value">${formatCurrency(balance)}</div>
+                    <div class="stat-label">Aylık Bakiye</div>
+                </div>
+                <div class="stat-card loans">
+                    <div class="stat-value">${formatCurrency(totalLoans)}</div>
+                    <div class="stat-label">Kredi Ödemeleri</div>
+                </div>
+            `;
+        }
+
+        // Genel istatistikleri güncelle
+        function updateGeneralStatistics() {
+            let totalYearlyIncome = 0;
+            let totalYearlyExpenses = 0;
+            let totalActiveLoans = 0;
+            let totalRemainingDebt = 0;
+
+            // Aktif kredileri sadece mevcut aydan hesapla
+            const currentMonthLoans = budgetData[currentYear][currentMonth].loans;
+            totalActiveLoans = currentMonthLoans.length;
+
+            // Kalan borç hesabı: Her kredi için sadece bir kez hesapla
+            const uniqueLoans = new Map();
+            currentMonthLoans.forEach(loan => {
+                const key = `${loan.bank}_${loan.principal}_${loan.terms}`;
+                if (!uniqueLoans.has(key)) {
+                    uniqueLoans.set(key, loan.remainingAmount);
+                }
+            });
+            totalRemainingDebt = Array.from(uniqueLoans.values()).reduce((sum, amount) => sum + amount, 0);
+
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                for (let month = 1; month <= 12; month++) {
+                    const data = budgetData[year][month];
+
+                    totalYearlyIncome += data.income.reduce((sum, item) => sum + item.amount, 0);
+                    totalYearlyExpenses += data.bills.reduce((sum, item) => sum + item.amount, 0);
+                    totalYearlyExpenses += data.expenses.reduce((sum, item) => sum + item.amount, 0);
+                    totalYearlyExpenses += data.loans.reduce((sum, item) => sum + item.monthly, 0);
+                }
+            }
+
+            const generalStatsContainer = document.getElementById('generalStats');
+            generalStatsContainer.innerHTML = `
+                <div class="stat-card income">
+                    <div class="stat-value">${formatCurrency(totalYearlyIncome)}</div>
+                    <div class="stat-label">Toplam Gelir (${yearRange.start}-${yearRange.end})</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-value">${formatCurrency(totalYearlyExpenses)}</div>
+                    <div class="stat-label">Toplam Gider (${yearRange.start}-${yearRange.end})</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-value">${formatCurrency(totalYearlyIncome - totalYearlyExpenses)}</div>
+                    <div class="stat-label">Net Bakiye (${yearRange.start}-${yearRange.end})</div>
+                </div>
+                <div class="stat-card loans">
+                    <div class="stat-value">${totalActiveLoans}</div>
+                    <div class="stat-label">Aktif Kredi Sayısı</div>
+                </div>
+                <div class="stat-card loans">
+                    <div class="stat-value">${formatCurrency(totalRemainingDebt)}</div>
+                    <div class="stat-label">Toplam Kalan Kredi Borcu</div>
+                </div>
+                <div class="stat-card balance">
+                    <div class="stat-value">${formatCurrency((totalYearlyIncome - totalYearlyExpenses) / ((yearRange.end - yearRange.start + 1) * 12))}</div>
+                    <div class="stat-label">Ortalama Aylık Bakiye</div>
+                </div>
+            `;
+        }
+
+        // Yıllık istatistikleri güncelle
+        function updateYearlyStatistics() {
+            const container = document.getElementById('yearlyStatsContainer');
+            container.innerHTML = '';
+
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                const yearDiv = document.createElement('div');
+                yearDiv.className = 'year-summary';
+
+                const yearTitle = document.createElement('h3');
+                yearTitle.textContent = `${year} Yılı`;
+                yearDiv.appendChild(yearTitle);
+
+                const monthlyBreakdown = document.createElement('div');
+                monthlyBreakdown.className = 'monthly-breakdown';
+
+                let yearlyIncome = 0;
+                let yearlyExpense = 0;
+
+                const monthNames = [
+                    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+                ];
+
+                for (let month = 1; month <= 12; month++) {
+                    const data = budgetData[year][month];
+                    const income = data.income.reduce((sum, item) => sum + item.amount, 0);
+                    const expense = data.bills.reduce((sum, item) => sum + item.amount, 0) +
+                                  data.loans.reduce((sum, item) => sum + item.monthly, 0) +
+                                  data.expenses.reduce((sum, item) => sum + item.amount, 0);
+                    const balance = income - expense;
+
+                    yearlyIncome += income;
+                    yearlyExpense += expense;
+
+                    const monthDiv = document.createElement('div');
+                    monthDiv.className = 'month-summary';
+                    monthDiv.innerHTML = `
+                        <div class="month-name">${monthNames[month - 1]}</div>
+                        <div>Gelir: ${formatCurrency(income)}</div>
+                        <div>Gider: ${formatCurrency(expense)}</div>
+                        <div class="month-balance ${balance >= 0 ? 'positive' : 'negative'}">
+                            Bakiye: ${formatCurrency(balance)}
+                        </div>
+                    `;
+                    monthlyBreakdown.appendChild(monthDiv);
+                }
+
+                yearDiv.appendChild(monthlyBreakdown);
+
+                // Yıllık özet
+                const yearSummary = document.createElement('div');
+                yearSummary.style.marginTop = '15px';
+                yearSummary.style.padding = '10px';
+                yearSummary.style.backgroundColor = '#e9ecef';
+                yearSummary.style.borderRadius = '5px';
+                yearSummary.style.fontWeight = 'bold';
+                yearSummary.innerHTML = `
+                    <div>Yıllık Toplam Gelir: ${formatCurrency(yearlyIncome)}</div>
+                    <div>Yıllık Toplam Gider: ${formatCurrency(yearlyExpense)}</div>
+                    <div style="color: ${yearlyIncome - yearlyExpense >= 0 ? '#28a745' : '#dc3545'}">
+                        Yıllık Net Bakiye: ${formatCurrency(yearlyIncome - yearlyExpense)}
+                    </div>
+                `;
+                yearDiv.appendChild(yearSummary);
+
+                container.appendChild(yearDiv);
+            }
+        }
+
+        // Rapor oluştur
+        function generateReport() {
+            let report = `Finansal Rapor (${yearRange.start} - ${yearRange.end})\n`;
+            report += '='.repeat(50) + '\n\n';
+
+            for (let year = yearRange.start; year <= yearRange.end; year++) {
+                report += `${year} YILI:\n`;
+                report += '-'.repeat(20) + '\n';
+
+                let yearlyIncome = 0;
+                let yearlyExpenses = 0;
+
+                for (let month = 1; month <= 12; month++) {
+                    const data = budgetData[year][month];
+                    const income = data.income.reduce((sum, item) => sum + item.amount, 0);
+                    const expenses = data.bills.reduce((sum, item) => sum + item.amount, 0) +
+                        data.loans.reduce((sum, item) => sum + item.monthly, 0) +
+                        data.expenses.reduce((sum, item) => sum + item.amount, 0);
+
+                    yearlyIncome += income;
+                    yearlyExpenses += expenses;
+
+                    if (income > 0 || expenses > 0) {
+                        report += `${month.toString().padStart(2, '0')}. Ay: Gelir ${formatCurrency(income)}, Gider ${formatCurrency(expenses)}, Bakiye ${formatCurrency(income - expenses)}\n`;
+                    }
+                }
+
+                report += `Yıllık Toplam: Gelir ${formatCurrency(yearlyIncome)}, Gider ${formatCurrency(yearlyExpenses)}, Net ${formatCurrency(yearlyIncome - yearlyExpenses)}\n\n`;
+            }
+
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(`
+                <html>
+                    <head><title>Finansal Rapor</title></head>
+                    <body style="font-family: monospace; padding: 20px; white-space: pre-wrap;">
+                        ${report}
+                    </body>
+                </html>
+            `);
+        }
+
+        // Veriyi kaydet
+        function saveData() {
+            const dataStr = JSON.stringify(budgetData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `budget_data_${new Date().getTime()}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Veriyi yükle
+        function loadData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+
+            input.onchange = function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        budgetData = JSON.parse(e.target.result);
+                        updateDisplay();
+                        updateGeneralStatistics();
+                        updateYearlyStatistics();
+                        alert('Veriler başarıyla yüklendi!');
+                    } catch (error) {
+                        alert('Dosya okuma hatası: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            input.click();
+        }
+
+        // Sayfa yüklendiğinde başlat
+        window.onload = function () {
+            generateYearRange();
+        };
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveData();
+            }
+            if (e.ctrlKey && e.key === 'o') {
+                e.preventDefault();
+                loadData();
+            }
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                generateReport();
+            }
+        });
+    </script>
+
+</body>
+
+</html>
