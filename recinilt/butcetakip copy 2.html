@@ -386,10 +386,6 @@
             background: #007bff;
         }
 
-        .action-btn.storage {
-            background: #6f42c1;
-        }
-
         .yearly-stats {
             background: white;
             padding: 20px;
@@ -450,224 +446,6 @@
             color: #dc3545;
         }
 
-        .storage-status {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #667eea;
-        }
-
-        .storage-status h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .storage-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .storage-current {
-            color: #666;
-        }
-
-        .storage-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .btn-sm {
-            padding: 5px 12px;
-            font-size: 12px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #0056b3;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #1e7e34;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
-        /* Storage Modal Styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-content h2 {
-            color: #333;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .storage-selection {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .storage-option {
-            background: white;
-            border: 3px solid #ddd;
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            text-align: center;
-            min-width: 200px;
-            transition: all 0.3s ease;
-        }
-
-        .storage-option:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-
-        .storage-option.selected {
-            border-color: #667eea;
-            background: #f0f8ff;
-        }
-
-        .storage-option h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .storage-option p {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .github-login {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .text-area {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 80px;
-            transition: border-color 0.3s ease;
-        }
-
-        .text-area:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .text-area.short {
-            min-height: 60px;
-        }
-
-        .btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 5px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn.secondary {
-            background: linear-gradient(45deg, #74b9ff, #0984e3);
-        }
-
-        .btn.danger {
-            background: linear-gradient(45deg, #e17055, #d63031);
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -701,27 +479,6 @@
             .monthly-breakdown {
                 grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
-
-            .storage-selection {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .storage-option {
-                min-width: auto;
-                width: 100%;
-                max-width: 300px;
-            }
-
-            .storage-info {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .storage-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
         }
     </style>
 </head>
@@ -733,69 +490,13 @@
             <p>Kapsamlı finansal planlama ve kredi takip sistemi</p>
         </div>
 
-        <!-- Kayıt Durumu Bölümü -->
-        <div class="storage-status">
-            <h3>Kayıt Durumu</h3>
-            <div class="storage-info">
-                <div class="storage-current" id="storageStatus">
-                    <!-- Mevcut kayıt durumu buraya gelecek -->
-                </div>
-                <div class="storage-actions">
-                    <button class="btn-sm btn-primary" onclick="saveToCurrentStorage()">Kaydet</button>
-                    <button class="btn-sm btn-secondary" onclick="loadFromCurrentStorage()">Yükle</button>
-                    <button class="btn-sm btn-success" onclick="exportToOtherStorage()">Diğer Yönteme Aktar</button>
-                    <button class="btn-sm btn-warning" onclick="changeStorageMethod()">Yöntem Değiştir</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Kayıt Seçimi Modal -->
-        <div id="storageModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <h2>Kayıt Yöntemi Seçimi</h2>
-                <p style="text-align: center; margin-bottom: 30px;">Finansal verilerinizi nerede saklamak istiyorsunuz?</p>
-                
-                <div class="storage-selection">
-                    <div class="storage-option" onclick="selectStorage('local')">
-                        <h3>Yerel Kayıt</h3>
-                        <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
-                        <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
-                    </div>
-                    
-                    <div class="storage-option" onclick="selectStorage('github')">
-                        <h3>GitHub Kayıt</h3>
-                        <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
-                    </div>
-                </div>
-                
-                <div id="githubLogin" style="display: none;" class="github-login">
-                    <h3 style="text-align: center; margin-bottom: 20px;">GitHub Giriş</h3>
-                    
-                    <div style="margin: 15px 0;">
-                        <label><strong>Kullanıcı Adı:</strong></label>
-                        <input type="text" id="loginUsername" class="text-area short" placeholder="Kullanıcı adınızı girin">
-                    </div>
-                    
-                    <div style="margin: 15px 0;">
-                        <label><strong>Şifre:</strong></label>
-                        <input type="password" id="loginPassword" class="text-area short" placeholder="Şifrenizi girin">
-                    </div>
-                </div>
-                
-                <div style="text-align: center; margin-top: 30px;">
-                    <button class="btn" onclick="confirmStorageSelection()">Seçimimi Onayla</button>
-                    <button class="btn secondary" onclick="closeStorageModal()">İptal</button>
-                </div>
-            </div>
-        </div>
-
         <div class="date-selector">
             <div class="date-inputs">
                 <label for="startYear">Başlangıç Yılı:</label>
-                <input type="number" id="startYear" value="" min="2020" max="2060">
+                <input type="number" id="startYear" value="2024" min="2020" max="2040">
 
                 <label for="endYear">Bitiş Yılı:</label>
-                <input type="number" id="endYear" value="" min="2020" max="2060">
+                <input type="number" id="endYear" value="2026" min="2020" max="2040">
 
                 <button class="generate-btn" onclick="generateYearRange()">Aralığı Oluştur</button>
             </div>
@@ -910,22 +611,16 @@
 
     <div class="action-buttons">
         <button class="action-btn report" onclick="generateReport()">Rapor Oluştur</button>
+        <button class="action-btn save" onclick="saveData()">Kaydet</button>
+        <button class="action-btn load" onclick="loadData()">Yükle</button>
     </div>
 
-    <div class="notification" id="notification"></div>
-
-    <script src="5t-github-parametreleri.js"></script>
     <script>
         // Global değişkenler
         let currentYear = new Date().getFullYear();
         let currentMonth = new Date().getMonth() + 1;
         let budgetData = {};
-        let yearRange = { start: currentYear, end: currentYear + 30 };
-
-        // Kayıt yöntemi ve kullanıcı bilgileri
-        let storageMethod = 'local';
-        let currentUser = null;
-        let userDatabase = {};
+        let yearRange = { start: 2024, end: 2026 };
 
         // Veri yapısını initialize et
         function initializeBudgetData() {
@@ -940,339 +635,6 @@
                     };
                 }
             }
-        }
-
-        // Kayıt durumunu güncelle
-        function updateStorageStatus() {
-            const statusElement = document.getElementById('storageStatus');
-            if (storageMethod === 'github') {
-                statusElement.innerHTML = `
-                    GitHub Kayıt Aktif${currentUser ? ` (${currentUser})` : ''}<br>
-                    <small>Verileriniz GitHub'da güvenle saklanıyor</small>
-                `;
-            } else {
-                statusElement.innerHTML = `
-                    Yerel Kayıt Aktif<br>
-                    <small>Verileriniz bu tarayıcıda saklanıyor</small>`;
-            }
-        }
-
-        // Kayıt yöntemi seçimi
-        function selectStorage(method) {
-            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
-            event.target.closest('.storage-option').classList.add('selected');
-            storageMethod = method;
-            
-            const githubLogin = document.getElementById('githubLogin');
-            if (method === 'github') {
-                githubLogin.style.display = 'block';
-            } else {
-                githubLogin.style.display = 'none';
-            }
-        }
-
-        // Modal kapatma
-        function closeStorageModal() {
-            document.getElementById('storageModal').style.display = 'none';
-        }
-
-        // Kayıt seçimini onayla
-        async function confirmStorageSelection() {
-            if (storageMethod === 'github') {
-                const username = document.getElementById('loginUsername').value.trim();
-                const password = document.getElementById('loginPassword').value.trim();
-                
-                if (!username || !password) {
-                    alert('Lütfen kullanıcı adı ve şifrenizi girin!');
-                    return;
-                }
-                
-                try {
-                    await loadUserDatabase();
-                    
-                    if (userDatabase[username]) {
-                        if (userDatabase[username].password === password) {
-                            currentUser = username;
-                            // GitHub'dan veriyi yükle
-                            if (userDatabase[username].budgetData) {
-                                budgetData = userDatabase[username].budgetData;
-                            }
-                            
-                            // GitHub ayarlarını kaydet
-                            const settings = { 
-                                method: storageMethod, 
-                                username: currentUser 
-                            };
-                            localStorage.setItem('budget-storage-settings', JSON.stringify(settings));
-                            
-                            showNotification(`Hoş geldin ${username}! GitHub verilerini yüklendi.`);
-                            document.getElementById('storageModal').style.display = 'none';
-                            updateStorageStatus();
-                            updateDisplay();
-                            updateGeneralStatistics();
-                            updateYearlyStatistics();
-                        } else {
-                            alert('Geçersiz şifre!');
-                            return;
-                        }
-                    } else {
-                        // Yeni kullanıcı oluştur
-                        userDatabase[username] = {
-                            password: password,
-                            budgetData: {},
-                            createdDate: new Date().toISOString()
-                        };
-                        
-                        currentUser = username;
-                        budgetData = {};
-                        initializeBudgetData();
-                        
-                        await saveUserDatabase();
-                        
-                        // Yeni kullanıcı ayarlarını kaydet
-                        const settings = { 
-                            method: storageMethod, 
-                            username: currentUser 
-                        };
-                        localStorage.setItem('budget-storage-settings', JSON.stringify(settings));
-                        
-                        showNotification(`Yeni hesap oluşturuldu! Hoş geldin ${username}!`);
-                        document.getElementById('storageModal').style.display = 'none';
-                        updateStorageStatus();
-                    }
-                } catch (error) {
-                    console.error('GitHub bağlantı hatası:', error);
-                    showNotification('GitHub bağlantısında hata! Yerel kayıt seçiliyor.');
-                    storageMethod = 'local';
-                    
-                    const settings = { method: 'local' };
-                    localStorage.setItem('budget-storage-settings', JSON.stringify(settings));
-                    
-                    document.getElementById('storageModal').style.display = 'none';
-                    updateStorageStatus();
-                }
-            } else {
-                // Yerel kayıt seçildi
-                const settings = { method: storageMethod };
-                localStorage.setItem('budget-storage-settings', JSON.stringify(settings));
-                
-                showNotification('Yerel kayıt seçildi!');
-                document.getElementById('storageModal').style.display = 'none';
-                updateStorageStatus();
-                
-                // Yerel veriler varsa yükle
-                const localData = localStorage.getItem('budget-data');
-                if (localData) {
-                    budgetData = JSON.parse(localData);
-                    updateDisplay();
-                    updateGeneralStatistics();
-                    updateYearlyStatistics();
-                }
-            }
-        }
-
-        // GitHub kullanıcı veritabanı yükleme
-        async function loadUserDatabase() {
-            try {
-                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    let content = data.content;
-                    let decodedContent = atob(content);
-                    let utf8Content = decodeURIComponent(escape(decodedContent));
-                    userDatabase = JSON.parse(utf8Content);
-                } else {
-                    userDatabase = {};
-                }
-            } catch (error) {
-                userDatabase = {};
-                throw error;
-            }
-        }
-
-        // GitHub kullanıcı veritabanı kaydetme
-        async function saveUserDatabase() {
-            try {
-                let sha = null;
-                try {
-                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-
-                    if (response.ok) {
-                        const fileData = await response.json();
-                        sha = fileData.sha;
-                    }
-                } catch (err) {
-                    // Dosya yoksa hata alırız, normal
-                }
-
-                const jsonData = JSON.stringify(userDatabase, null, 2);
-                let utf8Content = unescape(encodeURIComponent(jsonData));
-                let encodedContent = btoa(utf8Content);
-
-                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${dosyaAdi}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        message: 'Bütçe veritabanı güncellendi',
-                        content: encodedContent,
-                        sha: sha
-                    })
-                });
-
-                if (!updateResponse.ok) {
-                    throw new Error('GitHub veritabanı güncelleme hatası');
-                }
-            } catch (error) {
-                console.error('GitHub kullanıcı veritabanı kaydetme hatası:', error);
-                throw error;
-            }
-        }
-
-        // Kayıt ayarlarını kontrol et
-        function checkStorageSettings() {
-            const savedSettings = localStorage.getItem('budget-storage-settings');
-            if (savedSettings) {
-                const settings = JSON.parse(savedSettings);
-                storageMethod = settings.method;
-                
-                if (settings.method === 'github' && settings.username) {
-                    currentUser = settings.username;
-                }
-                
-                updateStorageStatus();
-                return true;
-            }
-            return false;
-        }
-
-        // Mevcut kayıt yöntemine kaydet
-        async function saveToCurrentStorage() {
-            if (storageMethod === 'github' && currentUser) {
-                await saveToGitHub();
-            } else {
-                saveToLocal();
-            }
-        }
-
-        // Yerel kayıt
-        function saveToLocal() {
-            localStorage.setItem('budget-data', JSON.stringify(budgetData));
-            showNotification('Veriler yerel olarak kaydedildi!');
-        }
-
-        // GitHub'a kaydet
-        async function saveToGitHub() {
-            try {
-                await loadUserDatabase();
-                
-                userDatabase[currentUser].budgetData = budgetData;
-                userDatabase[currentUser].lastUpdated = new Date().toISOString();
-                
-                await saveUserDatabase();
-                showNotification('Veriler GitHub\'a başarıyla kaydedildi!');
-            } catch (error) {
-                console.error('GitHub kaydetme hatası:', error);
-                showNotification('GitHub\'a kaydetme hatası! Yerel kayıt yapılıyor.');
-                saveToLocal();
-            }
-        }
-
-        // Mevcut kayıt yönteminden yükle
-        async function loadFromCurrentStorage() {
-            if (storageMethod === 'github' && currentUser) {
-                await loadFromGitHub();
-            } else {
-                loadFromLocal();
-            }
-        }
-
-        // Yerel veriden yükle
-        function loadFromLocal() {
-            const savedData = localStorage.getItem('budget-data');
-            if (savedData) {
-                budgetData = JSON.parse(savedData);
-                updateDisplay();
-                updateGeneralStatistics();
-                updateYearlyStatistics();
-                showNotification('Yerel veriler yüklendi!');
-            } else {
-                showNotification('Yerel veri bulunamadı!');
-            }
-        }
-
-        // GitHub'dan yükle
-        async function loadFromGitHub() {
-            try {
-                await loadUserDatabase();
-                
-                if (userDatabase[currentUser] && userDatabase[currentUser].budgetData) {
-                    budgetData = userDatabase[currentUser].budgetData;
-                    updateDisplay();
-                    updateGeneralStatistics();
-                    updateYearlyStatistics();
-                    showNotification('GitHub\'dan veriler yüklendi!');
-                } else {
-                    showNotification('GitHub\'da veri bulunamadı!');
-                }
-            } catch (error) {
-                console.error('GitHub yükleme hatası:', error);
-                showNotification('GitHub\'dan yükleme hatası!');
-            }
-        }
-
-        // Diğer kayıt yöntemine aktar
-        async function exportToOtherStorage() {
-            const targetMethod = storageMethod === 'github' ? 'local' : 'github';
-            
-            if (targetMethod === 'local') {
-                // GitHub'dan yerel'e aktar
-                if (confirm('Mevcut GitHub verilerinizi yerel tarayıcıya aktarmak istediğinizden emin misiniz?')) {
-                    localStorage.setItem('budget-data', JSON.stringify(budgetData));
-                    showNotification('Veriler yerel tarayıcıya aktarıldı!');
-                }
-            } else {
-                // Yerel'den GitHub'a aktar
-                if (!currentUser) {
-                    alert('GitHub\'a aktarmak için önce GitHub hesabına giriş yapmalısınız!');
-                    changeStorageMethod();
-                    return;
-                }
-                
-                if (confirm('Mevcut yerel verilerinizi GitHub\'a aktarmak istediğinizden emin misiniz?')) {
-                    try {
-                        await saveToGitHub();
-                        showNotification('Veriler GitHub\'a aktarıldı!');
-                    } catch (error) {
-                        showNotification('GitHub\'a aktarım hatası!');
-                    }
-                }
-            }
-        }
-
-        // Kayıt yöntemini değiştir
-        function changeStorageMethod() {
-            // Modal seçimlerini sıfırla
-            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
-            document.getElementById('githubLogin').style.display = 'none';
-            document.getElementById('loginUsername').value = '';
-            document.getElementById('loginPassword').value = '';
-            
-            // Modal aç
-            document.getElementById('storageModal').style.display = 'block';
         }
 
         // Yıl aralığını oluştur
@@ -1381,6 +743,7 @@
             };
 
             if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
                 for (let year = yearRange.start; year <= yearRange.end; year++) {
                     for (let month = 1; month <= 12; month++) {
                         if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
@@ -1422,6 +785,7 @@
             };
 
             if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
                 for (let year = yearRange.start; year <= yearRange.end; year++) {
                     for (let month = 1; month <= 12; month++) {
                         if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
@@ -1517,6 +881,7 @@
             };
 
             if (repeat) {
+                // Sadece mevcut ay ve sonrasındaki aylara ekle
                 for (let year = yearRange.start; year <= yearRange.end; year++) {
                     for (let month = 1; month <= 12; month++) {
                         if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
@@ -1544,6 +909,7 @@
 
             const amount = parseFloat(newAmount);
 
+            // Sadece mevcut ay ve sonrasındaki kayıtları güncelle
             for (let year = yearRange.start; year <= yearRange.end; year++) {
                 for (let month = 1; month <= 12; month++) {
                     if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
@@ -1557,6 +923,7 @@
                 }
             }
 
+            // Mevcut aydaki item'ı da güncelle
             const currentItems = budgetData[currentYear][currentMonth][type];
             const currentItem = currentItems.find(item => item.id === id);
             if (currentItem) {
@@ -1569,20 +936,17 @@
         }
 
         // Item silme
-        // Item silme - GÜNCELLENMİŞ VERSİYON
         function deleteItem(type, id) {
             const item = budgetData[currentYear][currentMonth][type].find(item => item.id === id);
             
             if (item && item.repeat) {
                 // Tekrarlanan item ise, mevcut ay ve sonrasındaki tüm kayıtları sil
-                // (Önceki aylardaki aynı kategorideki verileri korur)
-                const categoryToDelete = item.category;
-                
                 for (let year = yearRange.start; year <= yearRange.end; year++) {
                     for (let month = 1; month <= 12; month++) {
                         if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
                             budgetData[year][month][type] = budgetData[year][month][type].filter(
-                                item => !(item.category === categoryToDelete && item.repeat)
+                                item => item.category !== 
+                                budgetData[currentYear][currentMonth][type].find(i => i.id === id)?.category
                             );
                         }
                     }
@@ -1596,6 +960,7 @@
             updateGeneralStatistics();
             updateYearlyStatistics();
         }
+
         // Para formatla
         function formatCurrency(amount) {
             return new Intl.NumberFormat('tr-TR', {
@@ -1712,9 +1077,11 @@
             let totalActiveLoans = 0;
             let totalRemainingDebt = 0;
 
+            // Aktif kredileri sadece mevcut aydan hesapla
             const currentMonthLoans = budgetData[currentYear][currentMonth].loans;
             totalActiveLoans = currentMonthLoans.length;
 
+            // Kalan borç hesabı: Her kredi için sadece bir kez hesapla
             const uniqueLoans = new Map();
             currentMonthLoans.forEach(loan => {
                 const key = `${loan.bank}_${loan.principal}_${loan.terms}`;
@@ -1814,6 +1181,7 @@
 
                 yearDiv.appendChild(monthlyBreakdown);
 
+                // Yıllık özet
                 const yearSummary = document.createElement('div');
                 yearSummary.style.marginTop = '15px';
                 yearSummary.style.padding = '10px';
@@ -1874,50 +1242,62 @@
             `);
         }
 
-        // Bildirim göster
-        function showNotification(message) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.classList.add('show');
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 4000);
+        // Veriyi kaydet
+        function saveData() {
+            const dataStr = JSON.stringify(budgetData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `budget_data_${new Date().getTime()}.json`;
+            link.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Veriyi yükle
+        function loadData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+
+            input.onchange = function (event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        budgetData = JSON.parse(e.target.result);
+                        updateDisplay();
+                        updateGeneralStatistics();
+                        updateYearlyStatistics();
+                        alert('Veriler başarıyla yüklendi!');
+                    } catch (error) {
+                        alert('Dosya okuma hatası: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+
+            input.click();
         }
 
         // Sayfa yüklendiğinde başlat
         window.onload = function () {
-            const currentYearValue = new Date().getFullYear();
-            document.getElementById('startYear').value = currentYearValue;
-            document.getElementById('endYear').value = currentYearValue + 30;
-            
-            if (!checkStorageSettings()) {
-                document.getElementById('storageModal').style.display = 'block';
-            } else {
-                generateYearRange();
-                if (storageMethod === 'github' && currentUser) {
-                    loadFromGitHub();
-                } else {
-                    const localData = localStorage.getItem('budget-data');
-                    if (localData) {
-                        budgetData = JSON.parse(localData);
-                        updateDisplay();
-                        updateGeneralStatistics();
-                        updateYearlyStatistics();
-                    }
-                }
-            }
+            generateYearRange();
         };
 
         // Klavye kısayolları
         document.addEventListener('keydown', function (e) {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
-                saveToCurrentStorage();
+                saveData();
             }
             if (e.ctrlKey && e.key === 'o') {
                 e.preventDefault();
-                loadFromCurrentStorage();
+                loadData();
             }
             if (e.ctrlKey && e.key === 'r') {
                 e.preventDefault();
