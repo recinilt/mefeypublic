@@ -668,106 +668,6 @@
             transform: translateX(0);
         }
 
-        .notes-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #28a745;
-        }
-
-        .notes-section h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .notes-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .notes-table th,
-        .notes-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .notes-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            color: #495057;
-        }
-
-        .notes-table input {
-            width: 100%;
-            border: none;
-            padding: 5px;
-            font-size: 14px;
-        }
-
-        .notes-table input:focus {
-            outline: 1px solid #667eea;
-            background-color: #f0f8ff;
-        }
-
-        .notes-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn-add-note {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-add-note:hover {
-            background: #1e7e34;
-        }
-
-        .btn-delete-row {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .btn-delete-row:hover {
-            background: #c82333;
-        }
-
-        .notes-table-wrapper {
-        width: 100%;
-        overflow-x: auto;   /* Yatay kaydırma */
-        }
-
-        .notes-table {
-        min-width: 600px;   /* Tablonun sıkışıp bozulmasını önler */
-        }
-
-
-        @media (max-width: 768px) {
-            .notes-table {
-                font-size: 12px;
-            }
-            
-            .notes-table th,
-            .notes-table td {
-                padding: 5px;
-            }
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -823,8 +723,6 @@
                 justify-content: flex-start;
             }
         }
-
-
     </style>
 </head>
 
@@ -848,33 +746,6 @@
                     <button class="btn-sm btn-success" onclick="exportToOtherStorage()">Diğer Yönteme Aktar</button>
                     <button class="btn-sm btn-warning" onclick="changeStorageMethod()">Yöntem Değiştir</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Not Tablosu Bölümü -->
-        <div class="notes-section">
-            <h3>Finansal Notlarım</h3>
-            <div class="notes-table-wrapper">
-            <table class="notes-table" id="notesTable">
-                <thead>
-                    <tr>
-                        <th>Nereye</th>
-                        <th>Ne Zaman</th>
-                        <th>Ne Kadar</th>
-                        <th>IBAN</th>
-                        <th>Diğer</th>
-                        <th>İşlem</th>
-                    </tr>
-                </thead>
-                <tbody id="notesTableBody">
-                    <!-- Notlar buraya dinamik olarak eklenecek -->
-                </tbody>
-            </table></div>
-            <div class="notes-actions">
-                <button class="btn-add-note" onclick="addNewNoteRow()">Yeni Not Ekle</button>
-                <span style="margin-left: 15px; color: #666; font-size: 13px;">
-                    Otomatik kayıt: Değişiklikler anında kaydediliyor
-                </span>
             </div>
         </div>
 
@@ -1050,123 +921,11 @@
         let currentMonth = new Date().getMonth() + 1;
         let budgetData = {};
         let yearRange = { start: currentYear, end: currentYear + 30 };
-        let notesData = [];
 
         // Kayıt yöntemi ve kullanıcı bilgileri
         let storageMethod = 'local';
         let currentUser = null;
         let userDatabase = {};
-
-        // Not satırı ekleme
-        function addNewNoteRow() {
-            const newNote = {
-                id: Date.now(),
-                nereye: '',
-                neZaman: '',
-                neKadar: '',
-                iban: '',
-                diger: ''
-            };
-            
-            notesData.push(newNote);
-            renderNotesTable();
-            autoSaveNotes();
-        }
-
-        // Not tablosunu render et
-        function renderNotesTable() {
-            const tbody = document.getElementById('notesTableBody');
-            tbody.innerHTML = '';
-            
-            notesData.forEach(note => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><input type="text" value="${note.nereye}" onchange="updateNote(${note.id}, 'nereye', this.value)" placeholder="Ödeme yapılacak yer"></td>
-                    <td><input type="text" value="${note.neZaman}" onchange="updateNote(${note.id}, 'neZaman', this.value)" placeholder="Tarih/Zaman"></td>
-                    <td><input type="text" value="${note.neKadar}" onchange="updateNote(${note.id}, 'neKadar', this.value)" placeholder="Tutar"></td>
-                    <td><input type="text" value="${note.iban}" onchange="updateNote(${note.id}, 'iban', this.value)" placeholder="IBAN/Hesap No"></td>
-                    <td><input type="text" value="${note.diger}" onchange="updateNote(${note.id}, 'diger', this.value)" placeholder="Ek bilgiler"></td>
-                    <td><button class="btn-delete-row" onclick="deleteNoteRow(${note.id})">Sil</button></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Not güncelleme
-        function updateNote(id, field, value) {
-            const note = notesData.find(n => n.id === id);
-            if (note) {
-                note[field] = value;
-                autoSaveNotes();
-            }
-        }
-
-        // Not satırı silme
-        function deleteNoteRow(id) {
-            if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
-                notesData = notesData.filter(note => note.id !== id);
-                renderNotesTable();
-                autoSaveNotes();
-            }
-        }
-
-        // Otomatik not kaydetme
-        function autoSaveNotes() {
-            if (storageMethod === 'github' && currentUser) {
-                // GitHub'a kaydet (sessiz, hata gösterme)
-                saveNotesToGitHub().catch(() => {
-                    // Hata durumunda yerel kaydet
-                    localStorage.setItem('budget-notes', JSON.stringify(notesData));
-                });
-            } else {
-                // Yerel kaydet
-                localStorage.setItem('budget-notes', JSON.stringify(notesData));
-            }
-        }
-
-        // GitHub'a notları kaydet
-        async function saveNotesToGitHub() {
-            try {
-                await loadUserDatabase();
-                userDatabase[currentUser].notesData = notesData;
-                userDatabase[currentUser].lastUpdated = new Date().toISOString();
-                await saveUserDatabase();
-            } catch (error) {
-                throw error;
-            }
-        }
-
-        // Notları yükle
-        function loadNotes() {
-            if (storageMethod === 'github' && currentUser) {
-                loadNotesFromGitHub();
-            } else {
-                loadNotesFromLocal();
-            }
-        }
-
-        // Yerel'den notları yükle
-        function loadNotesFromLocal() {
-            const savedNotes = localStorage.getItem('budget-notes');
-            if (savedNotes) {
-                notesData = JSON.parse(savedNotes);
-                renderNotesTable();
-            }
-        }
-
-        // GitHub'dan notları yükle
-        async function loadNotesFromGitHub() {
-            try {
-                await loadUserDatabase();
-                if (userDatabase[currentUser] && userDatabase[currentUser].notesData) {
-                    notesData = userDatabase[currentUser].notesData;
-                    renderNotesTable();
-                }
-            } catch (error) {
-                console.error('GitHub notları yükleme hatası:', error);
-                loadNotesFromLocal();
-            }
-        }
 
         // Veri yapısını initialize et
         function initializeBudgetData() {
@@ -1421,7 +1180,6 @@
                 await loadUserDatabase();
                 
                 userDatabase[currentUser].budgetData = budgetData;
-                userDatabase[currentUser].notesData = notesData; // Bu satırı ekleyin
                 userDatabase[currentUser].lastUpdated = new Date().toISOString();
                 
                 await saveUserDatabase();
@@ -1432,6 +1190,7 @@
                 saveToLocal();
             }
         }
+
         // Mevcut kayıt yönteminden yükle
         async function loadFromCurrentStorage() {
             if (storageMethod === 'github' && currentUser) {
@@ -1462,11 +1221,9 @@
                 
                 if (userDatabase[currentUser] && userDatabase[currentUser].budgetData) {
                     budgetData = userDatabase[currentUser].budgetData;
-                    notesData = userDatabase[currentUser].notesData || []; // Bu satırı ekleyin
                     updateDisplay();
                     updateGeneralStatistics();
                     updateYearlyStatistics();
-                    renderNotesTable(); // Bu satırı ekleyin
                     showNotification('GitHub\'dan veriler yüklendi!');
                 } else {
                     showNotification('GitHub\'da veri bulunamadı!');
@@ -2150,9 +1907,6 @@
                     }
                 }
             }
-
-            // Not tablosunu başlat
-            loadNotes();
         };
 
         // Klavye kısayolları
