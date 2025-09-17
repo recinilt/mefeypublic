@@ -2379,7 +2379,6 @@
                 if (storageMethod === 'github' && currentUser) {
                     loadFromGitHub();
                 } else {
-                    generateYearRange();
                     const localData = localStorage.getItem('budget-data');
                     const localNotes = localStorage.getItem('budget-notes');
                     if (localData) {
