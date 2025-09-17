@@ -747,106 +747,6 @@
             transform: translateX(0);
         }
 
-        .loan-actions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .btn-loan-action {
-            background: #17a2b8;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-            margin-right: 3px;
-        }
-
-        .btn-loan-action:hover {
-            background: #138496;
-        }
-
-        .btn-loan-action.restructure {
-            background: #ffc107;
-            color: #212529;
-        }
-
-        .btn-loan-action.restructure:hover {
-            background: #e0a800;
-        }
-
-        .loan-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-        }
-
-        .loan-modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .loan-modal h3 {
-            margin-bottom: 15px;
-            color: #333;
-            text-align: center;
-        }
-
-        .loan-form-group {
-            margin-bottom: 15px;
-        }
-
-        .loan-form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .loan-form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .loan-modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .btn-confirm {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -1136,157 +1036,11 @@
         let budgetData = {};
         let yearRange = { start: currentYear, end: currentYear + 30 };
         let notesData = [];
-        let currentLoanId = null; // Modal işlemleri için
 
         // Kayıt yöntemi ve kullanıcı bilgileri
         let storageMethod = 'local';
         let currentUser = null;
         let userDatabase = {};
-
-        // Erken kapama modal aç
-        function openEarlyPaymentModal(loanId) {
-            currentLoanId = loanId;
-            document.getElementById('earlyPaymentModal').style.display = 'flex';
-        }
-
-        // Erken kapama modal kapat
-        function closeEarlyPaymentModal() {
-            currentLoanId = null;
-            document.getElementById('earlyPaymentAmount').value = '';
-            document.getElementById('earlyPaymentModal').style.display = 'none';
-        }
-
-        // Erken kapamayı onayla
-        function confirmEarlyPayment() {
-            const amount = parseFloat(document.getElementById('earlyPaymentAmount').value);
-            
-            if (!amount || amount <= 0) {
-                alert('Lütfen geçerli bir tutar girin!');
-                return;
-            }
-            
-            const loan = findLoanById(currentLoanId);
-            if (!loan) {
-                alert('Kredi bulunamadı!');
-                return;
-            }
-            
-            // Erken kapama tutarını diğer giderlere ekle
-            const earlyPaymentExpense = {
-                id: Date.now(),
-                category: `${loan.bank} Kredi Erken Kapama`,
-                amount: amount,
-                repeat: false,
-                startYear: currentYear,
-                startMonth: currentMonth
-            };
-            
-            budgetData[currentYear][currentMonth].expenses.push(earlyPaymentExpense);
-            
-            // Kredinin mevcut ay ve sonraki taksitlerini sil
-            const categoryToDelete = loan.bank;
-            for (let year = yearRange.start; year <= yearRange.end; year++) {
-                for (let month = 1; month <= 12; month++) {
-                    if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
-                        budgetData[year][month].loans = budgetData[year][month].loans.filter(
-                            item => !(item.bank === categoryToDelete && item.principal === loan.principal && item.terms === loan.terms)
-                        );
-                    }
-                }
-            }
-            
-            closeEarlyPaymentModal();
-            updateDisplay();
-            updateGeneralStatistics();
-            updateYearlyStatistics();
-            showNotification(`${loan.bank} kredisi erken kapatıldı!`);
-        }
-
-        // Yapılandırma modal aç
-        function openRestructureModal(loanId) {
-            currentLoanId = loanId;
-            document.getElementById('restructureModal').style.display = 'flex';
-        }
-
-        // Yapılandırma modal kapat
-        function closeRestructureModal() {
-            currentLoanId = null;
-            document.getElementById('newMonthlyPayment').value = '';
-            document.getElementById('newTerms').value = '';
-            document.getElementById('restructureModal').style.display = 'none';
-        }
-
-        // Yapılandırmayı onayla
-        function confirmRestructure() {
-            const newMonthly = parseFloat(document.getElementById('newMonthlyPayment').value);
-            const newTerms = parseInt(document.getElementById('newTerms').value);
-            
-            if (!newMonthly || newMonthly <= 0 || !newTerms || newTerms <= 0) {
-                alert('Lütfen geçerli değerler girin!');
-                return;
-            }
-            
-            const loan = findLoanById(currentLoanId);
-            if (!loan) {
-                alert('Kredi bulunamadı!');
-                return;
-            }
-            
-            // Eski kredi taksitlerini mevcut ay ve sonrasından sil
-            const categoryToDelete = loan.bank;
-            for (let year = yearRange.start; year <= yearRange.end; year++) {
-                for (let month = 1; month <= 12; month++) {
-                    if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
-                        budgetData[year][month].loans = budgetData[year][month].loans.filter(
-                            item => !(item.bank === categoryToDelete && item.principal === loan.principal && item.terms === loan.terms)
-                        );
-                    }
-                }
-            }
-            
-            // Yeni yapılandırılmış krediyi ekle
-            let yearCounter = currentYear;
-            let monthCounter = currentMonth;
-            
-            for (let i = 1; i <= newTerms; i++) {
-                const remainingTerms = newTerms - i + 1;
-                const remainingAmount = remainingTerms * newMonthly;
-                
-                const newLoanItem = {
-                    id: Date.now() + i,
-                    bank: `${loan.bank} (Yapılandırılmış)`,
-                    principal: remainingAmount, // Yeni toplam borç
-                    monthly: newMonthly,
-                    terms: newTerms,
-                    currentTerm: i,
-                    remainingTerms,
-                    remainingAmount,
-                    startYear: currentYear,
-                    startMonth: currentMonth
-                };
-                
-                budgetData[yearCounter][monthCounter].loans.push(newLoanItem);
-                
-                monthCounter++;
-                if (monthCounter > 12) {
-                    monthCounter = 1;
-                    yearCounter++;
-                    if (yearCounter > yearRange.end) break;
-                }
-            }
-            
-            closeRestructureModal();
-            updateDisplay();
-            updateGeneralStatistics();
-            updateYearlyStatistics();
-            showNotification(`${loan.bank} kredisi yapılandırıldı!`);
-        }
-
-        // Kredi bul (yardımcı fonksiyon)
-        function findLoanById(loanId) {
-            const currentLoans = budgetData[currentYear][currentMonth].loans;
-            return currentLoans.find(loan => loan.id === loanId);
-        }
 
         // Gerçek kalan kredi tutarını hesapla
         function calculateRealRemainingAmount(loan, displayYear, displayMonth) {
@@ -2118,9 +1872,7 @@
                         <div>${formatCurrency(item.monthly)}</div>
                         <div>${item.currentTerm}/${item.terms}</div>
                         <div>Kalan: ${formatCurrency(realRemainingAmount)}</div>
-                        <div class="loan-actions">
-                            <button class="btn-loan-action" onclick="openEarlyPaymentModal(${item.id})">Erken Kapat</button>
-                            <button class="btn-loan-action restructure" onclick="openRestructureModal(${item.id})">Yapılandır</button>
+                        <div>
                             <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})">Sil</button>
                         </div>
                         <div class="loan-details">
@@ -2410,39 +2162,6 @@
         });
     </script>
 
-<!-- Erken Kapama Modal -->
-<div id="earlyPaymentModal" class="loan-modal" style="display: none;">
-    <div class="loan-modal-content">
-        <h3>Kredi Erken Kapatma</h3>
-        <div class="loan-form-group">
-            <label>Erken Kapama Tutarı:</label>
-            <input type="number" id="earlyPaymentAmount" placeholder="Toplam ödeyeceğiniz tutar">
-        </div>
-        <div class="loan-modal-buttons">
-            <button class="btn-confirm" onclick="confirmEarlyPayment()">Onayla</button>
-            <button class="btn-cancel" onclick="closeEarlyPaymentModal()">İptal</button>
-        </div>
-    </div>
-</div>
-
-<!-- Yapılandırma Modal -->
-<div id="restructureModal" class="loan-modal" style="display: none;">
-    <div class="loan-modal-content">
-        <h3>Kredi Yapılandırma</h3>
-        <div class="loan-form-group">
-            <label>Yeni Aylık Ödeme:</label>
-            <input type="number" id="newMonthlyPayment" placeholder="Yeni aylık ödeme tutarı">
-        </div>
-        <div class="loan-form-group">
-            <label>Yeni Vade (Ay):</label>
-            <input type="number" id="newTerms" placeholder="Toplam kaç ay sürecek">
-        </div>
-        <div class="loan-modal-buttons">
-            <button class="btn-confirm" onclick="confirmRestructure()">Onayla</button>
-            <button class="btn-cancel" onclick="closeRestructureModal()">İptal</button>
-        </div>
-    </div>
-</div>
 </body>
 
 </html>

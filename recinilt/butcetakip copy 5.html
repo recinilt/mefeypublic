@@ -527,85 +527,6 @@
             background: #e0a800;
         }
 
-        .notes-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #28a745;
-        }
-
-        .notes-section h3 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .notes-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .notes-table th,
-        .notes-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .notes-table th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            color: #495057;
-        }
-
-        .notes-table input {
-            width: 100%;
-            border: none;
-            padding: 5px;
-            font-size: 14px;
-        }
-
-        .notes-table input:focus {
-            outline: 1px solid #667eea;
-            background-color: #f0f8ff;
-        }
-
-        .notes-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .btn-add-note {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-add-note:hover {
-            background: #1e7e34;
-        }
-
-        .btn-delete-row {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .btn-delete-row:hover {
-            background: #c82333;
-        }
-
         /* Storage Modal Styles */
         .modal {
             position: fixed;
@@ -747,106 +668,106 @@
             transform: translateX(0);
         }
 
-        .loan-actions {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
+        .notes-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #28a745;
         }
 
-        .btn-loan-action {
-            background: #17a2b8;
+        .notes-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .notes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .notes-table th,
+        .notes-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .notes-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .notes-table input {
+            width: 100%;
+            border: none;
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .notes-table input:focus {
+            outline: 1px solid #667eea;
+            background-color: #f0f8ff;
+        }
+
+        .notes-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-add-note {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-add-note:hover {
+            background: #1e7e34;
+        }
+
+        .btn-delete-row {
+            background: #dc3545;
             color: white;
             border: none;
             padding: 3px 8px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 11px;
-            margin-right: 3px;
+            font-size: 12px;
         }
 
-        .btn-loan-action:hover {
-            background: #138496;
+        .btn-delete-row:hover {
+            background: #c82333;
         }
 
-        .btn-loan-action.restructure {
-            background: #ffc107;
-            color: #212529;
+        .notes-table-wrapper {
+        width: 100%;
+        overflow-x: auto;   /* Yatay kaydırma */
         }
 
-        .btn-loan-action.restructure:hover {
-            background: #e0a800;
+        .notes-table {
+        min-width: 600px;   /* Tablonun sıkışıp bozulmasını önler */
         }
 
-        .loan-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
+
+        @media (max-width: 768px) {
+            .notes-table {
+                font-size: 12px;
+            }
+            
+            .notes-table th,
+            .notes-table td {
+                padding: 5px;
+            }
         }
 
-        .loan-modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .loan-modal h3 {
-            margin-bottom: 15px;
-            color: #333;
-            text-align: center;
-        }
-
-        .loan-form-group {
-            margin-bottom: 15px;
-        }
-
-        .loan-form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .loan-form-group input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .loan-modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .btn-confirm {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .btn-cancel {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
@@ -901,16 +822,9 @@
                 width: 100%;
                 justify-content: flex-start;
             }
-
-            .notes-table {
-                font-size: 12px;
-            }
-            
-            .notes-table th,
-            .notes-table td {
-                padding: 5px;
-            }
         }
+
+
     </style>
 </head>
 
@@ -940,6 +854,7 @@
         <!-- Not Tablosu Bölümü -->
         <div class="notes-section">
             <h3>Finansal Notlarım</h3>
+            <div class="notes-table-wrapper">
             <table class="notes-table" id="notesTable">
                 <thead>
                     <tr>
@@ -954,7 +869,7 @@
                 <tbody id="notesTableBody">
                     <!-- Notlar buraya dinamik olarak eklenecek -->
                 </tbody>
-            </table>
+            </table></div>
             <div class="notes-actions">
                 <button class="btn-add-note" onclick="addNewNoteRow()">Yeni Not Ekle</button>
                 <span style="margin-left: 15px; color: #666; font-size: 13px;">
@@ -1136,169 +1051,120 @@
         let budgetData = {};
         let yearRange = { start: currentYear, end: currentYear + 30 };
         let notesData = [];
-        let currentLoanId = null; // Modal işlemleri için
 
         // Kayıt yöntemi ve kullanıcı bilgileri
         let storageMethod = 'local';
         let currentUser = null;
         let userDatabase = {};
 
-        // Erken kapama modal aç
-        function openEarlyPaymentModal(loanId) {
-            currentLoanId = loanId;
-            document.getElementById('earlyPaymentModal').style.display = 'flex';
-        }
-
-        // Erken kapama modal kapat
-        function closeEarlyPaymentModal() {
-            currentLoanId = null;
-            document.getElementById('earlyPaymentAmount').value = '';
-            document.getElementById('earlyPaymentModal').style.display = 'none';
-        }
-
-        // Erken kapamayı onayla
-        function confirmEarlyPayment() {
-            const amount = parseFloat(document.getElementById('earlyPaymentAmount').value);
-            
-            if (!amount || amount <= 0) {
-                alert('Lütfen geçerli bir tutar girin!');
-                return;
-            }
-            
-            const loan = findLoanById(currentLoanId);
-            if (!loan) {
-                alert('Kredi bulunamadı!');
-                return;
-            }
-            
-            // Erken kapama tutarını diğer giderlere ekle
-            const earlyPaymentExpense = {
+        // Not satırı ekleme
+        function addNewNoteRow() {
+            const newNote = {
                 id: Date.now(),
-                category: `${loan.bank} Kredi Erken Kapama`,
-                amount: amount,
-                repeat: false,
-                startYear: currentYear,
-                startMonth: currentMonth
+                nereye: '',
+                neZaman: '',
+                neKadar: '',
+                iban: '',
+                diger: ''
             };
             
-            budgetData[currentYear][currentMonth].expenses.push(earlyPaymentExpense);
-            
-            // Kredinin mevcut ay ve sonraki taksitlerini sil
-            const categoryToDelete = loan.bank;
-            for (let year = yearRange.start; year <= yearRange.end; year++) {
-                for (let month = 1; month <= 12; month++) {
-                    if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
-                        budgetData[year][month].loans = budgetData[year][month].loans.filter(
-                            item => !(item.bank === categoryToDelete && item.principal === loan.principal && item.terms === loan.terms)
-                        );
-                    }
-                }
-            }
-            
-            closeEarlyPaymentModal();
-            updateDisplay();
-            updateGeneralStatistics();
-            updateYearlyStatistics();
-            showNotification(`${loan.bank} kredisi erken kapatıldı!`);
+            notesData.push(newNote);
+            renderNotesTable();
+            autoSaveNotes();
         }
 
-        // Yapılandırma modal aç
-        function openRestructureModal(loanId) {
-            currentLoanId = loanId;
-            document.getElementById('restructureModal').style.display = 'flex';
+        // Not tablosunu render et
+        function renderNotesTable() {
+            const tbody = document.getElementById('notesTableBody');
+            tbody.innerHTML = '';
+            
+            notesData.forEach(note => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><input type="text" value="${note.nereye}" onchange="updateNote(${note.id}, 'nereye', this.value)" placeholder="Ödeme yapılacak yer"></td>
+                    <td><input type="text" value="${note.neZaman}" onchange="updateNote(${note.id}, 'neZaman', this.value)" placeholder="Tarih/Zaman"></td>
+                    <td><input type="text" value="${note.neKadar}" onchange="updateNote(${note.id}, 'neKadar', this.value)" placeholder="Tutar"></td>
+                    <td><input type="text" value="${note.iban}" onchange="updateNote(${note.id}, 'iban', this.value)" placeholder="IBAN/Hesap No"></td>
+                    <td><input type="text" value="${note.diger}" onchange="updateNote(${note.id}, 'diger', this.value)" placeholder="Ek bilgiler"></td>
+                    <td><button class="btn-delete-row" onclick="deleteNoteRow(${note.id})">Sil</button></td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
-        // Yapılandırma modal kapat
-        function closeRestructureModal() {
-            currentLoanId = null;
-            document.getElementById('newMonthlyPayment').value = '';
-            document.getElementById('newTerms').value = '';
-            document.getElementById('restructureModal').style.display = 'none';
+        // Not güncelleme
+        function updateNote(id, field, value) {
+            const note = notesData.find(n => n.id === id);
+            if (note) {
+                note[field] = value;
+                autoSaveNotes();
+            }
         }
 
-        // Yapılandırmayı onayla
-        function confirmRestructure() {
-            const newMonthly = parseFloat(document.getElementById('newMonthlyPayment').value);
-            const newTerms = parseInt(document.getElementById('newTerms').value);
-            
-            if (!newMonthly || newMonthly <= 0 || !newTerms || newTerms <= 0) {
-                alert('Lütfen geçerli değerler girin!');
-                return;
+        // Not satırı silme
+        function deleteNoteRow(id) {
+            if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
+                notesData = notesData.filter(note => note.id !== id);
+                renderNotesTable();
+                autoSaveNotes();
             }
-            
-            const loan = findLoanById(currentLoanId);
-            if (!loan) {
-                alert('Kredi bulunamadı!');
-                return;
-            }
-            
-            // Eski kredi taksitlerini mevcut ay ve sonrasından sil
-            const categoryToDelete = loan.bank;
-            for (let year = yearRange.start; year <= yearRange.end; year++) {
-                for (let month = 1; month <= 12; month++) {
-                    if (isDateAfterOrEqual(year, month, currentYear, currentMonth)) {
-                        budgetData[year][month].loans = budgetData[year][month].loans.filter(
-                            item => !(item.bank === categoryToDelete && item.principal === loan.principal && item.terms === loan.terms)
-                        );
-                    }
-                }
-            }
-            
-            // Yeni yapılandırılmış krediyi ekle
-            let yearCounter = currentYear;
-            let monthCounter = currentMonth;
-            
-            for (let i = 1; i <= newTerms; i++) {
-                const remainingTerms = newTerms - i + 1;
-                const remainingAmount = remainingTerms * newMonthly;
-                
-                const newLoanItem = {
-                    id: Date.now() + i,
-                    bank: `${loan.bank} (Yapılandırılmış)`,
-                    principal: remainingAmount, // Yeni toplam borç
-                    monthly: newMonthly,
-                    terms: newTerms,
-                    currentTerm: i,
-                    remainingTerms,
-                    remainingAmount,
-                    startYear: currentYear,
-                    startMonth: currentMonth
-                };
-                
-                budgetData[yearCounter][monthCounter].loans.push(newLoanItem);
-                
-                monthCounter++;
-                if (monthCounter > 12) {
-                    monthCounter = 1;
-                    yearCounter++;
-                    if (yearCounter > yearRange.end) break;
-                }
-            }
-            
-            closeRestructureModal();
-            updateDisplay();
-            updateGeneralStatistics();
-            updateYearlyStatistics();
-            showNotification(`${loan.bank} kredisi yapılandırıldı!`);
         }
 
-        // Kredi bul (yardımcı fonksiyon)
-        function findLoanById(loanId) {
-            const currentLoans = budgetData[currentYear][currentMonth].loans;
-            return currentLoans.find(loan => loan.id === loanId);
-        }
-
-        // Gerçek kalan kredi tutarını hesapla
-        function calculateRealRemainingAmount(loan, displayYear, displayMonth) {
-            const today = new Date();
-            const currentRealYear = today.getFullYear();
-            const currentRealMonth = today.getMonth() + 1;
-            
-            if (displayYear < currentRealYear || 
-                (displayYear === currentRealYear && displayMonth < currentRealMonth)) {
-                return Math.max(0, loan.remainingAmount - loan.monthly);
+        // Otomatik not kaydetme
+        function autoSaveNotes() {
+            if (storageMethod === 'github' && currentUser) {
+                // GitHub'a kaydet (sessiz, hata gösterme)
+                saveNotesToGitHub().catch(() => {
+                    // Hata durumunda yerel kaydet
+                    localStorage.setItem('budget-notes', JSON.stringify(notesData));
+                });
             } else {
-                return loan.remainingAmount;
+                // Yerel kaydet
+                localStorage.setItem('budget-notes', JSON.stringify(notesData));
+            }
+        }
+
+        // GitHub'a notları kaydet
+        async function saveNotesToGitHub() {
+            try {
+                await loadUserDatabase();
+                userDatabase[currentUser].notesData = notesData;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                await saveUserDatabase();
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        // Notları yükle
+        function loadNotes() {
+            if (storageMethod === 'github' && currentUser) {
+                loadNotesFromGitHub();
+            } else {
+                loadNotesFromLocal();
+            }
+        }
+
+        // Yerel'den notları yükle
+        function loadNotesFromLocal() {
+            const savedNotes = localStorage.getItem('budget-notes');
+            if (savedNotes) {
+                notesData = JSON.parse(savedNotes);
+                renderNotesTable();
+            }
+        }
+
+        // GitHub'dan notları yükle
+        async function loadNotesFromGitHub() {
+            try {
+                await loadUserDatabase();
+                if (userDatabase[currentUser] && userDatabase[currentUser].notesData) {
+                    notesData = userDatabase[currentUser].notesData;
+                    renderNotesTable();
+                }
+            } catch (error) {
+                console.error('GitHub notları yükleme hatası:', error);
+                loadNotesFromLocal();
             }
         }
 
@@ -1328,8 +1194,7 @@
             } else {
                 statusElement.innerHTML = `
                     Yerel Kayıt Aktif<br>
-                    <small>Verileriniz bu tarayıcıda saklanıyor</small>
-                `;
+                    <small>Verileriniz bu tarayıcıda saklanıyor</small>`;
             }
         }
 
@@ -1369,13 +1234,12 @@
                     if (userDatabase[username]) {
                         if (userDatabase[username].password === password) {
                             currentUser = username;
+                            // GitHub'dan veriyi yükle
                             if (userDatabase[username].budgetData) {
                                 budgetData = userDatabase[username].budgetData;
                             }
-                            if (userDatabase[username].notesData) {
-                                notesData = userDatabase[username].notesData;
-                            }
                             
+                            // GitHub ayarlarını kaydet
                             const settings = { 
                                 method: storageMethod, 
                                 username: currentUser 
@@ -1388,26 +1252,25 @@
                             updateDisplay();
                             updateGeneralStatistics();
                             updateYearlyStatistics();
-                            renderNotesTable();
                         } else {
                             alert('Geçersiz şifre!');
                             return;
                         }
                     } else {
+                        // Yeni kullanıcı oluştur
                         userDatabase[username] = {
                             password: password,
                             budgetData: {},
-                            notesData: [],
                             createdDate: new Date().toISOString()
                         };
                         
                         currentUser = username;
                         budgetData = {};
-                        notesData = [];
                         initializeBudgetData();
                         
                         await saveUserDatabase();
                         
+                        // Yeni kullanıcı ayarlarını kaydet
                         const settings = { 
                             method: storageMethod, 
                             username: currentUser 
@@ -1430,6 +1293,7 @@
                     updateStorageStatus();
                 }
             } else {
+                // Yerel kayıt seçildi
                 const settings = { method: storageMethod };
                 localStorage.setItem('budget-storage-settings', JSON.stringify(settings));
                 
@@ -1437,17 +1301,13 @@
                 document.getElementById('storageModal').style.display = 'none';
                 updateStorageStatus();
                 
+                // Yerel veriler varsa yükle
                 const localData = localStorage.getItem('budget-data');
-                const localNotes = localStorage.getItem('budget-notes');
                 if (localData) {
                     budgetData = JSON.parse(localData);
                     updateDisplay();
                     updateGeneralStatistics();
                     updateYearlyStatistics();
-                }
-                if (localNotes) {
-                    notesData = JSON.parse(localNotes);
-                    renderNotesTable();
                 }
             }
         }
@@ -1552,7 +1412,6 @@
         // Yerel kayıt
         function saveToLocal() {
             localStorage.setItem('budget-data', JSON.stringify(budgetData));
-            localStorage.setItem('budget-notes', JSON.stringify(notesData));
             showNotification('Veriler yerel olarak kaydedildi!');
         }
 
@@ -1562,7 +1421,7 @@
                 await loadUserDatabase();
                 
                 userDatabase[currentUser].budgetData = budgetData;
-                userDatabase[currentUser].notesData = notesData;
+                userDatabase[currentUser].notesData = notesData; // Bu satırı ekleyin
                 userDatabase[currentUser].lastUpdated = new Date().toISOString();
                 
                 await saveUserDatabase();
@@ -1573,7 +1432,6 @@
                 saveToLocal();
             }
         }
-
         // Mevcut kayıt yönteminden yükle
         async function loadFromCurrentStorage() {
             if (storageMethod === 'github' && currentUser) {
@@ -1586,18 +1444,11 @@
         // Yerel veriden yükle
         function loadFromLocal() {
             const savedData = localStorage.getItem('budget-data');
-            const savedNotes = localStorage.getItem('budget-notes');
             if (savedData) {
                 budgetData = JSON.parse(savedData);
                 updateDisplay();
                 updateGeneralStatistics();
                 updateYearlyStatistics();
-            }
-            if (savedNotes) {
-                notesData = JSON.parse(savedNotes);
-                renderNotesTable();
-            }
-            if (savedData || savedNotes) {
                 showNotification('Yerel veriler yüklendi!');
             } else {
                 showNotification('Yerel veri bulunamadı!');
@@ -1609,17 +1460,13 @@
             try {
                 await loadUserDatabase();
                 
-                if (userDatabase[currentUser]) {
-                    if (userDatabase[currentUser].budgetData) {
-                        budgetData = userDatabase[currentUser].budgetData;
-                        updateDisplay();
-                        updateGeneralStatistics();
-                        updateYearlyStatistics();
-                    }
-                    if (userDatabase[currentUser].notesData) {
-                        notesData = userDatabase[currentUser].notesData;
-                        renderNotesTable();
-                    }
+                if (userDatabase[currentUser] && userDatabase[currentUser].budgetData) {
+                    budgetData = userDatabase[currentUser].budgetData;
+                    notesData = userDatabase[currentUser].notesData || []; // Bu satırı ekleyin
+                    updateDisplay();
+                    updateGeneralStatistics();
+                    updateYearlyStatistics();
+                    renderNotesTable(); // Bu satırı ekleyin
                     showNotification('GitHub\'dan veriler yüklendi!');
                 } else {
                     showNotification('GitHub\'da veri bulunamadı!');
@@ -1635,12 +1482,13 @@
             const targetMethod = storageMethod === 'github' ? 'local' : 'github';
             
             if (targetMethod === 'local') {
+                // GitHub'dan yerel'e aktar
                 if (confirm('Mevcut GitHub verilerinizi yerel tarayıcıya aktarmak istediğinizden emin misiniz?')) {
                     localStorage.setItem('budget-data', JSON.stringify(budgetData));
-                    localStorage.setItem('budget-notes', JSON.stringify(notesData));
                     showNotification('Veriler yerel tarayıcıya aktarıldı!');
                 }
             } else {
+                // Yerel'den GitHub'a aktar
                 if (!currentUser) {
                     alert('GitHub\'a aktarmak için önce GitHub hesabına giriş yapmalısınız!');
                     changeStorageMethod();
@@ -1660,88 +1508,14 @@
 
         // Kayıt yöntemini değiştir
         function changeStorageMethod() {
+            // Modal seçimlerini sıfırla
             document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
             document.getElementById('githubLogin').style.display = 'none';
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
             
+            // Modal aç
             document.getElementById('storageModal').style.display = 'block';
-        }
-
-        // Not satırı ekleme
-        function addNewNoteRow() {
-            const newNote = {
-                id: Date.now(),
-                nereye: '',
-                neZaman: '',
-                neKadar: '',
-                iban: '',
-                diger: ''
-            };
-            
-            notesData.push(newNote);
-            renderNotesTable();
-            autoSaveNotes();
-        }
-
-        // Not tablosunu render et
-        function renderNotesTable() {
-            const tbody = document.getElementById('notesTableBody');
-            tbody.innerHTML = '';
-            
-            notesData.forEach(note => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><input type="text" value="${note.nereye}" onchange="updateNote(${note.id}, 'nereye', this.value)" placeholder="Ödeme yapılacak yer"></td>
-                    <td><input type="text" value="${note.neZaman}" onchange="updateNote(${note.id}, 'neZaman', this.value)" placeholder="Tarih/Zaman"></td>
-                    <td><input type="text" value="${note.neKadar}" onchange="updateNote(${note.id}, 'neKadar', this.value)" placeholder="Tutar"></td>
-                    <td><input type="text" value="${note.iban}" onchange="updateNote(${note.id}, 'iban', this.value)" placeholder="IBAN/Hesap No"></td>
-                    <td><input type="text" value="${note.diger}" onchange="updateNote(${note.id}, 'diger', this.value)" placeholder="Ek bilgiler"></td>
-                    <td><button class="btn-delete-row" onclick="deleteNoteRow(${note.id})">Sil</button></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Not güncelleme
-        function updateNote(id, field, value) {
-            const note = notesData.find(n => n.id === id);
-            if (note) {
-                note[field] = value;
-                autoSaveNotes();
-            }
-        }
-
-        // Not satırı silme
-        function deleteNoteRow(id) {
-            if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
-                notesData = notesData.filter(note => note.id !== id);
-                renderNotesTable();
-                autoSaveNotes();
-            }
-        }
-
-        // Otomatik not kaydetme
-        function autoSaveNotes() {
-            if (storageMethod === 'github' && currentUser) {
-                saveNotesToGitHub().catch(() => {
-                    localStorage.setItem('budget-notes', JSON.stringify(notesData));
-                });
-            } else {
-                localStorage.setItem('budget-notes', JSON.stringify(notesData));
-            }
-        }
-
-        // GitHub'a notları kaydet
-        async function saveNotesToGitHub() {
-            try {
-                await loadUserDatabase();
-                userDatabase[currentUser].notesData = notesData;
-                userDatabase[currentUser].lastUpdated = new Date().toISOString();
-                await saveUserDatabase();
-            } catch (error) {
-                throw error;
-            }
         }
 
         // Yıl aralığını oluştur
@@ -2037,6 +1811,7 @@
             updateYearlyStatistics();
         }
 
+        // Item silme
         // Item silme - GÜNCELLENMİŞ VERSİYON
         function deleteItem(type, id) {
             const item = budgetData[currentYear][currentMonth][type].find(item => item.id === id);
@@ -2064,7 +1839,6 @@
             updateGeneralStatistics();
             updateYearlyStatistics();
         }
-
         // Para formatla
         function formatCurrency(amount) {
             return new Intl.NumberFormat('tr-TR', {
@@ -2112,20 +1886,17 @@
                 row.className = `item-row ${type === 'loans' ? 'loan-item' : ''}`;
 
                 if (type === 'loans') {
-                    const realRemainingAmount = calculateRealRemainingAmount(item, currentYear, currentMonth);
                     row.innerHTML = `
                         <div>${item.bank}</div>
                         <div>${formatCurrency(item.monthly)}</div>
                         <div>${item.currentTerm}/${item.terms}</div>
-                        <div>Kalan: ${formatCurrency(realRemainingAmount)}</div>
-                        <div class="loan-actions">
-                            <button class="btn-loan-action" onclick="openEarlyPaymentModal(${item.id})">Erken Kapat</button>
-                            <button class="btn-loan-action restructure" onclick="openRestructureModal(${item.id})">Yapılandır</button>
+                        <div>Kalan: ${formatCurrency(item.remainingAmount)}</div>
+                        <div>
                             <button class="delete-btn" onclick="deleteItem('${type}', ${item.id})">Sil</button>
                         </div>
                         <div class="loan-details">
                             Ana Para: ${formatCurrency(item.principal)} | 
-                            Kalan Taksit: ${Math.max(0, item.remainingTerms - (realRemainingAmount !== item.remainingAmount ? 1 : 0))} |
+                            Kalan Taksit: ${item.remainingTerms} |
                             Başlangıç: ${item.startMonth}/${item.startYear}
                         </div>
                     `;
@@ -2152,11 +1923,8 @@
 
             const totalIncome = currentData.income.reduce((sum, item) => sum + item.amount, 0);
             const totalBills = currentData.bills.reduce((sum, item) => sum + item.amount, 0);
-            const totalExpenses = currentData.expenses.reduce((sum, item) => sum + item.amount, 0);
-            
-            // Krediler için gerçek tutarları hesapla
             const totalLoans = currentData.loans.reduce((sum, item) => sum + item.monthly, 0);
-            
+            const totalExpenses = currentData.expenses.reduce((sum, item) => sum + item.amount, 0);
             const balance = totalIncome - (totalBills + totalLoans + totalExpenses);
 
             const monthlyStatsContainer = document.getElementById('monthlyStats');
@@ -2180,29 +1948,25 @@
             `;
         }
 
-        // Genel istatistikleri güncelle - GÜNCEL MANTIKLA
+        // Genel istatistikleri güncelle
         function updateGeneralStatistics() {
             let totalYearlyIncome = 0;
             let totalYearlyExpenses = 0;
             let totalActiveLoans = 0;
             let totalRemainingDebt = 0;
 
-            // Aktif kredileri sadece mevcut aydan hesapla
             const currentMonthLoans = budgetData[currentYear][currentMonth].loans;
             totalActiveLoans = currentMonthLoans.length;
 
-            // SADECE KREDİLER İÇİN: Gerçek kalan borç hesabı
             const uniqueLoans = new Map();
             currentMonthLoans.forEach(loan => {
                 const key = `${loan.bank}_${loan.principal}_${loan.terms}`;
                 if (!uniqueLoans.has(key)) {
-                    const realRemainingAmount = calculateRealRemainingAmount(loan, currentYear, currentMonth);
-                    uniqueLoans.set(key, realRemainingAmount);
+                    uniqueLoans.set(key, loan.remainingAmount);
                 }
             });
             totalRemainingDebt = Array.from(uniqueLoans.values()).reduce((sum, amount) => sum + amount, 0);
 
-            // Yıllık hesaplamalar (TÜM GİDERLER DAHİL - değişmez)
             for (let year = yearRange.start; year <= yearRange.end; year++) {
                 for (let month = 1; month <= 12; month++) {
                     const data = budgetData[year][month];
@@ -2378,19 +2142,17 @@
                     loadFromGitHub();
                 } else {
                     const localData = localStorage.getItem('budget-data');
-                    const localNotes = localStorage.getItem('budget-notes');
                     if (localData) {
                         budgetData = JSON.parse(localData);
                         updateDisplay();
                         updateGeneralStatistics();
                         updateYearlyStatistics();
                     }
-                    if (localNotes) {
-                        notesData = JSON.parse(localNotes);
-                        renderNotesTable();
-                    }
                 }
             }
+
+            // Not tablosunu başlat
+            loadNotes();
         };
 
         // Klavye kısayolları
@@ -2410,39 +2172,6 @@
         });
     </script>
 
-<!-- Erken Kapama Modal -->
-<div id="earlyPaymentModal" class="loan-modal" style="display: none;">
-    <div class="loan-modal-content">
-        <h3>Kredi Erken Kapatma</h3>
-        <div class="loan-form-group">
-            <label>Erken Kapama Tutarı:</label>
-            <input type="number" id="earlyPaymentAmount" placeholder="Toplam ödeyeceğiniz tutar">
-        </div>
-        <div class="loan-modal-buttons">
-            <button class="btn-confirm" onclick="confirmEarlyPayment()">Onayla</button>
-            <button class="btn-cancel" onclick="closeEarlyPaymentModal()">İptal</button>
-        </div>
-    </div>
-</div>
-
-<!-- Yapılandırma Modal -->
-<div id="restructureModal" class="loan-modal" style="display: none;">
-    <div class="loan-modal-content">
-        <h3>Kredi Yapılandırma</h3>
-        <div class="loan-form-group">
-            <label>Yeni Aylık Ödeme:</label>
-            <input type="number" id="newMonthlyPayment" placeholder="Yeni aylık ödeme tutarı">
-        </div>
-        <div class="loan-form-group">
-            <label>Yeni Vade (Ay):</label>
-            <input type="number" id="newTerms" placeholder="Toplam kaç ay sürecek">
-        </div>
-        <div class="loan-modal-buttons">
-            <button class="btn-confirm" onclick="confirmRestructure()">Onayla</button>
-            <button class="btn-cancel" onclick="closeRestructureModal()">İptal</button>
-        </div>
-    </div>
-</div>
 </body>
 
 </html>
