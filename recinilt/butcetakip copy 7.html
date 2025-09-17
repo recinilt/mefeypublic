@@ -132,12 +132,10 @@
             border-radius: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            display: block !important; /* Bu satırı ekleyin */
-            visibility: visible !important; /* Bu satırı ekleyin */
         }
 
         .year-tabs {
-            display: flex  !important;
+            display: flex;
             overflow-x: auto;
             border-bottom: 1px solid #ddd;
             background: #f8f9fa;
@@ -165,7 +163,7 @@
         }
 
         .month-tabs {
-            display: flex  !important;
+            display: flex;
             overflow-x: auto;
             padding: 10px;
             gap: 10px;
@@ -2379,7 +2377,6 @@
                 if (storageMethod === 'github' && currentUser) {
                     loadFromGitHub();
                 } else {
-                    generateYearRange();
                     const localData = localStorage.getItem('budget-data');
                     const localNotes = localStorage.getItem('budget-notes');
                     if (localData) {
