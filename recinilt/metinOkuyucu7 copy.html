@@ -166,18 +166,10 @@
             border-bottom: 1px solid #ddd;
             backdrop-filter: blur(10px);
             min-height: 60px;
-            flex-direction: column;
-        }
-
-        .reader-header .top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
         }
 
         .reader-content {
-            margin-top: 120px;
+            margin-top: 70px;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
@@ -195,12 +187,16 @@
                 padding: 15px;
                 font-size: 16px;
                 line-height: 1.6;
-                margin-top: 130px;
             }
             
             .reader-header {
                 padding: 8px 10px;
-                min-height: 100px;
+                flex-wrap: wrap;
+                min-height: 50px;
+            }
+            
+            .reader-content {
+                margin-top: 60px;
             }
         }
 
@@ -224,7 +220,7 @@
             background: #4CAF50;
             height: 3px;
             position: fixed;
-            top: 100px;
+            top: 60px;
             left: 0;
             transition: width 0.1s ease;
             z-index: 1002;
@@ -232,7 +228,7 @@
 
         @media (max-width: 768px) {
             .progress-indicator {
-                top: 110px;
+                top: 50px;
             }
         }
 
@@ -275,82 +271,6 @@
             background: #F57C00;
         }
 
-        /* Görüntüleme modu seçenekleri */
-        .view-mode-controls {
-            margin: 10px 0;
-            text-align: center;
-            width: 100%;
-        }
-
-        .view-mode-btn {
-            background: #9C27B0;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 0 5px;
-            font-size: 14px;
-            min-height: 36px;
-        }
-
-        .view-mode-btn:hover {
-            background: #7B1FA2;
-        }
-
-        .view-mode-btn.active {
-            background: #4CAF50;
-        }
-
-        /* PDF canvas container */
-        .pdf-viewer {
-            text-align: center;
-            background: white;
-            margin: 20px 0;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .pdf-page-container {
-            margin: 20px 0;
-            display: inline-block;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .pdf-page-canvas {
-            display: block;
-            max-width: 100%;
-            height: auto;
-        }
-
-        .page-number {
-            background: #333;
-            color: white;
-            padding: 5px 10px;
-            font-size: 12px;
-            text-align: center;
-        }
-
-        /* Word document viewer */
-        .word-viewer {
-            background: white;
-            padding: 40px;
-            margin: 20px auto;
-            max-width: 210mm;
-            min-height: 297mm;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            border-radius: 4px;
-        }
-
-        .word-viewer img {
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-        }
-
         .dark-theme {
             background-color: #1a1a1a;
             color: #e0e0e0;
@@ -381,16 +301,6 @@
         .dark-theme .file-item:active {
             background: #3d3d3d;
             border-color: #4CAF50;
-        }
-
-        /* Dark theme için PDF ve Word viewer */
-        .dark-theme .pdf-viewer,
-        .dark-theme .word-viewer {
-            background: #2d2d2d;
-        }
-
-        .dark-theme .pdf-page-container {
-            background: white;
         }
 
         .empty-state {
@@ -425,8 +335,7 @@
             .font-controls button,
             .close-btn,
             .theme-toggle,
-            .remove-btn,
-            .view-mode-btn {
+            .remove-btn {
                 min-height: 44px;
                 padding: 10px 15px;
                 font-size: 16px;
@@ -463,21 +372,15 @@
 
     <div class="reader-container" id="readerContainer">
         <div class="reader-header">
-            <div class="top-row">
-                <div>
-                    <strong id="currentFileName">Dosya Adı</strong>
-                </div>
-                <div class="controls">
-                    <div class="font-controls">
-                        <button onclick="changeFontSize(-2)">A-</button>
-                        <button onclick="changeFontSize(2)">A+</button>
-                    </div>
-                    <button class="close-btn" onclick="closeReader()">✕ Kapat</button>
-                </div>
+            <div>
+                <strong id="currentFileName">Dosya Adı</strong>
             </div>
-            <div class="view-mode-controls" id="viewModeControls" style="display: none;">
-                <button class="view-mode-btn active" id="textModeBtn" onclick="switchViewMode('text')">📝 Metin</button>
-                <button class="view-mode-btn" id="originalModeBtn" onclick="switchViewMode('original')">📄 Orijinal</button>
+            <div class="controls">
+                <div class="font-controls">
+                    <button onclick="changeFontSize(-2)">A-</button>
+                    <button onclick="changeFontSize(2)">A+</button>
+                </div>
+                <button class="close-btn" onclick="closeReader()">✕ Kapat</button>
             </div>
         </div>
         <div class="progress-indicator" id="progressBar"></div>
@@ -494,9 +397,6 @@
                 this.recentFiles = this.loadRecentFiles();
                 this.fontSize = parseInt(localStorage.getItem('fontSize') || '18');
                 this.theme = localStorage.getItem('theme') || 'light';
-                this.viewMode = 'text'; // Yeni ekleme
-                this.currentPdfDoc = null; // Yeni ekleme
-                this.currentWordArrayBuffer = null; // Yeni ekleme
                 
                 this.init();
                 this.updateRecentFilesList();
@@ -561,21 +461,13 @@
 
             async processFile(file) {
                 const content = await this.readFileContent(file);
-                const extension = file.name.split('.').pop().toLowerCase();
-                
                 const fileData = {
                     name: file.name,
                     content: content,
                     lastRead: Date.now(),
                     position: 0,
-                    size: file.size,
-                    fileType: extension
+                    size: file.size
                 };
-
-                // Word dosyaları için ArrayBuffer'ı sakla
-                if (['doc', 'docx'].includes(extension) && this.currentWordArrayBuffer) {
-                    fileData.originalArrayBuffer = this.currentWordArrayBuffer;
-                }
 
                 this.addToRecentFiles(fileData);
                 this.openFile(fileData);
@@ -613,9 +505,8 @@
                 try {
                     const arrayBuffer = await file.arrayBuffer();
                     const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-                    this.currentPdfDoc = pdf; // PDF dokümanını sakla
-                    
                     let fullText = '';
+
                     for (let i = 1; i <= pdf.numPages; i++) {
                         const page = await pdf.getPage(i);
                         const textContent = await page.getTextContent();
@@ -633,10 +524,6 @@
                 try {
                     const arrayBuffer = await file.arrayBuffer();
                     const result = await mammoth.extractRawText({arrayBuffer: arrayBuffer});
-                    
-                    // ArrayBuffer'ı sakla (orijinal format için)
-                    this.currentWordArrayBuffer = arrayBuffer;
-                    
                     return result.value;
                 } catch (error) {
                     throw new Error('Word dosyası okunamadı');
@@ -645,25 +532,9 @@
 
             openFile(fileData) {
                 this.currentFile = fileData;
-                const extension = fileData.name.split('.').pop().toLowerCase();
-                
-                // Görüntüleme modu kontrollerini göster/gizle
-                const viewModeControls = document.getElementById('viewModeControls');
-                if (['pdf', 'doc', 'docx'].includes(extension)) {
-                    viewModeControls.style.display = 'block';
-                } else {
-                    viewModeControls.style.display = 'none';
-                }
-                
                 document.getElementById('currentFileName').textContent = fileData.name;
+                document.getElementById('readerContent').textContent = fileData.content;
                 document.getElementById('readerContainer').style.display = 'block';
-                
-                // Başlangıçta metin modunda aç
-                this.viewMode = 'text';
-                document.getElementById('textModeBtn').classList.add('active');
-                document.getElementById('originalModeBtn').classList.remove('active');
-                
-                this.renderTextFormat();
                 
                 setTimeout(() => {
                     this.scrollToPosition(fileData.position);
@@ -679,110 +550,7 @@
 
                 document.getElementById('readerContainer').style.display = 'none';
                 this.currentFile = null;
-            }
 
-            // Görüntüleme modunu değiştir
-            switchViewMode(mode) {
-                this.viewMode = mode;
-                
-                // Buton durumlarını güncelle
-                document.getElementById('textModeBtn').classList.toggle('active', mode === 'text');
-                document.getElementById('originalModeBtn').classList.toggle('active', mode === 'original');
-                
-                // İçeriği yeniden render et
-                if (this.currentFile) {
-                    if (mode === 'original') {
-                        this.renderOriginalFormat();
-                    } else {
-                        this.renderTextFormat();
-                    }
-                }
-            }
-
-            // Orijinal format render
-            async renderOriginalFormat() {
-                const content = document.getElementById('readerContent');
-                const extension = this.currentFile.name.split('.').pop().toLowerCase();
-                
-                if (extension === 'pdf' && this.currentPdfDoc) {
-                    await this.renderPdfOriginal(content);
-                } else if (['doc', 'docx'].includes(extension)) {
-                    await this.renderWordOriginal(content);
-                } else {
-                    this.renderTextFormat();
-                }
-            }
-
-            // PDF orijinal render
-            async renderPdfOriginal(container) {
-                container.innerHTML = '<div class="pdf-viewer" id="pdfViewer"></div>';
-                const pdfViewer = document.getElementById('pdfViewer');
-                
-                for (let i = 1; i <= this.currentPdfDoc.numPages; i++) {
-                    const page = await this.currentPdfDoc.getPage(i);
-                    
-                    // Canvas oluştur
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    
-                    // Viewport ayarla (PDF sayfasının boyutları)
-                    const viewport = page.getViewport({ scale: 1.5 });
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    
-                    // Sayfa container'ı oluştur
-                    const pageContainer = document.createElement('div');
-                    pageContainer.className = 'pdf-page-container';
-                    
-                    const pageNumber = document.createElement('div');
-                    pageNumber.className = 'page-number';
-                    pageNumber.textContent = `Sayfa ${i}`;
-                    
-                    canvas.className = 'pdf-page-canvas';
-                    
-                    pageContainer.appendChild(pageNumber);
-                    pageContainer.appendChild(canvas);
-                    pdfViewer.appendChild(pageContainer);
-                    
-                    // Sayfayı render et
-                    await page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise;
-                }
-            }
-
-            // Word orijinal render (mammoth ile HTML çıktısı)
-            async renderWordOriginal(container) {
-                try {
-                    // Dosyayı yeniden oku ve HTML olarak render et
-                    let arrayBuffer = this.currentWordArrayBuffer;
-                    
-                    // Eğer mevcut ArrayBuffer yoksa, recent files'dan kontrol et
-                    if (!arrayBuffer && this.currentFile.originalArrayBuffer) {
-                        arrayBuffer = this.currentFile.originalArrayBuffer;
-                    }
-                    
-                    if (arrayBuffer) {
-                        const result = await mammoth.convertToHtml({
-                            arrayBuffer: arrayBuffer
-                        });
-                        
-                        container.innerHTML = `<div class="word-viewer">${result.value}</div>`;
-                    } else {
-                        container.innerHTML = '<div class="word-viewer"><p>Orijinal format yüklenemedi. Dosyayı yeniden açmayı deneyin.</p></div>';
-                    }
-                } catch (error) {
-                    console.error('Word dosyası render hatası:', error);
-                    container.innerHTML = '<div class="word-viewer"><p>Orijinal format gösterilemedi.</p></div>';
-                }
-            }
-
-            // Metin format render
-            renderTextFormat() {
-                const content = document.getElementById('readerContent');
-                content.innerHTML = '';
-                content.textContent = this.currentFile.content;
             }
 
             scrollToPosition(position) {
@@ -910,17 +678,6 @@
                 const file = this.recentFiles.find(f => f.name === fileName);
                 if (file) {
                     file.lastRead = Date.now();
-                    
-                    // PDF dosyası için currentPdfDoc'u yeniden yükle
-                    if (file.fileType === 'pdf') {
-                        this.currentPdfDoc = null;
-                    }
-                    
-                    // Word dosyası için ArrayBuffer'ı geri yükle
-                    if (['doc', 'docx'].includes(file.fileType) && file.originalArrayBuffer) {
-                        this.currentWordArrayBuffer = file.originalArrayBuffer;
-                    }
-                    
                     this.openFile(file);
                 }
             }
@@ -1017,10 +774,7 @@
             }
 
             applyFontSize() {
-                const content = document.getElementById('readerContent');
-                if (this.viewMode === 'text') {
-                    content.style.fontSize = this.fontSize + 'px';
-                }
+                document.getElementById('readerContent').style.fontSize = this.fontSize + 'px';
             }
 
             toggleTheme() {
@@ -1050,12 +804,9 @@
         }
 
         function closeReader() {
+            
             documentReader.closeReader();
-        }
-
-        // Görüntüleme modu değiştirme fonksiyonu
-        function switchViewMode(mode) {
-            documentReader.switchViewMode(mode);
+            
         }
 
         // Uygulamayı başlat
