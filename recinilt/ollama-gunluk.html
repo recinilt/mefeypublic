@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Günlük Defteri</title>
+    <link rel="stylesheet" href="ollama-gunluk.css">
+</head>
+<body>
+    <header>
+        <h1>Günlük Defteri</h1>
+    </header>
+    <main>
+        <section id="giris-section">
+            <input type="text" id="date-input" placeholder="Tarih giriniz...">
+            <input type="text" id="entry-input" placeholder="Giriş yazınız...">
+            <button id="kaydet-button">Kaydet</button>
+        </section>
+        <section id="liste-section">
+            <h2>Günlük Girişleri:</h2>
+            <ul id="giris-listesi"></ul>
+        </section>
+    </main>
+    <script src="ollama-gunluk.js"></script>
+</body>
+</html>
