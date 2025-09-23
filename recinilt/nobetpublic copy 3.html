@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Nöbet Oluşturma Sistemi</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            color: #555;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .person-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: box-shadow 0.3s;
+        }
+        
+        .person-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .person-card h3 {
+            margin: 0 0 15px 0;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        #nobetTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        #nobetTable th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        #nobetTable td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+            transition: background-color 0.3s;
+        }
+        
+        #nobetTable td:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .weekend {
+            background-color: #fff3cd !important;
+        }
+        
+        .today {
+            background-color: #d1ecf1 !important;
+            font-weight: bold;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card h4 {
+            margin: 0 0 10px 0;
+            color: #555;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+        
+        .stat-card p {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .algorithm-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .algorithm-option {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .algorithm-option.selected {
+            border-color: #667eea;
+            background-color: #f0f4ff;
+        }
+        
+        .algorithm-option:hover {
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗓️ Gelişmiş Nöbet Listesi Oluşturucu</h1>
+        
+        <div class="form-section">
+            <h2>Temel Bilgiler</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="year">Yıl:</label>
+                    <input type="number" id="year" min="2024" max="2100" value="2025" required>
+                </div>
+                <div class="form-group">
+                    <label for="month">Ay:</label>
+                    <select id="month" required>
+                        <option value="1">Ocak</option>
+                        <option value="2">Şubat</option>
+                        <option value="3">Mart</option>
+                        <option value="4">Nisan</option>
+                        <option value="5">Mayıs</option>
+                        <option value="6">Haziran</option>
+                        <option value="7">Temmuz</option>
+                        <option value="8">Ağustos</option>
+                        <option value="9">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="numPersons">Kişi Sayısı:</label>
+                    <input type="number" id="numPersons" min="1" max="50" value="3" required>
+                </div>
+            </div>
+            
+            <h3>Algoritma Seçimi</h3>
+            <div class="algorithm-selector">
+                <div class="algorithm-option selected" data-algorithm="hybrid">
+                    <strong>Hibrit</strong><br>
+                    <small>En iyi sonuç</small>
+                </div>
+                <div class="algorithm-option" data-algorithm="backtracking">
+                    <strong>Backtracking</strong><br>
+                    <small>Garanti çözüm</small>
+                </div>
+                <div class="algorithm-option" data-algorithm="genetic">
+                    <strong>Genetik</strong><br>
+                    <small>Optimizasyon</small>
+                </div>
+                <div class="algorithm-option" data-algorithm="balanced">
+                    <strong>Dengeli</strong><br>
+                    <small>Adil dağılım</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-section">
+            <h2>Kişi Detayları</h2>
+            <div id="personDetails"></div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="createSchedule()">
+                ✨ Nöbet Listesi Oluştur
+            </button>
+            <button class="btn-secondary" onclick="resetForm()">
+                🔄 Formu Sıfırla
+            </button>
+            <button class="btn-success" onclick="exportSchedule()">
+                📥 Excel İndir
+            </button>
+        </div>
+        
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill">0%</div>
+        </div>
+        
+        <div id="scheduleResult" style="display: none;">
+            <h2>📊 Nöbet Takvimi</h2>
+            <table id="nobetTable">
+                <thead>
+                    <tr>
+                        <th>Pazartesi</th>
+                        <th>Salı</th>
+                        <th>Çarşamba</th>
+                        <th>Perşembe</th>
+                        <th>Cuma</th>
+                        <th class="weekend">Cumartesi</th>
+                        <th class="weekend">Pazar</th>
+                    </tr>
+                </thead>
+                <tbody id="nobetList"></tbody>
+            </table>
+            
+            <div class="stats-container" id="statsContainer"></div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedAlgorithm = 'hybrid';
+        let currentSchedule = null;
+        let persons = [];
+        
+        // Algoritma seçimi
+        document.querySelectorAll('.algorithm-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.algorithm-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedAlgorithm = this.dataset.algorithm;
+            });
+        });
+        
+        // Kişi sayısı değiştiğinde form güncelle
+        document.getElementById('numPersons').addEventListener('input', updatePersonForms);
+        
+        function updatePersonForms() {
+            const numPersons = parseInt(document.getElementById('numPersons').value);
+            const container = document.getElementById('personDetails');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < numPersons; i++) {
+                const card = document.createElement('div');
+                card.className = 'person-card';
+                card.innerHTML = `
+                    <h3>👤 Kişi ${i + 1}</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ad Soyad:</label>
+                            <input type="text" id="name_${i}" required placeholder="Örn: Ali Yılmaz">
+                        </div>
+                        <div class="form-group">
+                            <label>Nöbet Sayısı:</label>
+                            <input type="number" id="numShifts_${i}" min="1" required placeholder="Örn: 8">
+                        </div>
+                        <div class="form-group">
+                            <label>Blok Nöbet (gün):</label>
+                            <input type="number" id="blockShifts_${i}" min="1" value="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Max Ardışık Nöbet:</label>
+                            <input type="number" id="maxConsecutive_${i}" min="1" value="2">
+                        </div>
+                        <div class="form-group">
+                            <label>İstemediği Günler:</label>
+                            <input type="text" id="notPreferred_${i}" placeholder="Örn: 5,10,15">
+                        </div>
+                        <div class="form-group">
+                            <label>Tercih Ettiği Günler:</label>
+                            <input type="text" id="preferred_${i}" placeholder="Örn: 1,7,14">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+        
+        // Sayfa yüklendiğinde başlangıç formunu oluştur
+        updatePersonForms();
+        
+        function showProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+            progressFill.style.width = percent + '%';
+            progressFill.textContent = percent + '%';
+        }
+        
+        function hideProgress() {
+            setTimeout(() => {
+                document.getElementById('progressBar').style.display = 'none';
+            }, 500);
+        }
+        
+        async function createSchedule() {
+            showProgress(10);
+            
+            // Form verilerini topla
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            const numPersons = parseInt(document.getElementById('numPersons').value);
+            const daysInMonth = new Date(year, month, 0).getDate();
+            
+            persons = [];
+            for (let i = 0; i < numPersons; i++) {
+                const name = document.getElementById(`name_${i}`).value;
+                const numShifts = parseInt(document.getElementById(`numShifts_${i}`).value);
+                const blockShifts = parseInt(document.getElementById(`blockShifts_${i}`).value) || 1;
+                const maxConsecutive = parseInt(document.getElementById(`maxConsecutive_${i}`).value) || 3;
+                const notPreferred = document.getElementById(`notPreferred_${i}`).value
+                    .split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d));
+                const preferred = document.getElementById(`preferred_${i}`).value
+                    .split(',').map(d => parseInt(d.trim())).filter(d => !isNaN(d));
+                
+                persons.push({
+                    name,
+                    numShifts,
+                    blockShifts,
+                    maxConsecutive,
+                    notPreferred,
+                    preferred,
+                    assigned: []
+                });
+            }
+            
+            showProgress(30);
+            
+            // Seçilen algoritmaya göre nöbet listesi oluştur
+            let schedule = null;
+            
+            switch(selectedAlgorithm) {
+                case 'backtracking':
+                    schedule = await createBacktrackingSchedule(persons, daysInMonth, year, month);
+                    break;
+                case 'genetic':
+                    schedule = await createGeneticSchedule(persons, daysInMonth, year, month);
+                    break;
+                case 'balanced':
+                    schedule = await createBalancedSchedule(persons, daysInMonth, year, month);
+                    break;
+                case 'hybrid':
+                default:
+                    schedule = await createHybridSchedule(persons, daysInMonth, year, month);
+                    break;
+            }
+            
+            showProgress(80);
+            
+            if (schedule) {
+                currentSchedule = schedule;
+                displaySchedule(schedule, year, month);
+                displayStatistics(schedule, persons);
+                document.getElementById('scheduleResult').style.display = 'block';
+            } else {
+                alert('Nöbet listesi oluşturulamadı. Lütfen kısıtlamaları kontrol edin.');
+            }
+            
+            showProgress(100);
+            hideProgress();
+        }
+        
+        // Backtracking algoritması
+        async function createBacktrackingSchedule(persons, daysInMonth, year, month) {
+            const schedule = Array(daysInMonth).fill(null);
+            const assignments = persons.map(p => ({...p, assigned: []}));
+            
+            function isValid(day, person, schedule) {
+                if (person.notPreferred.includes(day + 1)) return false;
+                if (person.assigned.length >= person.numShifts) return false;
+                
+                // Max ardışık kontrol
+                let consecutive = 0;
+                for (let i = day - 1; i >= 0 && schedule[i] === person.name; i--) consecutive++;
+                for (let i = day + 1; i < daysInMonth && schedule[i] === person.name; i++) consecutive++;
+                if (consecutive >= person.maxConsecutive) return false;
+                
+                return true;
+            }
+            
+            function solve(dayIndex) {
+                if (dayIndex === daysInMonth) {
+                    return assignments.every(p => p.assigned.length === p.numShifts);
+                }
+                
+                // Öncelikle tercih edilen kişileri dene
+                const candidates = [...assignments].sort((a, b) => {
+                    if (a.preferred.includes(dayIndex + 1) && !b.preferred.includes(dayIndex + 1)) return -1;
+                    if (!a.preferred.includes(dayIndex + 1) && b.preferred.includes(dayIndex + 1)) return 1;
+                    return (a.numShifts - a.assigned.length) - (b.numShifts - b.assigned.length);
+                });
+                
+                for (const person of candidates) {
+                    if (isValid(dayIndex, person, schedule)) {
+                        schedule[dayIndex] = person.name;
+                        person.assigned.push(dayIndex + 1);
+                        
+                        if (solve(dayIndex + 1)) return true;
+                        
+                        schedule[dayIndex] = null;
+                        person.assigned.pop();
+                    }
+                }
+                
+                return false;
+            }
+            
+            const success = solve(0);
+            return success ? schedule : null;
+        }
+        
+        // Genetik algoritma
+        async function createGeneticSchedule(persons, daysInMonth, year, month) {
+            const populationSize = 50;
+            const generations = 100;
+            const mutationRate = 0.1;
+            
+            function createRandomSchedule() {
+                const schedule = Array(daysInMonth).fill(null);
+                const assignments = persons.map(p => ({...p, assigned: []}));
+                
+                // Rastgele ama geçerli bir program oluştur
+                for (let day = 0; day < daysInMonth; day++) {
+                    const available = assignments.filter(p => 
+                        p.assigned.length < p.numShifts && 
+                        !p.notPreferred.includes(day + 1)
+                    );
+                    
+                    if (available.length > 0) {
+                        const person = available[Math.floor(Math.random() * available.length)];
+                        schedule[day] = person.name;
+                        person.assigned.push(day + 1);
+                    }
+                }
+                
+                return schedule;
+            }
+            
+            function calculateFitness(schedule) {
+                let fitness = 1000;
+                
+                // Boş gün cezası
+                fitness -= schedule.filter(s => s === null).length * 100;
+                
+                // Kişi bazlı değerlendirme
+                persons.forEach(person => {
+                    const shifts = schedule.filter(s => s === person.name).length;
+                    fitness -= Math.abs(shifts - person.numShifts) * 50;
+                    
+                    // Tercih bonusu/cezası
+                    schedule.forEach((name, day) => {
+                        if (name === person.name) {
+                            if (person.preferred.includes(day + 1)) fitness += 10;
+                            if (person.notPreferred.includes(day + 1)) fitness -= 30;
+                        }
+                    });
+                });
+                
+                return fitness;
+            }
+            
+            function crossover(parent1, parent2) {
+                const child = [];
+                for (let i = 0; i < daysInMonth; i++) {
+                    child[i] = Math.random() < 0.5 ? parent1[i] : parent2[i];
+                }
+                return repairSchedule(child);
+            }
+            
+            function mutate(schedule) {
+                const mutated = [...schedule];
+                if (Math.random() < mutationRate) {
+                    const i = Math.floor(Math.random() * daysInMonth);
+                    const j = Math.floor(Math.random() * daysInMonth);
+                    [mutated[i], mutated[j]] = [mutated[j], mutated[i]];
+                }
+                return repairSchedule(mutated);
+            }
+            
+            function repairSchedule(schedule) {
+                // Kısıtlamaları düzelt
+                const counts = {};
+                persons.forEach(p => counts[p.name] = 0);
+                
+                const repaired = [...schedule];
+                for (let i = 0; i < daysInMonth; i++) {
+                    if (repaired[i] && counts[repaired[i]] >= persons.find(p => p.name === repaired[i]).numShifts) {
+                        repaired[i] = null;
+                    }
+                    if (repaired[i]) counts[repaired[i]]++;
+                }
+                
+                return repaired;
+            }
+            
+            // Başlangıç popülasyonu
+            let population = Array(populationSize).fill(null).map(() => createRandomSchedule());
+            
+            // Evrim
+            for (let gen = 0; gen < generations; gen++) {
+                population.sort((a, b) => calculateFitness(b) - calculateFitness(a));
+                
+                const newPopulation = population.slice(0, 10); // Elitizm
+                
+                while (newPopulation.length < populationSize) {
+                    const parent1 = population[Math.floor(Math.random() * 10)];
+                    const parent2 = population[Math.floor(Math.random() * 10)];
+                    let child = crossover(parent1, parent2);
+                    child = mutate(child);
+                    newPopulation.push(child);
+                }
+                
+                population = newPopulation;
+            }
+            
+            return population[0];
+        }
+        
+        // Dengeli dağıtım algoritması
+        async function createBalancedSchedule(persons, daysInMonth, year, month) {
+            const schedule = Array(daysInMonth).fill(null);
+            
+            // Günleri zorluk derecesine göre sırala
+            const days = Array.from({length: daysInMonth}, (_, i) => i);
+            days.sort((a, b) => {
+                const aUnwanted = persons.filter(p => p.notPreferred.includes(a + 1)).length;
+                const bUnwanted = persons.filter(p => p.notPreferred.includes(b + 1)).length;
+                return bUnwanted - aUnwanted;
+            });
+            
+            // Her gün için en uygun kişiyi seç
+            for (const day of days) {
+                const candidates = persons.filter(p => 
+                    !p.notPreferred.includes(day + 1) &&
+                    p.assigned.length < p.numShifts
+                );
+                
+                if (candidates.length === 0) continue;
+                
+                // Puanlama
+                candidates.forEach(person => {
+                    let score = 0;
+                    
+                    if (person.preferred.includes(day + 1)) score += 100;
+                    score += (person.numShifts - person.assigned.length) * 10;
+                    
+                    const date = new Date(year, month - 1, day + 1);
+                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                    const weekendCount = person.assigned.filter(d => {
+                        const dt = new Date(year, month - 1, d);
+                        return dt.getDay() === 0 || dt.getDay() === 6;
+                    }).length;
+                    
+                    if (isWeekend && weekendCount < person.numShifts * 0.3) score += 20;
+                    
+                    person.currentScore = score;
+                });
+                
+                candidates.sort((a, b) => b.currentScore - a.currentScore);
+                const selected = candidates[0];
+                
+                schedule[day] = selected.name;
+                selected.assigned.push(day + 1);
+            }
+            
+            return schedule;
+        }
+        
+        // Hibrit algoritma (en iyi sonuçlar için)
+        async function createHybridSchedule(persons, daysInMonth, year, month) {
+            // Önce dengeli dağıtım ile başla
+            let schedule = await createBalancedSchedule(persons, daysInMonth, year, month);
+            
+            // Simulated Annealing ile optimize et
+            schedule = optimizeWithSimulatedAnnealing(schedule, persons, daysInMonth);
+            
+            // Eğer hala boş günler varsa backtracking dene
+            if (schedule.includes(null)) {
+                const backtrackResult = await createBacktrackingSchedule(persons, daysInMonth, year, month);
+                if (backtrackResult && !backtrackResult.includes(null)) {
+                    schedule = backtrackResult;
+                }
+            }
+            
+            return schedule;
+        }
+        
+        // Simulated Annealing optimizasyonu
+        function optimizeWithSimulatedAnnealing(initialSchedule, persons, daysInMonth) {
+            let current = [...initialSchedule];
+            let best = [...current];
+            let temperature = 100;
+            const coolingRate = 0.995;
+            const minTemperature = 0.1;
+            
+            function calculateEnergy(schedule) {
+                let energy = 0;
+                
+                // Boş günler
+                energy += schedule.filter(s => s === null).length * 1000;
+                
+                // Kişi başına dengesizlik
+                persons.forEach(person => {
+                    const shifts = schedule.filter(s => s === person.name).length;
+                    energy += Math.abs(shifts - person.numShifts) * 100;
+                    
+                    // İstenmeyen günler
+                    schedule.forEach((name, day) => {
+                        if (name === person.name && person.notPreferred.includes(day + 1)) {
+                            energy += 50;
+                        }
+                    });
+                });
+                
+                return energy;
+            }
+            
+            function generateNeighbor(schedule) {
+                const neighbor = [...schedule];
+                const i = Math.floor(Math.random() * daysInMonth);
+                const j = Math.floor(Math.random() * daysInMonth);
+                [neighbor[i], neighbor[j]] = [neighbor[j], neighbor[i]];
+                return neighbor;
+            }
+            
+            while (temperature > minTemperature) {
+                const neighbor = generateNeighbor(current);
+                const currentEnergy = calculateEnergy(current);
+                const neighborEnergy = calculateEnergy(neighbor);
+                const delta = neighborEnergy - currentEnergy;
+                
+                if (delta < 0 || Math.random() < Math.exp(-delta / temperature)) {
+                    current = neighbor;
+                    
+                    if (calculateEnergy(current) < calculateEnergy(best)) {
+                        best = [...current];
+                    }
+                }
+                
+                temperature *= coolingRate;
+            }
+            
+            return best;
+        }
+        
+        // Nöbet listesini görüntüle
+        function displaySchedule(schedule, year, month) {
+            const tableBody = document.getElementById('nobetList');
+            tableBody.innerHTML = '';
+            
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const adjustedFirstDay = firstDay === 0 ? 7 : firstDay;
+            const daysInMonth = schedule.length;
+            
+            let currentDate = 1;
+            let week = [];
+            
+            // İlk haftanın boş günleri
+            for (let i = 1; i < adjustedFirstDay; i++) {
+                week.push('');
+            }
+            
+            // Ayın günleri
+            while (currentDate <= daysInMonth) {
+                const date = new Date(year, month - 1, currentDate);
+                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                const isToday = isCurrentDate(date);
+                
+                const cellContent = `
+                    <div style="font-weight: bold; color: #667eea;">${currentDate}</div>
+                    <div style="margin-top: 5px;">${schedule[currentDate - 1] || '-'}</div>
+                `;
+                
+                week.push({
+                    content: cellContent,
+                    isWeekend: isWeekend,
+                    isToday: isToday
+                });
+                
+                currentDate++;
+                
+                if (week.length === 7 || currentDate > daysInMonth) {
+                    const row = document.createElement('tr');
+                    
+                    week.forEach(day => {
+                        const cell = document.createElement('td');
+                        if (typeof day === 'object') {
+                            cell.innerHTML = day.content;
+                            if (day.isWeekend) cell.classList.add('weekend');
+                            if (day.isToday) cell.classList.add('today');
+                        } else {
+                            cell.innerHTML = day;
+                        }
+                        row.appendChild(cell);
+                    });
+                    
+                    // Haftanın geri kalanını boş hücrelerle doldur
+                    while (week.length < 7) {
+                        const emptyCell = document.createElement('td');
+                        row.appendChild(emptyCell);
+                        week.push('');
+                    }
+                    
+                    tableBody.appendChild(row);
+                    week = [];
+                }
+            }
+        }
+        
+        function isCurrentDate(date) {
+            const today = new Date();
+            return date.getDate() === today.getDate() &&
+                   date.getMonth() === today.getMonth() &&
+                   date.getFullYear() === today.getFullYear();
+        }
+        
+        // İstatistikleri göster
+        function displayStatistics(schedule, persons) {
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = '';
+            
+            persons.forEach(person => {
+                const shifts = schedule.filter(s => s === person.name).length;
+                const weekendShifts = schedule.filter((s, i) => {
+                    if (s !== person.name) return false;
+                    const date = new Date(
+                        parseInt(document.getElementById('year').value),
+                        parseInt(document.getElementById('month').value) - 1,
+                        i + 1
+                    );
+                    return date.getDay() === 0 || date.getDay() === 6;
+                }).length;
+                
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <h4>${person.name}</h4>
+                    <p>${shifts} nöbet</p>
+                    <small>${weekendShifts} hafta sonu</small>
+                `;
+                container.appendChild(card);
+            });
+        }
+        
+        // Formu sıfırla
+        function resetForm() {
+            document.getElementById('year').value = new Date().getFullYear();
+            document.getElementById('month').value = new Date().getMonth() + 1;
+            document.getElementById('numPersons').value = 3;
+            updatePersonForms();
+            document.getElementById('scheduleResult').style.display = 'none';
+            currentSchedule = null;
+        }
+        
+        // Excel'e aktar
+        function exportSchedule() {
+            if (!currentSchedule) {
+                alert('Önce bir nöbet listesi oluşturun!');
+                return;
+            }
+            
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            const monthNames = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                              'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+            
+            let csv = 'Gün,Tarih,Nöbetçi\n';
+            const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+            
+            currentSchedule.forEach((person, index) => {
+                const date = new Date(year, month - 1, index + 1);
+                const dayName = dayNames[date.getDay()];
+                csv += `${dayName},${index + 1} ${monthNames[month - 1]} ${year},${person || '-'}\n`;
+            });
+            
+            // İstatistikler
+            csv += '\n\nKişi,Toplam Nöbet,Hafta Sonu Nöbeti\n';
+            persons.forEach(person => {
+                const total = currentSchedule.filter(s => s === person.name).length;
+                const weekend = currentSchedule.filter((s, i) => {
+                    if (s !== person.name) return false;
+                    const date = new Date(year, month - 1, i + 1);
+                    return date.getDay() === 0 || date.getDay() === 6;
+                }).length;
+                csv += `${person.name},${total},${weekend}\n`;
+            });
+            
+            // CSV'yi indir
+            const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `nobet_${monthNames[month - 1]}_${year}.csv`;
+            link.click();
+        }
+    </script>
+</body>
+</html>

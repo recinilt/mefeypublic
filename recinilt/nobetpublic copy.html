@@ -275,7 +275,25 @@
                 });
 
                 
-                
+                // İstenmeyen günlere yerleştir
+                /*
+                for (let day = 0; day < daysInMonth; day++) {
+                    if (schedule[day] === null) { // Boş olan günleri kontrol et
+                        for (let person of persons) {
+                            if (
+                                person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                person.assigned.length < person.numShifts &&
+                                isConsecutiveAllowed(schedule, day, person)
+                            ) {
+                                schedule[day] = person.name;
+                                person.assigned.push(day + 1);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                */
                 for (let day = 0; day < daysInMonth; day++) {
                     if (schedule[day] === null) { // Boş olan günleri kontrol et
                         for (let person of persons) {
@@ -342,7 +360,44 @@
                         });
                     });
 
-                    
+                    // İstenmeyen günlere yerleştir
+                    /*
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) { // Boş olan günleri kontrol et
+                            for (let person of persons) {
+                                if (
+                                    person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    */
+
+                    // İstenmeyen günlere yerleştir
+                    /*
+                    for (let day = 0; day < daysInMonth; day++) {
+                        if (schedule[day] === null) { // Boş olan günleri kontrol et
+                            for (let person of persons) {
+                                if (
+                                    person.notPreferred.includes(day + 1) && // İstenmeyen günlerden biri mi?
+                                    person.assigned.length < person.numShifts &&
+                                    isConsecutiveAllowed(schedule, day, person)
+                                ) {
+                                    schedule[day] = person.name;
+                                    person.assigned.push(day + 1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    */
                     for (let day = 0; day < daysInMonth; day++) {
                         if (schedule[day] === null) { // Boş olan günleri kontrol et
                             for (let person of persons) {
