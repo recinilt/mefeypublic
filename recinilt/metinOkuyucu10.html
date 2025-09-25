@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Metin Okuyucu</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.21/mammoth.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            background: linear-gradient(135deg, #f5f1eb 0%, #e8ddd4 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark-theme {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dark-theme .header {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #3498db, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            opacity: 0.7;
+            font-size: 1.1rem;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            min-width: 44px;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            color: white;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+        
+        .font-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 20px;
+        }
+        
+        .dark-theme .font-controls {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .font-size-input {
+            width: 60px;
+            padding: 5px;
+            border: 2px solid #3498db;
+            border-radius: 5px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .dark-theme .font-size-input {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        
+        .recent-files {
+            margin-bottom: 30px;
+        }
+        
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .dark-theme .file-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .file-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        
+        .file-info {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .file-progress {
+            background: rgba(0, 0, 0, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .file-progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 14px;
+            min-height: 32px;
+        }
+        
+        .reader-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .reader-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .reader-header {
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .reader-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .reader-text {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            line-height: 1.8;
+            background: white;
+            color: #2c3e50;
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .dark-theme .reader-text {
+            background: #2c3e50;
+            color: #ecf0f1;
+        }
+        
+        .progress-container {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border-radius: 3px;
+            transition: width 0.1s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1001;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .controls {
+                flex-direction: column;
+            }
+            .files-grid {
+                grid-template-columns: 1fr;
+            }
+            .reader-text {
+                padding: 20px;
+            }
+            .reader-header {
+                flex-direction: column;
+            }
+        }
+        
+        .chunk-info {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .error-message {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📚 Gelişmiş Metin Okuyucu</h1>
+            <p class="subtitle">TXT, PDF, DOC, DOCX dosyalarını parçalayarak güvenli okuma</p>
+        </header>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="controls">
+            <div class="file-input-container">
+                <input type="file" id="fileInput" class="file-input" accept=".txt,.pdf,.doc,.docx" multiple>
+                <label for="fileInput" class="btn">
+                    📁 Dosya Seç
+                </label>
+            </div>
+
+            <div class="font-controls">
+                <label>📏 Font:</label>
+                <input type="number" id="fontSizeInput" class="font-size-input" value="18" min="12" max="32" step="2">
+                <span>px</span>
+            </div>
+
+            <button class="btn btn-secondary" id="themeToggle">
+                🌙 Tema Değiştir
+            </button>
+
+            <button class="btn btn-danger" id="clearAll">
+                🗑️ Tümünü Temizle
+            </button>
+        </div>
+
+        <div class="recent-files" id="recentFilesSection">
+            <h2>📖 Son Okuduğunuz Dosyalar</h2>
+            <div class="files-grid" id="recentFilesList"></div>
+        </div>
+    </div>
+
+    <div class="reader-modal" id="readerModal">
+        <div class="reader-content">
+            <div class="reader-header">
+                <div class="reader-info">
+                    <h3 id="currentFileName">Dosya Adı</h3>
+                </div>
+                <div class="reader-controls">
+                    <button class="btn btn-small" id="fullscreenToggle">
+                        🔳 Tam Ekran
+                    </button>
+                    <button class="btn btn-small btn-secondary" id="closeReader">
+                        ✕ Kapat
+                    </button>
+                </div>
+            </div>
+
+            <div class="reader-text" id="readerText"></div>
+
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">%0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chunk-info" id="chunkInfo">
+        Parça: 1/1 | Boyut: 0 KB
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Dosya işleniyor...</div>
+    </div>
+
+    <script>
+        class ChunkedFileManager {
+            constructor() {
+                // LocalStorage limitleri (genellikle 5-10MB)
+                this.CHUNK_SIZE = 500000; // 500KB per chunk
+                this.MAX_STORAGE_SIZE = 4000000; // 4MB max per file
+                this.MAX_FILES = 10;
+
+                this.currentFile = null;
+                this.currentChunks = [];
+                this.currentChunkIndex = 0;
+
+                this.initializeEventListeners();
+                this.loadSettings();
+                this.displayRecentFiles();
+
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+            }
+
+            initializeEventListeners() {
+                document.getElementById('fileInput').addEventListener('change',
+                    (e) => this.handleFileSelect(e));
+                document.getElementById('themeToggle').addEventListener('click',
+                    () => this.toggleTheme());
+                document.getElementById('clearAll').addEventListener('click',
+                    () => this.clearAllFiles());
+                document.getElementById('closeReader').addEventListener('click',
+                    () => this.closeReader());
+                document.getElementById('fullscreenToggle').addEventListener('click',
+                    () => this.toggleFullscreen());
+                document.getElementById('fontSizeInput').addEventListener('input',
+                    (e) => this.changeFontSize(e.target.value));
+                document.getElementById('progressBar').addEventListener('click',
+                    (e) => this.seekToPosition(e));
+
+                document.getElementById('readerText').addEventListener('scroll',
+                    this.throttle(() => this.updateProgress(), 500));
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeReader();
+                });
+            }
+
+            throttle(func, limit) {
+                let inThrottle;
+                return function() {
+                    const args = arguments;
+                    const context = this;
+                    if (!inThrottle) {
+                        func.apply(context, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            showError(message) {
+                const errorEl = document.getElementById('errorMessage');
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                setTimeout(() => {
+                    errorEl.style.display = 'none';
+                }, 5000);
+            }
+
+            showLoading(show = true) {
+                document.getElementById('loading').style.display = show ? 'block' : 'none';
+            }
+
+            // Dosya boyutunu kontrol et ve parçala
+            chunkText(text, fileName) {
+                if (!text || text.length === 0) {
+                    throw new Error('Dosya içeriği boş veya okunamıyor.');
+                }
+
+                const chunks = [];
+                const totalSize = new Blob([text]).size;
+
+                if (totalSize > this.MAX_STORAGE_SIZE) {
+                    throw new Error(`Dosya çok büyük (${this.formatFileSize(totalSize)}). Maksimum ${this.formatFileSize(this.MAX_STORAGE_SIZE)} desteklenmektedir.`);
+                }
+
+                // Metin çok büyükse parçalara böl
+                if (text.length > this.CHUNK_SIZE) {
+                    for (let i = 0; i < text.length; i += this.CHUNK_SIZE) {
+                        let chunkEnd = i + this.CHUNK_SIZE;
+
+                        // Kelimeyi ortadan bölmemek için son boşluğu bul
+                        if (chunkEnd < text.length) {
+                            const lastSpace = text.lastIndexOf(' ', chunkEnd);
+                            const lastNewline = text.lastIndexOf('\n', chunkEnd);
+                            const breakPoint = Math.max(lastSpace, lastNewline);
+                            if (breakPoint > i) {
+                                chunkEnd = breakPoint;
+                            }
+                        }
+
+                        chunks.push(text.substring(i, chunkEnd));
+                    }
+                } else {
+                    chunks.push(text);
+                }
+
+                console.log(`Dosya ${chunks.length} parçaya bölündü. Toplam boyut: ${this.formatFileSize(totalSize)}`);
+                return chunks;
+            }
+
+            // Parçaları localStorage'a kaydet
+            saveFileChunks(fileName, chunks, metadata) {
+                try {
+                    const fileKey = `file_${this.generateFileId(fileName)}`;
+
+                    // Metadata kaydet
+                    const fileData = {
+                        name: fileName,
+                        chunks: chunks.length,
+                        lastRead: Date.now(),
+                        position: 0,
+                        fontSize: 18,
+                        chunkIndex: 0,
+                        ...metadata
+                    };
+
+                    localStorage.setItem(`${fileKey}_meta`, JSON.stringify(fileData));
+
+                    // Her parçayı ayrı ayrı kaydet
+                    chunks.forEach((chunk, index) => {
+                        localStorage.setItem(`${fileKey}_chunk_${index}`, chunk);
+                    });
+
+                    this.updateRecentFilesList(fileData);
+                    return fileKey;
+
+                } catch (error) {
+                    console.error('Dosya kaydedilemedi:', error);
+                    throw new Error('Dosya kaydedilirken hata oluştu. Storage alanı dolu olabilir.');
+                }
+            }
+
+            // Parçaları localStorage'dan oku
+            loadFileChunks(fileKey) {
+                try {
+                    const metaData = JSON.parse(localStorage.getItem(`${fileKey}_meta`) || '{}');
+
+                    if (!metaData.name) {
+                        throw new Error('Dosya metadata bulunamadı');
+                    }
+
+                    const chunks = [];
+                    for (let i = 0; i < metaData.chunks; i++) {
+                        const chunk = localStorage.getItem(`${fileKey}_chunk_${i}`);
+                        if (chunk === null) {
+                            throw new Error(`Parça ${i + 1} bulunamadı`);
+                        }
+                        chunks.push(chunk);
+                    }
+
+                    return {
+                        metadata: metaData,
+                        chunks
+                    };
+
+                } catch (error) {
+                    console.error('Dosya yüklenemedi:', error);
+                    throw new Error('Dosya yüklenirken hata oluştu.');
+                }
+            }
+
+            generateFileId(fileName) {
+                return btoa(encodeURIComponent(fileName)).replace(/[^a-zA-Z0-9]/g, '');
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            updateChunkInfo() {
+                const chunkInfo = document.getElementById('chunkInfo');
+                if (this.currentChunks.length > 1) {
+                    const currentSize = new Blob([this.currentChunks[this.currentChunkIndex]]).size;
+                    chunkInfo.innerHTML = `Parça: ${this.currentChunkIndex + 1}/${this.currentChunks.length} | Boyut: ${this.formatFileSize(currentSize)}`;
+                    chunkInfo.style.display = 'block';
+                } else {
+                    chunkInfo.style.display = 'none';
+                }
+            }
+
+            async handleFileSelect(event) {
+                const files = Array.from(event.target.files);
+
+                for (const file of files) {
+                    try {
+                        this.showLoading(true);
+                        await this.processFile(file);
+                    } catch (error) {
+                        console.error('Dosya işleme hatası:', error);
+                        this.showError(`${file.name}: ${error.message}`);
+                    } finally {
+                        this.showLoading(false);
+                    }
+                }
+
+                this.displayRecentFiles();
+                event.target.value = ''; // Input'u temizle
+            }
+
+            async processFile(file) {
+                let text = '';
+                const fileSize = file.size;
+
+                // Dosya boyutu kontrolü
+                if (fileSize > this.MAX_STORAGE_SIZE) {
+                    throw new Error(`Dosya çok büyük (${this.formatFileSize(fileSize)}). Maksimum ${this.formatFileSize(this.MAX_STORAGE_SIZE)} desteklenmektedir.`);
+                }
+
+                // Dosya tipine göre okuma
+                if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                    text = await this.readTextFile(file);
+                } else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+                    text = await this.readPdfFile(file);
+                } else if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+                    text = await this.readWordFile(file);
+                } else {
+                    throw new Error('Desteklenmeyen dosya formatı. Sadece TXT, PDF, DOC, DOCX dosyaları desteklenmektedir.');
+                }
+
+                if (!text || text.trim().length === 0) {
+                    throw new Error('Dosya içeriği boş veya okunamıyor.');
+                }
+
+                // Dosyayı parçalara böl ve kaydet
+                const chunks = this.chunkText(text, file.name);
+                const metadata = {
+                    size: fileSize,
+                    type: file.type,
+                    originalLength: text.length
+                };
+
+                const fileKey = this.saveFileChunks(file.name, chunks, metadata);
+
+                // Dosya limitini kontrol et
+                this.enforceFileLimit();
+
+                console.log(`${file.name} başarıyla kaydedildi. ${chunks.length} parça, toplam ${this.formatFileSize(fileSize)}`);
+            }
+
+            async readTextFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Metin dosyası okunamadı'));
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+
+            async readPdfFile(file) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({
+                    data: arrayBuffer
+                }).promise;
+                let fullText = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n\n';
+                }
+
+                if (!fullText.trim()) {
+                    throw new Error('PDF dosyasından metin çıkarılamadı');
+                }
+
+                return fullText;
+            }
+
+            async readWordFile(file) {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({
+                    arrayBuffer
+                });
+
+                if (!result.value || result.value.trim().length === 0) {
+                    throw new Error('Word dosyasından metin çıkarılamadı');
+                }
+
+                return result.value;
+            }
+
+            openFile(fileKey) {
+                try {
+                    const {
+                        metadata,
+                        chunks
+                    } = this.loadFileChunks(fileKey);
+
+                    this.currentFile = {
+                        key: fileKey,
+                        metadata: metadata,
+                        chunks: chunks
+                    };
+
+                    this.currentChunks = chunks;
+                    this.currentChunkIndex = metadata.chunkIndex || 0;
+
+                    document.getElementById('currentFileName').textContent = metadata.name;
+                    document.getElementById('fontSizeInput').value = metadata.fontSize || 18;
+
+                    this.displayCurrentChunk();
+                    this.updateChunkInfo();
+                    document.getElementById('readerModal').style.display = 'block';
+
+                    // Font boyutunu uygula
+                    this.changeFontSize(metadata.fontSize || 18);
+
+                    // Kaydedilmiş pozisyona git
+                    setTimeout(() => {
+                        this.restorePosition(metadata.position || 0);
+                    }, 100);
+
+                } catch (error) {
+                    console.error('Dosya açma hatası:', error);
+                    this.showError(error.message);
+                }
+            }
+
+            displayCurrentChunk() {
+                if (this.currentChunks.length === 0) return;
+
+                const readerText = document.getElementById('readerText');
+                const chunkText = this.currentChunks[this.currentChunkIndex];
+                readerText.innerHTML = this.escapeHtml(chunkText).replace(/\n/g, '<br>');
+                readerText.scrollTop = 0;
+                this.updateProgress();
+            }
+
+            updateProgress() {
+                if (!this.currentFile) return;
+
+                const readerText = document.getElementById('readerText');
+                const scrollTop = readerText.scrollTop;
+                const scrollHeight = readerText.scrollHeight - readerText.clientHeight;
+
+                let chunkProgress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+                chunkProgress = Math.max(0, Math.min(100, chunkProgress));
+
+                // Toplam ilerleme hesapla (tüm parçalar dahil)
+                const chunkWeight = 100 / this.currentChunks.length;
+                const totalProgress = (this.currentChunkIndex * chunkWeight) + (chunkProgress * chunkWeight / 100);
+
+                document.getElementById('progressFill').style.width = totalProgress + '%';
+                document.getElementById('progressText').textContent = Math.round(totalProgress) + '%';
+
+                // Pozisyonu kaydet
+                const position = {
+                    chunkIndex: this.currentChunkIndex,
+                    scrollRatio: chunkProgress / 100
+                };
+
+                this.savePosition(position);
+            }
+
+            seekToPosition(event) {
+                if (!this.currentFile) return;
+
+                const progressBar = document.getElementById('progressBar');
+                const rect = progressBar.getBoundingClientRect();
+                const clickX = event.clientX - rect.left;
+                const totalProgress = (clickX / rect.width) * 100;
+
+                const chunkWeight = 100 / this.currentChunks.length;
+                const targetChunkIndex = Math.floor(totalProgress / chunkWeight);
+                const targetChunkProgress = (totalProgress % chunkWeight) / chunkWeight * 100;
+
+                if (targetChunkIndex !== this.currentChunkIndex) {
+                    this.currentChunkIndex = Math.max(0, Math.min(this.currentChunks.length - 1, targetChunkIndex));
+                    this.displayCurrentChunk();
+                    this.updateChunkInfo();
+                }
+
+                setTimeout(() => {
+                    const readerText = document.getElementById('readerText');
+                    const scrollHeight = readerText.scrollHeight - readerText.clientHeight;
+                    readerText.scrollTop = (targetChunkProgress / 100) * scrollHeight;
+                }, 50);
+            }
+
+            restorePosition(positionData) {
+                if (!positionData || !this.currentFile) return;
+
+                if (typeof positionData === 'number') {
+                    // Eski format uyumluluğu
+                    const readerText = document.getElementById('readerText');
+                    const scrollHeight = readerText.scrollHeight - readerText.clientHeight;
+                    readerText.scrollTop = (positionData / 100) * scrollHeight;
+                } else if (positionData.chunkIndex !== undefined) {
+                    // Yeni format
+                    this.currentChunkIndex = Math.max(0, Math.min(this.currentChunks.length - 1, positionData.chunkIndex || 0));
+                    this.displayCurrentChunk();
+                    this.updateChunkInfo();
+
+                    setTimeout(() => {
+                        const readerText = document.getElementById('readerText');
+                        const scrollHeight = readerText.scrollHeight - readerText.clientHeight;
+                        readerText.scrollTop = (positionData.scrollRatio || 0) * scrollHeight;
+                    }, 100);
+                }
+            }
+
+            savePosition(position) {
+                if (!this.currentFile) return;
+
+                try {
+                    const metadata = this.currentFile.metadata;
+                    metadata.position = position;
+                    metadata.chunkIndex = this.currentChunkIndex;
+                    metadata.lastRead = Date.now();
+
+                    localStorage.setItem(`${this.currentFile.key}_meta`, JSON.stringify(metadata));
+                } catch (error) {
+                    console.warn('Pozisyon kaydedilemedi:', error);
+                }
+            }
+
+            changeFontSize(size) {
+                const readerText = document.getElementById('readerText');
+                readerText.style.fontSize = size + 'px';
+
+                // Font boyutunu kaydet
+                if (this.currentFile) {
+                    this.currentFile.metadata.fontSize = parseInt(size);
+                    this.savePosition(this.currentFile.metadata.position || 0);
+                }
+
+                // Ayarları global olarak kaydet
+                localStorage.setItem('reader_fontSize', size);
+            }
+
+            closeReader() {
+                document.getElementById('readerModal').style.display = 'none';
+                this.currentFile = null;
+                this.currentChunks = [];
+                this.currentChunkIndex = 0;
+                document.getElementById('chunkInfo').style.display = 'none';
+
+                // Tam ekran modundan çık
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+
+            toggleFullscreen() {
+                const modal = document.getElementById('readerModal');
+
+                if (!document.fullscreenElement) {
+                    modal.requestFullscreen().catch(err => {
+                        console.log('Tam ekran hatası:', err);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+
+            displayRecentFiles() {
+                const recentFilesList = document.getElementById('recentFilesList');
+                const files = this.getRecentFiles();
+
+                if (files.length === 0) {
+                    recentFilesList.innerHTML = '<div style="text-align: center; opacity: 0.7; grid-column: 1/-1;">Henüz hiç dosya eklenmemiş</div>';
+                    return;
+                }
+
+                recentFilesList.innerHTML = '';
+
+                files.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    const progress = this.calculateFileProgress(file);
+                    const lastReadText = new Date(file.lastRead).toLocaleString('tr-TR');
+
+                    fileItem.innerHTML = `
+                    <div class="file-name">${this.escapeHtml(file.name)}</div>
+                    <div class="file-info">
+                        <span>${this.formatFileSize(file.size || 0)}</span>
+                        <span>${lastReadText}</span>
+                    </div>
+                    <div class="file-progress">
+                        <div class="file-progress-bar" style="width: ${progress}%"></div>
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-small" onclick="fileManager.openFile('${file.key}')">
+                            📖 Oku
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="fileManager.deleteFile('${file.key}')">
+                            🗑️ Sil
+                        </button>
+                    </div>
+                `;
+
+                    recentFilesList.appendChild(fileItem);
+                });
+            }
+
+            calculateFileProgress(file) {
+                if (!file.chunks || file.chunks <= 1) {
+                    return (file.position && typeof file.position === 'number') ? file.position : 0;
+                }
+
+                // Çoklu parça için ilerleme hesapla
+                const chunkWeight = 100 / file.chunks;
+                const currentChunkIndex = file.chunkIndex || 0;
+                const chunkProgress = (file.position && file.position.scrollRatio) ? file.position.scrollRatio * 100 : 0;
+
+                return (currentChunkIndex * chunkWeight) + (chunkProgress * chunkWeight / 100);
+            }
+
+            getRecentFiles() {
+                const files = [];
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.endsWith('_meta')) {
+                        try {
+                            const fileData = JSON.parse(localStorage.getItem(key));
+                            fileData.key = key.replace('_meta', '');
+                            files.push(fileData);
+                        } catch (error) {
+                            console.warn('Geçersiz dosya metadata:', key);
+                        }
+                    }
+                }
+
+                return files.sort((a, b) => b.lastRead - a.lastRead).slice(0, this.MAX_FILES);
+            }
+
+            updateRecentFilesList(newFileData) {
+                const files = this.getRecentFiles();
+
+                // Eğer aynı dosya varsa güncelle
+                const existingIndex = files.findIndex(f => f.name === newFileData.name);
+                if (existingIndex >= 0) {
+                    files[existingIndex] = {...files[existingIndex],
+                        ...newFileData
+                    };
+                } else {
+                    files.unshift(newFileData);
+                }
+
+                // Limit kontrolü
+                if (files.length > this.MAX_FILES) {
+                    const toDelete = files.slice(this.MAX_FILES);
+                    toDelete.forEach(file => {
+                        this.deleteFile(file.key, false);
+                    });
+                }
+            }
+
+            enforceFileLimit() {
+                const files = this.getRecentFiles();
+                if (files.length > this.MAX_FILES) {
+                    const toDelete = files.slice(this.MAX_FILES);
+                    toDelete.forEach(file => {
+                        this.deleteFile(file.key, false);
+                    });
+                }
+            }
+
+            deleteFile(fileKey, refresh = true) {
+                try {
+                    // Metadata'yı sil
+                    localStorage.removeItem(`${fileKey}_meta`);
+
+                    // Tüm chunk'ları sil
+                    const metaKey = `${fileKey}_meta`;
+                    const metaData = localStorage.getItem(metaKey);
+
+                    if (metaData) {
+                        const data = JSON.parse(metaData);
+                        for (let i = 0; i < (data.chunks || 1); i++) {
+                            localStorage.removeItem(`${fileKey}_chunk_${i}`);
+                        }
+                    }
+
+                    // Chunk'ları brute force ile temizle (güvenlik için)
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith(`${fileKey}_chunk_`)) {
+                            localStorage.removeItem(key);
+                            i--; // Index değişti, tekrar kontrol et
+                        }
+                    }
+
+                    if (refresh) {
+                        this.displayRecentFiles();
+                    }
+
+                    console.log(`Dosya silindi: ${fileKey}`);
+
+                } catch (error) {
+                    console.error('Dosya silinirken hata:', error);
+                    this.showError('Dosya silinirken hata oluştu');
+                }
+            }
+
+            clearAllFiles() {
+                if (!confirm('Tüm dosyaları silmek istediğinizden emin misiniz?')) {
+                    return;
+                }
+
+                try {
+                    const keysToDelete = [];
+
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && (key.includes('file_') || key.startsWith('chunk_'))) {
+                            keysToDelete.push(key);
+                        }
+                    }
+
+                    keysToDelete.forEach(key => localStorage.removeItem(key));
+
+                    this.closeReader();
+                    this.displayRecentFiles();
+
+                    console.log(`${keysToDelete.length} dosya silindi`);
+
+                } catch (error) {
+                    console.error('Dosyalar silinirken hata:', error);
+                    this.showError('Dosyalar silinirken hata oluştu');
+                }
+            }
+
+            toggleTheme() {
+                document.body.classList.toggle('dark-theme');
+                const isDark = document.body.classList.contains('dark-theme');
+                localStorage.setItem('reader_theme', isDark ? 'dark' : 'light');
+
+                const button = document.getElementById('themeToggle');
+                button.innerHTML = isDark ? '☀️ Açık Tema' : '🌙 Koyu Tema';
+            }
+
+            loadSettings() {
+                // Tema ayarını yükle
+                const savedTheme = localStorage.getItem('reader_theme');
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                    document.getElementById('themeToggle').innerHTML = '☀️ Açık Tema';
+                }
+
+                // Font boyutu ayarını yükle
+                const savedFontSize = localStorage.getItem('reader_fontSize');
+                if (savedFontSize) {
+                    document.getElementById('fontSizeInput').value = savedFontSize;
+                }
+            }
+
+            // Storage kullanımını kontrol et
+            getStorageInfo() {
+                let totalSize = 0;
+                let fileCount = 0;
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.includes('file_')) {
+                        const value = localStorage.getItem(key);
+                        totalSize += new Blob([value]).size;
+
+                        if (key.endsWith('_meta')) {
+                            fileCount++;
+                        }
+                    }
+                }
+
+                return {
+                    totalSize,
+                    fileCount,
+                    formattedSize: this.formatFileSize(totalSize)
+                };
+            }
+
+            // Debug fonksiyonu
+            debugStorage() {
+                console.log('=== Storage Debug Info ===');
+                const info = this.getStorageInfo();
+                console.log(`Toplam dosya sayısı: ${info.fileCount}`);
+                console.log(`Toplam kullanılan alan: ${info.formattedSize}`);
+
+                const files = this.getRecentFiles();
+                files.forEach(file => {
+                    console.log(`- ${file.name}: ${file.chunks} parça, ${this.formatFileSize(file.size || 0)}`);
+                });
+
+                return info;
+            }
+        }
+
+        // Sayfa yüklendiğinde başlat
+        let fileManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            fileManager = new ChunkedFileManager();
+
+            // Debug için global erişim
+            window.debugStorage = () => fileManager.debugStorage();
+
+            console.log('Gelişmiş Metin Okuyucu başlatıldı');
+            console.log('Debug: Konsolda "debugStorage()" yazarak storage bilgilerini görebilirsiniz');
+        });
+
+        // Sayfa kapanırken son pozisyonu kaydet
+        window.addEventListener('beforeunload', () => {
+            if (fileManager && fileManager.currentFile) {
+                fileManager.updateProgress();
+            }
+        });
+
+        // Tam ekran değişikliklerini takip et
+        document.addEventListener('fullscreenchange', () => {
+            const button = document.getElementById('fullscreenToggle');
+            if (document.fullscreenElement) {
+                button.innerHTML = '🔲 Tam Ekrandan Çık';
+            } else {
+                button.innerHTML = '🔳 Tam Ekran';
+            }
+        });
+
+        // Touch eventleri için (mobil uyumluluk)
+        let touchStartY = 0;
+
+        document.getElementById('readerText').addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, {
+            passive: true
+        });
+
+        document.getElementById('readerText').addEventListener('touchmove', (e) => {
+            const readerText = e.currentTarget;
+            const touchY = e.touches[0].clientY;
+            const deltaY = touchStartY - touchY;
+
+            // Çok parça varsa ve swipe hareketi varsa parça değiştirme
+            if (fileManager && fileManager.currentChunks.length > 1 && Math.abs(deltaY) > 50) {
+                if (deltaY > 0 && readerText.scrollTop + readerText.clientHeight >= readerText.scrollHeight - 10) {
+                    // Aşağı swipe ve sayfanın sonundaysa - sonraki parça
+                    if (fileManager.currentChunkIndex < fileManager.currentChunks.length - 1) {
+                        fileManager.currentChunkIndex++;
+                        fileManager.displayCurrentChunk();
+                        fileManager.updateChunkInfo();
+                    }
+                } else if (deltaY < 0 && readerText.scrollTop <= 10) {
+                    // Yukarı swipe ve sayfanın başındaysa - önceki parça
+                    if (fileManager.currentChunkIndex > 0) {
+                        fileManager.currentChunkIndex--;
+                        fileManager.displayCurrentChunk();
+                        fileManager.updateChunkInfo();
+
+                        // Önceki parçanın sonuna git
+                        setTimeout(() => {
+                            readerText.scrollTop = readerText.scrollHeight;
+                        }, 50);
+                    }
+                }
+            }
+
+            touchStartY = touchY;
+        }, {
+            passive: true
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (!fileManager || !fileManager.currentFile) return;
+
+            // Sadece reader açıkken çalış
+            if (document.getElementById('readerModal').style.display !== 'block') return;
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    // Önceki parça
+                    if (fileManager.currentChunkIndex > 0) {
+                        fileManager.currentChunkIndex--;
+                        fileManager.displayCurrentChunk();
+                        fileManager.updateChunkInfo();
+                    }
+                    e.preventDefault();
+                    break;
+
+                case 'ArrowRight':
+                    // Sonraki parça
+                    if (fileManager.currentChunkIndex < fileManager.currentChunks.length - 1) {
+                        fileManager.currentChunkIndex++;
+                        fileManager.displayCurrentChunk();
+                        fileManager.updateChunkInfo();
+                    }
+                    e.preventDefault();
+                    break;
+
+                case 'Home':
+                    // Dosyanın başına git
+                    fileManager.currentChunkIndex = 0;
+                    fileManager.displayCurrentChunk();
+                    fileManager.updateChunkInfo();
+                    e.preventDefault();
+                    break;
+
+                case 'End':
+                    // Dosyanın sonuna git
+                    fileManager.currentChunkIndex = fileManager.currentChunks.length - 1;
+                    fileManager.displayCurrentChunk();
+                    fileManager.updateChunkInfo();
+                    setTimeout(() => {
+                        const readerText = document.getElementById('readerText');
+                        readerText.scrollTop = readerText.scrollHeight;
+                    }, 50);
+                    e.preventDefault();
+                    break;
+
+                case 'F11':
+                    // Tam ekran toggle
+                    fileManager.toggleFullscreen();
+                    e.preventDefault();
+                    break;
+            }
+        });
+    </script>
+</body>
+
+</html>
