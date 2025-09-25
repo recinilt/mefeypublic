@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gelişmiş Metin Okuyucu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+            margin-bottom: 25px;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .theme-btn {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .theme-btn:hover {
+            background: #edf2f7;
+            transform: translateY(-1px);
+        }
+        
+        .files-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-title {
+            color: #4a5568;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .file-card {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-card:hover {
+            background: #edf2f7;
+            border-color: #667eea;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .file-info h3 {
+            color: #4a5568;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .file-meta {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .delete-btn {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .delete-btn:hover {
+            background: #feb2b2;
+            color: #822727;
+        }
+        
+        .reader-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #1a202c;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .reader-header {
+            background: rgba(26, 32, 44, 0.95);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2d3748;
+            backdrop-filter: blur(10px);
+        }
+        
+        .reader-title {
+            color: #e2e8f0;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .reader-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: #4a5568;
+            color: #e2e8f0;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: #2d3748;
+        }
+        
+        .close-btn {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .close-btn:hover {
+            background: #c53030;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: #2d3748;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .reader-content {
+            flex: 1;
+            padding: 30px;
+            background: #1a202c;
+            color: #e2e8f0;
+            overflow-y: auto;
+            font-size: 18px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #718096;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+        
+        .dark-theme {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        }
+        
+        .dark-theme .header,
+        .dark-theme .files-section {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+        }
+        
+        .dark-theme .section-title,
+        .dark-theme .file-info h3 {
+            color: #e2e8f0;
+        }
+        
+        .dark-theme .file-card {
+            background: #2d3748;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        
+        .dark-theme .file-card:hover {
+            background: #4a5568;
+            border-color: #667eea;
+        }
+        
+        .dark-theme .theme-btn {
+            background: #4a5568;
+            color: #e2e8f0;
+            border-color: #2d3748;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .header {
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 2em;
+            }
+            .upload-btn,
+            .theme-btn {
+                padding: 12px 20px;
+                font-size: 14px;
+            }
+            .file-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .reader-content {
+                padding: 20px;
+                font-size: 16px;
+            }
+            .reader-controls {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .control-btn {
+                padding: 10px 15px;
+                font-size: 16px;
+                min-height: 44px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Metin Okuyucu</h1>
+            <p>Dosyalarınızı okuyun ve kaldığınız yerden devam edin</p>
+
+            <div class="file-upload">
+                <input type="file" class="file-input" id="fileInput" accept=".txt,.pdf,.doc,.docx" multiple>
+                <button class="upload-btn">
+                    📁 <span>Dosya Seçin</span>
+                </button>
+            </div>
+
+            <button class="theme-btn" id="themeToggle">🌙 Koyu Tema</button>
+        </div>
+
+        <div class="files-section">
+            <h2 class="section-title">📖 Dosyalarım</h2>
+            <div id="filesList"></div>
+        </div>
+    </div>
+
+    <div class="reader-modal" id="readerModal">
+        <div class="reader-header">
+            <div class="reader-title" id="readerTitle">Dosya Adı</div>
+            <div class="reader-controls">
+                <button class="control-btn" onclick="adjustFontSize(-2)">A-</button>
+                <button class="control-btn" onclick="adjustFontSize(2)">A+</button>
+                <button class="control-btn close-btn" onclick="closeReader()">✕ Kapat</button>
+            </div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="reader-content" id="readerContent"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script>
+        class TextReader {
+            constructor() {
+                this.currentFile = null;
+                this.files = this.loadFiles();
+                this.fontSize = parseInt(localStorage.getItem('reader_fontSize') || '18');
+                this.isDark = localStorage.getItem('reader_theme') === 'dark';
+                this.CHUNK_SIZE = 50000; // 50KB chunks for localStorage
+
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.renderFilesList();
+                this.applyTheme();
+                this.applyFontSize();
+            }
+
+            setupEventListeners() {
+                const fileInput = document.getElementById('fileInput');
+                const themeToggle = document.getElementById('themeToggle');
+                const readerContent = document.getElementById('readerContent');
+
+                fileInput.addEventListener('change', (e) => this.handleFiles(e.target.files));
+                themeToggle.addEventListener('click', () => this.toggleTheme());
+
+                // Scroll progress
+                let scrollTimeout;
+                readerContent.addEventListener('scroll', () => {
+                    if (scrollTimeout) clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        this.updateProgress();
+                    }, 200);
+                });
+
+                // ESC to close
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && this.isReaderOpen()) {
+                        this.closeReader();
+                    }
+                });
+            }
+
+            async handleFiles(fileList) {
+                for (let file of fileList) {
+                    try {
+                        const content = await this.readFile(file);
+                        const fileData = {
+                            id: this.generateId(),
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            dateAdded: Date.now(),
+                            lastRead: Date.now(),
+                            position: 0,
+                            fontSize: 18
+                        };
+
+                        // Store content in chunks
+                        await this.storeFileContent(fileData.id, content);
+
+                        this.files.unshift(fileData);
+                        if (this.files.length > 10) {
+                            // Remove oldest file and its content
+                            const removed = this.files.pop();
+                            this.removeFileContent(removed.id);
+                        }
+
+                        this.saveFiles();
+                        this.renderFilesList();
+                    } catch (error) {
+                        console.error('Dosya okuma hatası:', error);
+                        alert('Dosya okunamadı: ' + file.name);
+                    }
+                }
+            }
+
+            async readFile(file) {
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                switch (extension) {
+                    case 'txt':
+                        return await this.readTextFile(file);
+                    case 'pdf':
+                        return await this.readPDFFile(file);
+                    case 'doc':
+                    case 'docx':
+                        return await this.readWordFile(file);
+                    default:
+                        throw new Error('Desteklenmeyen dosya türü');
+                }
+            }
+
+            readTextFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = () => reject(new Error('Dosya okunamadı'));
+                    reader.readAsText(file, 'UTF-8');
+                });
+            }
+
+            async readPDFFile(file) {
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                let text = '';
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    text += pageText + '\n\n';
+                }
+
+                return text;
+            }
+
+            async readWordFile(file) {
+                const arrayBuffer = await file.arrayBuffer();
+                const result = await mammoth.extractRawText({
+                    arrayBuffer
+                });
+                return result.value;
+            }
+
+            async storeFileContent(fileId, content) {
+                const chunks = this.chunkContent(content);
+
+                // Store chunk count
+                localStorage.setItem(`file_${fileId}_chunks`, chunks.length.toString());
+
+                // Store each chunk
+                for (let i = 0; i < chunks.length; i++) {
+                    const key = `file_${fileId}_chunk_${i}`;
+                    try {
+                        localStorage.setItem(key, chunks[i]);
+                    } catch (error) {
+                        // If localStorage is full, remove oldest files
+                        this.cleanupStorage();
+                        localStorage.setItem(key, chunks[i]);
+                    }
+                }
+            }
+
+            chunkContent(content) {
+                const chunks = [];
+                for (let i = 0; i < content.length; i += this.CHUNK_SIZE) {
+                    chunks.push(content.substring(i, i + this.CHUNK_SIZE));
+                }
+                return chunks;
+            }
+
+            async getFileContent(fileId) {
+                const chunkCount = parseInt(localStorage.getItem(`file_${fileId}_chunks`) || '0');
+                let content = '';
+
+                for (let i = 0; i < chunkCount; i++) {
+                    const chunk = localStorage.getItem(`file_${fileId}_chunk_${i}`) || '';
+                    content += chunk;
+                }
+
+                return content;
+            }
+
+            removeFileContent(fileId) {
+                const chunkCount = parseInt(localStorage.getItem(`file_${fileId}_chunks`) || '0');
+
+                for (let i = 0; i < chunkCount; i++) {
+                    localStorage.removeItem(`file_${fileId}_chunk_${i}`);
+                }
+
+                localStorage.removeItem(`file_${fileId}_chunks`);
+            }
+
+            cleanupStorage() {
+                // Remove oldest files if storage is full
+                if (this.files.length > 5) {
+                    const toRemove = this.files.slice(-2); // Remove last 2 files
+                    toRemove.forEach(file => {
+                        this.removeFileContent(file.id);
+                    });
+                    this.files = this.files.slice(0, -2);
+                }
+            }
+
+            async openFile(fileId) {
+                const file = this.files.find(f => f.id === fileId);
+                if (!file) return;
+
+                try {
+                    const content = await this.getFileContent(fileId);
+                    this.currentFile = file;
+
+                    // Update last read time
+                    file.lastRead = Date.now();
+                    this.saveFiles();
+
+                    // Show reader
+                    document.getElementById('readerTitle').textContent = file.name;
+                    document.getElementById('readerContent').textContent = content;
+                    document.getElementById('readerModal').style.display = 'flex';
+
+                    // Apply saved font size and position
+                    this.fontSize = file.fontSize || 18;
+                    this.applyFontSize();
+
+                    // Restore reading position
+                    setTimeout(() => {
+                        this.restorePosition(file.position);
+                        this.updateProgress();
+                    }, 100);
+
+                } catch (error) {
+                    console.error('Dosya açma hatası:', error);
+                    alert('Dosya açılamadı');
+                }
+            }
+
+            closeReader() {
+                if (this.currentFile) {
+                    // Save current position and font size
+                    this.currentFile.position = this.getScrollPosition();
+                    this.currentFile.fontSize = this.fontSize;
+                    this.saveFiles();
+                }
+
+                document.getElementById('readerModal').style.display = 'none';
+                this.currentFile = null;
+                this.renderFilesList();
+            }
+
+            deleteFile(fileId) {
+                if (confirm('Bu dosyayı silmek istediğinizden emin misiniz?')) {
+                    this.removeFileContent(fileId);
+                    this.files = this.files.filter(f => f.id !== fileId);
+                    this.saveFiles();
+                    this.renderFilesList();
+                }
+            }
+
+            getScrollPosition() {
+                const content = document.getElementById('readerContent');
+                const scrollTop = content.scrollTop;
+                const scrollHeight = content.scrollHeight - content.clientHeight;
+                return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+            }
+
+            restorePosition(position) {
+                const content = document.getElementById('readerContent');
+                const scrollHeight = content.scrollHeight - content.clientHeight;
+                content.scrollTop = (position / 100) * scrollHeight;
+            }
+
+            updateProgress() {
+                const progress = this.getScrollPosition();
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+
+            adjustFontSize(change) {
+                // Mevcut pozisyonu kaydet
+                const currentPosition = this.getScrollPosition();
+
+                // Font boyutunu değiştir
+                this.fontSize = Math.max(12, Math.min(32, this.fontSize + change));
+                this.applyFontSize();
+
+                // Pozisyonu geri yükle (DOM güncellemesi için bekle)
+                setTimeout(() => {
+                    this.restorePosition(currentPosition);
+                    this.updateProgress();
+                }, 10);
+
+                localStorage.setItem('reader_fontSize', this.fontSize.toString());
+            }
+
+            applyFontSize() {
+                document.getElementById('readerContent').style.fontSize = this.fontSize + 'px';
+            }
+
+            toggleTheme() {
+                this.isDark = !this.isDark;
+                localStorage.setItem('reader_theme', this.isDark ? 'dark' : 'light');
+                this.applyTheme();
+            }
+
+            applyTheme() {
+                const body = document.body;
+                const themeBtn = document.getElementById('themeToggle');
+
+                if (this.isDark) {
+                    body.classList.add('dark-theme');
+                    themeBtn.innerHTML = '☀️ Açık Tema';
+                } else {
+                    body.classList.remove('dark-theme');
+                    themeBtn.innerHTML = '🌙 Koyu Tema';
+                }
+            }
+
+            renderFilesList() {
+                const container = document.getElementById('filesList');
+
+                if (this.files.length === 0) {
+                    container.innerHTML = '<div class="empty-state">Henüz dosya yok. Yukarıdan dosya seçin.</div>';
+                    return;
+                }
+
+                container.innerHTML = this.files.map(file => `
+                    <div class="file-card" onclick="reader.openFile('${file.id}')">
+                        <div class="file-info">
+                            <h3>${this.escapeHtml(file.name)}</h3>
+                            <div class="file-meta">
+                                ${this.formatFileSize(file.size)} • 
+                                ${new Date(file.lastRead).toLocaleDateString('tr-TR')} • 
+                                %${Math.round(file.position)} okundu
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button class="delete-btn" onclick="event.stopPropagation(); reader.deleteFile('${file.id}')">
+                                🗑️ Sil
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+            }
+
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            loadFiles() {
+                const stored = localStorage.getItem('reader_files');
+                return stored ? JSON.parse(stored) : [];
+            }
+
+            saveFiles() {
+                localStorage.setItem('reader_files', JSON.stringify(this.files));
+            }
+
+            isReaderOpen() {
+                return document.getElementById('readerModal').style.display === 'flex';
+            }
+        }
+
+        // Global functions for onclick handlers
+        let reader;
+
+        function adjustFontSize(change) {
+            reader.adjustFontSize(change);
+        }
+
+        function closeReader() {
+            reader.closeReader();
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            reader = new TextReader();
+        });
+    </script>
+</body>
+
+</html>
