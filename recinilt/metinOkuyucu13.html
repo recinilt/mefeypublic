@@ -594,6 +594,14 @@
                     document.getElementById('readerContent').textContent = content;
                     document.getElementById('readerModal').style.display = 'flex';
 
+                    // Apply current theme to reader modal
+                    const readerModal = document.getElementById('readerModal');
+                    if (this.isDark) {
+                        readerModal.classList.add('dark-theme');
+                    } else {
+                        readerModal.classList.remove('dark-theme');
+                    }
+
                     // Apply saved font size and position
                     this.fontSize = file.fontSize || 18;
                     this.applyFontSize();
@@ -675,6 +683,16 @@
                 this.isDark = !this.isDark;
                 localStorage.setItem('reader_theme', this.isDark ? 'dark' : 'light');
                 this.applyTheme();
+
+                // If reader is open, apply theme to reader modal too
+                if (this.isReaderOpen()) {
+                    const readerModal = document.getElementById('readerModal');
+                    if (this.isDark) {
+                        readerModal.classList.add('dark-theme');
+                    } else {
+                        readerModal.classList.remove('dark-theme');
+                    }
+                }
             }
 
             applyTheme() {
