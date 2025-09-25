@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
 <head>
     <meta charset="UTF-8">
@@ -7,153 +7,677 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <link rel="icon" href="favicon.png" type="image/x-icon">
-    <title>Document</title>
+    <title>Modern Araçlar ve Uygulamalar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        
+        .user-input {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .user-input input {
+            padding: 12px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .user-input input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .greeting {
+            margin-top: 15px;
+            font-size: 1.4rem;
+            color: #4a5568;
+            min-height: 40px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .category-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+            border-image: linear-gradient(135deg, #667eea, #764ba2) 1;
+            color: #2d3748;
+        }
+        
+        .link-list {
+            list-style: none;
+        }
+        
+        .link-item {
+            margin-bottom: 12px;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .link-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        
+        .link-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .link-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        
+        .link-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+        
+        .link-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+        
+        .link-item:nth-child(n+6) {
+            animation-delay: 0.6s;
+        }
+        
+        .link-item a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: #4a5568;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .link-item a:hover {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateX(8px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .link-item a:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .link-item a:hover:before {
+            left: 100%;
+        }
+        
+        .link-icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+        
+        .app-image {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .app-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .app-image img:hover {
+            transform: scale(1.05);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .category-card {
+                padding: 20px;
+            }
+            .container {
+                padding: 15px;
+            }
+            .user-input input {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.7rem;
+            }
+            .category-title {
+                font-size: 1.3rem;
+            }
+            .link-item a {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        .search-box {
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 25px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+    </style>
 </head>
 
-<body>
+<body ng-app="linkApp" ng-controller="MainController">
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Modern Araçlar ve Uygulamalar</h1>
+            <div class="user-input">
+                <label for="userName">👋 Adınız:</label>
+                <input type="text" id="userName" ng-model="name" placeholder="Adınızı girin...">
+                <div class="greeting" ng-show="name">
+                    <strong>Merhaba {{name}}! Hangi aracı kullanmak istiyorsunuz?</strong>
+                </div>
+            </div>
+        </div>
 
-    <div ng-app="">
-        <p>Name : <input type="text" ng-model="name"></p>
-        <h1>Hello {{name}}</h1>
+        <div class="search-box">
+            <input type="text" class="search-input" ng-model="searchTerm" placeholder="🔍 Araç veya uygulama ara...">
+        </div>
 
+        <div class="category-grid">
+            <!-- Kripto Para ve Finans -->
+            <div class="category-card" ng-show="shouldShowCategory('crypto')">
+                <h2 class="category-title">💰 Kripto Para ve Finans</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('AB=CD borsa formasyonu')">
+                        <a href="abcd.html"><span class="link-icon">📈</span>AB=CD Borsa Formasyonu</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('ATR to Price Ratio')">
+                        <a href="atr3.html"><span class="link-icon">📊</span>ATR to Price Ratio for Top 250 Coins (Süper)</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('ATR to Price Ratio')">
+                        <a href="atr2.html"><span class="link-icon">📊</span>ATR to Price Ratio for Top 250 Coins</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Crypto Binance Martingale')">
+                        <a href="b70-tekli-komisyonlu.html"><span class="link-icon">🤖</span>Crypto Binance Martingale System</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Crypto Binance Martingale Optimizasyon')">
+                        <a href="b44-4-veri-kaydediyor.html"><span class="link-icon">⚡</span>Crypto Binance Martingale System - Sadece Optimizasyon</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Risk Analizi')">
+                        <a href="b71-kombinasyonlu-excel.html"><span class="link-icon">⚖️</span>Crypto Binance Martingale System - Risk Analizi</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Optimizasyon Kombinasyon')">
+                        <a href="b82-opt-guzel.html"><span class="link-icon">🔍</span>Optimizasyon için Kombinasyon Tarama - SL'li</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Tekli Test SL')">
+                        <a href="b76-tekli-guzel.html"><span class="link-icon">🎯</span>Tekli Test - SL'li - Crypto Binance Martingale</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('çeyrek altın')">
+                        <a href="ceyrek.html"><span class="link-icon">🥇</span>Çeyrek Altın</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Coin Ci Long Short')">
+                        <a href="ci7guzel.html"><span class="link-icon">📈</span>Coin Ci 15m Top Traders Long Short Ratio</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Coin Ci Long Short 2')">
+                        <a href="ci10.html"><span class="link-icon">📈</span>Coin Ci 15m Top Traders Long Short Ratio 2</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Coin Ci Long Short 3')">
+                        <a href="ci12.html"><span class="link-icon">📈</span>Coin Ci 15m Top Traders Long Short Ratio 3</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Çifte Ema Kesişim')">
+                        <a href="ciftemakesisimlilerv4.html"><span class="link-icon">⚡</span>Coin'de Çifte Ema Kesişimliler</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Çifte Ema portföylü')">
+                        <a href="ciftemakesisimlilerv5.html"><span class="link-icon">💼</span>Coin'de Çifte Ema Kesişimliler (Portföylü)</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Coin Değeri')">
+                        <a href="file/coindegeri7.html"><span class="link-icon">💎</span>Coin Değeri</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Grid Bot')">
+                        <a href="gridBot.html"><span class="link-icon">🤖</span>Grid Bot Araçları</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Hisse Al-Sat')">
+                        <a href="alsat.html"><span class="link-icon">💹</span>Hisse Al-Sat</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Order Book')">
+                        <a href="orderbook6.html"><span class="link-icon">📋</span>Top 100 Coin Order Book</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Pump.fun')">
+                        <a href="pumpfun/index.html"><span class="link-icon">🚀</span>Pump.fun Coin Yaratımı ve Satış Takvimi</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('yüzde 2 yükselenler')">
+                        <a href="son2dakikadayuzde2yukselenler.html"><span class="link-icon">📊</span>Son 2 Dakikada Yüzde 2 Yükselenler</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Trend Analizi')">
+                        <a href="trend2.html"><span class="link-icon">📈</span>Periyodik Düzenli Yükseliş Düşüş Top100</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Trend Analizi Volümlü')">
+                        <a href="trendanalizivolumlu.html"><span class="link-icon">🔊</span>Periyodik Düzenli Yükseliş Düşüş Top100 (Volümlü)</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Trend Analizi Portföylü')">
+                        <a href="trendanaliziportfoylu.html"><span class="link-icon">💼</span>Periyodik Düzenli Yükseliş Düşüş Top100 (Portföylü)</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Trend Analizi Top300')">
+                        <a href="trend3.html"><span class="link-icon">📊</span>Periyodik Düzenli Yükseliş Düşüş Top300</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Volatilite Analiz')">
+                        <a href="volatilite-toplu.html"><span class="link-icon">📈</span>Kripto Para Volatilite Analiz Aracı</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Coin yukseliyor mu')">
+                        <a href="yukseliyormu.html"><span class="link-icon">🚀</span>Coin Yukseliyor mu?</a>
+                    </li>
+                </ul>
 
-        <p><a href="5t-v4.html">FBS'yi 5T İle Kullanarak Kalbi Cilalatma Parlatma Pratik Günlüğü</a></p>
-        <p><a href="kronoloji.html">Kronolojik Sıraya Koyma Sitesi</a></p>
-        <p><a href="https://app.babylons.io/reccirik?tab=vitrine">app.babylons.io</a></p>
-        <p><a href="abcd.html">AB=CD borsa formasyonu</a></p>
-        <p><a href="ANGULARJS.html">angujs</a></p>
-        <p><a href="asilar2.html">AŞILAR</a></p>
-        <p><a href="birlesikkademelicarpan.html">birleşik çarpan</a></p>
-        <p><a href="blokFlutGunlugu.html">Blok Flüt Günlüğüm</a></p>
-        <p><a href="butcetakip.html">Bütçe Takip</a></p>
-        <p><a href="bolum-4-canavar-avi-oyunu/index.html">Canavar oyunu</a></p>
-        <p><a href="tv.html">Canlı yayın izle tv</a></p>
-        <p><a href="canlitv/canlitv.html">Canlı TV m3u8</a></p>
-        <p><a href="ceyrek.html">çeyrek altın</a></p>
-        <p><a href="gridBot.html">Grid Bot Araçları</a></p>
+                <div class="app-image" ng-show="matchesSearch('Coin Follower Portfolio')">
+                    <a href="CoinFollowerPortfolio/index.html">
+                        <img src="CoinFollowerPortfolio/Coin_Follower_Portfolio.jpg" alt="Coin Follower Portfolio" width="300">
+                    </a>
+                </div>
+            </div>
 
+            <!-- Sağlık ve Tıp -->
+            <div class="category-card" ng-show="shouldShowCategory('health')">
+                <h2 class="category-title">🏥 Sağlık ve Tıp</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('AŞILAR')">
+                        <a href="asilar2.html"><span class="link-icon">💉</span>Aşılar</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Çocuk İlaç Şurup')">
+                        <a href="cocuksurup.html"><span class="link-icon">🍼</span>Çocuk İlaç Şurup Dozaj Hesaplayıcı</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('FBS Kalbi Cilalatma')">
+                        <a href="5t-v4.html"><span class="link-icon">❤️</span>FBS'yi 5T İle Kullanarak Kalbi Cilalatma Parlatma Pratik Günlüğü</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Hasta Kayıt')">
+                        <a href="hastakayit3.html"><span class="link-icon">📋</span>Hasta Kayıt</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Hazır Reçete')">
+                        <a href="hazirrecete.html"><span class="link-icon">📜</span>Hazır Reçete</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('İnfüzyon Seti')">
+                        <a href="infuzyon.html"><span class="link-icon">💧</span>İnfüzyon Seti Ayarlama</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Nikitabs Sigara')">
+                        <a href="nikitabs.html"><span class="link-icon">🚭</span>Sigara Bırakma İlacı - Nikitabs Kullanım Aracı</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Nöbet Listesi')">
+                        <a href="nobetpublic.html"><span class="link-icon">🌙</span>Nöbet Listesi</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Revir Sayım')">
+                        <a href="revirsayimgemini15.html"><span class="link-icon">📊</span>Revir Sayım</a>
+                    </li>
+                </ul>
+            </div>
 
-        <p><a href="volatilite-toplu.html">Kripto Para Volatilite Analiz Aracı</a></p>
-        <p><a href="b70-tekli-komisyonlu.html">Crypto Binance Martingale System</a></p>
-        <p><a href="b44-4-veri-kaydediyor.html">Crypto Binance Martingale System - Sadece Optimizasyon</a></p>
-        <p><a href="b71-kombinasyonlu-excel.html">Crypto Binance Martingale System - Sadece Optimizasyon - Risk Analizi</a></p>
-        <p><a href="b82-opt-guzel.html">Optimizasyon için Kombinasyon Tarama - SL'li - Crypto Binance Martingale System</a></p>
-        <p><a href="b76-tekli-guzel.html">Tekli Test - SL'li - Crypto Binance Martingale System</a></p>
-        <p><a href="ci7guzel.html">Coin Ci 15m Top Traders Long Short Ratio</a></p>
-        <p><a href="ci10.html"> Coin Ci 15m Top Traders Long Short Ratio 2</a></p>
-        <p><a href="ci12.html"> Coin Ci 15m Top Traders Long Short Ratio 3</a></p>
-        <p><a href="ciftemakesisimlilerv4.html">Coin'de Çifte Ema Kesişimliler</a></p>
-        <p><a href="ciftemakesisimlilerv5.html">Coin'de Çifte Ema Kesişimliler (portföylü)</a></p>
-        <p><a href="yukseliyormu.html">Coin yukseliyor mu?</a></p>
-        <p><a href="file/coindegeri7.html">Coin Değeri</a></p>
-        <p><a href="orderbook6.html">Top 100 Coin Order Book</a></p>
-        <p><a href="atr3.html">ATR to Price Ratio for Top 250 Coins Süper</a></p>
-        <p><a href="atr2.html">ATR to Price Ratio for Top 250 Coins</a></p>
-        <p><a href="son2dakikadayuzde2yukselenler.html">son 2 dakikada yüzde 2 yükselenler</a></p>
-        <p><a href="trend2.html">Periyodik düzenli yükseliş düşüş top100</a></p>
-        <p><a href="trendanalizivolumlu.html">Periyodik düzenli yükseliş düşüş top100 (Volümlü)</a></p>
-        <p><a href="trendanaliziportfoylu.html">Periyodik düzenli yükseliş düşüş top100 (Volümlü) (portföylü)</a></p>
-        <p><a href="trend3.html">Periyodik düzenli yükseliş düşüş top300</a></p>
-        <p><a href="pumpfun/index.html">Pump.fun coin yaratımı ve satış takvimi</a></p>
+            <!-- Medya ve Ses/Video -->
+            <div class="category-card" ng-show="shouldShowCategory('media')">
+                <h2 class="category-title">🎥 Medya ve Ses/Video</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('Canlı TV')">
+                        <a href="tv.html"><span class="link-icon">📺</span>Canlı Yayın İzle TV</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Canlı TV m3u8')">
+                        <a href="canlitv/canlitv.html"><span class="link-icon">📡</span>Canlı TV m3u8</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('güldür güldür')">
+                        <a href="guldur.html"><span class="link-icon">😄</span>Güldür Güldür Skeç</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Metin Okuyucu')">
+                        <a href="metinOkuyucu13.html"><span class="link-icon">📖</span>Metin Okuyucu - Kaldığın Yerden Devam Eder</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('srt')">
+                        <a href="srt.html"><span class="link-icon">📝</span>SRT</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('srt UTF-8')">
+                        <a href="srtunicode2utf8.html"><span class="link-icon">🔤</span>SRT UTF-8</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('srt gpt')">
+                        <a href="srtokuyucugtp2.html"><span class="link-icon">🤖</span>SRT GPT</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('t3')">
+                        <a href="deneme/subtitle/t3.html"><span class="link-icon">📝</span>T3</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('speechsynthesis')">
+                        <a href="ttsspeechsynthesis.html"><span class="link-icon">🗣️</span>T3 SpeechSynthesis</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('tts')">
+                        <a href="googletts.html"><span class="link-icon">🎤</span>TTS</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('tts1')">
+                        <a href="tts1.html"><span class="link-icon">🎤</span>TTS1</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('tts1tr')">
+                        <a href="tts1tr.html"><span class="link-icon">🇹🇷</span>TTS1 Türkçe</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('video altyazı seslendirme')">
+                        <a href="videovealtyaziseslendirme.html"><span class="link-icon">🎬</span>Video ve Altyazı Seslendirme</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('video altyazı seslendirme v.2')">
+                        <a href="videovealtyaziseslendirme2.html"><span class="link-icon">🎬</span>Video ve Altyazı Seslendirme v.2</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('YouTube Playlist')">
+                        <a href="ytplaylistmanagement.html"><span class="link-icon">📺</span>YouTube Playlist Yöneticisi</a>
+                    </li>
+                </ul>
 
-        <p>
-            <a href="CoinFollowerPortfolio/index.html"><img src="CoinFollowerPortfolio/Coin_Follower_Portfolio.jpg" alt="Coin Follower Portfolio" width="300px"> </a>
-        </p>
+                <div class="app-image" ng-show="matchesSearch('YouTube Subtitle Downloader')">
+                    <a href="https://play.google.com/store/apps/details?id=tk.recinilt.YouTubeSubtitleDownloader">
+                        <img src="file/YouTube Subtitle Downloader.jpg" alt="YouTube Subtitle Downloader" width="250">
+                    </a>
+                </div>
+            </div>
 
-        <p><a href="file/CSVFileExplorer.html">CSV File Explorer</a></p>
-        <p><a href="cocuksurup.html">Çocuk İlaç Şurup Dozaj Hesaplayıcı</a></p>
-        <p><a href="qr22super.html">Depo Yönetimi QR Kod İle</a></p>
-        <p><a href="file/fileResim.html">file resim</a></p>
-        <p><a href="file/filetext.html">file text</a></p>
-        <p><a href="firebaseJavascript2021.html">Firebase Data</a></p>
-        <p><a href="googlegiris/index.html">Google Giriş</a></p>
-        <p><a href="mymaps.html">google maps</a></p>
-        <p><a href="gramajfiyat.html">Gramaj Fiyat Karşılaştırma</a></p>
-        <p><a href="guldur.html">güldür güldür skeç</a></p>
-        <p><a href="gunluk.html">Günlük Yazma Aracı</a></p>
-        <p><a href="gunluk-rutin.html">Günlük Rutin</a></p>
-        <p><a href="haber.html">haberler</a></p>
-        <p><a href="hastakayit3.html">Hasta Kayıt</a></p>
-        <p><a href="hazirrecete.html">Hazır Reçete</a></p>
-        <p><a href="alsat.html">Hisse Al-Sat</a></p>
-        <p><a href="hotspot2.html">Hotspot</a></p>
-        <p><a href="infuzyon.html">İnfüzyon Seti Ayarlama</a></p>
+            <!-- Programlama ve Geliştirme -->
+            <div class="category-card" ng-show="shouldShowCategory('programming')">
+                <h2 class="category-title">💻 Programlama ve Geliştirme</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('AngularJS')">
+                        <a href="ANGULARJS.html"><span class="link-icon">⚡</span>AngularJS</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Firebase Data')">
+                        <a href="firebaseJavascript2021.html"><span class="link-icon">🔥</span>Firebase Data</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('js 30')">
+                        <a href="javascript30/js30.html"><span class="link-icon">📜</span>JavaScript 30</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('js module')">
+                        <a href="module.html"><span class="link-icon">📦</span>JS IIFE Module Örneği</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Js Login Firebase')">
+                        <a href="jsloginfirebase/index.html"><span class="link-icon">🔑</span>JS Login Firebase</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Metamask')">
+                        <a href="metamask5.html"><span class="link-icon">🦊</span>Metamask</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('regexp mail')">
+                        <a href="regexpmail.html"><span class="link-icon">📧</span>RegExp Mail</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('VueJS')">
+                        <a href="vuejs.html"><span class="link-icon">💚</span>Vue.js</a>
+                    </li>
+                </ul>
+            </div>
 
-        <p><a href="ingilizce.html">ingilizce cümle yapıları</a></p>
-        <p><a href="MMA.html">Murat Avcıoğlu 2024 Genele Video Makaleleri</a></p>
+            <!-- Araçlar ve Yardımcılar -->
+            <div class="category-card" ng-show="shouldShowCategory('tools')">
+                <h2 class="category-title">🛠️ Araçlar ve Yardımcılar</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('Babylons')">
+                        <a href="https://app.babylons.io/reccirik?tab=vitrine"><span class="link-icon">🌐</span>app.babylons.io</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('birleşik çarpan')">
+                        <a href="birlesikkademelicarpan.html"><span class="link-icon">🔢</span>Birleşik Çarpan</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Bütçe Takip')">
+                        <a href="butcetakip.html"><span class="link-icon">💰</span>Bütçe Takip</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('CSV File Explorer')">
+                        <a href="file/CSVFileExplorer.html"><span class="link-icon">📊</span>CSV File Explorer</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Depo Yönetimi QR')">
+                        <a href="qr22super.html"><span class="link-icon">📦</span>Depo Yönetimi QR Kod İle</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('file resim')">
+                        <a href="file/fileResim.html"><span class="link-icon">🖼️</span>File Resim</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('file text')">
+                        <a href="file/filetext.html"><span class="link-icon">📄</span>File Text</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Google Giriş')">
+                        <a href="googlegiris/index.html"><span class="link-icon">🔐</span>Google Giriş</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('google maps')">
+                        <a href="mymaps.html"><span class="link-icon">🗺️</span>Google Maps</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Gramaj Fiyat')">
+                        <a href="gramajfiyat.html"><span class="link-icon">⚖️</span>Gramaj Fiyat Karşılaştırma</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Günlük Yazma')">
+                        <a href="gunluk.html"><span class="link-icon">📝</span>Günlük Yazma Aracı</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Günlük Rutin')">
+                        <a href="gunluk-rutin.html"><span class="link-icon">📅</span>Günlük Rutin</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('haberler')">
+                        <a href="haber.html"><span class="link-icon">📰</span>Haberler</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Hotspot')">
+                        <a href="hotspot2.html"><span class="link-icon">📶</span>Hotspot</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Karınca Kovucu')">
+                        <a href="karincakovucu.html"><span class="link-icon">🐜</span>Karınca Kovucu</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Kelime Bulucu')">
+                        <a href="kelimebulucu.html"><span class="link-icon">🔍</span>Kelime Bulucu</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Kronolojik Sıraya')">
+                        <a href="kronoloji.html"><span class="link-icon">📊</span>Kronolojik Sıraya Koyma Sitesi</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('new page')">
+                        <a href="newpage.html"><span class="link-icon">📄</span>New Page</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Oversize Kontrolü')">
+                        <a href="myparse.html"><span class="link-icon">📏</span>Oversize Kontrolü</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Pomodoro Timer')">
+                        <a href="pomodoro3.html"><span class="link-icon">⏰</span>Pomodoro Timer</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Resim Promptu')">
+                        <a href="prompt4.html"><span class="link-icon">🎨</span>Resim Promptu</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Resimler')">
+                        <a href="resimler.html"><span class="link-icon">🖼️</span>Resimler</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('saat')">
+                        <a href="saat.html"><span class="link-icon">🕐</span>Saat</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Zinciri Kırma')">
+                        <a href="zincirikirma/index.html"><span class="link-icon">⛓️</span>Zinciri Kırma Alışkanlık Programı</a>
+                    </li>
+                </ul>
+            </div>
 
-        <p><a href="module.html">js ifee module örneği</a></p>
-        <p><a href="javascript30/js30.html">js 30</a></p>
-        <p><a href="jsloginfirebase/index.html">Js Login Firebase</a></p>
-        <p><a href="karincakovucu.html">Karınca Kovucu</a></p>
-        <p><a href="metamask5.html">Metamask</a></p>
-        <p><a href="kelimebulucu.html">Kelime Bulucu</a></p>
-        <p><a href="metinOkuyucu13.html">Metin Okuyucu - Kaldığın Yerden Devam Eder</a></p>
-        <p><a href="newpage.html">new page</a></p>
-        <p><a href="nobetpublic.html">Nöbet Listesi</a></p>
-        <p><a href="myparse.html">Oversize Kontrolü</a></p>
-        <p><a href="parallax-template/index.html">parallaxtemplate</a></p>
-        <p><a href="particle-life-main/particle-life-main/particle_life.html">Particle Life</a></p>
-        <p><a href="particle-life-main/particle-life-main/particle_life_3d.html">Particle Life 3d</a></p>
-        <p><a href="pomodoro3.html">Pomodoro Timer</a></p>
-        <p><a href="regexpmail.html">regexp mail</a></p>
-        <p><a href="prompt4.html">Resim Promptu</a></p>
-        <p><a href="resimler.html">Resimler</a></p>
-        <p><a href="revirsayimgemini15.html">Revir Sayım</a></p>
-        <p><a href="saat.html">saat</a></p>
-        <p><a href="sembolik_mantik/sembolik_mantik_www.erpelstolz.at_gateway_TruthTable.html">Sembolik Mantık</a></p>
-        <p><a href="nikitabs.html">Sigara Bırakma İlacı - Nikitabs Kullanım Aracı</a></p>
-        <p><a href="srt.html">srt</a></p>
-        <p><a href="srtunicode2utf8.html">srt UTF-8</a></p>
-        <p><a href="srtokuyucugtp2.html">srt gpt</a></p>
-        <p><a href="istanbultag4.html">TAG İstanbul Fırsat ve Risk Haritası</a></p>
-        <p><a href="tagtekirdag2.html">TAG Tekirdağ Fırsat ve Risk Haritası</a></p>
+            <!-- Eğitim ve Öğrenim -->
+            <div class="category-card" ng-show="shouldShowCategory('education')">
+                <h2 class="category-title">📚 Eğitim ve Öğrenim</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('Blok Flüt')">
+                        <a href="blokFlutGunlugu.html"><span class="link-icon">🎵</span>Blok Flüt Günlüğüm</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('ingilizce cümle')">
+                        <a href="ingilizce.html"><span class="link-icon">🇬🇧</span>İngilizce Cümle Yapıları</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Murat Avcıoğlu')">
+                        <a href="MMA.html"><span class="link-icon">🎥</span>Murat Avcıoğlu 2024 Genele Video Makaleleri</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Sembolik Mantık')">
+                        <a href="sembolik_mantik/sembolik_mantik_www.erpelstolz.at_gateway_TruthTable.html"><span class="link-icon">🧠</span>Sembolik Mantık</a>
+                    </li>
+                </ul>
+            </div>
 
-        <p><a href="deneme/subtitle/t3.html">t3</a></p>
-        <p><a href="ttsspeechsynthesis.html">t3 speechsynthesis</a></p>
-        <p><a href="googletts.html">tts</a></p>
-        <p><a href="tts1.html">tts1</a></p>
-        <p><a href="tts1tr.html">tts1tr</a></p>
-        <p><a href="videovealtyaziseslendirme.html">video ve altyazı seslendirme</a></p>
-        <p><a href="videovealtyaziseslendirme2.html">video ve altyazı seslendirme v.2</a></p>
-        <p><a href="vuejs.html">VueJs</a></p>
-        <p><a href="ytplaylistmanagement.html">YouTube Playlist Yöneticisi</a></p>
-        <p><a href="zincirikirma/index.html">Zinciri Kırma Alışkanlık Programı</a></p>
+            <!-- Oyunlar ve Eğlence -->
+            <div class="category-card" ng-show="shouldShowCategory('games')">
+                <h2 class="category-title">🎮 Oyunlar ve Eğlence</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('Canavar oyunu')">
+                        <a href="bolum-4-canavar-avi-oyunu/index.html"><span class="link-icon">👹</span>Canavar Oyunu</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Particle Life')">
+                        <a href="particle-life-main/particle-life-main/particle_life.html"><span class="link-icon">🎯</span>Particle Life</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('Particle Life 3d')">
+                        <a href="particle-life-main/particle-life-main/particle_life_3d.html"><span class="link-icon">🎯</span>Particle Life 3D</a>
+                    </li>
+                </ul>
+            </div>
 
+            <!-- Web Şablonları -->
+            <div class="category-card" ng-show="shouldShowCategory('templates')">
+                <h2 class="category-title">🎨 Web Şablonları</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('parallaxtemplate')">
+                        <a href="parallax-template/index.html"><span class="link-icon">🌊</span>Parallax Template</a>
+                    </li>
+                </ul>
+            </div>
 
-        <p>
-            <a href="https://play.google.com/store/apps/details?id=tk.recinilt.YouTubeSubtitleDownloader"><img src="file/YouTube Subtitle Downloader.jpg" alt="" width="250"></a>
-        </p>
-
-
-
-        <!-- <p><a href="bilesikcarpan/index.html">Bilesikcarpan.tk</a></p>  -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            <!-- Konum Tabanlı Hizmetler -->
+            <div class="category-card" ng-show="shouldShowCategory('location')">
+                <h2 class="category-title">🗺️ Konum Tabanlı Hizmetler</h2>
+                <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('TAG İstanbul')">
+                        <a href="istanbultag4.html"><span class="link-icon">🏙️</span>TAG İstanbul Fırsat ve Risk Haritası</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('TAG Tekirdağ')">
+                        <a href="tagtekirdag2.html"><span class="link-icon">🏞️</span>TAG Tekirdağ Fırsat ve Risk Haritası</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
+
+    <script>
+        angular.module('linkApp', [])
+            .controller('MainController', function($scope) {
+                $scope.name = '';
+                $scope.searchTerm = '';
+
+                $scope.matchesSearch = function(text) {
+                    if (!$scope.searchTerm) return true;
+                    return text.toLowerCase().includes($scope.searchTerm.toLowerCase());
+                };
+
+                $scope.shouldShowCategory = function(category) {
+                    if (!$scope.searchTerm) return true;
+
+                    const categoryItems = {
+                        'crypto': ['AB=CD borsa formasyonu', 'ATR to Price Ratio', 'Crypto Binance Martingale', 'çeyrek altın', 'Coin Ci Long Short', 'Çifte Ema', 'Coin Değeri', 'Grid Bot', 'Hisse Al-Sat', 'Order Book', 'Pump.fun', 'yüzde 2 yükselenler', 'Trend Analizi', 'Volatilite Analiz', 'Coin yukseliyor', 'Coin Follower Portfolio'],
+                        'health': ['AŞILAR', 'Çocuk İlaç Şurup', 'FBS Kalbi Cilalatma', 'Hasta Kayıt', 'Hazır Reçete', 'İnfüzyon Seti', 'Nikitabs Sigara', 'Nöbet Listesi', 'Revir Sayım'],
+                        'media': ['Canlı TV', 'güldür güldür', 'Metin Okuyucu', 'srt', 'speechsynthesis', 'tts', 'video altyazı seslendirme', 'YouTube', 't3'],
+                        'programming': ['AngularJS', 'Firebase Data', 'js 30', 'js module', 'Metamask', 'regexp mail', 'VueJS'],
+                        'tools': ['Babylons', 'birleşik çarpan', 'Bütçe Takip', 'CSV File Explorer', 'Depo Yönetimi QR', 'file', 'Google', 'Gramaj Fiyat', 'Günlük', 'haberler', 'Hotspot', 'Karınca Kovucu', 'Kelime Bulucu', 'Kronolojik Sıraya', 'new page', 'Oversize Kontrolü', 'Pomodoro Timer', 'Resim', 'saat', 'Zinciri Kırma'],
+                        'education': ['Blok Flüt', 'ingilizce cümle', 'Murat Avcıoğlu', 'Sembolik Mantık'],
+                        'games': ['Canavar oyunu', 'Particle Life'],
+                        'templates': ['parallaxtemplate'],
+                        'location': ['TAG İstanbul', 'TAG Tekirdağ']
+                    };
+
+                    return categoryItems[category].some(item =>
+                        item.toLowerCase().includes($scope.searchTerm.toLowerCase())
+                    );
+                };
+            });
+    </script>
 </body>
 
 </html>
