@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metin Dosya Okuyucu</title>
+    <style>
+         :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6b8cae;
+            --background-light: #f8f5f0;
+            --text-light: #333;
+            --background-dark: #1a1a1a;
+            --text-dark: #e6e6e6;
+            --card-bg-light: #fff;
+            --card-bg-dark: #2d2d2d;
+            --border-light: #ddd;
+            --border-dark: #444;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--background-light);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: var(--card-bg-light);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            margin: 15px 0;
+            width: 100%;
+        }
+        
+        .file-input {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        
+        .file-input-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            text-align: center;
+            user-select: none;
+        }
+        
+        .file-input-button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .theme-toggle {
+            background: var(--warning-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        
+        .theme-toggle:hover {
+            opacity: 0.9;
+        }
+        
+        .recent-files {
+            background: var(--card-bg-light);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 极 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .recent-files h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .file-item {
+            padding: 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .file-item:hover {
+            background: #f0f0f0;
+            border-color: var(--primary-color);
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: bold;
+            color: var(--text-light);
+            font-size: 极 6px;
+            margin-bottom: 5px;
+        }
+        
+        .file-meta {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .file-actions button {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        
+        .file-actions button:hover {
+            opacity: 0.8;
+        }
+        
+        .reader-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--background-light);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .reader-header {
+            position: sticky;
+            top: 0;
+            background: var(--card-bg-light);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1001;
+            border-bottom: 1px solid var(--border-light);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .reader-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            line-height: 1.8;
+            font-size: 18px;
+            text-align: justify;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .close-btn {
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .close-btn:hover {
+            opacity: 0.8;
+        }
+        
+        .progress-indicator {
+            background: var(--primary-color);
+            height: 4px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transition: width 0.1s ease;
+            z-index: 1002;
+            极
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .font-controls button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 2px;
+            font-size: 16px;
+        }
+        
+        .font-controls button:hover {
+            opacity: 0.8;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px;
+        }
+        /* Dark theme styles */
+        
+        body.dark-theme {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+        }
+        
+        body.dark-theme .header,
+        body.dark-theme .recent-files {
+            background: var(--card-bg-dark);
+        }
+        
+        body.dark-theme .file-item {
+            border-color: var(--border-dark);
+            background: 极 var(--card-bg-dark);
+        }
+        
+        body.dark-theme .file-item:hover {
+            background: #3d3d3d;
+        }
+        
+        body.dark-theme .file-name {
+            color: var(--text-dark);
+        }
+        
+        body.dark-theme .reader-container {
+            background: var(--background-dark);
+            color: var(--text-dark);
+        }
+        
+        body.dark-theme .reader-header {
+            background: var(--card-bg-dark);
+            border-bottom-color: var(--border-dark);
+        }
+        /* Responsive design */
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .header {
+                padding: 15px;
+            }
+            .file-input-button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            .reader-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            .reader-content {
+                padding: 20px 15px;
+                font-size: 16px;
+            }
+            .controls {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            background: var(--success-color);
+            color: white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .notification.error {
+            background: var(--danger-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📖 Metin Dosya Okuyucu</h1>
+            <p>TXT, PDF, DOC, DOCX dosyalarınızı okuyun ve kaldığınız yerden devam edin</p>
+
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" class="file-input" accept=".txt,.pdf,.doc,.docx" multiple>
+                <div class="file-input-button">
+                    📁 Dosya Seç
+                </div>
+            </div>
+
+            <button class="theme-toggle" id="themeToggle">🌙 Koyu Tema</button>
+        </div>
+
+        <div class="recent-files">
+            <h3>📚 Son Açılan Dosyalar</h3>
+            <div id="recentFilesList">
+                <div class="empty-state">Henüz dosya yüklenmedi</div>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">Dosya yükleniyor...</div>
+    </div>
+
+    <div class="reader-container" id="readerContainer">
+        <div class="reader-header">
+            <div>
+                <strong id="currentFileName">Dosya Adı</strong>
+                <div id="currentFileProgress">İlerleme: %0</div>
+                </极div>
+                <div class="controls">
+                    <div class="font-controls">
+                        <button id="fontDecrease">A-</button>
+                        <button id="fontIncrease">A+</button>
+                    </div>
+                    <button class="close-btn" id="closeReader">✕ Kapat</button>
+                </div>
+            </div>
+            <div class="progress-indicator" id="progressBar"></div>
+            <div class="reader-content" id="readerContent"></div>
+        </div>
+
+        <div class="notification" id="notification"></div>
+
+        <!-- PDF.js kütüphanesi -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+        <script>
+            // PDF.js worker'ı ayarla
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
+        </script>
+
+        <!-- Mammoth.js için CDN -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.17/mammoth.browser.min.js"></script>
+
+        <script>
+            // Uygulama durumu
+            const state = {
+                currentFile: null,
+                fontSize: 18,
+                theme: 'light'
+            };
+
+            // DOM elementleri
+            const fileInput = document.getElementById('fileInput');
+            const recentFilesList = document.getElementById('recentFilesList');
+            const readerContainer = document.getElementById('readerContainer');
+            const readerContent = document.getElementById('readerContent');
+            const currentFileName = document.getElementById('currentFileName');
+            const currentFileProgress = document.getElementById('currentFileProgress');
+            const progressBar = document.getElementById('progressBar');
+            const themeToggle = document.getElementById('themeToggle');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const notification = document.getElementById('notification');
+            const fontDecrease = document.getElementById('font极crease');
+            const fontIncrease = document.getElementById('fontIncrease');
+            const closeReader = document.getElementById('closeReader');
+
+            // Bildirim göster
+            function showNotification(message, isError = false) {
+                notification.textContent = message;
+                notification.className = 'notification' + (isError ? ' error' : '');
+                notification.classList.add('show');
+
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+
+            // Sayfa yüklendiğinde
+            document.addEventListener('DOMContentLoaded', () => {
+                loadSettings();
+                loadRecentFiles();
+                setupEventListeners();
+            });
+
+            // Event listener'ları kur
+            function setupEventListeners() {
+                fileInput.addEventListener('change', handleFileSelect);
+                window.addEventListener('scroll', updateProgress, {
+                    passive: true
+                });
+                themeToggle.addEventListener('click', toggleTheme);
+                fontDecrease.addEventListener('click', () => changeFontSize(-2));
+                fontIncrease.addEventListener('click', () => changeFontSize(2));
+                closeReader.addEventListener('click', closeReaderHandler);
+            }
+
+            // Dosya seçimi işleme
+            function handleFileSelect(event) {
+                const files = event.target.files;
+                if (!files.length) return;
+
+                loadingIndicator.style.display = 'block';
+
+                // Tüm dosyaları işle (sadece ilk dosyayı al)
+                processFile(files[0]).then(() => {
+                    loadingIndicator.style.display = 'none';
+                    fileInput.value = '';
+                }).catch(error => {
+                    console.error('Dosya işleme hatası:', error);
+                    showNotification('Dosya işlenirken hata oluştu: ' + error.message, true);
+                    loadingIndicator.style.display = 'none';
+                });
+            }
+
+            // Dosya işleme
+            async function processFile(file) {
+                try {
+                    let content = '';
+
+                    // Dosya türüne göre içerik çıkarma
+                    if (file.name.endsWith('.pdf')) {
+                        content = await readPDF(file);
+                    } else if (file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+                        content = await readWord(file);
+                    } else {
+                        content = await readText(file);
+                    }
+
+                    // Dosya bilgilerini sakla
+                    saveFileData(file, content);
+
+                    // Son dosyalar listesini güncelle
+                    loadRecentFiles();
+
+                    showNotification('Dosya başarıyla yüklendi: ' + file.name);
+
+                } catch (error) {
+                    console.error('Dosya okuma hatası:', error);
+                    showNotification('Dosya okunamadı: ' + error.message, true);
+                    throw error;
+                }
+            }
+
+            // Text dosyası okuma
+            function readText(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new极 FileReader();
+
+                    reader.onload = (e) => {
+                        resolve(e.target.result);
+                    };
+
+                    reader.onerror = (e) => {
+                        reject(new Error('Dosya okunamadı'));
+                    };
+
+                    // Büyük dosyalar için parçalı okuma
+                    if (file.size > 5000000) { // 5MB'den büyükse
+                        readLargeText(file, resolve, reject);
+                    } else {
+                        reader.readAsText(file, 'UTF-8');
+                    }
+                });
+            }
+
+            // Büyük text dosyalarını parçalı okuma
+            function readLargeText(file, resolve, reject) {
+                const chunkSize = 1000000; // 1MB parçalar
+                const chunks = Math.ceil(file.size / chunkSize);
+                let content = '';
+                let currentChunk = 0;
+
+                const readNextChunk = () => {
+                    const start = current极unk * chunkSize;
+                    const end = Math.min(start + chunkSize, file.size);
+                    const blob = file.slice(start, end);
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        content += e.target.result;
+                        currentChunk++;
+
+                        if (currentChunk < chunks) {
+                            // Sonraki parçayı oku
+                            setTimeout(readNextChunk, 0); // UI'nin blocklanmaması için
+                        } else {
+                            // Tüm içerik okundu
+                            resolve(content);
+                        }
+                    };
+
+                    reader.onerror = (e) => {
+                        reject(new Error('Dosya okunamadı'));
+                    };
+
+                    reader.readAsText(blob, 'UTF-8');
+                };
+
+                // İlk parçayı oku
+                readNextChunk();
+            }
+
+            // PDF dosyası okuma
+            async function readPDF(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = async(e) => {
+                        try {
+                            const typedArray = new Uint8Array(e.target.result);
+                            const pdf = await pdfjsLib.getDocument(typedArray).promise;
+                            let text = '';
+
+                            // Tüm sayfaları oku
+                            for (let i = 1; i <= pdf.numPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const textContent = await page.getTextContent();
+                                text += textContent.items.map(item => item.str).join(' ') + '\n';
+                            }
+
+                            resolve(text);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+
+                    reader.onerror = (e) => {
+                        reject(new Error('PDF dosyası okunamadı'));
+                    };
+
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            // Word dosyası okuma
+            async function readWord(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+
+                    reader.onload = async(e) => {
+                        try {
+                            const arrayBuffer = e.target.result;
+                            const result = await mammoth.extractRawText({
+                                arrayBuffer
+                            });
+                            resolve(result.value);
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+
+                    reader.onerror = (e) => {
+                        reject(new Error('Word dosyası okunamadı'));
+                    };
+
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            // Dosya verilerini saklama
+            function saveFileData(file, content) {
+                // Dosya bilgilerini hazırla
+                const fileData = {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    lastRead: new Date().toISOString(),
+                    content: content,
+                    position: 0
+                };
+
+                // localStorage için anahtar
+                const fileKey = `file_${file.name}_${file.lastModified}`;
+
+                // Büyük dosyaları parçalara böl
+                if (content.length > 500000) { // ~500KB'den büyükse
+                    const chunks = chunkString(content, 400000); // 400KB parçalar
+
+                    // Parça sayısını sakla
+                    fileData.chunks = chunks.length;
+                    fileData.content = null; // Ana içeriği temizle
+
+                    // Parçaları ayrı anahtarlarla sakla
+                    chunks.forEach((chunk, index) => {
+                        localStorage.setItem(`${fileKey}_chunk_${index}`, chunk);
+                    });
+                }
+
+                // Dosya metadata'sını sakla
+                localStorage.setItem(fileKey, JSON.stringify(fileData));
+
+                // Son dosyalar listesine ekle
+                let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+
+                // Aynı dosyayı kaldır (yeniden eklemek için)
+                recentFiles = recentFiles.filter(f => f.key !== fileKey);
+
+                // Yeni dosyayı ekle
+                recentFiles.unshift({
+                    key: fileKey,
+                    name: file.name,
+                    size: file.size,
+                    lastRead: fileData.lastRead
+                });
+
+                // En fazla 10 dosya sakla
+                if (recentFiles.length > 10) {
+                    recentFiles = recentFiles.slice(0, 10);
+
+                    // Kaldırılan dosyaların verilerini de temizle
+                    const removedFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]')
+                        .slice(10)
+                        .map(f => f.key);
+
+                    removedFiles.forEach(key => {
+                        localStorage.removeItem(key);
+                        // Parçalanmış içerik varsa kaldır
+                        let i = 0;
+                        while (localStorage.getItem(`${key}_chunk_${i}`)) {
+                            localStorage.removeItem(`${key}_chunk_${i}`);
+                            i++;
+                        }
+                    });
+                }
+
+                localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
+            }
+
+            // String'i parçalara bölme
+            function chunkString(str, size) {
+                const chunks = [];
+                for (let i = 0; i < str.length; i += size) {
+                    chunks.push(str.substring(i, i + size));
+                }
+                return chunks;
+            }
+
+            // Parçalanmış içeriği birleştirme
+            function getChunkedContent(fileKey, chunksCount) {
+                let content = '';
+                for (let i = 0; i < chunksCount; i++) {
+                    const chunk = localStorage.getItem(`${fileKey}_chunk_${i}`);
+                    if (chunk) {
+                        content += chunk;
+                    }
+                }
+                return content;
+            }
+
+            // Son dosyaları yükle
+            function loadRecentFiles() {
+                const recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+
+                if (recentFiles.length === 0) {
+                    recentFilesList.innerHTML = '<div class="empty-state">Henüz dosya yüklenmedi</div>';
+                    return;
+                }
+
+                recentFilesList.innerHTML = '';
+
+                recentFiles.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'file-item';
+
+                    // Dosya ismini güvenli şekilde ekle
+                    const fileNameDiv = document.createElement('div');
+                    fileNameDiv.className = 'file-name';
+                    fileNameDiv.textContent = file.name || 'İsimsiz Dosya';
+
+                    // Dosya meta bilgileri
+                    const fileMetaDiv = document.createElement('div');
+                    fileMetaDiv.className = 'file-meta';
+                    fileMetaDiv.textContent = `${formatFileSize(file.size || 0)} - ${formatDate(file.lastRead || new Date().toISOString())}`;
+
+                    // Dosya bilgi kısmı
+                    const fileInfoDiv = document.createElement('div');
+                    fileInfoDiv.className = 'file-info';
+                    fileInfoDiv.appendChild(fileNameDiv);
+                    fileInfoDiv.appendChild(fileMetaDiv);
+
+                    // Dosya aksiyon butonları
+                    const fileActionsDiv = document.createElement('div');
+                    fileActionsDiv.className = 'file-actions';
+
+                    const openButton = document.createElement('button');
+                    openButton.textContent = 'Aç';
+                    openButton.onclick = () => openFile(file.key);
+
+                    const removeButton = document.createElement('button');
+                    removeButton.textContent = 'Kaldır';
+                    removeButton.onclick = () => removeFile(file.key);
+
+                    fileActionsDiv.appendChild(openButton);
+                    fileActionsDiv.appendChild(removeButton);
+
+                    // Tüm elementleri birleştir
+                    fileItem.appendChild(fileInfoDiv);
+                    fileItem.appendChild(fileActionsDiv);
+
+                    recentFilesList.appendChild(fileItem);
+                });
+            }
+
+            // Dosyayı aç
+            function openFile(fileKey) {
+                const fileDataStr = localStorage.getItem(fileKey);
+                if (!fileDataStr) {
+                    showNotification('Dosya bulunamadı', true);
+                    loadRecentFiles();
+                    return;
+                }
+
+                try {
+                    const fileData = JSON.parse(fileDataStr);
+
+                    // Parçalanmış içerik varsa birleştir
+                    if (fileData.chunks && fileData.chunks > 0) {
+                        fileData.content = getChunkedContent(fileKey, fileData.chunks);
+                    }
+
+                    if (!fileData.content) {
+                        showNotification('Dosya içeriği bulunamadı', true);
+                        return;
+                    }
+
+                    state.currentFile = {
+                        key: fileKey,
+                        data: fileData
+                    };
+
+                    // Okuyucuyu göster
+                    currentFileName.textContent = fileData.name;
+                    readerContent.textContent = fileData.content;
+                    readerContent.style.fontSize = state.fontSize + 'px';
+                    readerContainer.style.display = 'block';
+
+                    // Kayıtlı pozisyona git
+                    setTimeout(() => {
+                        if (fileData.position && fileData.position > 0) {
+                            window.scrollTo(0, fileData.position);
+                        }
+                        updateProgress();
+                    }, 100);
+
+                } catch (error) {
+                    console.error('Dosya açma hatası:', error);
+                    showNotification('Dosya açılamadı: ' + error.message, true);
+                }
+            }
+
+            // Dosyayı kaldır
+            function removeFile(fileKey) {
+                if (!confirm('Bu dosyayı kaldırmak istediğinize emin misiniz?')) return;
+
+                // Dosya metadata'sını kaldır
+                localStorage.removeItem(fileKey);
+
+                // Parçalanmış içerik varsa kaldır
+                let i = 0;
+                while (localStorage.getItem(`${fileKey}_chunk_${i}`)) {
+                    localStorage.removeItem(`${fileKey}_chunk_${i}`);
+                    i++;
+                }
+
+                // Son dosyalar listesinden kaldır
+                let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+                recentFiles = recentFiles.filter(f => f.key !== fileKey);
+                localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
+
+                // Listeyi yenile
+                loadRecentFiles();
+
+                showNotification('Dosya kaldırıldı');
+            }
+
+            // Okuyucuyu kapat
+            function closeReaderHandler() {
+                if (state.currentFile) {
+                    // Mevcut pozisyonu kaydet
+                    saveCurrentPosition();
+                }
+
+                readerContainer.style.display = 'none';
+                state.currentFile = null;
+            }
+
+            // Mevcut pozisyonu kaydet
+            function saveCurrentPosition() {
+                if (!state.currentFile) return;
+
+                const position = window.scrollY;
+                const progress = calculateProgress();
+
+                // Dosya verilerini güncelle
+                const fileDataStr = localStorage.getItem(state.currentFile.key);
+                if (fileDataStr) {
+                    const fileData = JSON.parse(fileDataStr);
+                    fileData.position = position;
+                    fileData.lastRead = new Date().toISOString();
+
+                    // Sadece metadata'yı güncelle, içeriği değil
+                    const {
+                        content,
+                        chunks,
+                        ...metadata
+                    } = fileData;
+                    localStorage.setItem(state.currentFile.key, JSON.stringify(metadata));
+
+                    // Son dosyalar listesindeki tarihi güncelle
+                    let recentFiles = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+                    const fileIndex = recentFiles.findIndex(f => f.key === state.currentFile.key);
+                    if (fileIndex !== -1) {
+                        recentFiles[fileIndex].lastRead = fileData.lastRead;
+                        localStorage.setItem('recentFiles', JSON.stringify(recentFiles));
+                    }
+                }
+            }
+
+            // İlerlemeyi güncelle
+            function updateProgress() {
+                if (!state.currentFile) return;
+
+                const progress = calculateProgress();
+                progressBar.style.width = progress + '%';
+                currentFileProgress.textContent = `İlerleme: %${Math.round(progress)}`;
+            }
+
+            // İlerlemeyi hesapla
+            function calculateProgress() {
+                const scrollTop = window.scrollY;
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                return scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 极;
+            }
+
+            // Yazı tipi boyutunu değiştir
+            function changeFontSize(delta) {
+                state.fontSize = Math.max(12, Math.min(32, state.fontSize + delta));
+                readerContent.style.fontSize = state.fontSize + 'px';
+                saveSettings();
+            }
+
+            // Temayı değiştir
+            function toggleTheme() {
+                state.theme = state.theme === 'light' ? 'dark' : 'light';
+                document.body.classList.toggle('dark-theme', state.theme === 'dark');
+                themeToggle.textContent = state.theme === 'light' ? '🌙 Koyu Tema' : '☀️ Açık Tema';
+                saveSettings();
+            }
+
+            // Ayarları yükle
+            function loadSettings() {
+                const settings = JSON.parse(localStorage.getItem('readerSettings') || '{}');
+
+                if (settings.fontSize) {
+                    state.fontSize = settings.fontSize;
+                }
+
+                if (settings.theme) {
+                    state.the极 = settings.theme;
+                    document.body.classList.toggle('dark-theme', state.theme === 'dark');
+                    themeToggle.textContent = state.theme === 'light' ? '🌙 Koyu Tema' : '☀️ Açık Tema';
+                }
+            }
+
+            // Ayarları kaydet
+            function saveSettings() {
+                const settings = {
+                    fontSize: state.fontSize,
+                    theme: state.theme
+                };
+                localStorage.setItem('readerSettings', JSON.stringify(settings));
+            }
+
+            // Yardımcı fonksiyonlar
+            function formatFileSize(bytes) {
+                if (!bytes || bytes < 1024) return (bytes || 0) + ' B';
+                else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+                else return (bytes / 1048576).toFixed(1) + ' MB';
+            }
+
+            function formatDate(dateString) {
+                try {
+                    const date = new Date(dateString || new Date());
+                    return date.toLocaleDateString('tr-TR') + ' ' + date.toLocaleTimeString('tr-TR');
+                } catch (e) {
+                    return "Tarih bilinmiyor";
+                }
+            }
+
+            // Sayfadan ayrılırken pozisyonu kaydet
+            window.addEventListener('beforeunload', () => {
+                if (state.currentFile) {
+                    saveCurrentPosition();
+                }
+            });
+        </script>
+</body>
+
+</html>
