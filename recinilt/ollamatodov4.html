@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern To-Do List</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            /* Daha modern font */
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        h1 {
+            color: #3498db;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        input[type="text"] {
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #2ecc71;
+            /* Daha canlı renk */
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        
+        button:hover {
+            background-color: #27ae60;
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        li {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease;
+        }
+        
+        li:hover {
+            background-color: #e0e0e0;
+        }
+        
+        li.completed {
+            text-decoration: line-through;
+            color: #95a5a6;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>To-Do List</h1>
+    <input type="text" id="todoInput" placeholder="Yapılacak işi girin...">
+    <button onclick="addTask()">Ekle</button>
+
+    <ul id="todoList">
+    </ul>
+
+    <script>
+        function addTask() {
+            const todoInput = document.getElementById('todoInput');
+            const todoList = document.getElementById('todoList');
+            const listItem = document.createElement('li');
+
+            listItem.textContent = todoInput.value;
+            todoList.appendChild(listItem);
+            todoInput.value = '';
+        }
+    </script>
+</body>
+
+</html>

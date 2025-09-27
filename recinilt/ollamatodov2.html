@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapılacaklar Listesi</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1em;
+            text-align: center;
+        }
+        
+        #todo-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        #new-task {
+            padding: 10px;
+            font-size: 16px;
+            width: 70%;
+            margin-bottom: 10px;
+        }
+        
+        #add-button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        #task-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #task-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        
+        .delete-button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Yapılacaklar Listesi</h1>
+    </header>
+    <div id="todo-container">
+        <input type="text" id="new-task" placeholder="Yeni görev ekle">
+        <button id="add-button">Ekle</button>
+        <ul id="task-list"></ul>
+    </div>
+    <script>
+        const newTaskInput = document.getElementById('new-task');
+        const addButton = document.getElementById('add-button');
+        const taskList = document.getElementById('task-list');
+
+        addButton.addEventListener('click', () => {
+            const taskText = newTaskInput.value.trim();
+            if (taskText !== '') {
+                addTask(taskText);
+                newTaskInput.value = '';
+            }
+        });
+
+        function addTask(text) {
+            const listItem = document.createElement('li');
+            const taskSpan = document.createElement('span');
+            taskSpan.textContent = text;
+            const deleteButton = document.createElement('button');
+            deleteButton.classList.add('delete-button');
+            deleteButton.textContent = 'Sil';
+
+            listItem.appendChild(taskSpan);
+            listItem.appendChild(deleteButton);
+            taskList.appendChild(listItem);
+
+            // Tamamlandı işaretleme
+            taskSpan.addEventListener('click', () => {
+                taskSpan.classList.toggle('completed');
+            });
+
+            // Silme işlevi
+            deleteButton.addEventListener('click', () => {
+                listItem.remove();
+            });
+        }
+    </script>
+</body>
+
+</html>

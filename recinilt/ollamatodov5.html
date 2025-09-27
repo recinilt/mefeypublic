@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 350px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        input[type="text"] {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            width: 90%;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #218838;
+        }
+        
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        
+        li {
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .checkbox {
+            margin-right: 10px;
+        }
+        
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 2px 8px;
+            cursor: pointer;
+        }
+        
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Yeni görevi yazın...">
+        <button onclick="addTask()">Ekle</button>
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            const taskText = taskInput.value.trim();
+
+            if (taskText === '') {
+                alert('Lütfen bir görev girin.');
+                return;
+            }
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <input type="checkbox" class="checkbox">
+                ${taskText}
+                <button class="delete-btn">Sil</button>
+            `;
+
+            li.querySelector('.checkbox').addEventListener('change', function() {
+                if (this.checked) {
+                    li.style.textDecoration = 'line-through';
+                } else {
+                    li.style.textDecoration = 'none';
+                }
+            });
+
+            li.querySelector('.delete-btn').addEventListener('click', function() {
+                taskList.removeChild(li);
+            });
+
+            taskList.appendChild(li);
+            taskInput.value = '';
+        }
+    </script>
+</body>
+
+</html>

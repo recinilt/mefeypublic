@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>To‑Do List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+         :root {
+            --primary: #2c3e50;
+            --secondary: #ecf0f1;
+            --accent: #3498db;
+            --border: #bdc3c7;
+            --completed: #95a5a6;
+            --font: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: var(--font);
+            background: #f4f6f8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        header {
+            width: 100%;
+            max-width: 800px;
+            padding: 1rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .1);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 1.5rem;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .1);
+            margin-top: -20px;
+            border-radius: 8px;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .add-task {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .add-task input[type="text"] {
+            flex: 1;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        .add-task input[type="date"] {
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .add-task button {
+            padding: 0.5rem 1rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+        
+        .filters button {
+            background: var(--border);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .filters button.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+        
+        .task-info .title {
+            flex: 1;
+            font-size: 1rem;
+            word-break: break-word;
+        }
+        
+        .task-info .title.completed {
+            text-decoration: line-through;
+            color: var(--completed);
+        }
+        
+        .task-info .due {
+            font-size: 0.85rem;
+            color: var(--completed);
+        }
+        
+        .task-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--border);
+            margin-left: 0.5rem;
+            font-size: 1rem;
+            transition: color .2s;
+        }
+        
+        .task-actions button:hover {
+            color: var(--accent);
+        }
+        
+        .clear-completed {
+            text-align: right;
+            margin-top: 0.5rem;
+        }
+        
+        .clear-completed button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 480px) {
+            .add-task input[type="text"],
+            .add-task input[type="date"] {
+                font-size: 0.9rem;
+            }
+            .add-task button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>To‑Do List</h1>
+    </header>
+    <div class="container">
+        <div class="add-task">
+            <input type="text" id="new-task-title" placeholder="Yeni görev...">
+            <input type="date" id="new-task-due">
+            <button id="add-task-btn"><i class="fa-solid fa-plus"></i> Ekle</button>
+        </div>
+        <div class="filters">
+            <button data-filter="all" class="active">Tümü</button>
+            <button data-filter="active">Aktif</button>
+            <button data-filter="completed">Tamamlandı</button>
+        </div>
+        <ul class="task-list" id="task-list"></ul>
+        <div class="clear-completed" id="clear-completed" style="display:none;">
+            <button><i class="fa-solid fa-trash"></i> Tamamlananları Temizle</button>
+        </div>
+    </div>
+    <script>
+        (() => {
+            const STORAGE_KEY = 'todoApp.tasks';
+            let tasks = [];
+            let filter = 'all';
+
+            const elements = {
+                newTaskTitle: document.getElementById('new-task-title'),
+                newTaskDue: document.getElementById('new-task-due'),
+                addTaskBtn: document.getElementById('add-task-btn'),
+                taskList: document.getElementById('task-list'),
+                filters: document.querySelectorAll('.filters button'),
+                clearCompleted: document.getElementById('clear-completed')
+            };
+
+            /* Utility Functions */
+            const saveTasks = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+            const loadTasks = () => {
+                const data = localStorage.getItem(STORAGE_KEY);
+                tasks = data ? JSON.parse(data) : [];
+            };
+            const generateId = () => Date.now() + Math.random().toString(16).slice(2);
+
+            /* Render Functions */
+            const renderTasks = () => {
+                elements.taskList.innerHTML = '';
+                const filtered = tasks.filter(t => {
+                    if (filter === 'active') return !t.completed;
+                    if (filter === 'completed') return t.completed;
+                    return true;
+                });
+                filtered.forEach(task => {
+                    const li = document.createElement('li');
+                    li.className = 'task-item';
+                    li.dataset.id = task.id;
+
+                    const infoDiv = document.createElement('div');
+                    infoDiv.className = 'task-info';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = task.completed;
+                    checkbox.addEventListener('change', () => toggleComplete(task.id));
+
+                    const titleSpan = document.createElement('span');
+                    titleSpan.className = 'title' + (task.completed ? ' completed' : '');
+                    titleSpan.textContent = task.title;
+
+                    const dueSpan = document.createElement('span');
+                    dueSpan.className = 'due';
+                    dueSpan.textContent = task.due ? `🗓️ ${task.due}` : '';
+
+                    infoDiv.appendChild(checkbox);
+                    infoDiv.appendChild(titleSpan);
+                    infoDiv.appendChild(dueSpan);
+
+                    const actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'task-actions';
+
+                    const editBtn = document.createElement('button');
+                    editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+                    editBtn.title = 'Düzenle';
+                    editBtn.addEventListener('click', () => editTask(task.id));
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+                    deleteBtn.title = 'Sil';
+                    deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+                    actionsDiv.appendChild(editBtn);
+                    actionsDiv.appendChild(deleteBtn);
+
+                    li.appendChild(infoDiv);
+                    li.appendChild(actionsDiv);
+                    elements.taskList.appendChild(li);
+                });
+
+                // Show or hide clear completed button
+                const completedExist = tasks.some(t => t.completed);
+                elements.clearCompleted.style.display = completedExist ? 'block' : 'none';
+            };
+
+            /* Event Handlers */
+            const addTask = () => {
+                const title = elements.newTaskTitle.value.trim();
+                if (!title) return;
+                const due = elements.newTaskDue.value || null;
+                const newTask = {
+                    id: generateId(),
+                    title,
+                    due,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.push(newTask);
+                saveTasks();
+                renderTasks();
+                elements.newTaskTitle.value = '';
+                elements.newTaskDue.value = '';
+            };
+
+            const toggleComplete = (id) => {
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                task.completed = !task.completed;
+                saveTasks();
+                renderTasks();
+            };
+
+            const deleteTask = (id) => {
+                if (!confirm('Bu görevi silmek istediğinize emin misiniz?')) return;
+                tasks = tasks.filter(t => t.id !== id);
+                saveTasks();
+                renderTasks();
+            };
+
+            const editTask = (id) => {
+                const task = tasks.find(t => t.id === id);
+                if (!task) return;
+                const newTitle = prompt('Görev başlığını güncelle:', task.title);
+                if (newTitle === null) return; // cancel
+                task.title = newTitle.trim() || task.title;
+                saveTasks();
+                renderTasks();
+            };
+
+            const changeFilter = (evt) => {
+                const btn = evt.target.closest('button');
+                if (!btn) return;
+                filter = btn.dataset.filter;
+                elements.filters.forEach(b => b.classList.toggle('active', b === btn));
+                renderTasks();
+            };
+
+            const clearCompleted = () => {
+                if (!confirm('Tüm tamamlanan görevleri silmek istediğinize emin misiniz?')) return;
+                tasks = tasks.filter(t => !t.completed);
+                saveTasks();
+                renderTasks();
+            };
+
+            /* Initial Setup */
+            const init = () => {
+                loadTasks();
+                renderTasks();
+                elements.addTaskBtn.addEventListener('click', addTask);
+                elements.newTaskTitle.addEventListener('keypress', e => {
+                    if (e.key === 'Enter') addTask();
+                });
+                elements.filters.forEach(btn => btn.addEventListener('click', changeFilter));
+                elements.clearCompleted.addEventListener('click', clearCompleted);
+            };
+
+            init();
+        })();
+    </script>
+</body>
+
+</html>
