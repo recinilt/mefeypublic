@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alışveriş Kontrol Asistanı</title>
+    <title>💰 Alışveriş Kontrol Asistanı</title>
     <style>
         * {
             margin: 0;
@@ -71,6 +71,7 @@
         
         input[type="text"],
         input[type="number"],
+        input[type="password"],
         textarea {
             width: 100%;
             padding: 12px;
@@ -213,22 +214,158 @@
             color: #999;
         }
         
-        .timer {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 10px;
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
         }
         
-        .timer-text {
-            color: #1976d2;
-            font-weight: 600;
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+        
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+                padding: 20px;
+            }
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
         }
     </style>
 </head>
 
 <body>
+    <!-- Kayıt Seçimi Modal -->
+    <div id="storageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>💾 Kayıt Yöntemi Seçimi</h2>
+            <p style="text-align: center; margin-bottom: 30px;">Alışveriş verilerinizi nerede saklamak istiyorsunuz?</p>
+
+            <div class="storage-selection">
+                <div class="storage-option" onclick="selectStorage('local')">
+                    <h3>💻 Yerel Kayıt</h3>
+                    <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                    <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                </div>
+
+                <div class="storage-option" onclick="selectStorage('github')">
+                    <h3>☁️ GitHub Kayıt</h3>
+                    <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                </div>
+            </div>
+
+            <div id="githubLogin" style="display: none;" class="github-login">
+                <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>👤 Kullanıcı Adı:</strong></label>
+                    <input type="text" id="loginUsername" placeholder="Kullanıcı adınızı girin">
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>🔒 Şifre:</strong></label>
+                    <input type="password" id="loginPassword" placeholder="Şifrenizi girin">
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <h1>💰 Alışveriş Kontrol Asistanı</h1>
         <p class="subtitle">Bilinçli harcama yapmanıza yardımcı oluyoruz</p>
@@ -293,11 +430,248 @@
             <div id="notBoughtList"></div>
             <div class="stats" id="stats"></div>
         </div>
+
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+            <p id="storageInfo" style="font-weight: 600; color: #667eea;">💾 Verileriniz kaydediliyor</p>
+            <button class="btn-danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemini Değiştir</button>
+        </div>
     </div>
 
+    <div class="notification" id="notification"></div>
+
+    <script src="5t-github-parametreleri.js"></script>
     <script>
-        let waitingItems = JSON.parse(localStorage.getItem('waitingItems') || '[]');
-        let notBoughtItems = JSON.parse(localStorage.getItem('notBoughtItems') || '[]');
+        // GitHub parametreleri external dosyadan gelecek:
+        // kullaniciAdi, repoAdi, token, dosyaAdi
+
+        // Kayıt yöntemi ve kullanıcı yönetimi
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+
+        // Veri yapıları
+        let waitingItems = [];
+        let notBoughtItems = [];
+
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'flex';
+            } else {
+                loadProgress();
+            }
+        };
+
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+
+                try {
+                    await loadUserDatabase();
+
+                    if (userDatabase[username]) {
+                        // Mevcut kullanıcı - şifre kontrolü
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            waitingItems = userDatabase[username].waitingItems || [];
+                            notBoughtItems = userDatabase[username].notBoughtItems || [];
+
+                            const settings = {
+                                method: storageMethod,
+                                username: currentUser
+                            };
+                            localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            renderWaitList();
+                            renderNotBoughtList();
+                            updateStats();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        // Yeni kullanıcı kaydı
+                        userDatabase[username] = {
+                            password: password,
+                            waitingItems: [],
+                            notBoughtItems: [],
+                            createdDate: new Date().toISOString()
+                        };
+
+                        currentUser = username;
+                        waitingItems = [];
+                        notBoughtItems = [];
+                        localStorage.removeItem('shopping-waiting-items');
+                        localStorage.removeItem('shopping-not-bought-items');
+
+                        await saveUserDatabase();
+
+                        const settings = {
+                            method: storageMethod,
+                            username: currentUser
+                        };
+                        localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+
+                    const settings = {
+                        method: 'local'
+                    };
+                    localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                // Yerel kayıt
+                const settings = {
+                    method: storageMethod
+                };
+                localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadProgress, 500);
+            }
+        }
+
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Alışveriş kontrol veritabanı güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub veritabanı kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('shopping-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub'a kaydediliyor${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt kullanılıyor';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('shopping-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').style.display = 'flex';
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
 
         function evaluateNeed() {
             const itemName = document.getElementById('itemName').value;
@@ -343,7 +717,7 @@
             `;
         }
 
-        function addToWaitList() {
+        async function addToWaitList() {
             const itemName = document.getElementById('itemName').value;
             const itemPrice = document.getElementById('itemPrice').value;
 
@@ -361,16 +735,21 @@
             };
 
             waitingItems.push(item);
-            localStorage.setItem('waitingItems', JSON.stringify(waitingItems));
-
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+            }
+            
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
-
+            
             renderWaitList();
-            alert('✅ Bekleme listesine eklendi! 24 saat sonra tekrar değerlendir.');
+            showNotification('✅ Bekleme listesine eklendi! 24 saat sonra tekrar değerlendir.');
         }
 
-        function saveToNotBought() {
+        async function saveToNotBought() {
             const itemName = document.getElementById('itemName').value;
             const itemPrice = document.getElementById('itemPrice').value;
 
@@ -387,19 +766,86 @@
             };
 
             notBoughtItems.push(item);
-            localStorage.setItem('notBoughtItems', JSON.stringify(notBoughtItems));
-
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+            
             document.getElementById('itemName').value = '';
             document.getElementById('itemPrice').value = '';
-
+            
             renderNotBoughtList();
             updateStats();
-            alert('🎉 Tebrikler! Almadıklarım defterine eklendi.');
+            showNotification('🎉 Tebrikler! Almadıklarım defterine eklendi.');
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].waitingItems = waitingItems;
+                userDatabase[currentUser].notBoughtItems = notBoughtItems;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+        }
+
+        function loadProgress() {
+            if (storageMethod === 'github' && currentUser) {
+                loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            const savedWaiting = localStorage.getItem('shopping-waiting-items');
+            const savedNotBought = localStorage.getItem('shopping-not-bought-items');
+            
+            if (savedWaiting) waitingItems = JSON.parse(savedWaiting);
+            if (savedNotBought) notBoughtItems = JSON.parse(savedNotBought);
+            
+            renderWaitList();
+            renderNotBoughtList();
+            updateStats();
+            showNotification('💻 Yerel veriler yüklendi!');
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser]) {
+                    waitingItems = userDatabase[currentUser].waitingItems || [];
+                    notBoughtItems = userDatabase[currentUser].notBoughtItems || [];
+                    
+                    renderWaitList();
+                    renderNotBoughtList();
+                    updateStats();
+                    showNotification('☁️ GitHub\'dan veriler yüklendi!');
+                } else {
+                    waitingItems = [];
+                    notBoughtItems = [];
+                    showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+                loadFromLocal();
+            }
         }
 
         function renderWaitList() {
             const container = document.getElementById('waitList');
-
+            
             if (waitingItems.length === 0) {
                 container.innerHTML = '<div class="empty-state">Henüz bekleme listesinde ürün yok</div>';
                 return;
@@ -410,7 +856,7 @@
                 const now = new Date();
                 const timeLeft = waitUntil - now;
                 const hoursLeft = Math.max(0, Math.floor(timeLeft / (1000 * 60 * 60)));
-
+                
                 return `
                     <div class="list-item">
                         <div class="list-item-content">
@@ -425,7 +871,7 @@
 
         function renderNotBoughtList() {
             const container = document.getElementById('notBoughtList');
-
+            
             if (notBoughtItems.length === 0) {
                 container.innerHTML = '<div class="empty-state">Henüz almadığın bir şey yok</div>';
                 return;
@@ -461,23 +907,40 @@
             `;
         }
 
-        function removeFromWaitList(id) {
+        async function removeFromWaitList(id) {
             waitingItems = waitingItems.filter(item => item.id !== id);
-            localStorage.setItem('waitingItems', JSON.stringify(waitingItems));
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+            }
+            
             renderWaitList();
         }
 
-        function removeFromNotBought(id) {
+        async function removeFromNotBought(id) {
             notBoughtItems = notBoughtItems.filter(item => item.id !== id);
-            localStorage.setItem('notBoughtItems', JSON.stringify(notBoughtItems));
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+            
             renderNotBoughtList();
             updateStats();
         }
 
-        // Sayfa yüklendiğinde listeleri göster
-        renderWaitList();
-        renderNotBoughtList();
-        updateStats();
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
     </script>
 </body>
 
