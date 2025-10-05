@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Alışveriş Kontrol Asistanı</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin-top: 10px;
+        }
+        
+        .question-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .question-box p {
+            color: #856404;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+        
+        .list-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .list-item.saved {
+            border-left-color: #28a745;
+        }
+        
+        .list-item-content {
+            flex: 1;
+        }
+        
+        .list-item-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .list-item-details {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+        
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+                padding: 20px;
+            }
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Kayıt Seçimi Modal -->
+    <div id="storageModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>💾 Kayıt Yöntemi Seçimi</h2>
+            <p style="text-align: center; margin-bottom: 30px;">Alışveriş verilerinizi nerede saklamak istiyorsunuz?</p>
+
+            <div class="storage-selection">
+                <div class="storage-option" onclick="selectStorage('local')">
+                    <h3>💻 Yerel Kayıt</h3>
+                    <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                    <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                </div>
+
+                <div class="storage-option" onclick="selectStorage('github')">
+                    <h3>☁️ GitHub Kayıt</h3>
+                    <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                </div>
+            </div>
+
+            <div id="githubLogin" style="display: none;" class="github-login">
+                <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>👤 Kullanıcı Adı:</strong></label>
+                    <input type="text" id="loginUsername" placeholder="Kullanıcı adınızı girin">
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>🔒 Şifre:</strong></label>
+                    <input type="password" id="loginPassword" placeholder="Şifrenizi girin">
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>💰 Alışveriş Kontrol Asistanı</h1>
+        <p class="subtitle">Bilinçli harcama yapmanıza yardımcı oluyoruz</p>
+
+        <!-- İstek Testi -->
+        <div class="section">
+            <h2>🤔 İhtiyaç mı, İstek mi?</h2>
+            <div class="input-group">
+                <label>Almak istediğin şey ne?</label>
+                <input type="text" id="itemName" placeholder="Örn: Yeni ayakkabı">
+            </div>
+            <div class="input-group">
+                <label>Fiyatı (₺)</label>
+                <input type="number" id="itemPrice" placeholder="Örn: 500">
+            </div>
+
+            <div class="question-box">
+                <p>❓ Bunu almasam hayatım gerçekten zorlaşır mı?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q1" value="evet"> Evet</label>
+                    <label><input type="radio" name="q1" value="hayir"> Hayır</label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p>❓ Benzer bir şeyim zaten var mı?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q2" value="evet"> Evet</label>
+                    <label><input type="radio" name="q2" value="hayir"> Hayır</label>
+                </div>
+            </div>
+
+            <div class="question-box">
+                <p>❓ Bu ay bütçemde bu harcama için yer var mı?</p>
+                <div class="radio-group">
+                    <label><input type="radio" name="q3" value="evet"> Evet</label>
+                    <label><input type="radio" name="q3" value="hayir"> Hayır</label>
+                </div>
+            </div>
+
+            <button onclick="evaluateNeed()">Değerlendir</button>
+            <div id="evaluationResult"></div>
+        </div>
+
+        <!-- 24 Saat Bekleme Listesi -->
+        <div class="section">
+            <h2>⏰ 24 Saat Bekleme Listesi</h2>
+            <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                Almak istediğin şeyi buraya ekle, 24 saat bekle. Hala istiyorsan al!
+            </p>
+            <button onclick="addToWaitList()">Bekleme Listesine Ekle</button>
+            <div id="waitList"></div>
+        </div>
+
+        <!-- Almadıklarım Defteri -->
+        <div class="section">
+            <h2>📖 Almadıklarım Defteri</h2>
+            <p style="color: #666; margin-bottom: 15px; font-size: 14px;">
+                Almaktan vazgeçtiğin şeyleri kaydet ve ne kadar tasarruf ettiğini gör!
+            </p>
+            <button onclick="saveToNotBought()">Almadıklarım Defterine Ekle</button>
+            <div id="notBoughtList"></div>
+            <div class="stats" id="stats"></div>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 10px;">
+            <p id="storageInfo" style="font-weight: 600; color: #667eea;">💾 Verileriniz kaydediliyor</p>
+            <button class="btn-danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemini Değiştir</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="5t-github-parametreleri.js"></script>
+    <script>
+        // GitHub parametreleri external dosyadan gelecek:
+        // kullaniciAdi, repoAdi, token, dosyaAdi
+
+        // Kayıt yöntemi ve kullanıcı yönetimi
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+
+        // Veri yapıları
+        let waitingItems = [];
+        let notBoughtItems = [];
+
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'flex';
+            } else {
+                loadProgress();
+            }
+        };
+
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+
+                if (!username || !password) {
+                    alert('⚠ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+
+                try {
+                    await loadUserDatabase();
+
+                    if (userDatabase[username]) {
+                        // Mevcut kullanıcı - şifre kontrolü
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            waitingItems = userDatabase[username].waitingItems || [];
+                            notBoughtItems = userDatabase[username].notBoughtItems || [];
+
+                            const settings = {
+                                method: storageMethod,
+                                username: currentUser
+                            };
+                            localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            renderWaitList();
+                            renderNotBoughtList();
+                            updateStats();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        // Yeni kullanıcı kaydı
+                        userDatabase[username] = {
+                            password: password,
+                            waitingItems: [],
+                            notBoughtItems: [],
+                            createdDate: new Date().toISOString()
+                        };
+
+                        currentUser = username;
+                        waitingItems = [];
+                        notBoughtItems = [];
+                        localStorage.removeItem('shopping-waiting-items');
+                        localStorage.removeItem('shopping-not-bought-items');
+
+                        await saveUserDatabase();
+
+                        const settings = {
+                            method: storageMethod,
+                            username: currentUser
+                        };
+                        localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+
+                    const settings = {
+                        method: 'local'
+                    };
+                    localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                // Yerel kayıt
+                const settings = {
+                    method: storageMethod
+                };
+                localStorage.setItem('shopping-storage-settings', JSON.stringify(settings));
+
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadProgress, 500);
+            }
+        }
+
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"shopping-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Alışveriş kontrol veritabanı güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub veritabanı kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('shopping-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub'a kaydediliyor${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt kullanılıyor';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('shopping-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').style.display = 'flex';
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+        function evaluateNeed() {
+            const itemName = document.getElementById('itemName').value;
+            const itemPrice = document.getElementById('itemPrice').value;
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+
+            if (!itemName || !itemPrice) {
+                alert('Lütfen ürün adı ve fiyatını girin!');
+                return;
+            }
+
+            if (!q1 || !q2 || !q3) {
+                alert('Lütfen tüm soruları cevaplayın!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('evaluationResult');
+            let score = 0;
+            if (q1.value === 'evet') score++;
+            if (q2.value === 'hayir') score++;
+            if (q3.value === 'evet') score++;
+
+            let message = '';
+            let color = '';
+
+            if (score === 3) {
+                message = '✅ Bu alışverişi yapabilirsin, ama yine de 24 saat beklemeni öneririm!';
+                color = '#28a745';
+            } else if (score === 2) {
+                message = '⚠️ Biraz düşün! 24 saat bekle ve tekrar karar ver.';
+                color = '#ffc107';
+            } else {
+                message = '❌ Bu muhtemelen bir ihtiyaç değil. Almadıklarım defterine ekle!';
+                color = '#dc3545';
+            }
+
+            resultDiv.innerHTML = `
+                <div style="background: ${color}22; border-left: 4px solid ${color}; padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="color: ${color}; font-weight: 600;">${message}</p>
+                </div>
+            `;
+        }
+
+        async function addToWaitList() {
+            const itemName = document.getElementById('itemName').value;
+            const itemPrice = document.getElementById('itemPrice').value;
+
+            if (!itemName || !itemPrice) {
+                alert('Lütfen ürün adı ve fiyatını girin!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                name: itemName,
+                price: parseFloat(itemPrice),
+                addedDate: new Date().toISOString(),
+                waitUntil: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+            };
+
+            waitingItems.push(item);
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+            }
+            
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            
+            renderWaitList();
+            showNotification('✅ Bekleme listesine eklendi! 24 saat sonra tekrar değerlendir.');
+        }
+
+        async function saveToNotBought() {
+            const itemName = document.getElementById('itemName').value;
+            const itemPrice = document.getElementById('itemPrice').value;
+
+            if (!itemName || !itemPrice) {
+                alert('Lütfen ürün adı ve fiyatını girin!');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                name: itemName,
+                price: parseFloat(itemPrice),
+                savedDate: new Date().toISOString()
+            };
+
+            notBoughtItems.push(item);
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+            
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            
+            renderNotBoughtList();
+            updateStats();
+            showNotification('🎉 Tebrikler! Almadıklarım defterine eklendi.');
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].waitingItems = waitingItems;
+                userDatabase[currentUser].notBoughtItems = notBoughtItems;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+        }
+
+        function loadProgress() {
+            if (storageMethod === 'github' && currentUser) {
+                loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            const savedWaiting = localStorage.getItem('shopping-waiting-items');
+            const savedNotBought = localStorage.getItem('shopping-not-bought-items');
+            
+            if (savedWaiting) waitingItems = JSON.parse(savedWaiting);
+            if (savedNotBought) notBoughtItems = JSON.parse(savedNotBought);
+            
+            renderWaitList();
+            renderNotBoughtList();
+            updateStats();
+            showNotification('💻 Yerel veriler yüklendi!');
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser]) {
+                    waitingItems = userDatabase[currentUser].waitingItems || [];
+                    notBoughtItems = userDatabase[currentUser].notBoughtItems || [];
+                    
+                    renderWaitList();
+                    renderNotBoughtList();
+                    updateStats();
+                    showNotification('☁️ GitHub\'dan veriler yüklendi!');
+                } else {
+                    waitingItems = [];
+                    notBoughtItems = [];
+                    showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+                loadFromLocal();
+            }
+        }
+
+        function renderWaitList() {
+            const container = document.getElementById('waitList');
+            
+            if (waitingItems.length === 0) {
+                container.innerHTML = '<div class="empty-state">Henüz bekleme listesinde ürün yok</div>';
+                return;
+            }
+
+            container.innerHTML = waitingItems.map(item => {
+                const waitUntil = new Date(item.waitUntil);
+                const now = new Date();
+                const timeLeft = waitUntil - now;
+                const hoursLeft = Math.max(0, Math.floor(timeLeft / (1000 * 60 * 60)));
+                
+                return `
+                    <div class="list-item">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${item.name}</div>
+                            <div class="list-item-details">${item.price} ₺ • ${hoursLeft} saat kaldı</div>
+                        </div>
+                        <button class="delete-btn" onclick="removeFromWaitList(${item.id})">Sil</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderNotBoughtList() {
+            const container = document.getElementById('notBoughtList');
+            
+            if (notBoughtItems.length === 0) {
+                container.innerHTML = '<div class="empty-state">Henüz almadığın bir şey yok</div>';
+                return;
+            }
+
+            container.innerHTML = notBoughtItems.map(item => {
+                const date = new Date(item.savedDate).toLocaleDateString('tr-TR');
+                return `
+                    <div class="list-item saved">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${item.name}</div>
+                            <div class="list-item-details">${item.price} ₺ tasarruf • ${date}</div>
+                        </div>
+                        <button class="delete-btn" onclick="removeFromNotBought(${item.id})">Sil</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const totalSaved = notBoughtItems.reduce((sum, item) => sum + item.price, 0);
+            const itemCount = notBoughtItems.length;
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${itemCount}</div>
+                    <div class="stat-label">Almadığın Ürün</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${totalSaved.toLocaleString('tr-TR')} ₺</div>
+                    <div class="stat-label">Toplam Tasarruf</div>
+                </div>
+            `;
+        }
+
+        async function removeFromWaitList(id) {
+            waitingItems = waitingItems.filter(item => item.id !== id);
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-waiting-items', JSON.stringify(waitingItems));
+            }
+            
+            renderWaitList();
+        }
+
+        async function removeFromNotBought(id) {
+            notBoughtItems = notBoughtItems.filter(item => item.id !== id);
+            
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                localStorage.setItem('shopping-not-bought-items', JSON.stringify(notBoughtItems));
+            }
+            
+            renderNotBoughtList();
+            updateStats();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+
+</html>
