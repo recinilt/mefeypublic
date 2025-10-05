@@ -1550,17 +1550,9 @@
                     
                     if (response.ok) {
                         const data = await response.json();
-                        
-                        const binaryString = atob(data.content);
-                        
-                        const uint8Array = new Uint8Array(binaryString.length);
-                        for (let i = 0; i < binaryString.length; i++) {
-                            uint8Array[i] = binaryString.charCodeAt(i);
-                        }
-                        
-                        const decoder = new TextDecoder('utf-8');
-                        const utf8Content = decoder.decode(uint8Array);
-                        
+                        let content = data.content;
+                        let decodedContent = atob(content);
+                        let utf8Content = decodeURIComponent(escape(decodedContent));
                         console.log('GitHub\'dan başarıyla indirildi, uzunluk:', utf8Content.length);
                         return utf8Content;
                     } else {
