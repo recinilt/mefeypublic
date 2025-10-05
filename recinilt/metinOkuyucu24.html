@@ -1532,6 +1532,8 @@
             async getFileFromGitHub(fileId) {
                 try {
                     const fileName = `reader-content-${fileId}.txt`;
+                    console.log('GitHub\'dan indiriliyor:', fileName);
+                    
                     const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${fileName}`, {
                         headers: {
                             'Authorization': `token ${token}`,
@@ -1539,18 +1541,24 @@
                         }
                     });
                     
+                    console.log('GitHub response status:', response.status);
+                    
                     if (response.ok) {
                         const data = await response.json();
                         let content = data.content;
                         let decodedContent = atob(content);
                         let utf8Content = decodeURIComponent(escape(decodedContent));
+                        console.log('GitHub\'dan başarıyla indirildi, uzunluk:', utf8Content.length);
                         return utf8Content;
+                    } else {
+                        console.error('GitHub hatası:', response.status, await response.text());
                     }
                 } catch (error) {
                     console.error('GitHub dosya okuma hatası:', error);
                 }
                 return null;
             }
+
 
             async requestFileFromUser(file) {
                 const fileInput = document.createElement('input');
