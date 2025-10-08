@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitap Okuma Takip Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        body.dark-theme .container {
+            background: #0f0f23;
+            color: #e0e0e0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+        }
+
+        body.dark-theme h1 {
+            color: #a78bfa;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .theme-toggle {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        body.dark-theme .theme-toggle {
+            background: #a78bfa;
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+            background: #f0f0f0;
+            padding: 5px;
+            border-radius: 10px;
+        }
+
+        body.dark-theme .view-toggle {
+            background: #1a1a2e;
+        }
+
+        .view-btn {
+            padding: 8px 15px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .view-btn.active {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        body.dark-theme .view-btn.active {
+            background: #2a2a3e;
+        }
+
+        .search-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input, .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        body.dark-theme .search-input,
+        body.dark-theme .filter-select {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border-color: #2a2a3e;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        body.dark-theme .stat-card {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        body.dark-theme .tabs {
+            border-bottom-color: #2a2a3e;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: bold;
+        }
+
+        body.dark-theme .tab {
+            color: #a0a0a0;
+        }
+
+        body.dark-theme .tab.active {
+            color: #a78bfa;
+            border-bottom-color: #a78bfa;
+        }
+
+        .add-book-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .add-book-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .books-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .books-container.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .book-card {
+            background: #f9f9f9;
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        body.dark-theme .book-card {
+            background: #1a1a2e;
+            border-color: #2a2a3e;
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            background: #e0e0e0;
+        }
+
+        body.dark-theme .book-cover {
+            background: #2a2a3e;
+        }
+
+        .book-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        body.dark-theme .book-title {
+            color: #e0e0e0;
+        }
+
+        .book-author {
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        body.dark-theme .book-author {
+            color: #a0a0a0;
+        }
+
+        .book-meta {
+            font-size: 0.85em;
+            color: #999;
+            margin-bottom: 10px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: white;
+        }
+
+        .tag.roman { background: #ff6b6b; }
+        .tag.biyografi { background: #4ecdc4; }
+        .tag.bilim { background: #45b7d1; }
+        .tag.tarih { background: #f9ca24; }
+        .tag.felsefe { background: #a29bfe; }
+        .tag.other { background: #95a5a6; }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        body.dark-theme .progress-bar {
+            background: #2a2a3e;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+            border-radius: 10px;
+        }
+
+        .rating {
+            color: #ffd700;
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+
+        .summary-toggle {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .summary-toggle:hover {
+            background: #5568d3;
+        }
+
+        .summary-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            margin-top: 10px;
+            padding: 0 10px;
+        }
+
+        .summary-content.open {
+            max-height: 1000px;
+            padding: 15px 10px;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .book-actions button {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .move-btn {
+            background: #95a5a6;
+            color: white;
+            min-width: 40px;
+        }
+
+        .move-btn:hover, .edit-btn:hover, .delete-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        body.dark-theme .modal-content {
+            background: #1a1a2e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        body.dark-theme .form-group label {
+            color: #e0e0e0;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group textarea,
+        body.dark-theme .form-group select {
+            background: #0f0f23;
+            color: #e0e0e0;
+            border-color: #2a2a3e;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .save-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .storage-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .storage-modal.active {
+            display: flex;
+        }
+
+        .storage-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        body.dark-theme .storage-modal-content {
+            background: #1a1a2e;
+        }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: #f9f9f9;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .storage-option {
+            background: #0f0f23;
+            border-color: #2a2a3e;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        body.dark-theme .storage-option.selected {
+            background: #2a2a3e;
+            border-color: #a78bfa;
+        }
+
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        body.dark-theme .storage-option h3 {
+            color: #e0e0e0;
+        }
+
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        body.dark-theme .storage-option p {
+            color: #a0a0a0;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        body.dark-theme .github-login {
+            background: #0f0f23;
+        }
+
+        .quotes-section {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        body.dark-theme .quotes-section {
+            background: #0f0f23;
+        }
+
+        .quote-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-left: 4px solid #667eea;
+            border-radius: 4px;
+        }
+
+        body.dark-theme .quote-item {
+            background: #1a1a2e;
+        }
+
+        .color-tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .color-tag {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .color-tag.selected {
+            border-color: #333;
+            transform: scale(1.2);
+        }
+
+        body.dark-theme .color-tag.selected {
+            border-color: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .books-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📚 Kitap Okuma Takip Sistemi</h1>
+            <div class="controls">
+                <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema</button>
+                <div class="view-toggle">
+                    <button class="view-btn active" onclick="setView('grid')">🔲 Kart</button>
+                    <button class="view-btn" onclick="setView('list')">📋 Liste</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-filter">
+            <input type="text" class="search-input" placeholder="🔍 Kitap adı, yazar ara..." oninput="filterBooks()">
+            <select class="filter-select" onchange="filterBooks()">
+                <option value="">Tüm Kategoriler</option>
+                <option value="roman">Roman</option>
+                <option value="biyografi">Biyografi</option>
+                <option value="bilim">Bilim</option>
+                <option value="tarih">Tarih</option>
+                <option value="felsefe">Felsefe</option>
+                <option value="other">Diğer</option>
+            </select>
+            <select class="filter-select" onchange="filterBooks()">
+                <option value="">Tüm Puanlar</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalBooks">0</h3>
+                <p>Toplam Kitap</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="yearBooks">0</h3>
+                <p>Bu Yıl Okunanlar</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="monthBooks">0</h3>
+                <p>Bu Ay Okunanlar</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="topCategory">-</h3>
+                <p>En Çok Okunan Kategori</p>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('toRead')">📖 Okuyacaklarım</button>
+            <button class="tab" onclick="switchTab('reading')">📚 Şu An Okuyorum</button>
+            <button class="tab" onclick="switchTab('read')">✅ Okuduklarım</button>
+        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="add-book-btn" onclick="openModal()" style="margin: 0; flex: 1;">+ Yeni Kitap Ekle</button>
+                    <button class="add-book-btn" onclick="changeStorageMethod()" style="margin: 0; background: #e74c3c;">⚙️ Kayıt Yöntemi Değiştir</button>
+                </div>
+
+        <div id="toRead" class="books-container"></div>
+        <div id="reading" class="books-container" style="display: none;"></div>
+        <div id="read" class="books-container" style="display: none;"></div>
+    </div>
+
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Yeni Kitap Ekle</h2>
+            <form id="bookForm" onsubmit="saveBook(event)">
+                <input type="hidden" id="bookId">
+                <input type="hidden" id="bookStatus">
+                
+                <div class="form-group">
+                    <label>Kitap Başlığı *</label>
+                    <input type="text" id="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Yazar *</label>
+                    <input type="text" id="author" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Kapak Fotoğrafı URL</label>
+                    <input type="url" id="coverUrl" placeholder="https://...">
+                </div>
+
+                <div class="form-group">
+                    <label>Yayınevi</label>
+                    <input type="text" id="publisher">
+                </div>
+
+                <div class="form-group">
+                    <label>Basım Yılı</label>
+                    <input type="number" id="year" min="1000" max="2100">
+                </div>
+
+                <div class="form-group">
+                    <label>Sayfa Sayısı</label>
+                    <input type="number" id="pages" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="category">
+                        <option value="roman">Roman</option>
+                        <option value="biyografi">Biyografi</option>
+                        <option value="bilim">Bilim</option>
+                        <option value="tarih">Tarih</option>
+                        <option value="felsefe">Felsefe</option>
+                        <option value="other">Diğer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Puan (1-5)</label>
+                    <select id="rating">
+                        <option value="0">Puanlanmamış</option>
+                        <option value="1">⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="5">⭐⭐⭐⭐⭐</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Başlangıç Tarihi</label>
+                    <input type="date" id="startDate">
+                </div>
+
+                <div class="form-group">
+                    <label>Bitiş Tarihi</label>
+                    <input type="date" id="endDate">
+                </div>
+
+                <div class="form-group">
+                    <label>Renk Etiketi</label>
+                    <div class="color-tags">
+                        <div class="color-tag" style="background: #ff6b6b;" onclick="selectColor('#ff6b6b')"></div>
+                        <div class="color-tag" style="background: #4ecdc4;" onclick="selectColor('#4ecdc4')"></div>
+                        <div class="color-tag" style="background: #45b7d1;" onclick="selectColor('#45b7d1')"></div>
+                        <div class="color-tag" style="background: #f9ca24;" onclick="selectColor('#f9ca24')"></div>
+                        <div class="color-tag" style="background: #a29bfe;" onclick="selectColor('#a29bfe')"></div>
+                        <div class="color-tag" style="background: transparent; border: 2px solid #ccc;" onclick="selectColor('')"></div>
+                    </div>
+                    <input type="hidden" id="colorTag">
+                </div>
+
+                <div class="form-group">
+                    <label>Özet</label>
+                    <textarea id="summary" placeholder="Kitabın özeti..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Favori Alıntılar (Her satıra bir alıntı)</label>
+                    <textarea id="quotes" placeholder="İlk alıntı...
+İkinci alıntı..."></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal()">İptal</button>
+                    <button type="submit" class="save-btn">Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="kitap-github-parametreleri.js"></script>
+    <script>
+        // Kayıt yöntemi ve kullanıcı yönetimi
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+        
+        let books = JSON.parse(localStorage.getItem('books')) || {
+            toRead: [],
+            reading: [],
+            read: []
+        };
+        let currentTab = 'toRead';
+        let currentView = 'grid';
+        let editingBookId = null;
+        let openSummaryId = null;
+
+        function generateId() {
+            return Date.now() + Math.random().toString(36).substr(2, 9);
+        }
+
+        function saveToLocalStorage() {
+            if (storageMethod === 'local') {
+                localStorage.setItem('books', JSON.stringify(books));
+            }
+        }
+        
+        // ============ GITHUB ENTEGRASYON FONKSİYONLARI ============
+        
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"kitap-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"kitap-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa hata alırız, normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"kitap-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Kitap veritabanı güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub veritabanı kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('book-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                return true;
+            }
+            return false;
+        }
+
+        function openStorageModal() {
+            document.getElementById('storageModal').classList.add('active');
+        }
+
+        function closeStorageModal() {
+            document.getElementById('storageModal').classList.remove('active');
+        }
+
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim().toLowerCase(); // Küçük harfe çevir
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠️ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        // Kullanıcı var, şifre kontrolü
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            books = userDatabase[username].bookData || {
+                                toRead: [],
+                                reading: [],
+                                read: []
+                            };
+                            
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('book-storage-settings', JSON.stringify(settings));
+                            
+                            closeStorageModal();
+                            renderBooks(currentTab);
+                            updateStats();
+                            alert(`👋 Hoş geldin ${username}!\n\n✅ GitHub bağlantısı başarılı!`);
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        // Kullanıcı yok, yeni kayıt onayı iste
+                        if (confirm(`📝 "${username}" kullanıcı adı mevcut değil.\n\nYeni bir hesap oluşturmak ister misiniz?`)) {
+                            userDatabase[username] = {
+                                password: password,
+                                bookData: {
+                                    toRead: [],
+                                    reading: [],
+                                    read: []
+                                },
+                                createdDate: new Date().toISOString()
+                            };
+                            
+                            currentUser = username;
+                            books = {
+                                toRead: [],
+                                reading: [],
+                                read: []
+                            };
+                            
+                            // Yerel verileri temizle
+                            localStorage.removeItem('books');
+                            
+                            await saveUserDatabase();
+                            
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('book-storage-settings', JSON.stringify(settings));
+                            
+                            closeStorageModal();
+                            renderBooks(currentTab);
+                            updateStats();
+                            alert(`🎉 Yeni hesap oluşturuldu!\n\nHoş geldin ${username}!\n\n✅ GitHub bağlantısı başarılı!`);
+                        } else {
+                            // Yeni kayıt iptal edildi, modal açık kalsın
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    alert('⚠️ GitHub bağlantı hatası!\n\nYerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+                    
+                    const settings = { method: 'local' };
+                    localStorage.setItem('book-storage-settings', JSON.stringify(settings));
+                    
+                    closeStorageModal();
+                }
+            } else {
+                // Yerel kayıt
+                const settings = { method: storageMethod };
+                localStorage.setItem('book-storage-settings', JSON.stringify(settings));
+                
+                closeStorageModal();
+                
+                // Yerel verileri yükle
+                const savedData = localStorage.getItem('books');
+                if (savedData) {
+                    books = JSON.parse(savedData);
+                    renderBooks(currentTab);
+                    updateStats();
+                }
+                
+                alert('💻 Yerel kayıt seçildi!\n\nVerileriniz bu tarayıcıda saklanacak.');
+            }
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].bookData = books;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                alert('⚠️ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
+                localStorage.setItem('books', JSON.stringify(books));
+            }
+        }
+        
+        // ============ GITHUB ENTEGRASYON BİTİŞ ============
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            localStorage.setItem('theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+        }
+
+        function setView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.books-container').forEach(container => {
+                if (view === 'list') {
+                    container.classList.add('list-view');
+                } else {
+                    container.classList.remove('list-view');
+                }
+            });
+            
+            localStorage.setItem('view', view);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.books-container').forEach(c => c.style.display = 'none');
+            document.getElementById(tab).style.display = 'grid';
+            
+            renderBooks(tab);
+        }
+
+        function openModal(bookId = null, status = null) {
+            editingBookId = bookId;
+            const modal = document.getElementById('bookModal');
+            modal.classList.add('active');
+            
+            if (bookId) {
+                const book = books[status].find(b => b.id === bookId);
+                document.getElementById('modalTitle').textContent = 'Kitabı Düzenle';
+                document.getElementById('bookId').value = bookId;
+                document.getElementById('bookStatus').value = status;
+                document.getElementById('title').value = book.title;
+                document.getElementById('author').value = book.author;
+                document.getElementById('coverUrl').value = book.coverUrl || '';
+                document.getElementById('publisher').value = book.publisher || '';
+                document.getElementById('year').value = book.year || '';
+                document.getElementById('pages').value = book.pages || '';
+                document.getElementById('category').value = book.category || 'other';
+                document.getElementById('rating').value = book.rating || 0;
+                document.getElementById('startDate').value = book.startDate || '';
+                document.getElementById('endDate').value = book.endDate || '';
+                document.getElementById('colorTag').value = book.colorTag || '';
+                document.getElementById('summary').value = book.summary || '';
+                document.getElementById('quotes').value = book.quotes ? book.quotes.join('\n') : '';
+                
+                if (book.colorTag) {
+                    document.querySelectorAll('.color-tag').forEach(tag => {
+                        tag.classList.remove('selected');
+                        if (tag.style.background === book.colorTag) {
+                            tag.classList.add('selected');
+                        }
+                    });
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = 'Yeni Kitap Ekle';
+                document.getElementById('bookForm').reset();
+                document.getElementById('bookStatus').value = currentTab;
+                document.querySelectorAll('.color-tag').forEach(tag => tag.classList.remove('selected'));
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('bookModal').classList.remove('active');
+            editingBookId = null;
+        }
+
+        function selectColor(color) {
+            document.getElementById('colorTag').value = color;
+            document.querySelectorAll('.color-tag').forEach(tag => {
+                tag.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        function saveBook(e) {
+            e.preventDefault();
+            
+            const bookData = {
+                id: document.getElementById('bookId').value || generateId(),
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                coverUrl: document.getElementById('coverUrl').value,
+                publisher: document.getElementById('publisher').value,
+                year: document.getElementById('year').value,
+                pages: document.getElementById('pages').value,
+                category: document.getElementById('category').value,
+                rating: parseInt(document.getElementById('rating').value),
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                colorTag: document.getElementById('colorTag').value,
+                summary: document.getElementById('summary').value,
+                quotes: document.getElementById('quotes').value.split('\n').filter(q => q.trim())
+            };
+
+            const status = document.getElementById('bookStatus').value;
+
+            if (editingBookId) {
+                const index = books[status].findIndex(b => b.id === editingBookId);
+                books[status][index] = bookData;
+            } else {
+                books[status].push(bookData);
+            }
+
+            // Kaydetme işlemi
+            if (storageMethod === 'github' && currentUser) {
+                saveToGitHub();
+            } else {
+                saveToLocalStorage();
+            }
+            
+            closeModal();
+            renderBooks(currentTab);
+            updateStats();
+        }
+
+        function deleteBook(id, status) {
+            if (confirm('Bu kitabı silmek istediğinize emin misiniz?')) {
+                books[status] = books[status].filter(b => b.id !== id);
+                
+                // Kaydetme işlemi
+                if (storageMethod === 'github' && currentUser) {
+                    saveToGitHub();
+                } else {
+                    saveToLocalStorage();
+                }
+                
+                renderBooks(currentTab);
+                updateStats();
+            }
+        }
+
+        function moveBook(id, status, direction) {
+            const index = books[status].findIndex(b => b.id === id);
+            if (direction === 'up' && index > 0) {
+                [books[status][index], books[status][index - 1]] = [books[status][index - 1], books[status][index]];
+            } else if (direction === 'down' && index < books[status].length - 1) {
+                [books[status][index], books[status][index + 1]] = [books[status][index + 1], books[status][index]];
+            }
+            
+            // Kaydetme işlemi
+            if (storageMethod === 'github' && currentUser) {
+                saveToGitHub();
+            } else {
+                saveToLocalStorage();
+            }
+            
+            renderBooks(status);
+        }
+
+        function toggleSummary(id) {
+            const summaryContent = document.getElementById(`summary-${id}`);
+            const allSummaries = document.querySelectorAll('.summary-content');
+            
+            allSummaries.forEach(s => {
+                if (s.id !== `summary-${id}`) {
+                    s.classList.remove('open');
+                }
+            });
+            
+            summaryContent.classList.toggle('open');
+        }
+
+        function renderBooks(status) {
+            const container = document.getElementById(status);
+            const booksToRender = books[status];
+            
+            if (booksToRender.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Henüz kitap eklenmemiş.</p>';
+                return;
+            }
+
+            container.innerHTML = booksToRender.map((book, index) => `
+                <div class="book-card" style="${book.colorTag ? `border-left: 5px solid ${book.colorTag};` : ''}">
+                    ${book.coverUrl ? `<img src="${book.coverUrl}" class="book-cover" alt="${book.title}">` : `<div class="book-cover"></div>`}
+                    
+                    <h3 class="book-title">${book.title}</h3>
+                    <p class="book-author">✍️ ${book.author}</p>
+                    
+                    ${book.publisher || book.year ? `
+                        <p class="book-meta">
+                            ${book.publisher || ''} ${book.year ? `(${book.year})` : ''}
+                        </p>
+                    ` : ''}
+                    
+                    ${book.pages ? `<p class="book-meta">📄 ${book.pages} sayfa</p>` : ''}
+                    
+                    <div class="tags">
+                        ${book.category ? `<span class="tag ${book.category}">${book.category.charAt(0).toUpperCase() + book.category.slice(1)}</span>` : ''}
+                    </div>
+                    
+                    ${book.rating > 0 ? `
+                        <div class="rating">
+                            ${'⭐'.repeat(book.rating)}
+                        </div>
+                    ` : ''}
+                    
+                    ${book.startDate || book.endDate ? `
+                        <p class="book-meta">
+                            ${book.startDate ? `📅 Başlangıç: ${new Date(book.startDate).toLocaleDateString('tr-TR')}` : ''}
+                            ${book.endDate ? `<br>✅ Bitiş: ${new Date(book.endDate).toLocaleDateString('tr-TR')}` : ''}
+                        </p>
+                    ` : ''}
+                    
+                    ${book.summary ? `
+                        <button class="summary-toggle" onclick="toggleSummary('${book.id}')">
+                            📝 Özeti Göster
+                        </button>
+                        <div class="summary-content" id="summary-${book.id}">
+                            <strong>Özet:</strong>
+                            <p>${book.summary}</p>
+                            ${book.quotes && book.quotes.length > 0 ? `
+                                <div class="quotes-section">
+                                    <strong>💭 Favori Alıntılar:</strong>
+                                    ${book.quotes.map(q => `<div class="quote-item">"${q}"</div>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="book-actions">
+                        <button class="move-btn" onclick="moveBook('${book.id}', '${status}', 'up')" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+                        <button class="move-btn" onclick="moveBook('${book.id}', '${status}', 'down')" ${index === booksToRender.length - 1 ? 'disabled' : ''}>⬇️</button>
+                        <button class="edit-btn" onclick="openModal('${book.id}', '${status}')">✏️ Düzenle</button>
+                        <button class="delete-btn" onclick="deleteBook('${book.id}', '${status}')">🗑️ Sil</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats() {
+            const allBooks = [...books.toRead, ...books.reading, ...books.read];
+            document.getElementById('totalBooks').textContent = allBooks.length;
+            
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth();
+            
+            const yearBooks = books.read.filter(b => {
+                if (!b.endDate) return false;
+                return new Date(b.endDate).getFullYear() === currentYear;
+            }).length;
+            document.getElementById('yearBooks').textContent = yearBooks;
+            
+            const monthBooks = books.read.filter(b => {
+                if (!b.endDate) return false;
+                const date = new Date(b.endDate);
+                return date.getFullYear() === currentYear && date.getMonth() === currentMonth;
+            }).length;
+            document.getElementById('monthBooks').textContent = monthBooks;
+            
+            const categories = {};
+            books.read.forEach(book => {
+                if (book.category) {
+                    categories[book.category] = (categories[book.category] || 0) + 1;
+                }
+            });
+            
+            const topCategory = Object.entries(categories).sort((a, b) => b[1] - a[1])[0];
+            document.getElementById('topCategory').textContent = topCategory 
+                ? topCategory[0].charAt(0).toUpperCase() + topCategory[0].slice(1)
+                : '-';
+        }
+
+        function filterBooks() {
+            const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+            const categoryFilter = document.querySelectorAll('.filter-select')[0].value;
+            const ratingFilter = document.querySelectorAll('.filter-select')[1].value;
+            
+            const originalBooks = storageMethod === 'github' && currentUser 
+                ? userDatabase[currentUser].bookData[currentTab]
+                : JSON.parse(localStorage.getItem('books') || '{"toRead":[],"reading":[],"read":[]}')[currentTab];
+            
+            const filtered = originalBooks.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(searchTerm) || 
+                                    book.author.toLowerCase().includes(searchTerm);
+                const matchesCategory = !categoryFilter || book.category === categoryFilter;
+                const matchesRating = !ratingFilter || book.rating === parseInt(ratingFilter);
+                
+                return matchesSearch && matchesCategory && matchesRating;
+            });
+            
+            const container = document.getElementById(currentTab);
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Arama kriterlerine uygun kitap bulunamadı.</p>';
+                return;
+            }
+            
+            // Geçici olarak göster
+            const tempBooks = books[currentTab];
+            books[currentTab] = filtered;
+            renderBooks(currentTab);
+            books[currentTab] = tempBooks;
+        }
+
+        async function loadProgress() {
+            if (storageMethod === 'github' && currentUser) {
+                await loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            const savedData = localStorage.getItem('books');
+            if (savedData) {
+                books = JSON.parse(savedData);
+                renderBooks(currentTab);
+                updateStats();
+                alert('💻 Yerel veriler yüklendi!');
+            }
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser] && userDatabase[currentUser].bookData) {
+                    books = userDatabase[currentUser].bookData;
+                    renderBooks(currentTab);
+                    updateStats();
+                    alert('☁️ GitHub\'dan veriler yüklendi!');
+                } else {
+                    books = {
+                        toRead: [],
+                        reading: [],
+                        read: []
+                    };
+                    renderBooks(currentTab);
+                    updateStats();
+                    alert('⚠️ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                alert('⚠️ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.');
+                loadFromLocal();
+            }
+        }
+
+        function changeStorageMethod() {
+            const currentMethod = storageMethod === 'github' ? 'GitHub' : 'Yerel';
+            const currentInfo = currentUser ? ` (${currentUser})` : '';
+            
+            if (confirm(`📌 Şu an ${currentMethod} kayıt${currentInfo} kullanıyorsunuz.\n\nKayıt yöntemini değiştirmek istediğinize emin misiniz?`)) {
+                // Ayarları sıfırla
+                localStorage.removeItem('book-storage-settings');
+                
+                // Modal seçimlerini sıfırla
+                document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+                document.getElementById('githubLogin').style.display = 'none';
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                // Varsayılanları sıfırla
+                const oldMethod = storageMethod;
+                const oldUser = currentUser;
+                storageMethod = 'local';
+                currentUser = null;
+                
+                // Modal aç
+                openStorageModal();
+                
+                // Bilgilendirme
+                setTimeout(() => {
+                    alert(`ℹ️ Kayıt yöntemi değiştirme:\n\n• Önceki yöntem: ${currentMethod}${currentInfo}\n• Yeni yöntemi seçin ve giriş yapın\n• Verileriniz önceki yöntemde güvende kalacak`);
+                }, 300);
+            }
+        }
+
+        // Sayfa yüklendiğinde
+        window.addEventListener('load', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+            
+            const savedView = localStorage.getItem('view');
+            if (savedView === 'list') {
+                currentView = 'list';
+                document.querySelectorAll('.books-container').forEach(c => c.classList.add('list-view'));
+                document.querySelectorAll('.view-btn')[1].classList.add('active');
+                document.querySelectorAll('.view-btn')[0].classList.remove('active');
+            }
+            
+            // Kayıt ayarlarını kontrol et
+            if (!checkStorageSettings()) {
+                openStorageModal();
+            } else {
+                loadProgress();
+            }
+            
+            renderBooks('toRead');
+            updateStats();
+        });
+
+        // Modal dışına tıklandığında kapat
+        document.getElementById('bookModal').addEventListener('click', (e) => {
+            if (e.target.id === 'bookModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
