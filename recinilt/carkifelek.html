@@ -668,7 +668,7 @@
             document.getElementById('result').textContent = '';
 
             const basePower = parseFloat(powerSlider.value);
-            const randomMultiplier = 0.5 + Math.random() * 0.49; // 0.50 ile 0.99 arası
+            const randomMultiplier = 0.5 + Math.random() * 1.49; // 0.50 ile 0.99 arası
             const finalPower = basePower * randomMultiplier;
             
             // Şans faktörünü göster
@@ -680,7 +680,7 @@
             const spins = minSpins + Math.random() * (maxSpins - minSpins);
             const totalRotation = spins * 2 * Math.PI * finalPower;
 
-            const duration = 3000 + Math.random() * 2000;
+            const duration = 2000 + Math.random() * 2000;
             const startTime = Date.now();
             const startRotation = currentRotation;
 
