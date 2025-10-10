@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapılacaklar Listesi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .stats-bar {
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            color: white;
+        }
+
+        .stat-item {
+            text-align: center;
+            margin: 5px;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .column {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .column-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid;
+        }
+
+        .todo-header { border-bottom-color: #3b82f6; color: #3b82f6; }
+        .doing-header { border-bottom-color: #f59e0b; color: #f59e0b; }
+        .done-header { border-bottom-color: #10b981; color: #10b981; }
+
+        .add-task {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .add-task input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .add-task input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .add-task button {
+            padding: 10px 20px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .add-task button:hover {
+            background: #2563eb;
+        }
+
+        .task-list {
+            min-height: 100px;
+        }
+
+        .task {
+            background: #f9fafb;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            cursor: move;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .task:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .todo .task { border-left-color: #3b82f6; }
+        .doing .task { border-left-color: #f59e0b; }
+        .done .task { border-left-color: #10b981; }
+
+        .task.dragging {
+            opacity: 0.5;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #10b981;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        .task-list.drag-over {
+            background: #e5e7eb;
+            border-radius: 8px;
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .storage-option h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .storage-option p {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin: 15px 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .storage-info {
+            text-align: center;
+            color: white;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .board {
+                grid-template-columns: 1fr;
+            }
+            
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Yapılacaklar Listem</h1>
+        
+        <div class="storage-info" id="storageInfo">💾 Yerel kayıt</div>
+        
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number" id="todoCount">0</span>
+                <small>Yapılacak</small>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="doingCount">0</span>
+                <small>Yapılıyor</small>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="doneCount">0</span>
+                <small>Tamamlandı</small>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="totalCount">0</span>
+                <small>Toplam</small>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button class="btn btn-primary" onclick="saveAllTasks()">💾 Kaydet</button>
+            <button class="btn btn-secondary" onclick="loadAllTasks()">📥 Yükle</button>
+            <button class="btn btn-danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+        </div>
+        
+        <div class="board">
+            <!-- Yapılacaklar -->
+            <div class="column todo">
+                <div class="column-header todo-header">📝 Yapılacaklar</div>
+                <div class="add-task">
+                    <input type="text" id="todoInput" placeholder="Yeni görev ekle...">
+                    <button onclick="addTask('todo')">Ekle</button>
+                </div>
+                <div class="task-list" id="todoList" data-column="todo"></div>
+            </div>
+
+            <!-- Yapıyor Olduklarım -->
+            <div class="column doing">
+                <div class="column-header doing-header">🔄 Yapıyor Olduklarım</div>
+                <div class="add-task">
+                    <input type="text" id="doingInput" placeholder="Yeni görev ekle...">
+                    <button onclick="addTask('doing')">Ekle</button>
+                </div>
+                <div class="task-list" id="doingList" data-column="doing"></div>
+            </div>
+
+            <!-- Yaptıklarım -->
+            <div class="column done">
+                <div class="column-header done-header">✅ Yaptıklarım</div>
+                <div class="task-list" id="doneList" data-column="done"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kayıt Seçimi Modal -->
+    <div id="storageModal" class="modal">
+        <div class="modal-content">
+            <h2>💾 Kayıt Yöntemi Seçimi</h2>
+            <p style="text-align: center; margin-bottom: 30px;">Yapılacaklar listenizi nerede saklamak istiyorsunuz?</p>
+            
+            <div class="storage-selection">
+                <div class="storage-option" onclick="selectStorage('local')">
+                    <h3>💻 Yerel Kayıt</h3>
+                    <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                    <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                </div>
+                
+                <div class="storage-option" onclick="selectStorage('github')">
+                    <h3>☁️ GitHub Kayıt</h3>
+                    <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                </div>
+            </div>
+            
+            <div id="githubLogin" style="display: none;" class="github-login">
+                <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
+                
+                <div class="form-group">
+                    <label>👤 Kullanıcı Adı:</label>
+                    <input type="text" id="loginUsername" placeholder="Kullanıcı adınızı girin">
+                </div>
+                
+                <div class="form-group">
+                    <label>🔒 Şifre:</label>
+                    <input type="password" id="loginPassword" placeholder="Şifrenizi girin">
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn btn-primary" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+    <script src="5t-github-parametreleri.js"></script>
+    <script>
+        // GitHub Parametreleri - Kendinize göre düzenleyin
+        
+
+        let draggedElement = null;
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+        let tasksData = {
+            todo: [],
+            doing: [],
+            done: []
+        };
+
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'flex';
+            } else {
+                loadAllTasks();
+            }
+            updateStats();
+        };
+
+        function addTask(column) {
+            const input = document.getElementById(column + 'Input');
+            const text = input.value.trim();
+            
+            if (text === '') return;
+
+            const taskList = document.getElementById(column + 'List');
+            const task = createTaskElement(text, column);
+            taskList.appendChild(task);
+            
+            tasksData[column].push(text);
+            
+            input.value = '';
+            updateStats();
+            autoSave();
+        }
+
+        function createTaskElement(text, column) {
+            const task = document.createElement('div');
+            task.className = 'task';
+            task.draggable = true;
+            
+            if (column === 'doing') {
+                task.innerHTML = `
+                    <input type="checkbox" class="checkbox" onchange="moveTaskToDone(this)">
+                    <span class="task-content">${text}</span>
+                    <button class="delete-btn" onclick="deleteTask(this)">Sil</button>
+                `;
+            } else {
+                task.innerHTML = `
+                    <span class="task-content">${text}</span>
+                    <button class="delete-btn" onclick="deleteTask(this)">Sil</button>
+                `;
+            }
+
+            task.addEventListener('dragstart', handleDragStart);
+            task.addEventListener('dragend', handleDragEnd);
+
+            return task;
+        }
+
+        function moveTaskToDone(checkbox) {
+            const task = checkbox.parentElement;
+            const text = task.querySelector('.task-content').textContent;
+            
+            task.remove();
+            
+            // Doing listesinden çıkar
+            tasksData.doing = tasksData.doing.filter(t => t !== text);
+            
+            const doneList = document.getElementById('doneList');
+            const newTask = createTaskElement(text, 'done');
+            doneList.appendChild(newTask);
+            
+            tasksData.done.push(text);
+            
+            updateStats();
+            autoSave();
+        }
+
+        function deleteTask(button) {
+            const task = button.parentElement;
+            const text = task.querySelector('.task-content').textContent;
+            const column = task.closest('.task-list').dataset.column;
+            
+            tasksData[column] = tasksData[column].filter(t => t !== text);
+            
+            task.remove();
+            updateStats();
+            autoSave();
+        }
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.task-list').forEach(list => {
+                list.classList.remove('drag-over');
+            });
+        }
+
+        document.querySelectorAll('.task-list').forEach(list => {
+            list.addEventListener('dragover', e => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                list.classList.add('drag-over');
+            });
+
+            list.addEventListener('dragleave', e => {
+                list.classList.remove('drag-over');
+            });
+
+            list.addEventListener('drop', e => {
+                e.preventDefault();
+                list.classList.remove('drag-over');
+                
+                if (draggedElement) {
+                    const text = draggedElement.querySelector('.task-content').textContent;
+                    const sourceColumn = draggedElement.closest('.task-list').dataset.column;
+                    const targetColumn = list.dataset.column;
+                    
+                    // Eski listeden çıkar
+                    tasksData[sourceColumn] = tasksData[sourceColumn].filter(t => t !== text);
+                    
+                    // Yeni listeye ekle
+                    tasksData[targetColumn].push(text);
+                    
+                    draggedElement.remove();
+                    const newTask = createTaskElement(text, targetColumn);
+                    list.appendChild(newTask);
+                    
+                    updateStats();
+                    autoSave();
+                }
+            });
+        });
+
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('keypress', e => {
+                if (e.key === 'Enter') {
+                    const column = input.id.replace('Input', '');
+                    addTask(column);
+                }
+            });
+        });
+
+        function updateStats() {
+            document.getElementById('todoCount').textContent = tasksData.todo.length;
+            document.getElementById('doingCount').textContent = tasksData.doing.length;
+            document.getElementById('doneCount').textContent = tasksData.done.length;
+            document.getElementById('totalCount').textContent = 
+                tasksData.todo.length + tasksData.doing.length + tasksData.done.length;
+        }
+
+        // ===== GITHUB ENTEGRASYONU =====
+
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            if (method === 'github') {
+                githubLogin.style.display = 'block';
+            } else {
+                githubLogin.style.display = 'none';
+            }
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    alert('⚠️ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            tasksData = userDatabase[username].todoData || tasksData;
+                            
+                            const settings = { 
+                                method: storageMethod, 
+                                username: currentUser 
+                            };
+                            localStorage.setItem('todo-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').style.display = 'none';
+                            updateStorageInfo();
+                            renderAllTasks();
+                        } else {
+                            alert('❌ Geçersiz şifre!');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            todoData: tasksData,
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        localStorage.removeItem('todo-tasks');
+                        
+                        await saveUserDatabase();
+                        
+                        const settings = { 
+                            method: storageMethod, 
+                            username: currentUser 
+                        };
+                        localStorage.setItem('todo-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').style.display = 'none';
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠️ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.');
+                    storageMethod = 'local';
+                    
+                    const settings = { method: 'local' };
+                    localStorage.setItem('todo-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').style.display = 'none';
+                    updateStorageInfo();
+                }
+            } else {
+                const settings = { method: storageMethod };
+                localStorage.setItem('todo-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').style.display = 'none';
+                updateStorageInfo();
+                setTimeout(loadAllTasks, 500);
+            }
+        }
+
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Yapılacaklar listesi güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('todo-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('todo-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').style.display = 'flex';
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+        async function saveAllTasks() {
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                saveToLocal();
+            }
+            
+            showNotification('💾 Görevler kaydedildi!');
+        }
+
+        function saveToLocal() {
+            localStorage.setItem('todo-tasks', JSON.stringify(tasksData));
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].todoData = tasksData;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                showNotification('⚠️ GitHub\'a yüklenirken hata! Yerel kayıt yapılıyor.');
+                saveToLocal();
+            }
+        }
+
+        function loadAllTasks() {
+            if (storageMethod === 'github' && currentUser) {
+                loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            const saved = localStorage.getItem('todo-tasks');
+            if (saved) {
+                tasksData = JSON.parse(saved);
+                renderAllTasks();
+                showNotification('💻 Yerel veriler yüklendi!');
+            }
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser] && userDatabase[currentUser].todoData) {
+                    tasksData = userDatabase[currentUser].todoData;
+                    renderAllTasks();
+                    showNotification('☁️ GitHub\'dan veriler yüklendi!');
+                } else {
+                    showNotification('⚠️ GitHub\'da veri bulunamadı!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                showNotification('⚠️ GitHub\'dan yüklenirken hata!');
+                loadFromLocal();
+            }
+        }
+
+        function renderAllTasks() {
+            ['todo', 'doing', 'done'].forEach(column => {
+                const list = document.getElementById(column + 'List');
+                list.innerHTML = '';
+                
+                tasksData[column].forEach(text => {
+                    const task = createTaskElement(text, column);
+                    list.appendChild(task);
+                });
+            });
+            
+            updateStats();
+        }
+
+        function autoSave() {
+            if (storageMethod === 'local') {
+                saveToLocal();
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
