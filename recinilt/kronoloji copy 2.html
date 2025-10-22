@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕒 Kronolojik Sıralayıcı</title>
+    <title>🕐 Kronolojik Sıralayıcı</title>
     <style>
         * {
             margin: 0;
@@ -399,7 +399,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🕒 Kronolojik Sıralayıcı</h1>
+            <h1>🕐 Kronolojik Sıralayıcı</h1>
             <p>Konuları ve tarihsel olayları kronolojik sıraya koyma sitesi</p>
         </div>
 
@@ -502,7 +502,7 @@
         let topics = {};
         let currentTopic = null;
         let editingStepIndex = -1;
-        let expandedContentIndex = -1;
+        let expandedContentIndex = -1; // Açık olan açıklama
 
         // Sayfa yüklendiğinde çalışır
         window.onload = function() {
@@ -511,7 +511,7 @@
             if (!checkStorageSettings()) {
                 document.getElementById('storageModal').style.display = 'block';
             } else {
-                // Ayarlar varsa direkt yükle - checkStorageSettings içinde yapılacak
+                loadTopics();
             }
             
             updateTopicList();
@@ -545,7 +545,6 @@
                     await loadUserDatabase();
                     
                     if (userDatabase[username]) {
-                        // Mevcut kullanıcı - şifre kontrolü
                         if (userDatabase[username].password === password) {
                             currentUser = username;
                             topics = userDatabase[username].topicsData || {};
@@ -565,7 +564,6 @@
                             return;
                         }
                     } else {
-                        // Yeni kullanıcı
                         userDatabase[username] = {
                             password: password,
                             topicsData: {},
@@ -601,7 +599,6 @@
                    updateStorageInfo();
                }
            } else {
-               // Yerel kayıt
                const settings = { method: storageMethod };
                localStorage.setItem('timeline-storage-settings', JSON.stringify(settings));
                
@@ -624,18 +621,13 @@
                if (response.ok) {
                    const data = await response.json();
                    let content = data.content;
-                   // Base64 decode işlemi
                    let decodedContent = atob(content);
-                   // UTF-8 decode işlemi
                    let utf8Content = decodeURIComponent(escape(decodedContent));
                    userDatabase = JSON.parse(utf8Content);
-                   console.log('GitHub veritabanı yüklendi:', Object.keys(userDatabase));
                } else {
-                   console.log('GitHub\'da dosya bulunamadı, yeni oluşturulacak');
                    userDatabase = {};
                }
            } catch (error) {
-               console.error('GitHub veritabanı yükleme hatası:', error);
                userDatabase = {};
                throw error;
            }
@@ -643,7 +635,6 @@
 
        async function saveUserDatabase() {
            try {
-               // Önce mevcut dosyanın SHA'sını al
                let sha = null;
                try {
                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/timeline-topics.json`, {
@@ -656,30 +647,20 @@
                    if (response.ok) {
                        const fileData = await response.json();
                        sha = fileData.sha;
-                       console.log('Mevcut dosya SHA\'sı alındı:', sha);
                    }
                } catch (err) {
-                   // Dosya yoksa hata alırız, bu normaldir
-                   console.log('Dosya henüz yok, yeni oluşturulacak');
+                   // Dosya yoksa hata alırız, normal
                }
 
-               // JSON'u string'e çevir ve UTF-8 + Base64 encode et
                const jsonData = JSON.stringify(userDatabase, null, 2);
                let utf8Content = unescape(encodeURIComponent(jsonData));
                let encodedContent = btoa(utf8Content);
 
-               console.log('GitHub\'a kaydediliyor:', {
-                   kullaniciSayisi: Object.keys(userDatabase).length,
-                   sha: sha ? 'var' : 'yok'
-               });
-
-               // GitHub'a kaydet
                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/timeline-topics.json`, {
                    method: 'PUT',
                    headers: {
                        'Authorization': `token ${token}`,
-                       'Accept': 'application/vnd.github.v3+json',
-                       'Content-Type': 'application/json'
+                       'Accept': 'application/vnd.github.v3+json'
                    },
                    body: JSON.stringify({
                        message: 'Kronolojik konular kullanıcı veritabanı güncellendi',
@@ -689,12 +670,8 @@
                });
 
                if (!updateResponse.ok) {
-                   const errorData = await updateResponse.json();
-                   console.error('GitHub güncelleme hatası:', errorData);
                    throw new Error('GitHub kullanıcı veritabanı güncelleme hatası');
                }
-               
-               console.log('GitHub veritabanı başarıyla güncellendi');
            } catch (error) {
                console.error('GitHub kullanıcı veritabanı kaydetme hatası:', error);
                throw error;
@@ -709,15 +686,6 @@
                
                if (settings.method === 'github' && settings.username) {
                    currentUser = settings.username;
-                   // GitHub kullanıcısı varsa, hemen yükle
-                   setTimeout(() => {
-                       loadFromGitHub();
-                   }, 100);
-               } else {
-                   // Yerel kayıt varsa, hemen yükle
-                   setTimeout(() => {
-                       loadFromLocal();
-                   }, 100);
                }
                
                updateStorageInfo();
@@ -795,7 +763,7 @@
 
        function selectTopic(topicName) {
            currentTopic = topicName;
-           expandedContentIndex = -1;
+           expandedContentIndex = -1; // Açık olan açıklamayı kapat
            
            document.querySelectorAll('.topic-item').forEach(item => item.classList.remove('selected'));
            event.target.closest('.topic-item').classList.add('selected');
@@ -1049,25 +1017,10 @@
            try {
                await loadUserDatabase();
                
-               // Kullanıcı verisini güncelle
-               if (!userDatabase[currentUser]) {
-                   userDatabase[currentUser] = {
-                       password: '***', // Şifre zaten daha önce kaydedilmiş
-                       topicsData: {},
-                       createdDate: new Date().toISOString()
-                   };
-               }
-               
                userDatabase[currentUser].topicsData = topics;
                userDatabase[currentUser].lastUpdated = new Date().toISOString();
                
                await saveUserDatabase();
-               
-               console.log('GitHub\'a kaydedildi:', {
-                   user: currentUser,
-                   topicCount: Object.keys(topics).length,
-                   topics: Object.keys(topics)
-               });
            } catch (error) {
                console.error('GitHub hatası:', error);
                showNotification('⚠ GitHub\'a yüklenirken hata oluştu! Yerel kayıt yapılıyor.');
@@ -1094,7 +1047,6 @@
                    console.error('Yerel veri okuma hatası:', error);
                    topics = {};
                    updateTopicList();
-                   showNotification('⚠ Yerel veri okunamadı. Yeni başlıyoruz!');
                }
            } else {
                topics = {};
@@ -1108,11 +1060,6 @@
                
                if (userDatabase[currentUser] && userDatabase[currentUser].topicsData) {
                    topics = userDatabase[currentUser].topicsData;
-                   console.log('GitHub\'dan yüklendi:', {
-                       user: currentUser,
-                       topicCount: Object.keys(topics).length,
-                       topics: Object.keys(topics)
-                   });
                    updateTopicList();
                    showNotification('☁️ GitHub\'dan veriler yüklendi!');
                } else {
@@ -1211,7 +1158,7 @@
            checkAutoSave();
            
            if (Object.keys(topics).length === 0) {
-               showNotification('🕒 Hoş geldin! İlk kronolojik konunu oluşturmaya hazır mısın?');
+               showNotification('🕐 Hoş geldin! İlk kronolojik konunu oluşturmaya hazır mısın?');
            } else {
                showNotification('📚 Devam ediyoruz! Konularınız yüklendi.');
            }
