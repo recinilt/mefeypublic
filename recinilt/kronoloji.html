@@ -772,6 +772,13 @@
            updateTopicList();
            selectTopic(topicName);
            showNotification(`✅ "${topicName}" konusu oluşturuldu!`);
+           
+           // Otomatik kaydet
+           if (storageMethod === 'github' && currentUser) {
+               saveToGitHub();
+           } else {
+               saveToLocal();
+           }
        }
 
        function updateTopicList() {
@@ -817,6 +824,13 @@
                document.getElementById('timelineSection').style.display = 'none';
                updateTopicList();
                showNotification('🗑️ Konu silindi!');
+               
+               // Otomatik kaydet
+               if (storageMethod === 'github' && currentUser) {
+                   saveToGitHub();
+               } else {
+                   saveToLocal();
+               }
            }
        }
 
@@ -877,6 +891,13 @@
            
            hideAddStepForm();
            updateTimeline();
+           
+           // Otomatik kaydet
+           if (storageMethod === 'github' && currentUser) {
+               saveToGitHub();
+           } else {
+               saveToLocal();
+           }
        }
 
        function updateTimeline() {
@@ -980,6 +1001,13 @@
            
            updateTimeline();
            showNotification('⬆️ Adım yukarı taşındı!');
+           
+           // Otomatik kaydet
+           if (storageMethod === 'github' && currentUser) {
+               saveToGitHub();
+           } else {
+               saveToLocal();
+           }
        }
 
        function moveStepDown(index) {
@@ -997,6 +1025,13 @@
            
            updateTimeline();
            showNotification('⬇️ Adım aşağı taşındı!');
+           
+           // Otomatik kaydet
+           if (storageMethod === 'github' && currentUser) {
+               saveToGitHub();
+           } else {
+               saveToLocal();
+           }
        }
 
        function deleteStep(index) {
@@ -1012,6 +1047,13 @@
                
                updateTimeline();
                showNotification('🗑️ Adım silindi!');
+               
+               // Otomatik kaydet
+               if (storageMethod === 'github' && currentUser) {
+                   saveToGitHub();
+               } else {
+                   saveToLocal();
+               }
            }
        }
 
@@ -1158,9 +1200,9 @@
            }
        });
 
-       // Otomatik kaydetme (her 2 dakikada bir)
+       // Otomatik kaydetme (her 2 dakikada bir - sadece yerel için)
        setInterval(() => {
-           if (Object.keys(topics).length > 0) {
+           if (storageMethod === 'local' && Object.keys(topics).length > 0) {
                const autoSave = {
                    topics: topics,
                    currentTopic: currentTopic,
@@ -1172,6 +1214,12 @@
 
        // Sayfa yüklendiğinde otomatik kaydı kontrol et
        function checkAutoSave() {
+           // GitHub kullanılıyorsa lokale bakma
+           if (storageMethod === 'github' && currentUser) {
+               localStorage.removeItem('timeline-autoSave');
+               return;
+           }
+           
            const autoSave = localStorage.getItem('timeline-autoSave');
            if (autoSave) {
                const data = JSON.parse(autoSave);
@@ -1193,8 +1241,10 @@
            }
        }
 
-       // Sayfa kapatılırken uyarı
+       // Sayfa kapatılırken uyarı (sadece yerel kayıt için)
        window.addEventListener('beforeunload', function(e) {
+           if (storageMethod === 'github') return; // GitHub otomatik kaydediyor
+           
            const hasUnsavedData = currentTopic && topics[currentTopic] && 
                                 topics[currentTopic].steps.length > 0 &&
                                 !localStorage.getItem('timeline-topics');
