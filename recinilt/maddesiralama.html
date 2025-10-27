@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Görev Listesi Yöneticisi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .topic-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .topic-input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #e17055, #d63031);
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+
+        .topic-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .topic-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            border-left: 5px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .topic-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .topic-item.active {
+            border-left-color: #ff6b6b;
+            background: #fff3f3;
+        }
+
+        .topic-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .topic-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .topic-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .topic-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .icon-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: #d0d0d0;
+            transform: scale(1.05);
+        }
+
+        .icon-btn.delete {
+            background: #ffe0e0;
+            color: #d63031;
+        }
+
+        .icon-btn.delete:hover {
+            background: #ffcccc;
+        }
+
+        .tasks-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .task-input-area {
+            margin-bottom: 20px;
+        }
+
+        .task-input-area label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .textarea-field {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .textarea-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .paste-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .task-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .task-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .task-item:hover {
+            background: #e9ecef;
+        }
+
+        .task-drag-handle {
+            cursor: grab;
+            font-size: 20px;
+            color: #999;
+        }
+
+        .task-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .task-content {
+            flex: 1;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .task-content.editing {
+            border: 2px solid #667eea;
+            padding: 8px;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .task-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.2s ease;
+        }
+
+        .task-btn:hover {
+            background: #ddd;
+        }
+
+        .storage-controls {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .storage-controls p {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .storage-controls .btn {
+            margin: 5px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .storage-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .storage-option {
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+
+        .storage-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .storage-option.selected {
+            border-color: #667eea;
+            background: #f0f8ff;
+        }
+
+        .github-login {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 3000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.error {
+            background: #e17055;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+
+            .topic-input-group {
+                flex-direction: column;
+            }
+
+            .storage-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .storage-option {
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Görev Listesi Yöneticisi</h1>
+            <p>Görevlerinizi düzenleyin, sıralayın ve yönetin</p>
+        </div>
+
+        <!-- Storage Modal -->
+        <div id="storageModal" class="modal">
+            <div class="modal-content">
+                <h2>💾 Kayıt Yöntemi Seçimi</h2>
+                <p style="text-align: center; margin-bottom: 30px;">Verilerinizi nerede saklamak istiyorsunuz?</p>
+                
+                <div class="storage-selection">
+                    <div class="storage-option" onclick="selectStorage('local')">
+                        <h3>💻 Yerel Kayıt</h3>
+                        <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
+                        <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                    </div>
+                    
+                    <div class="storage-option" onclick="selectStorage('github')">
+                        <h3>☁️ GitHub Kayıt</h3>
+                        <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                    </div>
+                </div>
+                
+                <div id="githubLogin" style="display: none;" class="github-login">
+                    <h3 style="text-align: center; margin-bottom: 20px;">🔒 GitHub Giriş</h3>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>👤 Kullanıcı Adı:</strong></label>
+                        <input type="text" id="loginUsername" class="input-field" placeholder="Kullanıcı adınızı girin">
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <label><strong>🔑 Şifre:</strong></label>
+                        <input type="password" id="loginPassword" class="input-field" placeholder="Şifrenizi girin">
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Konu Başlığı Ekleme -->
+            <div class="topic-section">
+                <h2 style="margin-bottom: 20px;">📌 Konu Başlıkları</h2>
+                <div class="topic-input-group">
+                    <input type="text" id="newTopicInput" class="input-field" placeholder="Yeni konu başlığı girin..." onkeypress="if(event.key==='Enter') addTopic()">
+                    <button class="btn" onclick="addTopic()">➕ Ekle</button>
+                </div>
+
+                <div class="topic-list" id="topicList">
+                    <!-- Konular buraya eklenecek -->
+                </div>
+            </div>
+
+            <!-- Görev Ekleme (Seçili konuya) -->
+            <div class="tasks-section" id="tasksSection" style="display: none;">
+                <h2 id="tasksSectionTitle">📝 Görevler</h2>
+                
+                <div class="task-input-area">
+                    <label for="taskInput">
+                        Görevleri Ekleyin:
+                        <span class="paste-info">(Her satıra bir görev yazın veya Excel'den kopyalayın)</span>
+                    </label>
+                    <textarea id="taskInput" class="textarea-field" placeholder="Görev 1&#10;Görev 2&#10;Görev 3&#10;&#10;veya Excel/Word'den kopyalayıp yapıştırın..."></textarea>
+                    <button class="btn success" onclick="addTasks()" style="margin-top: 10px;">➕ Görevleri Ekle</button>
+                </div>
+
+                <div class="task-list" id="taskList">
+                    <!-- Görevler buraya eklenecek -->
+                </div>
+            </div>
+
+            <!-- Kayıt Kontrolleri -->
+            <div class="storage-controls">
+                <p id="storageInfo">💾 Verileriniz kaydedilmedi</p>
+                <button class="btn" onclick="saveData()">💾 Kaydet</button>
+                <button class="btn secondary" onclick="loadData()">📥 Yükle</button>
+                <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Başlıklar</button>
+                <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Geçmiş Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📚 Geçmiş Başlıklar</h2>
+                <button onclick="closeHistory()" class="btn danger" style="padding: 8px 15px; font-size: 14px;">Kapat</button>
+            </div>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script src="5t-github-parametreleri.js"></script>
+    <script>
+        // Global Variables
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+        let allTopics = {};
+        let currentTopicId = null;
+
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').classList.add('show');
+            } else {
+                loadData();
+            }
+            updateStorageInfo();
+        };
+
+        // Storage Seçimi
+        function selectStorage(method) {
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.storage-option').classList.add('selected');
+            storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            githubLogin.style.display = method === 'github' ? 'block' : 'none';
+        }
+
+        async function confirmStorageSelection() {
+            if (storageMethod === 'github') {
+                const username = document.getElementById('loginUsername').value.trim();
+                const password = document.getElementById('loginPassword').value.trim();
+                
+                if (!username || !password) {
+                    showNotification('⚠ Lütfen kullanıcı adı ve şifrenizi girin!', 'error');
+                    return;
+                }
+                
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            allTopics = userDatabase[username].topics || {};
+                            
+                            const settings = { method: storageMethod, username: currentUser };
+                            localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').classList.remove('show');
+                            updateStorageInfo();
+                            renderTopics();
+                        } else {
+                            showNotification('❌ Geçersiz şifre!', 'error');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            topics: {},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        allTopics = {};
+                        localStorage.removeItem('task-topics-data');
+                        
+                        await saveUserDatabase();
+                        
+                        const settings = { method: storageMethod, username: currentUser };
+                        localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').classList.remove('show');
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.', 'error');
+                    storageMethod = 'local';
+                    
+                    const settings = { method: 'local' };
+                    localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').classList.remove('show');
+                    updateStorageInfo();
+                }
+            } else {
+                const settings = { method: storageMethod };
+                localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').classList.remove('show');
+                updateStorageInfo();
+                loadData();
+            }
+        }
+
+        async function loadUserDatabase() {
+            try {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
+            } catch (error) {
+                userDatabase = {};
+                throw error;
+            }
+        }
+
+        async function saveUserDatabase() {
+            try {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {}
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Görev listeleri güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub veritabanı güncelleme hatası');
+                }
+            } catch (error) {
+                console.error('GitHub kaydetme hatası:', error);
+                throw error;
+            }
+        }
+
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('task-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('task-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').classList.add('show');
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+        // Konu Başlığı Ekleme
+        function addTopic() {
+            const input = document.getElementById('newTopicInput');
+            const title = input.value.trim();
+            
+            if (!title) {
+                showNotification('⚠ Lütfen bir başlık girin!', 'error');
+                return;
+            }
+            
+            const topicId = 'topic_' + Date.now();
+            allTopics[topicId] = {
+                id: topicId,
+                title: title,
+                tasks: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            input.value = '';
+            renderTopics();
+            selectTopic(topicId);
+            showNotification('✅ Başlık eklendi!');
+        }
+
+        function renderTopics() {
+            const topicList = document.getElementById('topicList');
+            
+            if (Object.keys(allTopics).length === 0) {
+                topicList.innerHTML = '<div class="empty-state"><h3>📭 Henüz başlık yok</h3><p>Yukarıdan bir başlık ekleyerek başlayın</p></div>';
+                return;
+            }
+            
+            topicList.innerHTML = '';
+            
+            Object.values(allTopics).forEach(topic => {
+                const topicDiv = document.createElement('div');
+                topicDiv.className = 'topic-item';
+                if (topic.id === currentTopicId) {
+                    topicDiv.classList.add('active');
+                }
+                
+                topicDiv.innerHTML = `
+                    <div class="topic-header">
+                        <div class="topic-title">${topic.title}</div>
+                        <div class="topic-count">${topic.tasks.length} görev</div>
+                    </div>
+                    <div class="topic-actions">
+                        <button class="icon-btn" onclick="event.stopPropagation(); selectTopic('${topic.id}')">📝 Düzenle</button>
+                        <button class="icon-btn delete" onclick="event.stopPropagation(); deleteTopic('${topic.id}')">🗑️ Sil</button>
+                    </div>
+                `;
+                
+                topicDiv.onclick = () => selectTopic(topic.id);
+                topicList.appendChild(topicDiv);
+            });
+        }
+
+        function selectTopic(topicId) {
+            currentTopicId = topicId;
+            
+            const tasksSection = document.getElementById('tasksSection');
+            tasksSection.style.display = 'block';
+            
+            const title = document.getElementById('tasksSectionTitle');
+            title.textContent = `📝 ${allTopics[topicId].title} - Görevler`;
+            
+            renderTopics();
+            renderTasks();
+        }
+
+        function deleteTopic(topicId) {
+            if (!confirm('Bu başlığı ve tüm görevlerini silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            delete allTopics[topicId];
+            
+            if (currentTopicId === topicId) {
+                currentTopicId = null;
+                document.getElementById('tasksSection').style.display = 'none';
+            }
+            
+            renderTopics();
+            showNotification('🗑️ Başlık silindi!');
+        }
+
+        // Görev Ekleme
+        function addTasks() {
+            if (!currentTopicId) {
+                showNotification('⚠ Lütfen önce bir başlık seçin!', 'error');
+                return;
+            }
+            
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            
+            if (!text) {
+                showNotification('⚠ Lütfen en az bir görev girin!', 'error');
+                return;
+            }
+            
+            // Satırlara böl ve boş satırları temizle
+            const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
+            
+            if (lines.length === 0) {
+                showNotification('⚠ Geçerli görev bulunamadı!', 'error');
+                return;
+            }
+            
+            const topic = allTopics[currentTopicId];
+            lines.forEach(line => {
+                topic.tasks.push({
+                    id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    content: line
+                });
+            });
+            
+            input.value = '';
+            renderTasks();
+            renderTopics();
+            showNotification(`✅ ${lines.length} görev eklendi!`);
+        }
+
+        function renderTasks() {
+            if (!currentTopicId) return;
+            
+            const taskList = document.getElementById('taskList');
+            const topic = allTopics[currentTopicId];
+            
+            if (topic.tasks.length === 0) {
+                taskList.innerHTML = '<div class="empty-state"><h3>📭 Henüz görev yok</h3><p>Yukarıdan görev ekleyerek başlayın</p></div>';
+                return;
+            }
+            
+            taskList.innerHTML = '';
+            
+            topic.tasks.forEach((task, index) => {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'task-item';
+                taskDiv.draggable = true;
+                taskDiv.dataset.taskId = task.id;
+                taskDiv.dataset.index = index;
+                
+                taskDiv.innerHTML = `
+                    <div class="task-drag-handle">☰</div>
+                    <div class="task-content" id="content-${task.id}">${task.content}</div>
+                    <div class="task-actions">
+                        <button class="task-btn" onclick="moveTaskUp('${task.id}')" title="Yukarı">⬆️</button>
+                        <button class="task-btn" onclick="moveTaskDown('${task.id}')" title="Aşağı">⬇️</button>
+                        <button class="task-btn" onclick="editTask('${task.id}')" title="Düzenle">✏️</button>
+                        <button class="task-btn" onclick="deleteTask('${task.id}')" title="Sil">🗑️</button>
+                    </div>
+                `;
+                
+                // Drag and Drop
+                taskDiv.addEventListener('dragstart', handleDragStart);
+                taskDiv.addEventListener('dragover', handleDragOver);
+                taskDiv.addEventListener('drop', handleDrop);
+                taskDiv.addEventListener('dragend', handleDragEnd);
+                
+                taskList.appendChild(taskDiv);
+            });
+        }
+
+        function moveTaskUp(taskId) {
+            const topic = allTopics[currentTopicId];
+            const index = topic.tasks.findIndex(t => t.id === taskId);
+            
+            if (index > 0) {
+                [topic.tasks[index], topic.tasks[index - 1]] = [topic.tasks[index - 1], topic.tasks[index]];
+                renderTasks();
+            }
+        }
+
+        function moveTaskDown(taskId) {
+            const topic = allTopics[currentTopicId];
+            const index = topic.tasks.findIndex(t => t.id === taskId);
+            
+            if (index < topic.tasks.length - 1) {
+                [topic.tasks[index], topic.tasks[index + 1]] = [topic.tasks[index + 1], topic.tasks[index]];
+                renderTasks();
+            }
+        }
+
+        function editTask(taskId) {
+            const topic = allTopics[currentTopicId];
+            const task = topic.tasks.find(t => t.id === taskId);
+            
+            const contentDiv = document.getElementById('content-' + taskId);
+            const currentContent = task.content;
+            
+            contentDiv.contentEditable = true;
+            contentDiv.classList.add('editing');
+            contentDiv.focus();
+            
+            // Metni seç
+            const range = document.createRange();
+            range.selectNodeContents(contentDiv);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            
+            function saveEdit() {
+                const newContent = contentDiv.textContent.trim();
+                if (newContent) {
+                    task.content = newContent;
+                    contentDiv.contentEditable = false;
+                    contentDiv.classList.remove('editing');
+                    renderTasks();
+                    showNotification('✅ Görev güncellendi!');
+                } else {
+                    contentDiv.textContent = currentContent;
+                    contentDiv.contentEditable = false;
+                    contentDiv.classList.remove('editing');
+                }
+            }
+            
+            contentDiv.onblur = saveEdit;
+            contentDiv.onkeydown = function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    saveEdit();
+                } else if (e.key === 'Escape') {
+                    contentDiv.textContent = currentContent;
+                    contentDiv.contentEditable = false;
+                    contentDiv.classList.remove('editing');
+                }
+            };
+        }
+
+        function deleteTask(taskId) {
+            if (!confirm('Bu görevi silmek istediğinizden emin misiniz?')) {
+                return;
+            }
+            
+            const topic = allTopics[currentTopicId];
+            topic.tasks = topic.tasks.filter(t => t.id !== taskId);
+            
+            renderTasks();
+            renderTopics();
+            showNotification('🗑️ Görev silindi!');
+        }
+
+        // Drag and Drop
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedElement !== this) {
+                const topic = allTopics[currentTopicId];
+                const draggedIndex = parseInt(draggedElement.dataset.index);
+                const targetIndex = parseInt(this.dataset.index);
+                
+                const [draggedTask] = topic.tasks.splice(draggedIndex, 1);
+                topic.tasks.splice(targetIndex, 0, draggedTask);
+                
+                renderTasks();
+            }
+            
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.style.opacity = '1';
+            
+            document.querySelectorAll('.task-item').forEach(item => {
+                item.classList.remove('over');
+            });
+        }
+
+        // Kaydetme ve Yükleme
+        async function saveData() {
+            if (storageMethod === 'github' && currentUser) {
+                await saveToGitHub();
+            } else {
+                saveToLocal();
+            }
+        }
+
+        function saveToLocal() {
+            try {
+                localStorage.setItem('task-topics-data', JSON.stringify(allTopics));
+                showNotification('💾 Veriler yerel olarak kaydedildi!');
+            } catch (error) {
+                console.error('Yerel kaydetme hatası:', error);
+                showNotification('❌ Kaydetme hatası!', 'error');
+            }
+        }
+
+        async function saveToGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                userDatabase[currentUser].topics = allTopics;
+                userDatabase[currentUser].lastUpdated = new Date().toISOString();
+                
+                await saveUserDatabase();
+                showNotification('☁️ Veriler GitHub\'a kaydedildi!');
+            } catch (error) {
+                console.error('GitHub hatası:', error);
+                showNotification('⚠ GitHub\'a yüklenirken hata! Yerel kayıt yapılıyor.', 'error');
+                saveToLocal();
+            }
+        }
+
+        async function loadData() {
+            if (storageMethod === 'github' && currentUser) {
+                await loadFromGitHub();
+            } else {
+                loadFromLocal();
+            }
+        }
+
+        function loadFromLocal() {
+            try {
+                const savedData = localStorage.getItem('task-topics-data');
+                if (savedData) {
+                    allTopics = JSON.parse(savedData);
+                    renderTopics();
+                    
+                    if (Object.keys(allTopics).length > 0) {
+                        showNotification('💻 Yerel veriler yüklendi!');
+                    }
+                } else {
+                    allTopics = {};
+                    renderTopics();
+                }
+            } catch (error) {
+                console.error('Yerel yükleme hatası:', error);
+                showNotification('❌ Veri yükleme hatası!', 'error');
+            }
+        }
+
+        async function loadFromGitHub() {
+            try {
+                await loadUserDatabase();
+                
+                if (userDatabase[currentUser] && userDatabase[currentUser].topics) {
+                    allTopics = userDatabase[currentUser].topics;
+                    renderTopics();
+                    showNotification('☁️ GitHub\'dan veriler yüklendi!');
+                } else {
+                    allTopics = {};
+                    renderTopics();
+                    showNotification('⚠ GitHub\'da veri bulunamadı. Yeni başlıyoruz!');
+                }
+            } catch (error) {
+                console.error('GitHub yükleme hatası:', error);
+                showNotification('⚠ GitHub\'dan yüklenirken hata! Yerel veri kontrol ediliyor.', 'error');
+                loadFromLocal();
+            }
+        }
+
+        // Geçmiş Gösterme
+        function showHistory() {
+            const modal = document.getElementById('historyModal');
+            const content = document.getElementById('historyContent');
+            
+            const topics = Object.values(allTopics).sort((a, b) => 
+                new Date(b.createdAt) - new Date(a.createdAt)
+            );
+            
+            if (topics.length === 0) {
+                content.innerHTML = '<div class="empty-state"><h3>📭 Henüz başlık yok</h3><p>Başlık ekleyerek başlayın</p></div>';
+            } else {
+                let historyHTML = '';
+                topics.forEach(topic => {
+                    const date = new Date(topic.createdAt).toLocaleDateString('tr-TR');
+                    historyHTML += `
+                        <div class="topic-item" onclick="loadHistoryTopic('${topic.id}')">
+                            <div class="topic-header">
+                                <div class="topic-title">${topic.title}</div>
+                                <div class="topic-count">${topic.tasks.length} görev</div>
+                            </div>
+                            <p style="color: #666; font-size: 0.9em; margin-top: 8px;">Oluşturulma: ${date}</p>
+                        </div>
+                    `;
+                });
+                content.innerHTML = historyHTML;
+            }
+            
+            modal.classList.add('show');
+        }
+
+        function loadHistoryTopic(topicId) {
+            selectTopic(topicId);
+            closeHistory();
+            showNotification('📋 Başlık yüklendi!');
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').classList.remove('show');
+        }
+
+        // Bildirim
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = 'notification show';
+            
+            if (type === 'error') {
+                notification.classList.add('error');
+            }
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Klavye kısayolları
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveData();
+            }
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                showHistory();
+            }
+            if (e.key === 'Escape') {
+                closeHistory();
+                document.getElementById('storageModal').classList.remove('show');
+            }
+        });
+
+        // Otomatik kaydetme (her 2 dakikada)
+        setInterval(() => {
+            if (Object.keys(allTopics).length > 0) {
+                localStorage.setItem('task-topics-autosave', JSON.stringify({
+                    topics: allTopics,
+                    timestamp: new Date().toISOString()
+                }));
+            }
+        }, 120000);
+
+        // Sayfa kapatılırken uyarı
+        window.addEventListener('beforeunload', function(e) {
+            const hasUnsavedData = Object.keys(allTopics).length > 0 && 
+                                   !localStorage.getItem('task-topics-data');
+            
+            if (hasUnsavedData) {
+                e.preventDefault();
+                e.returnValue = '';
+                return 'Kaydedilmemiş verileriniz var. Ayrılmak istediğinizden emin misiniz?';
+            }
+        });
+    </script>
+</body>
+</html>
