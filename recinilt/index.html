@@ -414,6 +414,12 @@
             <div class="category-card" ng-show="shouldShowCategory('health')">
                 <h2 class="category-title">🏥 Sağlık ve Tıp</h2>
                 <ul class="link-list">
+                    <li class="link-item" ng-show="matchesSearch('Tanı ve Tedavi Rehberi')">
+                        <a href="https://recinilt.github.io/tanivetedavirehberi/"><span class="link-icon">💉</span>Tanı ve Tedavi Rehberi</a>
+                    </li>
+                    <li class="link-item" ng-show="matchesSearch('112 Algoritma')">
+                        <a href="https://recinilt.github.io/ileriyasamdestegi/"><span class="link-icon">💉</span>112 Algoritma</a>
+                    </li>
                     <li class="link-item" ng-show="matchesSearch('AŞILAR')">
                         <a href="asilar2.html"><span class="link-icon">💉</span>Aşılar</a>
                     </li>
@@ -686,7 +692,7 @@
 
                     const categoryItems = {
                         'crypto': ['Babylons', 'AB=CD borsa formasyonu', 'ATR to Price Ratio', 'Crypto Binance Martingale', 'çeyrek altın', 'Coin Ci Long Short', 'Çifte Ema', 'Coin Değeri', 'Grid Bot', 'Hisse Al-Sat', 'Order Book', 'Pump.fun', 'yüzde 2 yükselenler', 'Trend Analizi', 'Volatilite Analiz', 'Coin yukseliyor', 'Coin Follower Portfolio'],
-                        'health': ['AŞILAR', 'Çocuk İlaç Şurup', 'FBS Kalbi Cilalatma', 'Hasta Kayıt', 'Hazır Reçete', 'İnfüzyon Seti', 'Nikitabs Sigara', 'Nöbet Listesi', 'Revir Sayım'],
+                        'health': ['Tanı ve Tedavi Rehberi','112 Algoritma','AŞILAR', 'Çocuk İlaç Şurup', 'FBS Kalbi Cilalatma', 'Hasta Kayıt', 'Hazır Reçete', 'İnfüzyon Seti', 'Nikitabs Sigara', 'Nöbet Listesi', 'Revir Sayım'],
                         'media': ['Canlı TV', 'güldür güldür', 'srt', 'speechsynthesis', 'tts', 'video altyazı seslendirme', 'YouTube', 't3'],
                         'programming': ['AngularJS', 'Firebase Data', 'js 30', 'js module', 'Metamask', 'regexp mail', 'VueJS'],
                         'tools': ['Metin Okuyucu', "İngilizce", "Maddeleri Sıralama - İnfo Data ayrıştırması", "Yapılacaklar Checklist", "Çarkıfelek", "Alışveriş Kontrol", 'birleşik çarpan', 'Bütçe Takip', 'CSV File Explorer', 'Depo Yönetimi QR', 'file', 'Google', 'Gramaj Fiyat', 'Günlük', 'haberler', 'Hotspot', 'Karınca Kovucu', 'Kelime Bulucu', 'Kronolojik Sıraya', 'new page', 'Oversize Kontrolü', 'Pomodoro Timer', 'Resim', 'saat', 'Zinciri Kırma'],
