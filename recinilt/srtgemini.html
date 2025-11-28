@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas SRT Okuyucu ve Video Oynatıcı</title>
+    <style>
+        /* Genel Sayfa Stili */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* Daha koyu sinematik arka plan */
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h2 { color: #66bb6a; margin-bottom: 15px; }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        }
+
+        /* Dosya Yükleme Alanı */
+        .controls-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 220px;
+        }
+
+        label { margin-bottom: 8px; font-size: 0.95em; color: #bbb; font-weight: 600; }
+        input[type="file"] {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            padding: 8px;
+            border-radius: 6px;
+            color: #ddd;
+            cursor: pointer;
+        }
+
+        /* Video ve Canvas Kapsayıcısı */
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden; /* Köşelerin düzgün görünmesi için */
+            margin-bottom: 20px;
+            /* Video yüklenmediğinde yer kaplaması için geçici yükseklik */
+            min-height: 300px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Canvas Stili - Videonun üzerine bindirme */
+        #subtitleCanvas {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%; /* Videonun alt %30'luk kısmını kaplasın */
+            pointer-events: none; /* Tıklamalar videoya geçsin */
+            /* Geliştirme sırasında alanı görmek için border açılabilir: */
+            /* border-top: 1px dotted yellow; */
+        }
+
+        /* Slider Kontrolleri */
+        .slider-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .slider-group { display: flex; flex-direction: column; }
+        .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9em; color: #ccc; }
+        input[type="range"] { width: 100%; cursor: pointer; accent-color: #66bb6a; }
+
+        .status { font-size: 0.85em; color: #777; margin-top: 10px; text-align: right; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <h2>Canvas SRT Oynatıcı</h2>
+
+        <div class="controls-area">
+            <div class="input-group">
+                <label for="videoInput">1. Video Dosyası (MP4/MKV)</label>
+                <input type="file" id="videoInput" accept="video/*">
+            </div>
+            <div class="input-group">
+                <label for="srtInput">2. Altyazı Dosyası (.srt)</label>
+                <input type="file" id="srtInput" accept=".srt">
+            </div>
+        </div>
+
+        <!-- Video ve Canvas Kapsayıcısı -->
+        <div class="video-wrapper">
+            <video id="mainVideo" controls playsinline></video>
+            <canvas id="subtitleCanvas"></canvas>
+        </div>
+
+        <div class="slider-controls">
+            <div class="slider-group">
+                <div class="slider-header"><label for="videoVolume">Video Sesi</label><span id="volVideoVal">100%</span></div>
+                <input type="range" id="videoVolume" min="0" max="1" step="0.1" value="1">
+            </div>
+            <div class="slider-group">
+                <div class="slider-header"><label for="ttsVolume">Altyazı Okuma Sesi</label><span id="volTTSVal">100%</span></div>
+                <input type="range" id="ttsVolume" min="0" max="1" step="0.1" value="1">
+            </div>
+            <div class="slider-group">
+                <div class="slider-header"><label for="baseRate">Baz Okuma Hızı</label><span id="rateVal">1.0x</span></div>
+                <input type="range" id="baseRate" min="0.5" max="2" step="0.1" value="1">
+            </div>
+        </div>
+        <div class="status" id="statusLog">Dosyalar bekleniyor...</div>
+    </div>
+
+<script>
+    // Element Seçimleri
+    const videoInput = document.getElementById('videoInput');
+    const srtInput = document.getElementById('srtInput');
+    const videoPlayer = document.getElementById('mainVideo');
+    
+    // Canvas Elementleri
+    const subtitleCanvas = document.getElementById('subtitleCanvas');
+    const ctx = subtitleCanvas.getContext('2d');
+    
+    // Kontroller ve Etiketler
+    const videoVolumeSlider = document.getElementById('videoVolume');
+    const ttsVolumeSlider = document.getElementById('ttsVolume');
+    const baseRateSlider = document.getElementById('baseRate');
+    const volVideoVal = document.getElementById('volVideoVal');
+    const volTTSVal = document.getElementById('volTTSVal');
+    const rateVal = document.getElementById('rateVal');
+    const statusLog = document.getElementById('statusLog');
+
+    // Durum Değişkenleri
+    let subtitles = [];
+    let synth = window.speechSynthesis;
+    let currentSubtitleIndex = -1;
+    let ttsEnabled = false;
+    let currentSubtitleTextForCanvas = "";
+
+    // --- SES AYARLARI ---
+    function getTurkishVoice() {
+        const voices = synth.getVoices();
+        return voices.find(v => v.lang.includes('tr')) || voices[0];
+    }
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = getTurkishVoice;
+    }
+
+    // --- 1. DOSYA YÜKLEME ---
+    videoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            videoPlayer.src = url;
+            statusLog.innerText = "Video yüklendi. Oynatmaya hazır.";
+            // Video yüklendiğinde canvas boyutunu ayarla
+            videoPlayer.onloadedmetadata = resizeCanvas;
+        }
+    });
+
+    srtInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.readAsText(file, "UTF-8");
+            reader.onload = function(e) {
+                subtitles = parseSRT(e.target.result);
+                statusLog.innerText = `Altyazı yüklendi. Toplam ${subtitles.length} satır.`;
+                ttsEnabled = true;
+            };
+        }
+    });
+
+    // --- 2. SRT PARSE İŞLEMİ (DÜZELTİLMİŞ REGEX) ---
+    function parseSRT(data) {
+        // VS Code hatasını düzelten daha güvenli Regex.
+        // (?=\n\s*\n|$) -> "Sonrasında ya boş bir satır (iki newline arası boşluk olabilir) ya da dosya sonu gelmeli" demektir.
+        const pattern = /(\d+)\n(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})\n([\s\S]*?)(?=\n\s*\n|$)/g;
+        
+        const result = [];
+        let match;
+        // Dosya sonlarındaki olası sorunları önlemek için veriyi normalize et
+        data = data.replace(/\r\n/g, '\n') + "\n\n"; 
+        
+        while ((match = pattern.exec(data)) !== null) {
+            result.push({
+                id: match[1],
+                startTime: timeToSeconds(match[2]),
+                endTime: timeToSeconds(match[3]),
+                // HTML etiketlerini temizle ve baştaki/sondaki boşlukları al
+                text: match[4].replace(/<[^>]*>/g, '').trim()
+            });
+        }
+        return result;
+    }
+
+    function timeToSeconds(timeString) {
+        const parts = timeString.split(':');
+        const secondsPart = parts[2].split(',');
+        return (parseInt(parts[0]) * 3600) + 
+               (parseInt(parts[1]) * 60) + 
+               parseInt(secondsPart[0]) + 
+               (parseInt(secondsPart[1]) / 1000);
+    }
+
+    // --- 3. CANVAS ÇİZİM İŞLEMLERİ ---
+    
+    function resizeCanvas() {
+        // Canvas'ın iç çözünürlüğünü, ekranda kapladığı alana eşitle
+        // Bu, bulanık görüntüyü engeller.
+        subtitleCanvas.width = subtitleCanvas.clientWidth;
+        subtitleCanvas.height = subtitleCanvas.clientHeight;
+        
+        // Boyut değişirse mevcut altyazıyı tekrar çiz (eğer varsa)
+        if (currentSubtitleTextForCanvas) {
+            drawSubtitleOnCanvas(currentSubtitleTextForCanvas);
+        }
+    }
+    // Pencere boyutu değişirse canvas'ı yeniden boyutlandır
+    window.addEventListener('resize', resizeCanvas);
+
+    function drawSubtitleOnCanvas(text) {
+        currentSubtitleTextForCanvas = text;
+        // 1. Canvas'ı temizle
+        ctx.clearRect(0, 0, subtitleCanvas.width, subtitleCanvas.height);
+
+        if (!text) return; // Metin yoksa çık
+
+        // 2. Metin Ayarları (Sinematik Görünüm)
+        const fontSize = subtitleCanvas.height * 0.18; // Canvas yüksekliğine göre dinamik font
+        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "bottom";
+        
+        // Dolgu rengi (Beyaz/Sarımsı)
+        ctx.fillStyle = "#FFD700"; // Altın sarısı daha okunaklı olabilir, veya "#FFFFFF"
+        
+        // Kenarlık (Stroke) rengi ve kalınlığı (Siyah)
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = fontSize * 0.15; // Font boyutuna göre kenarlık kalınlığı
+        ctx.lineJoin = "round"; // Köşeleri yumuşat
+        ctx.miterLimit = 2;
+
+        // Gölge Efekti (Opsiyonel, bazen stroke yeterlidir)
+        ctx.shadowColor = "rgba(0,0,0,0.8)";
+        ctx.shadowBlur = fontSize * 0.2;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = fontSize * 0.05;
+
+        // 3. Çok Satırlı Metin İşleme
+        // SRT dosyasındaki satır sonlarına (\n) göre böl
+        const lines = text.split('\n');
+        const lineHeight = fontSize * 1.2;
+        const centerX = subtitleCanvas.width / 2;
+        // Metin bloğunun alt kenar konumu (Canvasın altından biraz yukarıda)
+        let bottomY = subtitleCanvas.height - (fontSize * 0.5); 
+
+        // Satırları sondan başa doğru çiz (yukarı doğru yığınla)
+        for (let i = lines.length - 1; i >= 0; i--) {
+            // Önce kenarlığı (stroke) çiz
+            ctx.strokeText(lines[i], centerX, bottomY);
+            // Sonra dolguyu (fill) çiz
+            ctx.fillText(lines[i], centerX, bottomY);
+            // Bir sonraki satır için Y konumunu yukarı kaydır
+            bottomY -= lineHeight;
+        }
+    }
+
+    // --- 4. OYNATICI KONTROLLERİ VE SENKRONİZASYON ---
+
+    // Slider Olayları
+    videoVolumeSlider.addEventListener('input', (e) => {
+        videoPlayer.volume = e.target.value;
+        volVideoVal.innerText = Math.round(e.target.value * 100) + "%";
+    });
+    ttsVolumeSlider.addEventListener('input', (e) => {
+        volTTSVal.innerText = Math.round(e.target.value * 100) + "%";
+    });
+    baseRateSlider.addEventListener('input', (e) => {
+        rateVal.innerText = e.target.value + "x";
+    });
+
+    // Video Oynatma Olayları
+    videoPlayer.addEventListener('play', () => { if(synth.paused) synth.resume(); });
+    videoPlayer.addEventListener('pause', () => { synth.cancel(); });
+    videoPlayer.addEventListener('seeking', () => {
+        synth.cancel();
+        currentSubtitleIndex = -1;
+        drawSubtitleOnCanvas(""); // Ararken altyazıyı gizle
+    });
+
+    // Ana Döngü (Timeupdate)
+    videoPlayer.addEventListener('timeupdate', () => {
+        // Video oynarken sürekli çalışır
+        if (subtitles.length === 0) return;
+        const currentTime = videoPlayer.currentTime;
+
+        // Aktif altyazıyı bul (Basit tarama)
+        let activeSub = null;
+        let foundIndex = -1;
+        for (let i = 0; i < subtitles.length; i++) {
+            if (currentTime >= subtitles[i].startTime && currentTime <= subtitles[i].endTime) {
+                activeSub = subtitles[i];
+                foundIndex = i;
+                break;
+            }
+        }
+
+        // --- CANVAS GÜNCELLEME ---
+        if (activeSub) {
+            // Sadece metin değiştiğinde yeniden çiz (Performans için)
+            if (activeSub.text !== currentSubtitleTextForCanvas) {
+                drawSubtitleOnCanvas(activeSub.text);
+            }
+        } else {
+             // Altyazı yoksa ve ekranda hala bir şey varsa temizle
+            if (currentSubtitleTextForCanvas !== "") {
+                 drawSubtitleOnCanvas("");
+            }
+        }
+
+        // --- TTS (OKUMA) MANTIĞI ---
+        if (!ttsEnabled || videoPlayer.paused) return;
+
+        if (foundIndex !== -1 && foundIndex !== currentSubtitleIndex) {
+            currentSubtitleIndex = foundIndex;
+            speakSubtitle(activeSub);
+        } else if (foundIndex === -1) {
+            currentSubtitleIndex = -1; 
+        }
+    });
+
+    // Akıllı Hız Konuşma Fonksiyonu (Öncekiyle aynı mantık)
+    function speakSubtitle(sub) {
+        synth.cancel();
+        const utterance = new SpeechSynthesisUtterance(sub.text);
+        utterance.lang = 'tr-TR';
+        utterance.volume = parseFloat(ttsVolumeSlider.value);
+        const trVoice = getTurkishVoice();
+        if(trVoice) utterance.voice = trVoice;
+
+        const duration = sub.endTime - sub.startTime;
+        const charCount = sub.text.length;
+        const userBaseRate = parseFloat(baseRateSlider.value);
+        // Ortalama okuma hızı sabiti (saniyede karakter)
+        const avgCharsPerSec = 13; 
+        const estimatedTimeAtNormalSpeed = charCount / avgCharsPerSec;
+        const estimatedTimeAtUserRate = estimatedTimeAtNormalSpeed / userBaseRate;
+
+        let finalRate = userBaseRate;
+        if (estimatedTimeAtUserRate > duration) {
+            // Süre yetmiyorsa hızlandır (+%10 güvenlik payı)
+            let requiredRate = (estimatedTimeAtNormalSpeed / duration) * 1.1;
+            if (requiredRate > 10) requiredRate = 10; // Tarayıcı limiti
+            finalRate = requiredRate;
+        }
+        utterance.rate = finalRate;
+        synth.speak(utterance);
+    }
+
+</script>
+</body>
+</html>

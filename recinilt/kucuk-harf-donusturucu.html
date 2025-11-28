@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Küçük Harf Çevirici</title>
+    <style>
+        /* CSS Başlangıcı */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box; /* Padding'in genişliğe dahil olmasını sağlar */
+            min-height: 300px; /* Metin alanı için yeterli yükseklik */
+            resize: vertical;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745; /* Yeşil tonu */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        /* CSS Sonu */
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔡 Metni Küçük Harfe Çevirici</h1>
+
+    <textarea id="metinAlani" placeholder="Lütfen çevirmek istediğiniz uzun metni buraya yapıştırın..."></textarea>
+
+    <button onclick="kucukHarfYap()">Tümünü Küçük Harf Yap</button>
+
+</div>
+
+<script>
+    /* JavaScript Başlangıcı */
+    function kucukHarfYap() {
+        // 1. Metin alanını (textarea) DOM'dan al
+        const metinAlani = document.getElementById('metinAlani');
+        
+        // 2. Metin alanındaki mevcut değeri al
+        let metin = metinAlani.value;
+        
+        // 3. Metni, JavaScript'in yerleşik .toLowerCase() metodu ile küçük harfe çevir
+        // toLocaleLowerCase() metodu, Türkçe (ve diğer dillerdeki) özel karakterleri (İ, I gibi)
+        // doğru şekilde küçük harfe çevirmek için daha güvenilir bir yoldur.
+        let kucukMetin = metin.toLocaleLowerCase('tr-TR'); 
+        
+        // 4. Küçük harfe çevrilmiş metni metin alanına geri yaz
+        metinAlani.value = kucukMetin;
+
+        // Kullanıcıya işlemin tamamlandığını bildirmek için (isteğe bağlı)
+        if (metin.trim() !== "") {
+             console.log("Metin başarıyla küçük harfe çevrildi.");
+        }
+    }
+    /* JavaScript Sonu */
+</script>
+
+</body>
+</html>
