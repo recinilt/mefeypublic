@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resmi Nöbet Listesi Oluşturucu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .weekend {
+            background-color: #ffe6e6;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #ffe6e6;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+            padding: 10px;
+            background-color: #e6ffe6;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resmi Nöbet Listesi Oluşturucu</h1>
+    
+    <div class="form-section">
+        <h2>1. Tarih Seçimi</h2>
+        <label for="year">Yıl:</label>
+        <input type="number" id="year" min="2024" max="2100" value="2025" required>
+        
+        <label for="month">Ay:</label>
+        <select id="month" required>
+            <option value="">Seçiniz</option>
+            <option value="1">Ocak</option>
+            <option value="2">Şubat</option>
+            <option value="3">Mart</option>
+            <option value="4">Nisan</option>
+            <option value="5">Mayıs</option>
+            <option value="6">Haziran</option>
+            <option value="7">Temmuz</option>
+            <option value="8">Ağustos</option>
+            <option value="9">Eylül</option>
+            <option value="10">Ekim</option>
+            <option value="11">Kasım</option>
+            <option value="12">Aralık</option>
+        </select>
+    </div>
+
+    <div class="form-section">
+        <h2>2. Gerçek Doktor Nöbet Listesi</h2>
+        <p class="help-text">Her satıra bir doktor yazın. Format: İsim, gün numaraları (virgülle ayrılmış)<br>
+        Örnek: Dr. Ahmet, 1, 5, 10, 15</p>
+        <textarea id="realDoctorList" placeholder="Dr. Ahmet, 1, 5, 10, 15&#10;Dr. Mehmet, 2, 7, 12, 18&#10;Dr. Ayşe, 3, 8, 14, 20"></textarea>
+    </div>
+
+    <div class="form-section">
+        <h2>3. Gerçek Hemşire Nöbet Listesi</h2>
+        <p class="help-text">Her satıra bir hemşire yazın. Format: İsim, gün numaraları (virgülle ayrılmış)<br>
+        Örnek: Hemşire Fatma, 1, 6, 11, 16</p>
+        <textarea id="realNurseList" placeholder="Hemşire Fatma, 1, 6, 11, 16&#10;Hemşire Zeynep, 2, 8, 13, 19&#10;Hemşire Ali, 3, 9, 15, 21"></textarea>
+    </div>
+
+    <button onclick="generateSchedule()">Resmi Nöbet Listesi Oluştur</button>
+
+    <div id="messageArea"></div>
+
+    <div class="result-section" id="resultSection">
+        <h2>Resmi Nöbet Listesi</h2>
+        <table id="scheduleTable"></table>
+    </div>
+
+    <script>
+        function parseInput(text) {
+            const lines = text.trim().split('\n');
+            const people = [];
+            
+            for (let line of lines) {
+                if (!line.trim()) continue;
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length < 2) continue;
+                
+                const name = parts[0];
+                const days = parts.slice(1).map(d => parseInt(d)).filter(d => !isNaN(d));
+                people.push({ name, realDays: days, assignedDays: [] });
+            }
+            
+            return people;
+        }
+
+        function isWeekday(year, month, day) {
+            const date = new Date(year, month - 1, day);
+            const dayOfWeek = date.getDay();
+            return dayOfWeek >= 1 && dayOfWeek <= 5; // Pazartesi-Cuma
+        }
+
+        function hasConsecutive(days) {
+            const sorted = [...days].sort((a, b) => a - b);
+            for (let i = 0; i < sorted.length - 1; i++) {
+                if (sorted[i + 1] - sorted[i] === 1) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getMaxGapBetweenShifts(days) {
+            if (days.length < 2) return 0;
+            const sorted = [...days].sort((a, b) => a - b);
+            let maxGap = 0;
+            for (let i = 0; i < sorted.length - 1; i++) {
+                const gap = sorted[i + 1] - sorted[i];
+                if (gap > maxGap) maxGap = gap;
+            }
+            return maxGap;
+        }
+
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generateSchedule() {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = '';
+
+            const year = parseInt(document.getElementById('year').value);
+            const month = parseInt(document.getElementById('month').value);
+            
+            if (!year || !month) {
+                messageArea.innerHTML = '<div class="error">Lütfen yıl ve ay seçiniz!</div>';
+                return;
+            }
+
+            const doctors = parseInput(document.getElementById('realDoctorList').value);
+            const nurses = parseInput(document.getElementById('realNurseList').value);
+
+            if (doctors.length === 0 || nurses.length === 0) {
+                messageArea.innerHTML = '<div class="error">Lütfen doktor ve hemşire listelerini giriniz!</div>';
+                return;
+            }
+
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const shiftsPerDoctor = Math.floor(daysInMonth / doctors.length);
+            const shiftsPerNurse = Math.floor(daysInMonth / nurses.length);
+
+            let success = false;
+            let attempts = 0;
+            let doctorSchedule = [];
+            let nurseSchedule = [];
+
+            while (!success && attempts < 10000) {
+                attempts++;
+                doctorSchedule = Array(daysInMonth).fill(null);
+                nurseSchedule = Array(daysInMonth).fill(null);
+                doctors.forEach(d => d.assignedDays = []);
+                nurses.forEach(n => n.assignedDays = []);
+
+                // Hafta içi günleri önce işle
+                const weekdayDays = [];
+                const weekendDays = [];
+                
+                for (let day = 1; day <= daysInMonth; day++) {
+                    if (isWeekday(year, month, day)) {
+                        weekdayDays.push(day);
+                    } else {
+                        weekendDays.push(day);
+                    }
+                }
+
+                // Hafta içi günlere atama yap (gerçek liste ile uyumlu)
+                let weekdaySuccess = true;
+                for (let day of weekdayDays) {
+                    let doctorAssigned = false;
+                    let nurseAssigned = false;
+
+                    // Bu gün gerçek listede olan doktor veya hemşireleri bul
+                    const availableDoctors = doctors.filter(d => 
+                        d.realDays.includes(day) && 
+                        d.assignedDays.length < shiftsPerDoctor &&
+                        !hasConsecutive([...d.assignedDays, day]) &&
+                        getMaxGapBetweenShifts([...d.assignedDays, day]) <= 10
+                    );
+                    
+                    const availableNurses = nurses.filter(n => 
+                        n.realDays.includes(day) && 
+                        n.assignedDays.length < shiftsPerNurse &&
+                        !hasConsecutive([...n.assignedDays, day]) &&
+                        getMaxGapBetweenShifts([...n.assignedDays, day]) <= 10
+                    );
+
+                    // En az biri gerçek listede olmalı
+                    if (availableDoctors.length > 0 || availableNurses.length > 0) {
+                        if (availableDoctors.length > 0) {
+                            const doctor = availableDoctors[Math.floor(Math.random() * availableDoctors.length)];
+                            doctorSchedule[day - 1] = doctor.name;
+                            doctor.assignedDays.push(day);
+                            doctorAssigned = true;
+                        }
+
+                        if (availableNurses.length > 0) {
+                            const nurse = availableNurses[Math.floor(Math.random() * availableNurses.length)];
+                            nurseSchedule[day - 1] = nurse.name;
+                            nurse.assignedDays.push(day);
+                            nurseAssigned = true;
+                        }
+
+                        // Atanmayan pozisyon için rastgele seç
+                        if (!doctorAssigned) {
+                            const availDocs = doctors.filter(d => 
+                                d.assignedDays.length < shiftsPerDoctor &&
+                                !hasConsecutive([...d.assignedDays, day]) &&
+                                getMaxGapBetweenShifts([...d.assignedDays, day]) <= 10
+                            );
+                            if (availDocs.length > 0) {
+                                const doctor = availDocs[Math.floor(Math.random() * availDocs.length)];
+                                doctorSchedule[day - 1] = doctor.name;
+                                doctor.assignedDays.push(day);
+                            } else {
+                                // Uygun değilse, blok ve gap kontrolü olmadan ata
+                                const fallbackDocs = doctors.filter(d => d.assignedDays.length < shiftsPerDoctor);
+                                if (fallbackDocs.length > 0) {
+                                    const doctor = fallbackDocs[Math.floor(Math.random() * fallbackDocs.length)];
+                                    doctorSchedule[day - 1] = doctor.name;
+                                    doctor.assignedDays.push(day);
+                                }
+                            }
+                        }
+
+                        if (!nurseAssigned) {
+                            const availNurs = nurses.filter(n => 
+                                n.assignedDays.length < shiftsPerNurse &&
+                                !hasConsecutive([...n.assignedDays, day]) &&
+                                getMaxGapBetweenShifts([...n.assignedDays, day]) <= 10
+                            );
+                            if (availNurs.length > 0) {
+                                const nurse = availNurs[Math.floor(Math.random() * availNurs.length)];
+                                nurseSchedule[day - 1] = nurse.name;
+                                nurse.assignedDays.push(day);
+                            } else {
+                                // Uygun değilse, blok ve gap kontrolü olmadan ata
+                                const fallbackNurs = nurses.filter(n => n.assignedDays.length < shiftsPerNurse);
+                                if (fallbackNurs.length > 0) {
+                                    const nurse = fallbackNurs[Math.floor(Math.random() * fallbackNurs.length)];
+                                    nurseSchedule[day - 1] = nurse.name;
+                                    nurse.assignedDays.push(day);
+                                }
+                            }
+                        }
+                    } else {
+                        // Gerçek listede kimse yoksa, uygun birisini ata
+                        if (!doctorAssigned) {
+                            const availDocs = doctors.filter(d => 
+                                d.assignedDays.length < shiftsPerDoctor &&
+                                !hasConsecutive([...d.assignedDays, day]) &&
+                                getMaxGapBetweenShifts([...d.assignedDays, day]) <= 10
+                            );
+                            if (availDocs.length > 0) {
+                                const doctor = availDocs[Math.floor(Math.random() * availDocs.length)];
+                                doctorSchedule[day - 1] = doctor.name;
+                                doctor.assignedDays.push(day);
+                            } else {
+                                const fallbackDocs = doctors.filter(d => d.assignedDays.length < shiftsPerDoctor);
+                                if (fallbackDocs.length > 0) {
+                                    const doctor = fallbackDocs[Math.floor(Math.random() * fallbackDocs.length)];
+                                    doctorSchedule[day - 1] = doctor.name;
+                                    doctor.assignedDays.push(day);
+                                }
+                            }
+                        }
+
+                        if (!nurseAssigned) {
+                            const availNurs = nurses.filter(n => 
+                                n.assignedDays.length < shiftsPerNurse &&
+                                !hasConsecutive([...n.assignedDays, day]) &&
+                                getMaxGapBetweenShifts([...n.assignedDays, day]) <= 10
+                            );
+                            if (availNurs.length > 0) {
+                                const nurse = availNurs[Math.floor(Math.random() * availNurs.length)];
+                                nurseSchedule[day - 1] = nurse.name;
+                                nurse.assignedDays.push(day);
+                            } else {
+                                const fallbackNurs = nurses.filter(n => n.assignedDays.length < shiftsPerNurse);
+                                if (fallbackNurs.length > 0) {
+                                    const nurse = fallbackNurs[Math.floor(Math.random() * fallbackNurs.length)];
+                                    nurseSchedule[day - 1] = nurse.name;
+                                    nurse.assignedDays.push(day);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Hafta sonu günleri doldur (gerçek liste ile uyumlu olmasına gerek yok)
+                for (let day of weekendDays) {
+                    const availDocs = shuffleArray(doctors.filter(d => 
+                        d.assignedDays.length < shiftsPerDoctor &&
+                        !hasConsecutive([...d.assignedDays, day]) &&
+                        getMaxGapBetweenShifts([...d.assignedDays, day]) <= 10
+                    ));
+                    
+                    const availNurs = shuffleArray(nurses.filter(n => 
+                        n.assignedDays.length < shiftsPerNurse &&
+                        !hasConsecutive([...n.assignedDays, day]) &&
+                        getMaxGapBetweenShifts([...n.assignedDays, day]) <= 10
+                    ));
+
+                    if (availDocs.length > 0) {
+                        const doctor = availDocs[0];
+                        doctorSchedule[day - 1] = doctor.name;
+                        doctor.assignedDays.push(day);
+                    } else {
+                        // Fallback: gap kontrolü olmadan
+                        const fallbackDocs = shuffleArray(doctors.filter(d => 
+                            d.assignedDays.length < shiftsPerDoctor &&
+                            !hasConsecutive([...d.assignedDays, day])
+                        ));
+                        if (fallbackDocs.length > 0) {
+                            const doctor = fallbackDocs[0];
+                            doctorSchedule[day - 1] = doctor.name;
+                            doctor.assignedDays.push(day);
+                        }
+                    }
+
+                    if (availNurs.length > 0) {
+                        const nurse = availNurs[0];
+                        nurseSchedule[day - 1] = nurse.name;
+                        nurse.assignedDays.push(day);
+                    } else {
+                        // Fallback: gap kontrolü olmadan
+                        const fallbackNurs = shuffleArray(nurses.filter(n => 
+                            n.assignedDays.length < shiftsPerNurse &&
+                            !hasConsecutive([...n.assignedDays, day])
+                        ));
+                        if (fallbackNurs.length > 0) {
+                            const nurse = fallbackNurs[0];
+                            nurseSchedule[day - 1] = nurse.name;
+                            nurse.assignedDays.push(day);
+                        }
+                    }
+                }
+
+                // Kontrol: tüm günler dolu mu ve blok yok mu?
+                if (!doctorSchedule.includes(null) && !nurseSchedule.includes(null)) {
+                    let hasBlockDoctor = doctors.some(d => hasConsecutive(d.assignedDays));
+                    let hasBlockNurse = nurses.some(n => hasConsecutive(n.assignedDays));
+                    
+                    if (!hasBlockDoctor && !hasBlockNurse) {
+                        success = true;
+                    }
+                }
+            }
+
+            if (!success) {
+                messageArea.innerHTML = '<div class="error">Resmi nöbet listesi oluşturulamadı. Lütfen gerçek listeleri kontrol edin veya tekrar deneyin.</div>';
+                return;
+            }
+
+            messageArea.innerHTML = '<div class="success">Resmi nöbet listesi başarıyla oluşturuldu! (Deneme sayısı: ' + attempts + ')</div>';
+
+            // Tabloyu oluştur
+            displaySchedule(year, month, daysInMonth, doctorSchedule, nurseSchedule);
+        }
+
+        function displaySchedule(year, month, daysInMonth, doctorSchedule, nurseSchedule) {
+            const table = document.getElementById('scheduleTable');
+            table.innerHTML = '';
+
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'].forEach(day => {
+                const th = document.createElement('th');
+                th.textContent = day;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            let row = document.createElement('tr');
+            let currentDay = 0;
+            
+            let firstDay = new Date(year, month - 1, 1).getDay();
+            firstDay = (firstDay === 0) ? 7 : firstDay;
+
+            // Boş hücreleri ekle
+            for (let i = 1; i < firstDay; i++) {
+                const emptyCell = document.createElement('td');
+                row.appendChild(emptyCell);
+                currentDay++;
+            }
+
+            // Günleri ekle
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('td');
+                const isWeekend = !isWeekday(year, month, day);
+                if (isWeekend) {
+                    cell.classList.add('weekend');
+                }
+                
+                cell.innerHTML = `<strong>${day}</strong><br>
+                                 Dr: ${doctorSchedule[day - 1]}<br>
+                                 Hem: ${nurseSchedule[day - 1]}`;
+                row.appendChild(cell);
+                currentDay++;
+
+                if (currentDay % 7 === 0 || day === daysInMonth) {
+                    tbody.appendChild(row);
+                    row = document.createElement('tr');
+                }
+            }
+
+            table.appendChild(tbody);
+            document.getElementById('resultSection').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
