@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📁 GitHub Dosya Yükleyici</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .upload-section, .text-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover, .text-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: block;
+            padding: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .file-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #4a90e2;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .text-area {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 150px;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #4caf50, #45a049);
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .status-message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status-message.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .upload-section, .text-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📁 GitHub Dosya Yükleyici</h1>
+            <p>Dosyalarınızı ve notlarınızı GitHub'a kolayca yükleyin</p>
+        </div>
+
+        <div class="main-content">
+            <div class="info-box">
+                <strong>ℹ️ Bilgi:</strong>
+                Dosyalar ve notlar GitHub'daki "önemli" klasörüne kaydedilecektir.
+            </div>
+
+            <!-- Dosya Yükleme Bölümü -->
+            <div class="upload-section">
+                <div class="section-title">
+                    📎 Dosya Yükle
+                </div>
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" class="file-input" accept="image/*,.pdf,.txt,.doc,.docx" multiple>
+                    <label for="fileInput" class="file-input-label">
+                        📤 Dosya Seç (Resim, PDF, TXT, DOC, DOCX)
+                    </label>
+                </div>
+                <div id="fileInfo" class="file-info"></div>
+                <div class="btn-container">
+                    <button id="uploadFileBtn" class="btn" disabled onclick="uploadFile()">
+                        ☁️ Dosyayı GitHub'a Yükle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Metin Kaydetme Bölümü -->
+            <div class="text-section">
+                <div class="section-title">
+                    📝 Metin Ekle/Kaydet
+                </div>
+                <textarea id="textInput" class="text-area" placeholder="Kaydetmek istediğiniz metni buraya yazın..."></textarea>
+                <div class="btn-container">
+                    <button id="saveTextBtn" class="btn success" onclick="saveText()">
+                        💾 Metni JSON'a Kaydet
+                    </button>
+                </div>
+            </div>
+
+            <!-- Yükleme Durumu -->
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">İşlem yapılıyor...</p>
+            </div>
+
+            <!-- Durum Mesajı -->
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </div>
+
+    <!-- GitHub Parametreleri -->
+    <script src="5t-github-parametreleri.js"></script>
+
+    <script>
+        let selectedFiles = [];
+
+        // Dosya seçildiğinde
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFiles = Array.from(e.target.files);
+            const fileInfo = document.getElementById('fileInfo');
+            const uploadBtn = document.getElementById('uploadFileBtn');
+
+            if (selectedFiles.length > 0) {
+                let infoHTML = '<div style="font-weight: bold; margin-bottom: 10px;">Seçilen Dosyalar:</div>';
+                selectedFiles.forEach((file, index) => {
+                    const sizeKB = (file.size / 1024).toFixed(2);
+                    infoHTML += `
+                        <div style="padding: 8px; background: #f0f0f0; border-radius: 5px; margin: 5px 0;">
+                            <div class="file-name">${index + 1}. ${file.name}</div>
+                            <div class="file-size">Boyut: ${sizeKB} KB | Tip: ${file.type || 'Bilinmiyor'}</div>
+                        </div>
+                    `;
+                });
+                fileInfo.innerHTML = infoHTML;
+                fileInfo.classList.add('active');
+                uploadBtn.disabled = false;
+            } else {
+                fileInfo.classList.remove('active');
+                uploadBtn.disabled = true;
+            }
+        });
+
+        // Dosya yükleme fonksiyonu
+        async function uploadFile() {
+            if (selectedFiles.length === 0) {
+                showStatus('Lütfen önce bir dosya seçin!', 'error');
+                return;
+            }
+
+            showLoading(true);
+            hideStatus();
+
+            try {
+                for (const file of selectedFiles) {
+                    await uploadSingleFile(file);
+                }
+                showStatus(`✅ ${selectedFiles.length} dosya başarıyla yüklendi!`, 'success');
+                
+                // Formu temizle
+                document.getElementById('fileInput').value = '';
+                document.getElementById('fileInfo').classList.remove('active');
+                document.getElementById('uploadFileBtn').disabled = true;
+                selectedFiles = [];
+            } catch (error) {
+                showStatus('❌ Hata: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Tek dosya yükleme
+        async function uploadSingleFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                
+                reader.onload = async function(e) {
+                    try {
+                        const content = e.target.result.split(',')[1]; // Base64 içerik
+                        const path = `önemli/${file.name}`;
+
+                        // Önce dosyanın var olup olmadığını kontrol et
+                        const checkUrl = `https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${path}`;
+                        
+                        let sha = null;
+                        try {
+                            const checkResponse = await fetch(checkUrl, {
+                                headers: {
+                                    'Authorization': `token ${token}`,
+                                    'Accept': 'application/vnd.github.v3+json'
+                                }
+                            });
+                            
+                            if (checkResponse.ok) {
+                                const data = await checkResponse.json();
+                                sha = data.sha;
+                            }
+                        } catch (e) {
+                            // Dosya yoksa devam et
+                        }
+
+                        // Dosyayı yükle veya güncelle
+                        const uploadUrl = `https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${path}`;
+                        const uploadData = {
+                            message: `${file.name} dosyası eklendi/güncellendi`,
+                            content: content
+                        };
+
+                        if (sha) {
+                            uploadData.sha = sha;
+                        }
+
+                        const response = await fetch(uploadUrl, {
+                            method: 'PUT',
+                            headers: {
+                                'Authorization': `token ${token}`,
+                                'Accept': 'application/vnd.github.v3+json',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(uploadData)
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Dosya yüklenemedi');
+                        }
+
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                };
+
+                reader.onerror = function() {
+                    reject(new Error('Dosya okunamadı'));
+                };
+
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Metin kaydetme fonksiyonu
+        async function saveText() {
+            const textInput = document.getElementById('textInput');
+            const text = textInput.value.trim();
+
+            if (!text) {
+                showStatus('Lütfen kaydetmek için bir metin girin!', 'error');
+                return;
+            }
+
+            showLoading(true);
+            hideStatus();
+
+            try {
+                const jsonPath = `önemli/${dosyaAdi}`;
+                const checkUrl = `https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${jsonPath}`;
+
+                // Mevcut JSON dosyasını kontrol et
+                let existingData = [];
+                let sha = null;
+
+                try {
+                    const response = await fetch(checkUrl, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        sha = data.sha;
+                        const content = atob(data.content);
+                        existingData = JSON.parse(content);
+                    }
+                } catch (e) {
+                    // Dosya yoksa yeni array oluştur
+                    existingData = [];
+                }
+
+                // Yeni girdiyi ekle
+                const newEntry = {
+                    timestamp: new Date().toISOString(),
+                    date: new Date().toLocaleString('tr-TR'),
+                    text: text
+                };
+
+                existingData.push(newEntry);
+
+                // JSON'u güncelle
+                const jsonContent = JSON.stringify(existingData, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
+
+                const uploadData = {
+                    message: 'Yeni metin girişi eklendi',
+                    content: base64Content
+                };
+
+                if (sha) {
+                    uploadData.sha = sha;
+                }
+
+                const uploadResponse = await fetch(checkUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(uploadData)
+                });
+
+                if (!uploadResponse.ok) {
+                    const errorData = await uploadResponse.json();
+                    throw new Error(errorData.message || 'Metin kaydedilemedi');
+                }
+
+                showStatus('✅ Metin başarıyla kaydedildi!', 'success');
+                textInput.value = '';
+            } catch (error) {
+                showStatus('❌ Hata: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Yardımcı fonksiyonlar
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            if (show) {
+                loading.classList.add('active');
+            } else {
+                loading.classList.remove('active');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideStatus();
+                }, 5000);
+            }
+        }
+
+        function hideStatus() {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.className = 'status-message';
+        }
+
+        // Sayfa yüklendiğinde bilgi ver
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                showStatus('ℹ️ Hazır! Dosya seçin veya metin girin.', 'info');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
