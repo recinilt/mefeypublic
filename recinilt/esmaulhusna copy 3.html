@@ -69,7 +69,7 @@
 
         .mode-selector {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -261,11 +261,6 @@
             max-width: 600px;
             height: 400px;
             margin-bottom: 25px;
-            transition: height 0.3s ease;
-        }
-
-        .card-wrapper.tall {
-            height: 550px;
         }
 
         .card {
@@ -324,16 +319,6 @@
 
         .card-back .card-content {
             font-size: 2em;
-        }
-
-        .card-wrapper.tall .card-content {
-            font-size: 2em;
-        }
-
-        .card-wrapper.tall .card-back .card-content {
-            font-size: 1.3em;
-            line-height: 1.6;
-            white-space: pre-line;
         }
 
         .card-hint {
@@ -487,24 +472,12 @@
                 height: 350px;
             }
 
-            .card-wrapper.tall {
-                height: 500px;
-            }
-
             .card-content {
                 font-size: 1.8em;
             }
 
             .card-back .card-content {
                 font-size: 1.4em;
-            }
-
-            .card-wrapper.tall .card-content {
-                font-size: 1.5em;
-            }
-
-            .card-wrapper.tall .card-back .card-content {
-                font-size: 1.1em;
             }
 
             .stats-grid {
@@ -533,7 +506,7 @@
 
     <div class="container">
         <div class="header fade-in">
-            <h1><img src="gunes-hilal.png" alt="Güneş - Hilal" width="50"> Esmâ-ü'l-Hüsnâ</h1>
+            <h1>🌟 Esmâ-ü'l-Hüsnâ</h1>
             <p>Allah'ın 99 Güzel İsmini Öğren</p>
         </div>
 
@@ -542,17 +515,11 @@
             <div class="mode-selector">
                 <button class="mode-btn active" onclick="selectMode('category')">📚 Kategorilere Göre</button>
                 <button class="mode-btn" onclick="selectMode('shuffle')">🔀 Karıştır (Tümü)</button>
-                <button class="mode-btn" onclick="selectMode('baybars')">💜 Vahdetî Derviş Jargonu</button>
             </div>
 
             <div class="category-selector active" id="categorySelector">
                 <h4 style="margin-bottom: 10px; color: var(--text-primary);">Kategori Seç</h4>
                 <div id="categoryGrid"></div>
-            </div>
-
-            <div class="category-selector" id="baybarsSelector">
-                <h4 style="margin-bottom: 10px; color: var(--text-primary);">Vahdetî Derviş Jargonu Tanımları</h4>
-                <div id="baybarsGrid"></div>
             </div>
 
             <div class="learning-mode">
@@ -749,19 +716,6 @@
             ]
         };
 
-        // Vahdetî Derviş Jargonu Tanımları - Baybars Emre
-        const BaybarsEmre = {
-            "Celâl - Cemâl": {
-                esma: "Celâl - Cemâl",
-                meaning: `Celâl - Cemâl dendiğinde, Tanrı'nın, evren, olaylar, nesneler ve İnsan'a hem hoşuna giden (cemâl) tecelliler, hem hoşuna gitmeyen (celâl) tecelliler deneyimletmesi kastedilir.
-
-tâ ki Adem, celâl - cemâl ile kemâl'e varsın, yani tekamül etsin, esmae kullehâ'yı derinlemesine öğrensin.
-
-cemâl - celâl - kemâl
-illâ hû 💜`
-            }
-        };
-
         let currentMode = 'category';
         let selectedCategory = null;
         let learningMode = 'esma-to-meaning';
@@ -806,55 +760,6 @@ illâ hû 💜`
             });
         }
 
-        // Initialize Baybars Emre definitions
-        function initBaybarsDefinitions() {
-            const grid = document.getElementById('baybarsGrid');
-            Object.keys(BaybarsEmre).forEach(term => {
-                const termContainer = document.createElement('div');
-                termContainer.style.marginBottom = '10px';
-                
-                const btn = document.createElement('button');
-                btn.className = 'category-btn';
-                btn.textContent = term;
-                btn.onclick = () => toggleBaybarsContent(term);
-                
-                const content = document.createElement('div');
-                content.className = 'category-content';
-                content.id = `baybars-content-${term}`;
-                
-                const item = BaybarsEmre[term];
-                const esmaDiv = document.createElement('div');
-                esmaDiv.className = 'esma-item';
-                esmaDiv.innerHTML = `
-                    <div class="esma-name">${item.esma}</div>
-                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
-                `;
-                content.appendChild(esmaDiv);
-                
-                termContainer.appendChild(btn);
-                termContainer.appendChild(content);
-                grid.appendChild(termContainer);
-            });
-        }
-
-        let currentOpenBaybarsTerm = null;
-
-        function toggleBaybarsContent(term) {
-            const content = document.getElementById(`baybars-content-${term}`);
-            
-            // Close previously open term
-            if (currentOpenBaybarsTerm && currentOpenBaybarsTerm !== term) {
-                const prevContent = document.getElementById(`baybars-content-${currentOpenBaybarsTerm}`);
-                if (prevContent) {
-                    prevContent.classList.remove('active');
-                }
-            }
-            
-            // Toggle current term
-            content.classList.toggle('active');
-            currentOpenBaybarsTerm = content.classList.contains('active') ? term : null;
-        }
-
         function toggleCategoryContent(category) {
             const content = document.getElementById(`content-${category}`);
             
@@ -880,17 +785,10 @@ illâ hû 💜`
             event.target.classList.add('active');
             
             const categorySelector = document.getElementById('categorySelector');
-            const baybarsSelector = document.getElementById('baybarsSelector');
-            
             if (mode === 'category') {
                 categorySelector.classList.add('active');
-                baybarsSelector.classList.remove('active');
-            } else if (mode === 'baybars') {
-                categorySelector.classList.remove('active');
-                baybarsSelector.classList.add('active');
             } else {
                 categorySelector.classList.remove('active');
-                baybarsSelector.classList.remove('active');
                 selectedCategory = null;
                 document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             }
@@ -928,9 +826,6 @@ illâ hû 💜`
                 });
                 // SHUFFLE EVERY TIME - FIX #1
                 currentCards = currentCards.sort(() => Math.random() - 0.5);
-            } else if (currentMode === 'baybars') {
-                // Vahdetî Derviş Jargonu mode
-                currentCards = Object.values(BaybarsEmre);
             } else {
                 currentCards = [...esmaData[selectedCategory]];
             }
@@ -956,20 +851,12 @@ illâ hû 💜`
 
             const card = currentCards[currentIndex];
             const flashcard = document.getElementById('flashcard');
-            const cardWrapper = document.querySelector('.card-wrapper');
             const frontLabel = document.getElementById('frontLabel');
             const frontContent = document.getElementById('frontContent');
             const backContent = document.getElementById('backContent');
 
             flashcard.classList.remove('flipped');
             isFlipped = false;
-
-            // Check if this is a Baybars Emre definition (longer text)
-            if (currentMode === 'baybars' || card.meaning.length > 200) {
-                cardWrapper.classList.add('tall');
-            } else {
-                cardWrapper.classList.remove('tall');
-            }
 
             if (learningMode === 'esma-to-meaning') {
                 frontLabel.textContent = 'ESMA';
@@ -1117,7 +1004,6 @@ illâ hû 💜`
         // Initialize on load
         window.onload = function() {
             initCategories();
-            initBaybarsDefinitions();
         };
     </script>
 </body>
