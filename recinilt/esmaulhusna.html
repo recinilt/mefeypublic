@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esmâ-ü'l-Hüsnâ Hafıza Kartları</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c5f2d;
+            --secondary: #d4af37;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1a1a1a;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 15px 25px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(44, 95, 45, 0.3);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-selector {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .category-selector.active {
+            display: block;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .category-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--secondary);
+            background: white;
+            color: var(--text-primary);
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .category-btn.selected {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .category-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            margin-top: 10px;
+            padding: 0 15px;
+        }
+
+        .category-content.active {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .esma-item {
+            padding: 10px;
+            margin-bottom: 8px;
+            background: white;
+            border-left: 3px solid var(--primary);
+            border-radius: 5px;
+        }
+
+        .esma-name {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .esma-meaning {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .learning-mode {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .learning-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .learning-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .learning-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 95, 45, 0.4);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .card-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-container.active {
+            display: flex;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            height: 30px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9em;
+        }
+
+        .card-wrapper {
+            perspective: 1000px;
+            width: 100%;
+            max-width: 600px;
+            height: 400px;
+            margin-bottom: 25px;
+            transition: height 0.3s ease;
+        }
+
+        .card-wrapper.tall {
+            height: 600px;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s;
+            cursor: pointer;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            background: linear-gradient(135deg, var(--primary), #3d7f3f);
+            color: white;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .card-back::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .card-back::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .card-back::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .card-back::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .card-label {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .card-content {
+            font-size: 2.5em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .card-back .card-content {
+            font-size: 2em;
+        }
+
+        .card-wrapper.tall .card-content {
+            font-size: 2em;
+        }
+
+        .card-wrapper.tall .card-back .card-content {
+            font-size: 1.2em;
+            line-height: 1.8;
+            white-space: pre-line;
+            text-align: left;
+            max-height: 450px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .card-wrapper.tall .card-back .card-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .card-wrapper.tall .card-back .card-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .card-wrapper.tall .card-back .card-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 10px;
+        }
+
+        .card-wrapper.tall .card-back .card-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .card-hint {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .card-back .card-hint {
+            margin-top: 10px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .know-btn {
+            background: #27ae60;
+            color: white;
+        }
+
+        .know-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .dont-know-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .dont-know-btn:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .next-btn {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .next-btn:hover {
+            background: #c9a02d;
+            transform: translateY(-2px);
+        }
+
+        .bottom-controls {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border: 2px solid white;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .stats {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-wrapper {
+                height: 350px;
+            }
+
+            .card-wrapper.tall {
+                height: 550px;
+            }
+
+            .card-wrapper.tall .card-back .card-content {
+                font-size: 1em;
+                max-height: 400px;
+            }
+
+            .card-content {
+                font-size: 1.8em;
+            }
+
+            .card-back .card-content {
+                font-size: 1.4em;
+            }
+
+            .card-wrapper.tall .card-content {
+                font-size: 1.5em;
+            }
+
+            .card-wrapper.tall .card-back .card-content {
+                font-size: 1.1em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙 Tema</button>
+
+    <div class="container">
+        <div class="header fade-in">
+            <h1>🕌 Esmâ-ü'l-Hüsnâ</h1>
+            <p>Allah'ın 99 Güzel İsmini Öğren</p>
+        </div>
+
+        <div class="controls fade-in">
+            <h3 style="margin-bottom: 15px; color: var(--text-primary);">Çalışma Modunu Seç</h3>
+            <div class="mode-selector">
+                <button class="mode-btn active" onclick="selectMode('category')">📚 Kategorilere Göre</button>
+                <button class="mode-btn" onclick="selectMode('shuffle')">🔀 Karıştır (Tümü)</button>
+                <button class="mode-btn" onclick="selectMode('baybars')">💜 Vahdetî Derviş Jargonu</button>
+            </div>
+
+            <div class="category-selector active" id="categorySelector">
+                <h4 style="margin-bottom: 10px; color: var(--text-primary);">Kategori Seç</h4>
+                <div id="categoryGrid"></div>
+            </div>
+
+            <div class="category-selector" id="baybarsSelector">
+                <h4 style="margin-bottom: 10px; color: var(--text-primary);">Vahdetî Derviş Jargonu Tanımları</h4>
+                <div id="baybarsGrid"></div>
+            </div>
+
+            <div class="learning-mode">
+                <button class="learning-btn active" onclick="selectLearningMode('esma-to-meaning')">
+                    Esma → Anlam
+                </button>
+                <button class="learning-btn" onclick="selectLearningMode('meaning-to-esma')">
+                    Anlam → Esma
+                </button>
+            </div>
+
+            <button class="start-btn" onclick="startLearning()">🚀 Başla</button>
+        </div>
+
+        <div class="card-container" id="cardContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill">0 / 0</div>
+            </div>
+
+            <div class="card-wrapper">
+                <div class="card" id="flashcard" onclick="flipCard()">
+                    <div class="card-face card-front">
+                        <div class="card-label" id="frontLabel">ESMA</div>
+                        <div class="card-content" id="frontContent">er-Rahmân</div>
+                        <div class="card-hint">🔄 Kartı çevirmek için tıkla</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="card-label">CEVAP</div>
+                        <div class="card-content" id="backContent">Bütün mahlûkâta merhamet eden</div>
+                        <div class="card-hint">🔄 Tekrar görmek için tıkla<br>📜 Uzun metinler için kaydırabilirsin</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-actions">
+                <button class="action-btn dont-know-btn" onclick="markCard(false)">❌ Bilmiyorum</button>
+                <button class="action-btn know-btn" onclick="markCard(true)">✓ Biliyorum</button>
+            </div>
+            
+            <div class="card-actions">
+                <button class="action-btn" style="background: #95a5a6;" onclick="previousCard()" id="prevBtn">⬅️ Önceki</button>
+                <button class="action-btn next-btn" onclick="nextCard()">➡️ Sonraki</button>
+            </div>
+
+            <div class="bottom-controls">
+                <button class="control-btn" onclick="restartLearning()">🔄 Yeniden Başla</button>
+                <button class="control-btn" onclick="backToMenu()">🏠 Ana Menü</button>
+            </div>
+
+            <div class="stats">
+                <h3 style="margin-bottom: 10px; color: var(--text-primary);">📊 İstatistikler</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statKnown">0</div>
+                        <div class="stat-label">Biliyorum</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statUnknown">0</div>
+                        <div class="stat-label">Bilmiyorum</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statProgress">0%</div>
+                        <div class="stat-label">İlerleme</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const esmaData = {
+            "RAHMET VE ŞEFKAT": [
+                { esma: "er-Rahmân", meaning: "Bütün mahlûkâta merhamet eden, hepsine de nîmetler veren" },
+                { esma: "er-Rahîm", meaning: "Pek ziyâde merhamet edici, bilhassa mü'minlere rahmet eden" },
+                { esma: "el-Ğaffâr", meaning: "Mağfireti pek bol olan. Dilediği kullarını da günahlardan koruyan" },
+                { esma: "el-Ğafûr", meaning: "Mağfireti çok olan, bütün günahları bağışlayan" },
+                { esma: "el-Afüvv", meaning: "Affı çok. Hiçbir sorumluluk kalmayacak şekilde günahları affeden" },
+                { esma: "et-Tevvâb", meaning: "Kullarını tevbeye sevkeden, tevbeleri çokça kabûl edip, günahları bağışlayan" },
+                { esma: "er-Raûf", meaning: "Çok re'fet ve şefkat sâhibi" },
+                { esma: "el-Vedûd", meaning: "İyi kullarını seven, onları rahmet ve rızâsına erdiren. Sevilmeye lâyık" },
+                { esma: "el-Halîm", meaning: "Suçluların cezâsını vermeye gücü yettiği hâlde onlara yumuşak davranan" }
+            ],
+            "KUDRET VE GÜÇLÜLÜK": [
+                { esma: "el-Azîz", meaning: "Yenilmeyen yegâne gâlip" },
+                { esma: "el-Cebbâr", meaning: "Kırılanları onaran, eksikleri tamamlayan, irâdesini her durumda yürüten" },
+                { esma: "el-Kahhâr", meaning: "Her şeye, her istediğini yapacak surette gâlib ve hâkim" },
+                { esma: "el-Kaviyy", meaning: "Çok kuvvetli, her şeye gücü yeten, kudretli" },
+                { esma: "el-Metîn", meaning: "Çok sağlam, kuvveti çok ve şiddetli olan" },
+                { esma: "el-Kâdir", meaning: "İstediğini, istediği gibi yapmaya gücü yeten" },
+                { esma: "el-Muktedir", meaning: "Kuvvet ve kudret sâhipleri üzerinde istediği gibi tasarruf eden" },
+                { esma: "el-Mukaddim", meaning: "İstediğini ileri geçiren, öne alan" },
+                { esma: "el-Muahhir", meaning: "İstediğini geri koyan, arkaya bırakan" },
+                { esma: "el-Mâni'", meaning: "Dilemediği şeyin gerçekleşmesine müsaade etmeyen, kötü şeylere mâni olan" },
+                { esma: "el-Bâis", meaning: "Ölüleri diriltip kabirlerinden kaldıran; gönüllerde saklı olanları meydana çıkaran" }
+            ],
+            "YARATICILIK VE İRADE": [
+                { esma: "el-Hâlık", meaning: "Her şeyin varlığını ve halleri tayin ve tesbit eden ve ona göre yaratan" },
+                { esma: "el-Bâri'", meaning: "Eşyâyı ve her şeyin âzâlarını birbirine uygun bir hâlde yaratan" },
+                { esma: "el-Musavvir", meaning: "Tasvîr eden, her şeye bir şekil ve hususiyet veren" },
+                { esma: "el-Mübdi'", meaning: "Mahlûkatı maddesiz ve örneksiz olarak ilk baştan yaratan" },
+                { esma: "el-Mu'îd", meaning: "Yaratılmışları yok ettikten sonra tekrar yaratan" },
+                { esma: "el-Muhyî", meaning: "Hayat veren, can bağışlayan, sağlık veren" },
+                { esma: "el-Mümît", meaning: "Canlı bir mahlûkun ölümünü yaratan, öldüren" },
+                { esma: "el-Bedî'", meaning: "Örneksiz, misalsiz, acîb ve hayret verici âlemler îcad eden" },
+                { esma: "ed-Dârr", meaning: "Elem ve zarar verici şeyleri yaratan" },
+                { esma: "en-Nâfi'", meaning: "Hayır ve menfaat verici şeyleri yaratan, fayda veren" }
+            ],
+            "EGEMENLİK VE HÜKÜMDÂRLIK": [
+                { esma: "el-Melik", meaning: "Görünen ve görünmeyen alemlerin sahibi" },
+                { esma: "el-Müheymin", meaning: "Kâinâtın bütün işlerini gözetip yöneten ve koruyan" },
+                { esma: "el-Hakem", meaning: "Hükmeden, hakkı yerine getiren, hükmünü eksiksiz icrâ eden" },
+                { esma: "el-Vâlî", meaning: "Mahlûkatın işlerini yoluna koyan, kâinatı tek başına tedbîr ve idare eden" },
+                { esma: "Mâlikü'l-Mülk", meaning: "Bütün mülkün mâliki ve hâkimi. Mülkünde dilediği gibi tasarruf eder" },
+                { esma: "el-Mütekebbir", meaning: "Her şeyde ve her hâdisede büyüklüğünü gösteren" },
+                { esma: "el-Mu'izz", meaning: "İzzet ve şeref veren, ağırlayan" },
+                { esma: "el-Müzill", meaning: "Zillete düşüren, hor ve hakîr eden" },
+                { esma: "el-Hâfıd", meaning: "Yukarıdan aşağıya indiren, alçaltan, zillete düşüren" },
+                { esma: "er-Râfi'", meaning: "Yukarı kaldıran, yükselten, yücelten" }
+            ],
+            "İLİM VE HİKMET": [
+                { esma: "el-Alîm", meaning: "Her şeyi hakkıyla ve çok iyi bilen" },
+                { esma: "el-Habîr", meaning: "Her şeyin iç yüzünden, gizli taraflarından haberdar olan" },
+                { esma: "el-Hakîm", meaning: "Bütün emirleri ve işleri hikmetli, yerli yerinde ve sağlam olan" },
+                { esma: "el-Muhsî", meaning: "Her şeyin sayısını ve miktarını tek tek ve bütün ayrıntılarıyla bilen" },
+                { esma: "el-Basîr", meaning: "Hakkıyla gören" },
+                { esma: "es-Semi'", meaning: "Hakkıyla işiten" },
+                { esma: "er-Rakîb", meaning: "Bütün varlıklar üzerinde gözcü, bütün işler murakabesi altında bulunan" },
+                { esma: "eş-Şehîd", meaning: "Her zaman ve her şeyi gözlemiş olarak bilen, her yerde hâzır ve nâzır olan" },
+                { esma: "el-Latîf", meaning: "En ince işlerin bütün inceliklerini bilen, ihtiyacı en ince noktasına kadar bilip karşılayan" },
+                { esma: "el-Bâtın", meaning: "Gizli olan; duyu organları ile idrâk edilemeyen, mâhiyeti bilinemeyen" },
+                { esma: "ez-Zâhir", meaning: "Âşikâr olan, kat'î delillerle bilinen" },
+                { esma: "el-Hâdî", meaning: "Hidâyeti yaratan, yol gösteren, murada erdiren" },
+                { esma: "en-Nûr", meaning: "Âlemleri nurlandıran; sîmalara, zihinlere ve gönüllere nûr bahşeden" }
+            ],
+            "CÖMERTLİK VE İHSAN": [
+                { esma: "el-Vehhâb", meaning: "Çeşit çeşit nimetleri devamlı bağışlayıp duran. Her zaman, her yerde bol bol veren" },
+                { esma: "er-Rezzâk", meaning: "Yaratılmışlara, faydalanacakları şeyleri ihsân eden, bedenlerin ve ruhların gıdasını veren" },
+                { esma: "el-Kerîm", meaning: "Keremi, lütuf ve ihsânı bol, her türlü fazilete sahip olan" },
+                { esma: "eş-Şekûr", meaning: "Sâlih amelleri, daha ziyâdesiyle karşılayan, az tâat karşılığında çok büyük dereceler veren" },
+                { esma: "el-Vâsi'", meaning: "Geniş ve müsaadekâr. İlmi, ihsânı, rahmeti, kudreti her şeyi kaplamıştır" },
+                { esma: "el-Ğaniyy", meaning: "Çok zengin ve her şeyden müstağnî" },
+                { esma: "el-Muğnî", meaning: "İstediğini zengin eden, tatmin eden" },
+                { esma: "el-Berr", meaning: "Kulları hakkında kolaylık isteyen; iyilik ve bahşişi çok olan" },
+                { esma: "el-Mâcid", meaning: "Kadr ü şânı büyük, kerem ve semâhati bol" }
+            ],
+            "TEMİZLİK VE YÜCELİK": [
+                { esma: "el-Kuddûs", meaning: "Hatâdan, gafletten, aczden ve her türlü eksiklikten münezzeh/çok uzak ve pek temiz" },
+                { esma: "es-Selâm", meaning: "Her çeşit ârıza ve hâdiselerden sâlim kalan, kullarını selâmete çıkaran" },
+                { esma: "el-Aliyy", meaning: "Her hususta, her şeyden yüce olan. Her şey kendisinin emrinde ve hükmü altında olan" },
+                { esma: "el-Kebîr", meaning: "Büyüklükte kendisinden daha büyüğü düşünülemeyen, bütün büyüklükler kendisine mahsus" },
+                { esma: "el-Azîm", meaning: "Bütün büyüklüklerin sâhibi. Zâtının ve sıfatlarının mâhiyeti anlaşılamayacak kadar ulvî" },
+                { esma: "el-Celîl", meaning: "Celâdet, azamet ve heybet sâhibi, celâl sıfatları ile muttasıf" },
+                { esma: "el-Mecîd", meaning: "Zâtı şerefli, ef'âli güzel olan, her türlü övgüye lâyık bulunan" },
+                { esma: "el-Müteâlî", meaning: "Yaratılmışlar hakkında aklın mümkün gördüğü her şeyden pek yüce ve pek münezzeh" },
+                { esma: "Zü'l-Celâli ve'l-İkrâm", meaning: "Hem büyüklük ve azamet, hem de fazl u kerem sâhibi" },
+                { esma: "el-Hamîd", meaning: "Ancak kendisine hamd ü senâ olunan, bütün varlığın diliyle biricik övülen" },
+                { esma: "el-Bâkî", meaning: "Varlığı devamlı olan, sonu olmayan" }
+            ],
+            "KORUMA VE GÜVEN": [
+                { esma: "el-Mü'min", meaning: "Gönüllerde îman ışığı yakan, kendine sığınanlara eman verip onları koruyan" },
+                { esma: "el-Hafîz", meaning: "Yapılan işleri bütün tafsilâtıyla tutan, her şeyi belli vaktine kadar âfât ve belâlardan saklayan" },
+                { esma: "el-Vekîl", meaning: "Kendisine tevdi edilen işleri en güzel şekilde neticelendiren, güvenilip dayanılan" },
+                { esma: "el-Veliyy", meaning: "İyi kullarına dost olan, yardım eden" },
+                { esma: "el-Mukît", meaning: "Her yaratılmışın azığını ve gıdasını tayin eden, azıkları beden ve kalblere gönderen" },
+                { esma: "el-Kâbıd", meaning: "Sıkan, daraltan, rızkı daraltan, canlıların rûhunu alan" },
+                { esma: "el-Bâsıt", meaning: "Açan, genişleten, rızkı bollaştıran, ruhları bedenlerine yayan" }
+            ],
+            "ADALET VE DENGE": [
+                { esma: "el-Adl", meaning: "Mutlak adâlet sahibi, aşırılığa meyletmeyen" },
+                { esma: "el-Muksit", meaning: "Bütün işlerini denk, birbirine uygun ve yerli yerinde yapan. Adâlet sâhibi" },
+                { esma: "el-Hasîb", meaning: "Herkesin yapıp ettiklerinin, bütün tafsilât ve teferruatıyla hesabını iyi bilen" },
+                { esma: "el-Müntekım", meaning: "Suçluları, adâleti ile müstehak oldukları cezaya çarptıran" },
+                { esma: "er-Reşîd", meaning: "Bütün işleri ezelî takdîrine göre yürütüp, bir nizam ve hikmet üzere âkıbetine ulaştıran" }
+            ],
+            "AÇMA VE KOLAYLAŞTIRMA": [
+                { esma: "el-Fettâh", meaning: "Her türlü müşkülleri açan ve kolaylaştıran, iyilik kapılarını açan" },
+                { esma: "el-Mücîb", meaning: "Kendine duâ edip yalvaranların isteklerini işitip cevab veren" },
+                { esma: "el-Halîm", meaning: "Suçluların cezâsını vermeye gücü yettiği hâlde onlara yumuşak davranan" },
+                { esma: "es-Sabûr", meaning: "Çok sabırlı" }
+            ],
+            "BİRLİK VE VARLIK": [
+                { esma: "el-Vâhid", meaning: "Tek. Zâtında, sıfatlarında, işlerinde asla şerîki/ortağı, nazîri/benzeri bulunmayan" },
+                { esma: "es-Samed", meaning: "Hâcetlerin bitirilmesi için tek merci', kimseye ve hiçbir şeye muhtaç olmayan" },
+                { esma: "el-Hayy", meaning: "Dâimâ diri; her şeyi bilen ve her şeye gücü yeten" },
+                { esma: "el-Kayyûm", meaning: "Gökleri, yeri, her şeyi ayakta tutan. Her şeyin varlığı kendisine bağlı olup kâinatı idare eden" },
+                { esma: "el-Hakk", meaning: "Fiilen var olan, mevcûdiyeti ve uluhiyeti gerçek olan. Hakikaten vâr olan yalnız O'dur" },
+                { esma: "el-Evvel", meaning: "Her varlıktan mukaddem olan, başlangıcı olmayan" },
+                { esma: "el-Âhir", meaning: "Varlığının sonu olmayan" },
+                { esma: "el-Vâcid", meaning: "Hiçbir şeye ihtiyacı olmayan, müstağnî; istediğini, istediği vakit bulan" },
+                { esma: "el-Vâris", meaning: "Servetlerin geçici sâhipleri elleri boş olarak yokluğa döndükleri zaman servetlerin hakikî sâhibi olan" }
+            ],
+            "TOPLAMA VE NİZAM": [
+                { esma: "el-Câmi'", meaning: "İstediğini, istediği zaman, istediği yerde toplayan. Kıyâmet günü hesâba çekmek için mahlukatı toplayan" }
+            ]
+        };
+
+        // Vahdetî Derviş Jargonu Tanımları - Baybars Emre
+        const BaybarsEmre = {
+            "Celâl - Cemâl": {
+                esma: "Celâl - Cemâl",
+                meaning: `Celâl - Cemâl dendiğinde, Tanrı'nın, evren, olaylar, nesneler ve İnsan'a hem hoşuna giden (cemâl) tecelliler, hem hoşuna gitmeyen (celâl) tecelliler deneyimletmesi kastedilir.
+
+tâ ki Adem, celâl - cemâl ile kemâl'e varsın, yani tekamül etsin, esmae kullehâ'yı derinlemesine öğrensin.
+
+cemâl - celâl - kemâl
+illâ hû 💜`
+            },
+            "fark - cem - cem'ül cem": {
+                esma: "fark - cem - cem'ül cem",
+                meaning: `fark - cem - cem'ül cem
+
+dendiğinde;
+
+fark bu kesret (çokluk) alemidir. bizim "realite dünyası' dediğimiz. diyalektik zevc uzme geçerlidir. iyi/kötü, doğru yanlış, güzel/çirkin v.b. akli yargıların ve varlıkların suretleri öğrenilir fark'ta. dosdoğru kullanmayı yani aklı. Fark'ta ilahi kaos vardır. hiçbir şey %100 olmaz. kesrettir, çan eğrisidir, zevctir yani.
+
+cem: kesretten öte Hakikatin temsil edildiği,  yani BİRLİK (vahdet, varoluş, bütün) bilincinin alanıdır. Karakter ve Organizmal Benlikler, yani sen, ben, o, şu, bu, biz, siz, onlar, şunlar, bunlar YOKTUR. ilahi kaos ilahi kozmos'a (uyuma) dönüşür.
+
+bu nedenle ârifler ve âşıklar söze başlarken "fark'tan konuşuyorum" ya da "cem'den konuşuyorum" diye belirtirler.
+
+cem'ül cem: sessizlik, susuş... yani artık iş akılda ve dilde değildir, herkesciklerin kendi kalbindedir.
+
+illâ hû 💜`
+            },
+            "Birbirine Çırılçıplak Kalmak": {
+                esma: "Birbirine Çırılçıplak Kalmak",
+                meaning: `Birbirine Çırılçıplak Kalmak
+
+dendiğinde; artık hiçbir maske takmadan, birbirine bırak yalan söylemeyi gerçeği saklamak zorunda bile hissetmeden, kendilerinin en karanlık yanlarını bile birbirine anlatabilen,
+
+ve tüm bunlar olurken birbirlerini zerre kadar bile yargılamayan, hatta birbirlerini ve hiç kimseyi ayru gayru gör(e)meyen, karakter benlikten böylesine kurtuluşmuk zirve hâli anlatılır.
+
+bu farkta olmaz, yapılmaz, insanlar seni linç eder. bu, bu seviye bilince ve âşka gelmişlerin sadece birbiri arasında olabilen bir hâldir.
+
+ve Zümrüd-ü Anka'nın yuvasını bulmak kadar zordur.
+
+evet, İnsan için imkansız şeyler vardır ama Tanrı için imkansız diye bir şey yoktur. 💜`
+            },
+            "4 Vahdet Mertebesi": {
+                esma: "4 Vahdet Mertebesi",
+                meaning: `dendiğinde: aşağıdan yukarı şu dört vahdet (birlik) anlaşıyı ifade edilir.
+
+1- Vahdet-i Kusûd  (avâmın vahdeti): Kalbine tek Tanrı inancını yerleştirmiş, onun dışındaki varlıklar ile ilgilenmeyen, Tanrı'nın şeriâtını uygulamaya çalışan, kendi iradesini Tanrı'nın iradesine uydurmaya çalışanların birlik mertebesidir.
+
+2- Vahdet-i Mevcûd (varlıkların birliği - panteizm): Evren ve  nesnelerin (varlıkların) bizzat oldukları bu fizik halleri ile Tanrı'nın kendisini oluşturduğunu kabul eden birlik anlayışıdır.
+
+3- Vahdet-i Şuhûd (görünüşlerin birliği)
+vahdet-i vücûd'a inanmaktan korkan sunnî tasavvufçuların ondan revize ederek ortaya çıkardığı birlik anlayışıdır.
+Tanrı fiilleri ile (zâhiren) ve sıfatları ile (bâtınen) insana tecelli ettiğinde kişi benliğini Tanrı'da fenâ eder (yok eder) baktığı gördüğü her şeyde Tanrı'nın bir/tek  oluşunu (el-Vâhid) görür.
+İnsanı, evreni ve nesneleri ne fizik ne metafizik olarak Tanrı'da kabul etmez, onlar ayrıdır. Tanrı, ontolojik olarak bunlardan uzak ve âşkındır. (lâ ilâhe illallah).
+gerçekte vahdetten ziyade bir çeşit tevhid anlayışıdır.
+
+4- Vahdet-i Vucûd (Varlığın Birliği, Non-Dualite)
+vucûd kelimesi Arapçada "varlık" demektir.
+İnsan, evren ve nesnelerinin vahdet-i mevcûd (panteizmde)  inanıldığı gibi fiziksel olarak Tanrı'yı oluşturduğunu değil, metafizik olarak Tanrı'dan ve Tanrı'da olduklarını, ve dâhî Tanrı'nın zâtının bundan da öte olduğunu söyledikleri birlik inancıdır.
+yani, hakikatte Tanrı'dan başka varlık yoktur (lâ mevcûde illâllah). İnsan, evren ve nesneler Tanrı'nın tecelli etmiş hâlleridir, gerçek varlık değillerdir, olamazlar, onların hakikatleri Tanrı'nın ilmindedir, kendi bu hallerinde değil.
+çünkü Tanrı Ehâd ve Samed'dir, yani sonsuz ve sınırsız zâtında tek (Ehâd) ve asla bölünemeyen ve arttırılamayandır. (Samed).`
+            }
+        };
+
+        let currentMode = 'category';
+        let selectedCategory = null;
+        let learningMode = 'esma-to-meaning';
+        let currentCards = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let stats = {
+            known: 0,
+            unknown: 0
+        };
+        let currentOpenCategory = null;
+
+        // Initialize categories
+        function initCategories() {
+            const grid = document.getElementById('categoryGrid');
+            Object.keys(esmaData).forEach(category => {
+                const categoryContainer = document.createElement('div');
+                categoryContainer.style.marginBottom = '10px';
+                
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = `${category} (${esmaData[category].length})`;
+                btn.onclick = () => toggleCategoryContent(category);
+                
+                const content = document.createElement('div');
+                content.className = 'category-content';
+                content.id = `content-${category}`;
+                
+                esmaData[category].forEach(item => {
+                    const esmaDiv = document.createElement('div');
+                    esmaDiv.className = 'esma-item';
+                    esmaDiv.innerHTML = `
+                        <div class="esma-name">${item.esma}</div>
+                        <div class="esma-meaning">${item.meaning}</div>
+                    `;
+                    content.appendChild(esmaDiv);
+                });
+                
+                categoryContainer.appendChild(btn);
+                categoryContainer.appendChild(content);
+                grid.appendChild(categoryContainer);
+            });
+        }
+
+        // Initialize Baybars Emre definitions
+        function initBaybarsDefinitions() {
+            const grid = document.getElementById('baybarsGrid');
+            Object.keys(BaybarsEmre).forEach(term => {
+                const termContainer = document.createElement('div');
+                termContainer.style.marginBottom = '10px';
+                
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = term;
+                btn.onclick = () => toggleBaybarsContent(term);
+                
+                const content = document.createElement('div');
+                content.className = 'category-content';
+                content.id = `baybars-content-${term}`;
+                
+                const item = BaybarsEmre[term];
+                const esmaDiv = document.createElement('div');
+                esmaDiv.className = 'esma-item';
+                esmaDiv.innerHTML = `
+                    <div class="esma-name">${item.esma}</div>
+                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                `;
+                content.appendChild(esmaDiv);
+                
+                termContainer.appendChild(btn);
+                termContainer.appendChild(content);
+                grid.appendChild(termContainer);
+            });
+        }
+
+        let currentOpenBaybarsTerm = null;
+
+        function toggleBaybarsContent(term) {
+            const content = document.getElementById(`baybars-content-${term}`);
+            
+            // Close previously open term
+            if (currentOpenBaybarsTerm && currentOpenBaybarsTerm !== term) {
+                const prevContent = document.getElementById(`baybars-content-${currentOpenBaybarsTerm}`);
+                if (prevContent) {
+                    prevContent.classList.remove('active');
+                }
+            }
+            
+            // Toggle current term
+            content.classList.toggle('active');
+            currentOpenBaybarsTerm = content.classList.contains('active') ? term : null;
+        }
+
+        function toggleCategoryContent(category) {
+            const content = document.getElementById(`content-${category}`);
+            
+            // Close previously open category
+            if (currentOpenCategory && currentOpenCategory !== category) {
+                const prevContent = document.getElementById(`content-${currentOpenCategory}`);
+                if (prevContent) {
+                    prevContent.classList.remove('active');
+                }
+            }
+            
+            // Toggle current category
+            content.classList.toggle('active');
+            currentOpenCategory = content.classList.contains('active') ? category : null;
+            
+            // Also select this category for learning
+            selectCategory(category);
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const categorySelector = document.getElementById('categorySelector');
+            const baybarsSelector = document.getElementById('baybarsSelector');
+            
+            if (mode === 'category') {
+                categorySelector.classList.add('active');
+                baybarsSelector.classList.remove('active');
+            } else if (mode === 'baybars') {
+                categorySelector.classList.remove('active');
+                baybarsSelector.classList.add('active');
+            } else {
+                categorySelector.classList.remove('active');
+                baybarsSelector.classList.remove('active');
+                selectedCategory = null;
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            }
+        }
+
+        function selectCategory(category) {
+            selectedCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+            // Find and highlight the clicked button
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                if (btn.textContent.startsWith(category)) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function selectLearningMode(mode) {
+            learningMode = mode;
+            document.querySelectorAll('.learning-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function startLearning() {
+            if (currentMode === 'category' && !selectedCategory) {
+                alert('Lütfen bir kategori seçin!');
+                return;
+            }
+
+            // Prepare cards
+            if (currentMode === 'shuffle') {
+                currentCards = [];
+                Object.values(esmaData).forEach(category => {
+                    currentCards = currentCards.concat(category);
+                });
+                // SHUFFLE EVERY TIME - FIX #1
+                currentCards = currentCards.sort(() => Math.random() - 0.5);
+            } else if (currentMode === 'baybars') {
+                // Vahdetî Derviş Jargonu mode
+                currentCards = Object.values(BaybarsEmre);
+            } else {
+                currentCards = [...esmaData[selectedCategory]];
+            }
+
+            currentIndex = 0;
+            stats = { known: 0, unknown: 0 };
+            
+            document.querySelector('.controls').style.display = 'none';
+            document.getElementById('cardContainer').classList.add('active');
+            
+            showCard();
+            updateProgress();
+            updateStats();
+            updatePrevButton();
+        }
+
+        function showCard() {
+            // FIX #4: Check if we've gone past the last card
+            if (currentIndex >= currentCards.length) {
+                showCompletionMessage();
+                return;
+            }
+
+            const card = currentCards[currentIndex];
+            const flashcard = document.getElementById('flashcard');
+            const cardWrapper = document.querySelector('.card-wrapper');
+            const frontLabel = document.getElementById('frontLabel');
+            const frontContent = document.getElementById('frontContent');
+            const backContent = document.getElementById('backContent');
+
+            flashcard.classList.remove('flipped');
+            isFlipped = false;
+
+            // Check if this is a Baybars Emre definition (longer text)
+            if (currentMode === 'baybars' || card.meaning.length > 200) {
+                cardWrapper.classList.add('tall');
+            } else {
+                cardWrapper.classList.remove('tall');
+            }
+
+            if (learningMode === 'esma-to-meaning') {
+                frontLabel.textContent = 'ESMA';
+                frontContent.textContent = card.esma;
+                backContent.textContent = card.meaning;
+            } else {
+                frontLabel.textContent = 'ANLAM';
+                frontContent.textContent = card.meaning;
+                backContent.textContent = card.esma;
+            }
+
+            updateProgress();
+            updatePrevButton();
+        }
+
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            isFlipped = !isFlipped;
+            
+            // Play sound effect (optional)
+            playFlipSound();
+        }
+
+        function playFlipSound() {
+            // Simple beep sound using Web Audio API
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = isFlipped ? 800 : 600;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Ignore audio errors
+            }
+        }
+
+        function markCard(known) {
+            if (known) {
+                stats.known++;
+            } else {
+                stats.unknown++;
+            }
+            updateStats();
+            nextCard();
+        }
+
+        // FIX #5: Next card should flip first if needed, then change card
+        function nextCard() {
+            // If card is not flipped, flip it first
+            if (!isFlipped) {
+                flipCard();
+                return;
+            }
+            
+            // Card is already flipped, move to next
+            currentIndex++;
+            showCard();
+        }
+
+        // FIX #2: Add previous card function
+        function previousCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                showCard();
+            }
+        }
+
+        // FIX #2: Update previous button state
+        function updatePrevButton() {
+            const prevBtn = document.getElementById('prevBtn');
+            if (currentIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = '0.5';
+                prevBtn.style.cursor = 'not-allowed';
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = '1';
+                prevBtn.style.cursor = 'pointer';
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progressFill');
+            const percentage = ((currentIndex + 1) / currentCards.length) * 100;
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = `${currentIndex + 1} / ${currentCards.length}`;
+        }
+
+        function updateStats() {
+            document.getElementById('statKnown').textContent = stats.known;
+            document.getElementById('statUnknown').textContent = stats.unknown;
+            const total = stats.known + stats.unknown;
+            const progressPercent = total > 0 ? Math.round((stats.known / total) * 100) : 0;
+            document.getElementById('statProgress').textContent = progressPercent + '%';
+        }
+
+        function showCompletionMessage() {
+            const frontContent = document.getElementById('frontContent');
+            const backContent = document.getElementById('backContent');
+            const flashcard = document.getElementById('flashcard');
+            
+            flashcard.classList.remove('flipped');
+            frontContent.innerHTML = '🎉<br>Tebrikler!<br>Tamamladınız!';
+            backContent.textContent = '';
+            
+            document.getElementById('frontLabel').textContent = '';
+            document.querySelector('.card-hint').textContent = '';
+        }
+
+        function restartLearning() {
+            currentIndex = 0;
+            stats = { known: 0, unknown: 0 };
+            
+            // Re-shuffle if in shuffle mode - FIX #1
+            if (currentMode === 'shuffle') {
+                currentCards = currentCards.sort(() => Math.random() - 0.5);
+            }
+            
+            showCard();
+            updateStats();
+        }
+
+        function backToMenu() {
+            document.querySelector('.controls').style.display = 'block';
+            document.getElementById('cardContainer').classList.remove('active');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = document.body.classList.contains('dark-mode') ? '☀️ Tema' : '🌙 Tema';
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initCategories();
+            initBaybarsDefinitions();
+        };
+    </script>
+</body>
+</html>
