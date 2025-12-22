@@ -3,395 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fraktal Çemberler</title>
+    <title>Sonsuz Çember Fraktalı - Özelleştirilebilir</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
+            margin: 0;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        
         canvas {
             display: block;
-            cursor: move;
+            image-rendering: crisp-edges;
         }
-        
-        .controls {
+        #ui {
             position: absolute;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            z-index: 10;
-        }
-        
-        .control-group {
-            margin-bottom: 15px;
-        }
-        
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        input[type="range"] {
-            width: 200px;
-        }
-        
-        input[type="color"] {
-            width: 60px;
-            height: 30px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .value-display {
-            display: inline-block;
-            margin-left: 10px;
-            color: #666;
-            font-weight: bold;
-        }
-        
-        button {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+            color: #ff0000;
+            font-family: 'Courier New', Courier, monospace;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border: 1px solid #ff0000;
             font-size: 14px;
-            margin-top: 5px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        
-        button:hover {
-            background: #45a049;
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-        
-        .info {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 12px;
-            color: #333;
+        input[type=range] {
+            cursor: pointer;
+            accent-color: #ff0000;
+        }
+        span.value {
+            font-weight: bold;
+            color: #fff;
         }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    
-    <div class="controls">
-        <div class="control-group">
-            <label>Çember Sayısı: <span class="value-display" id="circleCountValue">12</span></label>
-            <input type="range" id="circleCount" min="3" max="24" value="12" step="1">
+    <div id="ui">
+        <div class="info">
+            DERİNLİK: <span id="depth-val" class="value">0</span><br>
+            ÖLÇEK: <span id="zoom-val" class="value">1.0</span>
         </div>
-        
+        <hr style="border: 0; border-top: 1px solid #ff0000; width: 100%;">
         <div class="control-group">
-            <label>Arka Plan Rengi:</label>
-            <input type="color" id="bgColor" value="#000000">
+            <label>AKTİF KATMAN: <span id="layer-val" class="value">3</span></label>
+            <input type="range" id="layer-slider" min="1" max="5" value="3">
         </div>
-        
-        <div class="control-group">
-            <button id="resetBtn">Sıfırla</button>
+        <div style="font-size: 10px; color: #888; margin-top: 5px;">
+            Yakınlaşmak için tekerleği kaydırın
         </div>
     </div>
-    
-    <div class="info">
-        🖱️ Fare tekerleği: Zoom<br>
-        🖱️ Sürükle: Hareket ettir<br>
-        <span id="zoomLevel">Zoom: 1.0x</span><br>
-        <span id="depthLevel">Derinlik: 3</span>
-    </div>
+    <canvas id="fractalCanvas"></canvas>
 
     <script>
-        const canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('fractalCanvas');
         const ctx = canvas.getContext('2d');
+        const depthDisplay = document.getElementById('depth-val');
+        const zoomDisplay = document.getElementById('zoom-val');
+        const layerSlider = document.getElementById('layer-slider');
+        const layerDisplay = document.getElementById('layer-val');
+
+        let width, height;
+        let scale = 1.0;
+        let baseDepth = 0;
+        let maxLayers = 3;
         
-        // Canvas boyutunu ayarla (optimize edilmiş)
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Çember dizilim oranı artık 5.0
+        const FRACTAL_RATIO = 5.0; 
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
         }
-        
-        resizeCanvas();
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            draw();
+
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Katman sayısını güncelle
+        layerSlider.addEventListener('input', (e) => {
+            maxLayers = parseInt(e.target.value);
+            layerDisplay.innerText = maxLayers;
         });
-        
-        // Ayarlar
-        let circleCount = 12;
-        let bgColor = '#000000';
-        let zoom = 1;
-        let offsetX = 0;
-        let offsetY = 0;
-        let isDragging = false;
-        let lastMouseX = 0;
-        let lastMouseY = 0;
-        const maxLayers = 500;
-        
-        // Zoom seviyesine göre hangi katmanların görüneceğini hesapla
-        function getVisibleLayers() {
-            // Her 3x zoom'da bir sonraki katmana geç
-            const baseLayer = Math.max(0, Math.floor(Math.log(zoom) / Math.log(3)));
-            const layer1 = Math.max(0, Math.min(baseLayer, maxLayers - 2));
-            const layer2 = Math.max(1, Math.min(baseLayer + 1, maxLayers - 1));
-            return [layer1, layer2];
-        }
-        
-        // Belirli bir katmandaki çemberleri çiz
-        function drawLayer(layer, baseRadius) {
-            // Layer+2'nin çemberlerini çiz (böylece ara path'lar görünmez)
-            const targetLayer = layer + 2;
-            if (targetLayer > maxLayers) return;
-            
-            const positions = getLayerPositions(targetLayer, baseRadius);
-            
-            // Pozisyonları çiz
-            positions.forEach(pos => {
-                // Ekran sınırlarını kontrol et
-                const screenX = (pos.x * zoom) + window.innerWidth / 2 + offsetX;
-                const screenY = (pos.y * zoom) + window.innerHeight / 2 + offsetY;
-                const screenRadius = pos.radius * zoom;
-                
-                // Ekran dışındaysa çizme
-                if (screenX + screenRadius < 0 || screenX - screenRadius > window.innerWidth ||
-                    screenY + screenRadius < 0 || screenY - screenRadius > window.innerHeight) {
-                    return;
-                }
-                
-                // Çemberi çiz
-                ctx.strokeStyle = `hsl(${pos.hue}, 100%, 50%)`;
-                ctx.lineWidth = 1 / zoom; // Zoom'a ters orantılı - zoom arttıkça ince
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, pos.radius, 0, 2 * Math.PI);
-                ctx.stroke();
-            });
-        }
-        
-        // Katman pozisyonlarını hesapla (çizmeden)
-        function getLayerPositions(layer, baseRadius) {
-            if (layer === 0) {
-                return [{x: 0, y: 0, radius: baseRadius, hue: 0, depth: 0}];
+
+        // Fare tekerleği ile sonsuz zoom
+        window.addEventListener('wheel', (e) => {
+            const delta = e.deltaY > 0 ? 0.97 : 1.03;
+            scale *= delta;
+
+            // SONSUZ DÖNGÜ MANTIĞI:
+            if (scale > FRACTAL_RATIO) {
+                scale /= FRACTAL_RATIO;
+                baseDepth++;
+            } else if (scale < 1.0) {
+                scale *= FRACTAL_RATIO;
+                baseDepth--;
             }
             
-            const prevPositions = getLayerPositions(layer - 1, baseRadius);
-            const newPositions = [];
+            depthDisplay.innerText = baseDepth;
+            zoomDisplay.innerText = scale.toFixed(2);
+        });
+
+        /**
+         * Fraktal Çember Çizimi
+         * @param {number} x - Merkez X
+         * @param {number} y - Merkez Y
+         * @param {number} r - Yarıçap
+         * @param {number} currentDepth - Derinlik
+         */
+        function drawCircles(x, y, r, currentDepth) {
+            const sR = r * scale;
+
+            // Görünürlük kontrolü
+            if (sR < 0.2 || sR > width * 3) return;
+
+            // Çizim
+            ctx.beginPath();
+            ctx.arc(x, y, sR, 0, Math.PI * 2);
+            ctx.strokeStyle = '#ff0000';
             
-            prevPositions.forEach(pos => {
-                // Doğru yarıçap hesaplama
-                const sinValue = Math.sin(Math.PI / circleCount);
-                const circleRadius = (pos.radius * sinValue) / (1 + sinValue);
-                const angleStep = (2 * Math.PI) / circleCount;
-                const pathRadius = pos.radius - circleRadius;
-                
-                for (let i = 0; i < circleCount; i++) {
-                    const angle = i * angleStep;
-                    const cx = pos.x + pathRadius * Math.cos(angle);
-                    const cy = pos.y + pathRadius * Math.sin(angle);
-                    const hue = (pos.hue + (i / circleCount) * 360 + layer * 30) % 360;
-                    
-                    newPositions.push({
-                        x: cx,
-                        y: cy,
-                        radius: circleRadius,
-                        hue: hue,
-                        depth: layer
-                    });
+            // Katman derinliğine göre incelen çizgiler (Görsel netlik için)
+            ctx.lineWidth = Math.max(0.3, 1.5 - (currentDepth * 0.3));
+            ctx.stroke();
+
+            // Kullanıcının seçtiği katman sayısına kadar in
+            if (currentDepth < maxLayers - 1) {
+                const nextR = r / FRACTAL_RATIO;
+                const distance = r - nextR;
+
+                // 8'li dizilim (5 ölçeğinde daha geniş alan olduğu için daha çok çember sığar)
+                const count = 8;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i / count) * Math.PI * 2;
+                    const nextX = x + Math.cos(angle) * distance * scale;
+                    const nextY = y + Math.sin(angle) * distance * scale;
+                    drawCircles(nextX, nextY, nextR, currentDepth + 1);
                 }
-            });
-            
-            return newPositions;
+                
+                // Merkez çemberi
+                drawCircles(x, y, nextR, currentDepth + 1);
+            }
         }
-        
-        // Ana çizim fonksiyonu
-        function draw() {
-            // Canvas'ı temizle
-            ctx.fillStyle = bgColor;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Transformation uygula
+
+        function animate() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+
             ctx.save();
-            ctx.translate(window.innerWidth / 2 + offsetX, window.innerHeight / 2 + offsetY);
-            ctx.scale(zoom, zoom);
-            
-            // Başlangıç yarıçapı
-            const baseRadius = Math.min(window.innerWidth, window.innerHeight) * 0.35;
-            
-            // Görünür katmanları al
-            const [layer1, layer2] = getVisibleLayers();
-            
-            // Sadece en derin katmanı çiz (layer2 + 2)
-            const targetLayer = layer2 + 2;
-            if (targetLayer <= maxLayers) {
-                const positions = getLayerPositions(targetLayer, baseRadius);
-                
-                positions.forEach(pos => {
-                    // Ekran sınırlarını kontrol et
-                    const screenX = (pos.x * zoom) + window.innerWidth / 2 + offsetX;
-                    const screenY = (pos.y * zoom) + window.innerHeight / 2 + offsetY;
-                    const screenRadius = pos.radius * zoom;
-                    
-                    // Ekran dışındaysa çizme
-                    if (screenX + screenRadius < 0 || screenX - screenRadius > window.innerWidth ||
-                        screenY + screenRadius < 0 || screenY - screenRadius > window.innerHeight) {
-                        return;
-                    }
-                    
-                    // Çemberi çiz
-                    ctx.strokeStyle = `hsl(${pos.hue}, 100%, 50%)`;
-                    ctx.lineWidth = 1 / zoom;
-                    ctx.beginPath();
-                    ctx.arc(pos.x, pos.y, pos.radius, 0, 2 * Math.PI);
-                    ctx.stroke();
-                });
-            }
-            
+            ctx.translate(width / 2, height / 2);
+
+            const initialRadius = Math.min(width, height) * 0.48;
+            drawCircles(0, 0, initialRadius, 0);
+
             ctx.restore();
-            
-            // UI güncelle
-            document.getElementById('zoomLevel').textContent = `Zoom: ${zoom.toFixed(1)}x`;
-            document.getElementById('depthLevel').textContent = `Katmanlar: ${layer1} & ${layer2}`;
+            requestAnimationFrame(animate);
         }
-        
-        // Zoom fonksiyonu (fare pozisyonuna göre)
-        canvas.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            
-            const mouseX = e.clientX - window.innerWidth / 2 - offsetX;
-            const mouseY = e.clientY - window.innerHeight / 2 - offsetY;
-            
-            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-            const newZoom = zoom * zoomFactor;
-            
-            // Zoom limitleri
-            if (newZoom >= 0.05 && newZoom <= 1000) {
-                // Fare pozisyonuna göre offset ayarla
-                offsetX -= mouseX * (zoomFactor - 1);
-                offsetY -= mouseY * (zoomFactor - 1);
-                
-                zoom = newZoom;
-                draw();
-            }
-        });
-        
-        // Sürükleme
-        canvas.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            lastMouseX = e.clientX;
-            lastMouseY = e.clientY;
-            canvas.style.cursor = 'grabbing';
-        });
-        
-        canvas.addEventListener('mousemove', (e) => {
-            if (isDragging) {
-                const dx = e.clientX - lastMouseX;
-                const dy = e.clientY - lastMouseY;
-                
-                offsetX += dx;
-                offsetY += dy;
-                
-                lastMouseX = e.clientX;
-                lastMouseY = e.clientY;
-                
-                draw();
-            }
-        });
-        
-        canvas.addEventListener('mouseup', () => {
-            isDragging = false;
-            canvas.style.cursor = 'move';
-        });
-        
-        canvas.addEventListener('mouseleave', () => {
-            isDragging = false;
-            canvas.style.cursor = 'move';
-        });
-        
-        // Touch desteği (mobil)
-        let lastTouchX = 0;
-        let lastTouchY = 0;
-        let lastTouchDistance = 0;
-        
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1) {
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-            } else if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
-            }
-        });
-        
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (e.touches.length === 1) {
-                const dx = e.touches[0].clientX - lastTouchX;
-                const dy = e.touches[0].clientY - lastTouchY;
-                
-                offsetX += dx;
-                offsetY += dy;
-                
-                lastTouchX = e.touches[0].clientX;
-                lastTouchY = e.touches[0].clientY;
-                
-                draw();
-            } else if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX;
-                const dy = e.touches[0].clientY - e.touches[1].clientY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                const zoomFactor = distance / lastTouchDistance;
-                const newZoom = zoom * zoomFactor;
-                
-                if (newZoom >= 0.05 && newZoom <= 1000) {
-                    zoom = newZoom;
-                    draw();
-                }
-                
-                lastTouchDistance = distance;
-            }
-        });
-        
-        // Kontroller
-        document.getElementById('circleCount').addEventListener('input', (e) => {
-            circleCount = parseInt(e.target.value);
-            document.getElementById('circleCountValue').textContent = circleCount;
-            draw();
-        });
-        
-        document.getElementById('bgColor').addEventListener('input', (e) => {
-            bgColor = e.target.value;
-            draw();
-        });
-        
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            zoom = 1;
-            offsetX = 0;
-            offsetY = 0;
-            draw();
-        });
-        
-        // İlk çizim
-        draw();
+
+        animate();
     </script>
 </body>
 </html>
