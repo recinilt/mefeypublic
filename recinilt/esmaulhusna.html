@@ -69,7 +69,7 @@
 
         .mode-selector {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
@@ -594,6 +594,7 @@
                 <button class="mode-btn active" onclick="selectMode('category')">📚 Kategorilere Göre</button>
                 <button class="mode-btn" onclick="selectMode('shuffle')">🔀 Karıştır (Tümü)</button>
                 <button class="mode-btn" onclick="selectMode('baybars')">💜 Vahdetî Derviş Jargonu</button>
+                <button class="mode-btn" onclick="selectMode('avcioglu')">📖 AVCIOĞLU'na Göre</button>
             </div>
 
             <div class="category-selector active" id="categorySelector">
@@ -604,6 +605,11 @@
             <div class="category-selector" id="baybarsSelector">
                 <h4 style="margin-bottom: 10px; color: var(--text-primary);">Vahdetî Derviş Jargonu Tanımları</h4>
                 <div id="baybarsGrid"></div>
+            </div>
+
+            <div class="category-selector" id="avciogluSelector">
+                <h4 style="margin-bottom: 10px; color: var(--text-primary);">AVCIOĞLU'na Göre Esma Mealleri</h4>
+                <div id="avciogluGrid"></div>
             </div>
 
             <div class="learning-mode">
@@ -982,6 +988,402 @@ illâ hû 💜`
             }
         };
 
+        // AVCIOĞLU'na Göre Esma Mealleri
+        const AvciogluData = {
+            "er-Rahmân er-Rahîm": {
+                esma: "er-Rahmân er-Rahîm",
+                meaning: "(bilerek boş bırakıldı)"
+            },
+            "el-Melik": {
+                esma: "el-Melik",
+                meaning: "Yöneten"
+            },
+            "el-Kuddûs": {
+                esma: "el-Kuddûs",
+                meaning: "Lekesiz"
+            },
+            "es-Selâm": {
+                esma: "es-Selâm",
+                meaning: "esenlik"
+            },
+            "el-Mü'min": {
+                esma: "el-Mü'min",
+                meaning: "güvenen ve güvenilir"
+            },
+            "el-Müheymin": {
+                esma: "el-Müheymin",
+                meaning: "himayesine alan, koruyan"
+            },
+            "el-Azîz": {
+                esma: "el-Azîz",
+                meaning: "muzaffer"
+            },
+            "el-Cebbâr": {
+                esma: "el-Cebbâr",
+                meaning: "zorla yaptıran"
+            },
+            "el-Mütekebbir": {
+                esma: "el-Mütekebbir",
+                meaning: "büyüklük gösteren"
+            },
+            "el-Hâlık": {
+                esma: "el-Hâlık",
+                meaning: "bir şeyleri kullanarak yeni bir şey ortaya çıkaran"
+            },
+            "el-Bâri'": {
+                esma: "el-Bâri'",
+                meaning: "yeni şeyler yaratan"
+            },
+            "el-Musavvir": {
+                esma: "el-Musavvir",
+                meaning: "tasarım, tasvir yapan"
+            },
+            "el-Kahhâr": {
+                esma: "el-Kahhâr",
+                meaning: "kahreden"
+            },
+            "el-Vehhâb": {
+                esma: "el-Vehhâb",
+                meaning: "cömertçe veren"
+            },
+            "er-Rezzâk": {
+                esma: "er-Rezzâk",
+                meaning: "rızk veren"
+            },
+            "el-Fettâh": {
+                esma: "el-Fettâh",
+                meaning: "kapılar açan"
+            },
+            "el-Alîm": {
+                esma: "el-Alîm",
+                meaning: "bilen"
+            },
+            "el-Kâbıd": {
+                esma: "el-Kâbıd",
+                meaning: "daraltan, sıkan"
+            },
+            "el-Bâsıt": {
+                esma: "el-Bâsıt",
+                meaning: "genişleten rahatlatan"
+            },
+            "el-Hâfıd": {
+                esma: "el-Hâfıd",
+                meaning: "zillete düşüren"
+            },
+            "er-Râfi'": {
+                esma: "er-Râfi'",
+                meaning: "yücelten"
+            },
+            "el-Mu'izz": {
+                esma: "el-Mu'izz",
+                meaning: "şereflendiren"
+            },
+            "el-Müzill": {
+                esma: "el-Müzill",
+                meaning: "rezil eden"
+            },
+            "es-Semi'": {
+                esma: "es-Semi'",
+                meaning: "işiterek anlanyabilen"
+            },
+            "el-Basîr": {
+                esma: "el-Basîr",
+                meaning: "derinlemesine kavrayabilen"
+            },
+            "el-Hakem": {
+                esma: "el-Hakem",
+                meaning: "Hükmeden, yargı veren"
+            },
+            "el-Adl": {
+                esma: "el-Adl",
+                meaning: "adaletli"
+            },
+            "el-Latîf": {
+                esma: "el-Latîf",
+                meaning: "lutfeden"
+            },
+            "el-Habîr": {
+                esma: "el-Habîr",
+                meaning: "haberdar olan"
+            },
+            "el-Halîm": {
+                esma: "el-Halîm",
+                meaning: "gücü yettiği halde sakin ve şefkatli olabilen"
+            },
+            "el-Azîm": {
+                esma: "el-Azîm",
+                meaning: "güçlü ve dirençli"
+            },
+            "el-Ğafûr – el-Ğaffâr": {
+                esma: "el-Ğafûr – el-Ğaffâr",
+                meaning: "bir daha açmamak üzere affeden"
+            },
+            "el-A'füvv": {
+                esma: "el-A'füvv",
+                meaning: "affedici"
+            },
+            "eş-Şekûr": {
+                esma: "eş-Şekûr",
+                meaning: "karşılığını dosdoğru veren"
+            },
+            "el-Aliyy": {
+                esma: "el-Aliyy",
+                meaning: "yüce"
+            },
+            "el-Kebîr": {
+                esma: "el-Kebîr",
+                meaning: "büyüklük gösteren"
+            },
+            "el-Hafîz": {
+                esma: "el-Hafîz",
+                meaning: "muhafaza eden, koruyan"
+            },
+            "el-Mukît": {
+                esma: "el-Mukît",
+                meaning: "fiziki ve manevi gıdalandıran"
+            },
+            "el-Hasîb": {
+                esma: "el-Hasîb",
+                meaning: "hesap yapabilen, orantılayabilen"
+            },
+            "el-Celîl": {
+                esma: "el-Celîl",
+                meaning: "şiddet sahibi"
+            },
+            "el-Cemâl": {
+                esma: "el-Cemâl",
+                meaning: "güzellik sahibi"
+            },
+            "el-Kerîm": {
+                esma: "el-Kerîm",
+                meaning: "ihsan eden, cömert"
+            },
+            "er-Rakîb": {
+                esma: "er-Rakîb",
+                meaning: "kontrol altında tutan"
+            },
+            "el-Mücîb": {
+                esma: "el-Mücîb",
+                meaning: "yardım çağrısına cevap veren"
+            },
+            "el-Vâsi'": {
+                esma: "el-Vâsi'",
+                meaning: "çok yönlü ve derin"
+            },
+            "el-Hakîm": {
+                esma: "el-Hakîm",
+                meaning: "hikmet sahibi"
+            },
+            "el-Vedûd": {
+                esma: "el-Vedûd",
+                meaning: "karşılıklı derin bağlı âşkla seven ve sevilen"
+            },
+            "el-Mecîd": {
+                esma: "el-Mecîd",
+                meaning: "övgüye layık"
+            },
+            "el-Bâis": {
+                esma: "el-Bâis",
+                meaning: "ölüleri dirilten"
+            },
+            "eş-Şehîd": {
+                esma: "eş-Şehîd",
+                meaning: "gözlemci"
+            },
+            "el-Hakk": {
+                esma: "el-Hakk",
+                meaning: "gerçek"
+            },
+            "el-Vekîl": {
+                esma: "el-Vekîl",
+                meaning: "vekalet eden, başkası adına hareket eden"
+            },
+            "el-Kaviyy": {
+                esma: "el-Kaviyy",
+                meaning: "fiilen güçlü"
+            },
+            "el-Metîn": {
+                esma: "el-Metîn",
+                meaning: "dayanıklı, manen güçlü"
+            },
+            "el-Veliyy": {
+                esma: "el-Veliyy",
+                meaning: "her şartta dost"
+            },
+            "el-Hamîd": {
+                esma: "el-Hamîd",
+                meaning: "övgüye layık"
+            },
+            "el-Muhsî": {
+                esma: "el-Muhsî",
+                meaning: "sayıları ile sınıflandıran"
+            },
+            "el-Mübdi'": {
+                esma: "el-Mübdi'",
+                meaning: "benzersiz tasarım ve yaratım yapabilen"
+            },
+            "el-Mu'îd": {
+                esma: "el-Mu'îd",
+                meaning: "yeni baştan yaratabilen"
+            },
+            "el-Muhyî": {
+                esma: "el-Muhyî",
+                meaning: "Hayat veren"
+            },
+            "el-Mümît": {
+                esma: "el-Mümît",
+                meaning: "öldürebilen"
+            },
+            "el-Hayy": {
+                esma: "el-Hayy",
+                meaning: "diri, canlı"
+            },
+            "el-Kayyûm": {
+                esma: "el-Kayyûm",
+                meaning: "idare ve ikame edebilen"
+            },
+            "el-Mâcid": {
+                esma: "el-Mâcid",
+                meaning: "şanı şerefi büyük"
+            },
+            "el-Vâhid": {
+                esma: "el-Vâhid",
+                meaning: "çokluktan oluşan tek"
+            },
+            "el-Ehâd": {
+                esma: "el-Ehâd",
+                meaning: "zâtında tek"
+            },
+            "es-Samed": {
+                esma: "es-Samed",
+                meaning: "parçalanamayan, arttırılamayan bütün"
+            },
+            "el-Vâcid": {
+                esma: "el-Vâcid",
+                meaning: "aracısız bilebilen"
+            },
+            "el-Kâdir": {
+                esma: "el-Kâdir",
+                meaning: "ölçülendirebilen ve yönetebilen"
+            },
+            "el-Muktedir": {
+                esma: "el-Muktedir",
+                meaning: "yapma etme yönetme gücü olan"
+            },
+            "el-Mukaddim": {
+                esma: "el-Mukaddim",
+                meaning: "öne geçiren"
+            },
+            "el-Muahhir": {
+                esma: "el-Muahhir",
+                meaning: "geriye bırakan"
+            },
+            "el-Evvel": {
+                esma: "el-Evvel",
+                meaning: "ezeli"
+            },
+            "el-Âhir": {
+                esma: "el-Âhir",
+                meaning: "ebedi"
+            },
+            "ez-Zâhir": {
+                esma: "ez-Zâhir",
+                meaning: "aşikar, görünen"
+            },
+            "el-Bâtın": {
+                esma: "el-Bâtın",
+                meaning: "gizli, görünmeyen"
+            },
+            "el-Vâlî": {
+                esma: "el-Vâlî",
+                meaning: "düzeni yöneten"
+            },
+            "el-Müteâlî": {
+                esma: "el-Müteâlî",
+                meaning: "aşkın"
+            },
+            "el-Berr": {
+                esma: "el-Berr",
+                meaning: "kolaylık ve iyilik veren"
+            },
+            "et-Tevvâb": {
+                esma: "et-Tevvâb",
+                meaning: "özrü kabul eden"
+            },
+            "el-Müntekım": {
+                esma: "el-Müntekım",
+                meaning: "intikam alan"
+            },
+            "er-Raûf": {
+                esma: "er-Raûf",
+                meaning: "şefkatli"
+            },
+            "Mâlikü'l-Mülk": {
+                esma: "Mâlikü'l-Mülk",
+                meaning: "yönetimin ve unsurlarının sahibi"
+            },
+            "Zü'l-Celâli ve'l-İkrâm": {
+                esma: "Zü'l-Celâli ve'l-İkrâm",
+                meaning: "güzelliğe sahip ve onu ikram eden"
+            },
+            "el-Muksit": {
+                esma: "el-Muksit",
+                meaning: "yerli yerinde dosdoğru yapabilen"
+            },
+            "el-Câmi'": {
+                esma: "el-Câmi'",
+                meaning: "bir araya getirip organize eden"
+            },
+            "el-Ğaniyy": {
+                esma: "el-Ğaniyy",
+                meaning: "çok zengin, ihtiyaçsız"
+            },
+            "el-Muğnî": {
+                esma: "el-Muğnî",
+                meaning: "zengin edebilen"
+            },
+            "el-Mâni'": {
+                esma: "el-Mâni'",
+                meaning: "engelleyebilen"
+            },
+            "ed-Dârr": {
+                esma: "ed-Dârr",
+                meaning: "Elem ve zarar verici şeyleri yaratan"
+            },
+            "en-Nâfi'": {
+                esma: "en-Nâfi'",
+                meaning: "Hayır ve menfaat verici şeyleri yaratan, fayda veren"
+            },
+            "en-Nûr": {
+                esma: "en-Nûr",
+                meaning: "hakikatin göstereni"
+            },
+            "el-Hâdî": {
+                esma: "el-Hâdî",
+                meaning: "doğru yol rehberi"
+            },
+            "el-Bedî'": {
+                esma: "el-Bedî'",
+                meaning: "emsalsiz yaratabilen"
+            },
+            "el-Bâkî": {
+                esma: "el-Bâkî",
+                meaning: "varlığı sürekli olan"
+            },
+            "el-Vâris": {
+                esma: "el-Vâris",
+                meaning: "geçicilerden kalanı alan"
+            },
+            "er-Reşîd": {
+                esma: "er-Reşîd",
+                meaning: "doğruya ulaşmış"
+            },
+            "es-Sabûr": {
+                esma: "es-Sabûr",
+                meaning: "sabırlı"
+            }
+        };
+
         let currentMode = 'category';
         let selectedCategory = null;
         let learningMode = 'esma-to-meaning';
@@ -1075,6 +1477,54 @@ illâ hû 💜`
             currentOpenBaybarsTerm = content.classList.contains('active') ? term : null;
         }
 
+        function initAvciogluDefinitions() {
+            const grid = document.getElementById('avciogluGrid');
+            Object.keys(AvciogluData).forEach(term => {
+                const termContainer = document.createElement('div');
+                termContainer.style.marginBottom = '10px';
+                
+                const btn = document.createElement('button');
+                btn.className = 'category-btn';
+                btn.textContent = term;
+                btn.onclick = () => toggleAvciogluContent(term);
+                
+                const content = document.createElement('div');
+                content.className = 'category-content';
+                content.id = `avcioglu-content-${term}`;
+                
+                const item = AvciogluData[term];
+                const esmaDiv = document.createElement('div');
+                esmaDiv.className = 'esma-item';
+                esmaDiv.innerHTML = `
+                    <div class="esma-name">${item.esma}</div>
+                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                `;
+                content.appendChild(esmaDiv);
+                
+                termContainer.appendChild(btn);
+                termContainer.appendChild(content);
+                grid.appendChild(termContainer);
+            });
+        }
+
+        let currentOpenAvciogluTerm = null;
+
+        function toggleAvciogluContent(term) {
+            const content = document.getElementById(`avcioglu-content-${term}`);
+            
+            // Close previously open term
+            if (currentOpenAvciogluTerm && currentOpenAvciogluTerm !== term) {
+                const prevContent = document.getElementById(`avcioglu-content-${currentOpenAvciogluTerm}`);
+                if (prevContent) {
+                    prevContent.classList.remove('active');
+                }
+            }
+            
+            // Toggle current term
+            content.classList.toggle('active');
+            currentOpenAvciogluTerm = content.classList.contains('active') ? term : null;
+        }
+
         function toggleCategoryContent(category) {
             const content = document.getElementById(`content-${category}`);
             
@@ -1101,16 +1551,24 @@ illâ hû 💜`
             
             const categorySelector = document.getElementById('categorySelector');
             const baybarsSelector = document.getElementById('baybarsSelector');
+            const avciogluSelector = document.getElementById('avciogluSelector');
             
             if (mode === 'category') {
                 categorySelector.classList.add('active');
                 baybarsSelector.classList.remove('active');
+                avciogluSelector.classList.remove('active');
             } else if (mode === 'baybars') {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.add('active');
+                avciogluSelector.classList.remove('active');
+            } else if (mode === 'avcioglu') {
+                categorySelector.classList.remove('active');
+                baybarsSelector.classList.remove('active');
+                avciogluSelector.classList.add('active');
             } else {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
+                avciogluSelector.classList.remove('active');
                 selectedCategory = null;
                 document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             }
@@ -1151,6 +1609,9 @@ illâ hû 💜`
             } else if (currentMode === 'baybars') {
                 // Vahdetî Derviş Jargonu mode
                 currentCards = Object.values(BaybarsEmre);
+            } else if (currentMode === 'avcioglu') {
+                // AVCIOĞLU'na Göre Esma Mealleri mode
+                currentCards = Object.values(AvciogluData);
             } else {
                 currentCards = [...esmaData[selectedCategory]];
             }
@@ -1338,6 +1799,7 @@ illâ hû 💜`
         window.onload = function() {
             initCategories();
             initBaybarsDefinitions();
+            initAvciogluDefinitions();
         };
     </script>
 </body>

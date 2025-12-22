@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+        <title>AI Picture Prompts - Görsel Oluşturma için En İyi Promtlar | Recep Yeni</title>
+        <meta name="description" content="Stil, atmosfer, kompozisyon ve daha fazlasını seçerek AI için mükemmel görsel promptları oluşturun. | Recep Yeni">
+        <meta name="keywords" content="AI picture prompts, AI görsel oluşturma, görsel prompt oluşturucu, Midjourney promptları, Stable Diffusion promptları, AI prompt seçici, yapay zeka görsel oluşturma">
+        <meta name="author" content="Recep Yeni">
+      
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://aipictureprompts.com/">
+        <meta property="og:title" content="AI Picture Prompts - Görsel Oluşturma için En İyi Promtlar">
+        <meta property="og:description" content="Stil, atmosfer, kompozisyon ve daha fazlasını seçerek AI için mükemmel görsel promptları oluşturun.">
+        <meta property="og:image" content="https://aipictureprompts.com/seo-cover.jpg">
+      
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://aipictureprompts.com/">
+        <meta property="twitter:title" content="AI Picture Prompts - Görsel Oluşturma için En İyi Promtlar">
+        <meta property="twitter:description" content="Stil, atmosfer, kompozisyon ve daha fazlasını seçerek AI için mükemmel görsel promptları oluşturun.">
+        <meta property="twitter:image" content="https://aipictureprompts.com/seo-cover.jpg">
+      
+        <!-- Favicon -->
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+      
+        <!-- Schema.org Structured Data -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "AI Picture Prompts",
+          "url": "https://aipictureprompts.com/",
+          "author": {
+            "@type": "Person",
+            "name": "Recep Yeni",
+            "email": "mailto:recepyeni@gmail.com"
+          },
+          "description": "Stil, atmosfer, kompozisyon ve daha fazlasını seçerek AI için mükemmel görsel promptları oluşturun.",
+          "publisher": {
+            "@type": "Organization",
+            "name": "AI Picture Prompts"
+          }
+        }
+        </script>
+      
+        <!-- CSS Dosyası -->
+        <link rel="stylesheet" href="/style.css">
+      
+      </head>
+      
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      margin-top: 40px;
+    }
+    .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+    .option {
+      background-color: white;
+      border: 2px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .option:hover {
+      border-color: #555;
+      background-color: #e0f0ff;
+    }
+    .option.selected {
+      border-color: #007bff;
+      background-color: #cce5ff;
+    }
+    #prompt-output {
+      background-color: white;
+      padding: 20px;
+      margin-top: 40px;
+      border: 2px dashed #007bff;
+      white-space: pre-wrap;
+    }
+    @media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 24px;
+    text-align: center;
+  }
+  h2 {
+    font-size: 18px;
+  }
+  #prompt-output {
+    font-size: 14px;
+  }
+  button {
+    width: 100%;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .option {
+    padding: 8px;
+    font-size: 14px;
+  }
+}
+
+
+  </style>
+
+
+    
+</head>
+<body>
+  <h1>🎨 AI Görsel Prompt Seçici: Hayalinizdeki Sanatı Oluşturun</h1>
+  <button onclick="randomGenerate()" style="margin-bottom:20px; padding:10px 20px; background:#2196F3; color:white; border:none; border-radius:5px; cursor:pointer;">🎲 Rastgele Oluştur (Random Generate)</button>
+
+  <h2>Seçim yaptıkça, en altta prompt otomatik oluşturulur.</h2>
+  
+
+  <!-- Gridler (Tüm 27 kategori) -->
+  <!-- 1. Görsel Tarzı (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Görsel Tarzı</h2>
+  <div class="grid" data-category="style">
+    <!-- Temel Stil Türleri -->
+    <div class="option">Realistik (Realistic)</div>
+    <div class="option">Hiperrealistik (Hyperrealistic)</div>
+    <div class="option">3D (3D)</div>
+    <div class="option">2D (2D)</div>
+    <div class="option">Anime (Anime)</div>
+    <div class="option">Manga (Manga)</div>
+    <div class="option">Düşük poligon (Low-poly)</div>
+    <div class="option">Piksel Sanatı (Pixel Art)</div>
+    <div class="option">İzometrik (Isometric)</div>
+    <div class="option">Vektör Sanatı (Vector Art)</div>
+    
+    <!-- Sanatsal Teknikler -->
+    <div class="option">Yağlı Boya (Oil Painting)</div>
+    <div class="option">Suluboya (Watercolor)</div>
+    <div class="option">Kurşun Kalem Eskizi (Pencil Sketch)</div>
+    <div class="option">Mürekkep Çizimi (Ink Drawing)</div>
+    <div class="option">Kömür Çizimi (Charcoal Drawing)</div>
+    <div class="option">Pastel Çizimi (Pastel Drawing)</div>
+    <div class="option">Akrilik Boyama (Acrylic Painting)</div>
+  
+    <!-- Dijital ve Yaratıcı Stiller -->
+    <div class="option">Dijital Boyama (Digital Painting)</div>
+    <div class="option">Konsept Sanatı (Concept Art)</div>
+    <div class="option">Mat Boyama (Matte Painting)</div>
+    <div class="option">Fotoğraf Birleştirme (Photobash)</div>
+    <div class="option">Kolaj (Collage)</div>
+    <div class="option">Neon Sanatı (Neon Art)</div>
+    <div class="option">Synthwave (Synthwave)</div>
+    <div class="option">Cyberpunk (Cyberpunk)</div>
+    <div class="option">Steampunk (Steampunk)</div>
+    <div class="option">Fantazi Sanatı (Fantasy Art)</div>
+    <div class="option">Bilimkurgu Sanatı (Sci-fi Art)</div>
+  
+    <!-- Soyut ve Modern Akımlar -->
+    <div class="option">Soyut (Abstract)</div>
+    <div class="option">Gerçeküstücülük (Surrealism)</div>
+    <div class="option">Minimalizm (Minimalism)</div>
+    <div class="option">Pop Art (Pop Art)</div>
+    <div class="option">Art Nouveau (Art Nouveau)</div>
+    <div class="option">İzlenimcilik (Impressionism)</div>
+    <div class="option">Dışavurumculuk (Expressionism)</div>
+    <div class="option">Kübizm (Cubism)</div>
+  
+    <!-- Özel Stil Seçenekleri -->
+    <div class="option">Karanlık Fantazi (Dark Fantasy)</div>
+    <div class="option">Noir Tarzı (Noir Style)</div>
+    <div class="option">Hikaye Kitabı İllüstrasyonu (Storybook Illustration)</div>
+    <div class="option">Çocuk Kitabı Tarzı (Children's Book Style)</div>
+    <div class="option">Kağıt Kesme Sanatı (Paper Cutout Art)</div>
+    <div class="option">Grafiti (Graffiti)</div>
+    <div class="option">Çıkartma Sanatı (Sticker Art)</div>
+  </div>
+  
+  
+  <!-- 2. Kompozisyon (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Kompozisyon</h2>
+  <div class="grid" data-category="composition">
+    <div class="option">Yakın Çekim (Close-up)</div>
+    <div class="option">Aşırı Yakın Çekim (Extreme Close-up)</div>
+    <div class="option">Orta Çekim (Medium Shot)</div>
+    <div class="option">Geniş Çekim (Wide Shot)</div>
+    <div class="option">Aşırı Geniş Çekim (Extreme Wide Shot)</div>
+    <div class="option">Üstten Görünüm (Top-down View)</div>
+    <div class="option">Kuş Bakışı (Bird's Eye View)</div>
+    <div class="option">Solucan Bakışı (Worm's Eye View)</div>
+    <div class="option">Yandan Görünüm (Side View)</div>
+    <div class="option">Önden Görünüm (Front View)</div>
+    <div class="option">Omuz Üstü (Over the Shoulder)</div>
+    <div class="option">Bakış Açısı (Point of View (POV))</div>
+    <div class="option">Düşük Açılı Çekim (Low Angle Shot)</div>
+    <div class="option">Yüksek Açılı Çekim (High Angle Shot)</div>
+    <div class="option">Simetrik Kompozisyon (Symmetrical Composition)</div>
+    <div class="option">Asimetrik Kompozisyon (Asymmetrical Composition)</div>
+    <div class="option">Üçler Kuralı (Rule of Thirds)</div>
+    <div class="option">Merkezli Kompozisyon (Centered Composition)</div>
+    <div class="option">Diyagonal Kompozisyon (Diagonal Composition)</div>
+    <div class="option">Minimal Kompozisyon (Minimal Composition)</div>
+    <div class="option">Dinamik Kompozisyon (Dynamic Composition)</div>
+    <div class="option">Kalabalık Kompozisyon (Crowded Composition)</div>
+    <div class="option">Negatif Alan Odaklı (Negative Space Focused)</div>
+    <div class="option">Çerçeve İçinde Çerçeve (Frame within a Frame)</div>
+    <div class="option">Yönlendirici Çizgiler (Leading Lines)</div>
+    <div class="option">Hollanda Açısı (Dutch Angle (Tilted Shot))</div>
+    <div class="option">Silüet Kompozisyonu (Silhouette Composition)</div>
+    <div class="option">Panoramik Görünüm (Panoramic View)</div>
+    <div class="option">Üstten Kompozisyon (Overhead Composition)</div>
+  </div>
+  
+  
+  <!-- 3. Atmosfer (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Atmosfer</h2>
+  <div class="grid" data-category="atmosphere">
+    <div class="option">Parlak (Bright)</div>
+    <div class="option">Karanlık (Dark)</div>
+    <div class="option">Mutlu (Happy)</div>
+    <div class="option">Üzgün (Sad)</div>
+    <div class="option">Dramatik (Dramatic)</div>
+    <div class="option">Mistik (Mystical)</div>
+    <div class="option">Huzurlu (Peaceful)</div>
+    <div class="option">Gergin (Tense)</div>
+    <div class="option">Romantik (Romantic)</div>
+    <div class="option">Gizemli (Mysterious)</div>
+    <div class="option">Rüya Gibi (Dreamy)</div>
+    <div class="option">Melankolik (Melancholic)</div>
+    <div class="option">Macera Dolu (Adventurous)</div>
+    <div class="option">Enerjik (Energetic)</div>
+    <div class="option">Yalnız (Lonely)</div>
+    <div class="option">Umut Dolu (Hopeful)</div>
+    <div class="option">Kasvetli (Gloomy)</div>
+    <div class="option">Neşelendirici (Uplifting)</div>
+    <div class="option">Kaprisli (Whimsical)</div>
+    <div class="option">Gerçeküstü (Surreal)</div>
+    <div class="option">Ürpertici (Chilling)</div>
+    <div class="option">Görkemli (Majestic)</div>
+    <div class="option">Sakin (Calm)</div>
+    <div class="option">Heyecan Verici (Exciting)</div>
+    <div class="option">Destansı (Epic)</div>
+    <div class="option">Yas Dolu (Mournful)</div>
+    <div class="option">Neşeli (Cheerful)</div>
+    <div class="option">Dingin (Serene)</div>
+    <div class="option">Ürkütücü (Eerie)</div>
+    <div class="option">Gerilim Dolu (Suspenseful)</div>
+  </div>
+  
+  
+  <!-- 4. Mekan (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Mekan</h2>
+  <div class="grid" data-category="location">
+    <div class="option">Orman (Forest)</div>
+    <div class="option">Yoğun Orman (Dense Jungle)</div>
+    <div class="option">Çöl (Desert)</div>
+    <div class="option">Plaj (Beach)</div>
+    <div class="option">Okyanus Altı (Ocean Underwater)</div>
+    <div class="option">Dağlar (Mountains)</div>
+    <div class="option">Kanyon (Canyon)</div>
+    <div class="option">Savana (Savannah)</div>
+    <div class="option">Donmuş Tundra (Frozen Tundra)</div>
+    <div class="option">Buzul (Glacier)</div>
+    <div class="option">Şehir (City)</div>
+    <div class="option">Fütüristik Şehir (Futuristic City)</div>
+    <div class="option">Terk Edilmiş Şehir (Abandoned City)</div>
+    <div class="option">Küçük Köy (Small Village)</div>
+    <div class="option">Kale (Castle)</div>
+    <div class="option">Ortaçağ Kasabası (Medieval Town)</div>
+    <div class="option">Antik Harabeler (Ancient Ruins)</div>
+    <div class="option">Tapınak (Temple)</div>
+    <div class="option">Mağara (Cave)</div>
+    <div class="option">Yanardağ (Volcano)</div>
+    <div class="option">Uzay İstasyonu (Space Station)</div>
+    <div class="option">Uzaylı Gezegeni (Alien Planet)</div>
+    <div class="option">Yüzen Ada (Floating Island)</div>
+    <div class="option">Gök Krallığı (Sky Kingdom)</div>
+    <div class="option">Sualtı Şehri (Underwater City)</div>
+    <div class="option">Fantazi Dünyası (Fantasy Land)</div>
+    <div class="option">Bilimkurgu Dünyası (Sci-fi World)</div>
+    <div class="option">Perili Orman (Haunted Forest)</div>
+    <div class="option">Rüya Manzarası (Dreamscape)</div>
+    <div class="option">Cyberpunk Sokağı (Cyberpunk Alley)</div>
+    <div class="option">Steampunk Kasabası (Steampunk Town)</div>
+    <div class="option">Kıyamet Sonrası Çorak Topraklar (Post-apocalyptic Wasteland)</div>
+    <div class="option">Karlı Köy (Snowy Village)</div>
+    <div class="option">Güneşli Çayır (Sunny Meadow)</div>
+    <div class="option">Çiçek Tarlası (Flower Field)</div>
+    <div class="option">Nehir Kıyısı (Riverbank)</div>
+    <div class="option">Sisli Bataklık (Misty Swamp)</div>
+    <div class="option">Batık Gemi Enkazı (Sunken Shipwreck)</div>
+  </div>
+  
+  <!-- 5. Karakter Özellikleri (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Karakter Özellikleri</h2>
+  <div class="grid" data-category="character">
+    <!-- İnsan Karakterleri -->
+    <div class="option">İnsan (Human)</div>
+    <div class="option">Çocuk (Child)</div>
+    <div class="option">Genç (Teenager)</div>
+    <div class="option">Yetişkin (Adult)</div>
+    <div class="option">Yaşlı (Elderly)</div>
+  
+    <!-- Hayvan Karakterleri -->
+    <div class="option">Hayvan (Animal)</div>
+    <div class="option">Sevimli Hayvan (Cute Animal)</div>
+    <div class="option">Vahşi Hayvan (Wild Beast)</div>
+    <div class="option">Antropomorfik Hayvan (Anthropomorphic Animal)</div>
+  
+    <!-- Fantastik Yaratıklar -->
+    <div class="option">Elf (Elf)</div>
+    <div class="option">Peri (Fairy)</div>
+    <div class="option">Cüce (Dwarf)</div>
+    <div class="option">Ork (Orc)</div>
+    <div class="option">Goblin (Goblin)</div>
+    <div class="option">Ejderha (Dragon)</div>
+    <div class="option">Anka Kuşu (Phoenix)</div>
+    <div class="option">Deniz Kızı (Mermaid)</div>
+    <div class="option">Kentaur (Centaur)</div>
+    <div class="option">Minotor (Minotaur)</div>
+    <div class="option">Tek Boynuzlu At (Unicorn)</div>
+  
+    <!-- Bilimkurgu ve Teknolojik Karakterler -->
+    <div class="option">Robot (Robot)</div>
+    <div class="option">Siborg (Cyborg)</div>
+    <div class="option">Android (Android)</div>
+    <div class="option">Uzaylı (Alien)</div>
+    <div class="option">Uzay Yolcusu (Space Traveler)</div>
+  
+    <!-- Korku ve Karanlık Karakterler -->
+    <div class="option">Vampir (Vampire)</div>
+    <div class="option">Zombi (Zombie)</div>
+    <div class="option">Hayalet (Ghost)</div>
+    <div class="option">Şeytan (Demon)</div>
+    <div class="option">Kurtadam (Werewolf)</div>
+  
+    <!-- Kahramanlar ve Savaşçılar -->
+    <div class="option">Süper Kahraman (Superhero)</div>
+    <div class="option">Kötü Adam (Villain)</div>
+    <div class="option">Şövalye (Knight)</div>
+    <div class="option">Samuray (Samurai)</div>
+    <div class="option">Korsan (Pirate)</div>
+    <div class="option">Kaşif (Explorer)</div>
+    <div class="option">Büyücü (Wizard)</div>
+    <div class="option">Cadı (Witch)</div>
+    <div class="option">Mistik Keşiş (Mystic Monk)</div>
+  
+    <!-- Özel Karakter Tipleri -->
+    <div class="option">Steampunk Maceracı (Steampunk Adventurer)</div>
+    <div class="option">Kıyamet Sonrası Hayatta Kalan (Post-apocalyptic Survivor)</div>
+    <div class="option">Zaman Yolcusu (Time Traveler)</div>
+    <div class="option">Cyberpunk Hacker (Cyberpunk Hacker)</div>
+    <div class="option">Fantazi Kahramanı (Fantasy Hero)</div>
+    <div class="option">Hikaye Kitabı Karakteri (Storybook Character)</div>
+    <div class="option">Animasyon Maskotu (Animated Mascot)</div>
+  </div>
+  
+  <!-- 6. Duygu (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Duygu</h2>
+  <div class="grid" data-category="emotion">
+    <div class="option">Mutlu (Happy)</div>
+    <div class="option">Üzgün (Sad)</div>
+    <div class="option">Kızgın (Angry)</div>
+    <div class="option">Korkmuş (Fearful)</div>
+    <div class="option">Şaşırmış (Surprised)</div>
+    <div class="option">İğrenmiş (Disgusted)</div>
+    <div class="option">Kafası Karışmış (Confused)</div>
+    <div class="option">Heyecanlı (Excited)</div>
+    <div class="option">Yalnız (Lonely)</div>
+    <div class="option">Umutlu (Hopeful)</div>
+    <div class="option">Depresif (Depressed)</div>
+    <div class="option">Melankolik (Melancholic)</div>
+    <div class="option">Romantik (Romantic)</div>
+    <div class="option">Huzurlu (Peaceful)</div>
+    <div class="option">Sakin (Calm)</div>
+    <div class="option">Neşeli (Joyful)</div>
+    <div class="option">Memnun (Content)</div>
+    <div class="option">Enerjik (Energetic)</div>
+    <div class="option">Oynak (Playful)</div>
+    <div class="option">Endişeli (Anxious)</div>
+    <div class="option">Dehşete Düşmüş (Terrified)</div>
+    <div class="option">Yas Tutan (Grieving)</div>
+    <div class="option">İyimser (Optimistic)</div>
+    <div class="option">Kötümser (Pessimistic)</div>
+    <div class="option">Nostaljik (Nostalgic)</div>
+    <div class="option">Sinirli (Frustrated)</div>
+    <div class="option">Hayran Kalmış (Amazed)</div>
+    <div class="option">Gururlu (Proud)</div>
+    <div class="option">Utanmış (Ashamed)</div>
+    <div class="option">Sıkılmış (Bored)</div>
+    <div class="option">Meraklı (Curious)</div>
+    <div class="option">Cesur (Courageous)</div>
+    <div class="option">Kıskanç (Jealous)</div>
+    <div class="option">Mahcup (Embarrassed)</div>
+    <div class="option">Müteşekkir (Grateful)</div>
+    <div class="option">Suçlu Hisseden (Guilty)</div>
+    <div class="option">Dingin (Serene)</div>
+    <div class="option">Şakacı (Silly)</div>
+    <div class="option">Kararlı (Determined)</div>
+  </div>
+  
+  <!-- 7. Kıyafet Stili (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Kıyafet Stili</h2>
+  <div class="grid" data-category="clothing">
+    <div class="option">Gündelik (Casual)</div>
+    <div class="option">Resmi (Formal)</div>
+    <div class="option">İş Kıyafeti (Business Attire)</div>
+    <div class="option">Şık Elbise (Elegant Dress)</div>
+    <div class="option">Sokak Kıyafeti (Streetwear)</div>
+    <div class="option">Spor Kıyafeti (Sportswear)</div>
+    <div class="option">Askeri Üniforma (Military Uniform)</div>
+    <div class="option">Okul Üniforması (School Uniform)</div>
+    <div class="option">Geleneksel Kıyafet (Traditional Clothing)</div>
+    <div class="option">Kimono (Kimono)</div>
+    <div class="option">Hanbok (Hanbok)</div>
+    <div class="option">Sari (Sari)</div>
+    <div class="option">Ortaçağ Zırhı (Medieval Armor)</div>
+    <div class="option">Şövalye Zırhı (Knight Armor)</div>
+    <div class="option">Samuray Zırhı (Samurai Armor)</div>
+    <div class="option">Fantazi Cübbesi (Fantasy Robe)</div>
+    <div class="option">Büyücü Cübbesi (Wizard Robe)</div>
+    <div class="option">Steampunk Kıyafeti (Steampunk Outfit)</div>
+    <div class="option">Cyberpunk Kıyafeti (Cyberpunk Outfit)</div>
+    <div class="option">Kıyamet Sonrası Ekipman (Post-apocalyptic Gear)</div>
+    <div class="option">Korsan Kıyafeti (Pirate Outfit)</div>
+    <div class="option">Kaşif Kıyafeti (Explorer Outfit)</div>
+    <div class="option">Kraliyet Kıyafeti (Royal Clothing)</div>
+    <div class="option">Köylü Kıyafeti (Peasant Clothing)</div>
+    <div class="option">Festival Kostümü (Festival Costume)</div>
+    <div class="option">Taktik Ekipman (Tactical Gear)</div>
+    <div class="option">Uzay Kıyafeti (Space Suit)</div>
+    <div class="option">Dalış Kıyafeti (Diver Suit)</div>
+    <div class="option">Kışlık Palto (Winter Coat)</div>
+    <div class="option">Yazlık Elbise (Summer Dress)</div>
+    <div class="option">Gelinlik (Wedding Dress)</div>
+    <div class="option">Takım Elbise ve Kravat (Suit and Tie)</div>
+    <div class="option">Gotik Moda (Gothic Fashion)</div>
+    <div class="option">Punk Modası (Punk Fashion)</div>
+    <div class="option">Lolita Modası (Lolita Fashion)</div>
+    <div class="option">Fantazi Zırhı (Fantasy Armor)</div>
+    <div class="option">Plaj Kıyafeti (Beachwear)</div>
+    <div class="option">Keşiş Cübbesi (Monk Robe)</div>
+    <div class="option">Tarihi Kostüm (Historical Costume)</div>
+  </div>
+  
+  <!-- 8. Işıklandırma (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Işıklandırma</h2>
+  <div class="grid" data-category="lighting">
+    <div class="option">Doğal Işık (Natural Light)</div>
+    <div class="option">Yumuşak Işık (Soft Light)</div>
+    <div class="option">Sert Işık (Harsh Light)</div>
+    <div class="option">Düşük Anahtarlı Aydınlatma (Low Key Lighting)</div>
+    <div class="option">Yüksek Anahtarlı Aydınlatma (High Key Lighting)</div>
+    <div class="option">Altın Saat Işığı (Golden Hour Light)</div>
+    <div class="option">Mavi Saat Işığı (Blue Hour Light)</div>
+    <div class="option">Sinematik Aydınlatma (Cinematic Lighting)</div>
+    <div class="option">Arka Aydınlatma (Backlighting)</div>
+    <div class="option">Ön Aydınlatma (Front Lighting)</div>
+    <div class="option">Yandan Aydınlatma (Side Lighting)</div>
+    <div class="option">Üstten Aydınlatma (Top Lighting)</div>
+    <div class="option">Alttan Aydınlatma (Under Lighting)</div>
+    <div class="option">Neon Aydınlatma (Neon Lighting)</div>
+    <div class="option">Parlak Işık (Glowing Light)</div>
+    <div class="option">Ortam Işığı (Ambient Light)</div>
+    <div class="option">Dramatik Spot Işığı (Dramatic Spotlight)</div>
+    <div class="option">Renkli Aydınlatma (Colorful Lighting)</div>
+    <div class="option">Sisli Aydınlatma (Foggy Lighting)</div>
+    <div class="option">Ay Işığı (Moonlight)</div>
+    <div class="option">Ateş Işığı (Firelight)</div>
+    <div class="option">Fener Işığı (Lantern Light)</div>
+    <div class="option">Mum Işığı (Candlelight)</div>
+    <div class="option">Yıldız Işığı (Starlight)</div>
+    <div class="option">Elektrik Işığı (Electric Light)</div>
+    <div class="option">Biyolüminesan Işık (Bioluminescent Light)</div>
+    <div class="option">Mistik Işık (Mystical Light)</div>
+    <div class="option">Gün Batımı Işıltısı (Sunset Glow)</div>
+    <div class="option">Gün Doğumu Işığı (Sunrise Light)</div>
+    <div class="option">Gökkuşağı Işığı (Rainbow Light)</div>
+    <div class="option">Gölge Oyunu (Shadow Play)</div>
+  </div>
+  
+  <!-- 9. Format (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Format</h2>
+  <div class="grid" data-category="format">
+    <div class="option">Kare (1:1) (Square (1:1))</div>
+    <div class="option">Yatay (16:9) (Landscape (16:9))</div>
+    <div class="option">Dikey (9:16) (Portrait (9:16))</div>
+    <div class="option">Ultra Geniş (21:9) (Ultra-wide (21:9))</div>
+    <div class="option">Sinematik Geniş Ekran (Cinematic Widescreen)</div>
+    <div class="option">Panoramik (Panoramic)</div>
+    <div class="option">Dikey Panoramik (Vertical Panoramic)</div>
+    <div class="option">4:3 Klasik TV Oranı (4:3 Classic TV Ratio)</div>
+    <div class="option">5:4 Geleneksel Fotoğraf Oranı (5:4 Traditional Photo Ratio)</div>
+    <div class="option">2:3 DSLR Standart (2:3 DSLR Standard)</div>
+    <div class="option">3:2 Fotoğrafçılık Standart (3:2 Photography Standard)</div>
+    <div class="option">Banner Formatı (Banner Format)</div>
+    <div class="option">Poster Formatı (Poster Format)</div>
+    <div class="option">Albüm Kapağı (Kare) (Album Cover (Square))</div>
+    <div class="option">Webtoon Dikey Kaydırma (Webtoon Vertical Scroll)</div>
+    <div class="option">Ultra Uzun (1:3) (Ultra Tall (1:3))</div>
+    <div class="option">Ultra Geniş (3:1) (Ultra Wide (3:1))</div>
+    <div class="option">Küçük Resim Formatı (Thumbnail Format)</div>
+    <div class="option">Dergi Kapağı (Magazine Cover)</div>
+    <div class="option">Storyboard Sıralaması (Storyboard Sequence)</div>
+  </div>
+  
+  <!-- 10. Efekt (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Efekt</h2>
+  <div class="grid" data-category="effect">
+    <div class="option">Lens Parlaması (Lens Flare)</div>
+    <div class="option">Hareket Bulanıklığı (Motion Blur)</div>
+    <div class="option">Alan Derinliği (Depth of Field)</div>
+    <div class="option">Vinyet (Vignette)</div>
+    <div class="option">Film Greni (Film Grain)</div>
+    <div class="option">Işık Huzmeleri (Light Rays)</div>
+    <div class="option">Parlama Efekti (Bloom Effect)</div>
+    <div class="option">Hata Efekti (Glitch Effect)</div>
+    <div class="option">Kromatik Sapma (Chromatic Aberration)</div>
+    <div class="option">Eğik Kaydırma (Tilt Shift)</div>
+    <div class="option">Bokeh Arka Plan (Bokeh Background)</div>
+    <div class="option">Sis Efekti (Fog Effect)</div>
+    <div class="option">Toz Parçacıkları (Dust Particles)</div>
+    <div class="option">Yağmur Efekti (Rain Effect)</div>
+    <div class="option">Kar Efekti (Snow Effect)</div>
+    <div class="option">Ateş Kıvılcımları (Fire Embers)</div>
+    <div class="option">Duman İzleri (Smoke Trails)</div>
+    <div class="option">Su Sıçraması (Water Splash)</div>
+    <div class="option">Sualtı Bozulması (Underwater Distortion)</div>
+    <div class="option">Çift Pozlama (Double Exposure)</div>
+    <div class="option">Kızılötesi Görünüm (Infrared Look)</div>
+    <div class="option">Ayna Yansıması (Mirror Reflection)</div>
+    <div class="option">Gölge Oyunu (Shadow Play)</div>
+    <div class="option">Neon Parlaması (Neon Glow)</div>
+    <div class="option">Yumuşak Parlama (Soft Glow)</div>
+    <div class="option">Yıldırım (Lightning Bolt)</div>
+    <div class="option">Yıldız Alanı Arka Plan (Starfield Background)</div>
+    <div class="option">Patlama Efekti (Explosion Effect)</div>
+    <div class="option">Büyü Aurası (Magic Aura)</div>
+    <div class="option">Enerji Dalgaları (Energy Waves)</div>
+    <div class="option">Renk Sıçraması (Color Splash)</div>
+  </div>
+  
+  <!-- 11. Zaman ve Mevsim (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Zaman ve Mevsim</h2>
+  <div class="grid" data-category="season">
+    <!-- Mevsimler -->
+    <div class="option">İlkbahar (Spring)</div>
+    <div class="option">Yaz (Summer)</div>
+    <div class="option">Sonbahar (Autumn)</div>
+    <div class="option">Kış (Winter)</div>
+  
+    <!-- Gündüz Gece Döngüsü -->
+    <div class="option">Sabah (Morning)</div>
+    <div class="option">Öğle (Noon)</div>
+    <div class="option">Öğleden Sonra (Afternoon)</div>
+    <div class="option">Akşam (Evening)</div>
+    <div class="option">Gün Batımı (Sunset)</div>
+    <div class="option">Alacakaranlık (Twilight)</div>
+    <div class="option">Gece (Night)</div>
+    <div class="option">Gece Yarısı (Midnight)</div>
+  
+    <!-- Özel Zamanlar -->
+    <div class="option">Altın Saat (Golden Hour)</div>
+    <div class="option">Mavi Saat (Blue Hour)</div>
+    <div class="option">Şafak (Dawn)</div>
+    <div class="option">Alacakaranlık (Dusk)</div>
+  
+    <!-- Hava Durumu ile Zaman -->
+    <div class="option">Yağmurlu Gün (Rainy Day)</div>
+    <div class="option">Fırtınalı Gece (Stormy Night)</div>
+    <div class="option">Karlı Sabah (Snowy Morning)</div>
+    <div class="option">Sisli Şafak (Foggy Dawn)</div>
+    <div class="option">Açık Gökyüzü Günü (Clear Sky Day)</div>
+    <div class="option">Bulutlu Öğleden Sonra (Cloudy Afternoon)</div>
+  
+    <!-- Atmosferik Mevsimsel Durumlar -->
+    <div class="option">Çiçek Açan İlkbahar (Blooming Spring)</div>
+    <div class="option">Sıcak Yaz (Hot Summer)</div>
+    <div class="option">Renkli Sonbahar (Colorful Autumn)</div>
+    <div class="option">Donmuş Kış (Frozen Winter)</div>
+  </div>
+  
+  <!-- 12. Sanatsal Teknik (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Sanatsal Teknik</h2>
+  <div class="grid" data-category="technique">
+    <div class="option">Yağlı Boya (Oil Painting)</div>
+    <div class="option">Suluboya (Watercolor)</div>
+    <div class="option">Kurşun Kalem Eskizi (Pencil Sketch)</div>
+    <div class="option">Mürekkep Çizimi (Ink Drawing)</div>
+    <div class="option">Kömür Çizimi (Charcoal Drawing)</div>
+    <div class="option">Pastel Çizimi (Pastel Drawing)</div>
+    <div class="option">Akrilik Boyama (Acrylic Painting)</div>
+    <div class="option">Dijital Boyama (Digital Painting)</div>
+    <div class="option">Vektör Sanatı (Vector Art)</div>
+    <div class="option">Piksel Sanatı (Pixel Art)</div>
+    <div class="option">3D Modelleme (3D Modeling)</div>
+    <div class="option">3D Render (3D Rendering)</div>
+    <div class="option">Fotoğraf Birleştirme (Photobashing)</div>
+    <div class="option">Kolaj Sanatı (Collage Art)</div>
+    <div class="option">Mat Boyama (Matte Painting)</div>
+    <div class="option">Düşük Poligon Modelleme (Low-poly Modeling)</div>
+    <div class="option">Kağıt Kesme Sanatı (Papercut Art)</div>
+    <div class="option">Silüet Sanatı (Silhouette Art)</div>
+    <div class="option">Çizgi Sanatı (Line Art)</div>
+    <div class="option">Spray Boya Sanatı (Spray Paint Art)</div>
+    <div class="option">Grafiti Sanatı (Graffiti Art)</div>
+    <div class="option">Karma Medya (Mixed Media)</div>
+    <div class="option">Foto-Gerçekçi Render (Photorealistic Rendering)</div>
+    <div class="option">Stop Motion Tarzı (Stop Motion Style)</div>
+    <div class="option">Cel Gölgelendirme (Cel Shading)</div>
+    <div class="option">El Çizimi Animasyon Tarzı (Hand-drawn Animation Style)</div>
+    <div class="option">Hata Sanatı (Glitch Art)</div>
+    <div class="option">Neon Sanatı (Neon Art)</div>
+    <div class="option">Synthwave Tarzı (Synthwave Style)</div>
+    <div class="option">Hiperrealizm (Hyperrealism)</div>
+    <div class="option">Minimalist Sanat (Minimalist Art)</div>
+    <div class="option">Gerçeküstücü Teknik (Surrealist Technique)</div>
+    <div class="option">Fantazi İllüstrasyonu (Fantasy Illustration)</div>
+  </div>
+  
+  <!-- 13. Arka Plan Stili (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Arka Plan Stili</h2>
+  <div class="grid" data-category="backgroundstyle">
+    <div class="option">Detaylı Arka Plan (Detailed Background)</div>
+    <div class="option">Minimal Arka Plan (Minimal Background)</div>
+    <div class="option">Düz Renk Arka Plan (Flat Color Background)</div>
+    <div class="option">Gradyan Arka Plan (Gradient Background)</div>
+    <div class="option">Bulanık Arka Plan (Blurred Background)</div>
+    <div class="option">Bokeh Arka Plan (Bokeh Background)</div>
+    <div class="option">Soyut Arka Plan (Abstract Background)</div>
+    <div class="option">Doğa Arka Planı (Nature Background)</div>
+    <div class="option">Şehir Arka Planı (Urban Background)</div>
+    <div class="option">Fantazi Manzarası (Fantasy Landscape)</div>
+    <div class="option">Bilimkurgu Ortamı (Sci-fi Environment)</div>
+    <div class="option">Dış Uzay Arka Planı (Outer Space Background)</div>
+    <div class="option">Sualtı Sahnesi (Underwater Scene)</div>
+    <div class="option">Uzaktaki Dağlar (Mountains in Distance)</div>
+    <div class="option">Okyanus Manzarası (Ocean View)</div>
+    <div class="option">Orman Sahnesi (Forest Scene)</div>
+    <div class="option">Çöl Manzarası (Desert Landscape)</div>
+    <div class="option">Karlı Manzara (Snowy Landscape)</div>
+    <div class="option">Bulutlu Gökyüzü (Sky with Clouds)</div>
+    <div class="option">Yıldızlı Gece Gökyüzü (Starry Night Sky)</div>
+    <div class="option">Gün Batımı Ufku (Sunset Horizon)</div>
+    <div class="option">Şehir Silüeti (City Skyline)</div>
+    <div class="option">Fütüristik Şehir Manzarası (Futuristic Cityscape)</div>
+    <div class="option">Harabeler ve Antik Tapınaklar (Ruins and Ancient Temples)</div>
+    <div class="option">Mistik Orman (Mystical Forest)</div>
+    <div class="option">Sisli Dağlar (Foggy Mountains)</div>
+    <div class="option">Cyberpunk Şehri (Cyberpunk City)</div>
+    <div class="option">Steampunk Dünyası (Steampunk World)</div>
+    <div class="option">Kıyamet Sonrası Çorak Topraklar (Post-apocalyptic Wasteland)</div>
+    <div class="option">Fantazi Kalesi (Fantasy Castle)</div>
+  </div>
+  
+  <!-- 14. Pozisyon (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Pozisyon</h2>
+  <div class="grid" data-category="pose">
+    <div class="option">Ayakta Durma (Standing)</div>
+    <div class="option">Oturma (Sitting)</div>
+    <div class="option">Uzanma (Lying Down)</div>
+    <div class="option">Diz Çökme (Kneeling)</div>
+    <div class="option">Koşma (Running)</div>
+    <div class="option">Yürüme (Walking)</div>
+    <div class="option">Zıplama (Jumping)</div>
+    <div class="option">Uçma (Flying)</div>
+    <div class="option">Yüzme (Floating)</div>
+    <div class="option">Duvara Yaslanma (Leaning Against Wall)</div>
+    <div class="option">Uzanma (Reaching Out)</div>
+    <div class="option">El Ele Tutuşma (Holding Hands)</div>
+    <div class="option">Kolları Kavuşturma (Crossed Arms)</div>
+    <div class="option">Eli Kalçada (Hand on Hip)</div>
+    <div class="option">Kolları Açma (Arms Spread Wide)</div>
+    <div class="option">Yukarı Bakma (Looking Up)</div>
+    <div class="option">Aşağı Bakma (Looking Down)</div>
+    <div class="option">Uzaklara Bakma (Turning Away)</div>
+    <div class="option">Karşıya Bakma (Facing Forward)</div>
+    <div class="option">Yandan Profil (Side Profile)</div>
+    <div class="option">Arkadan Görünüm (Back View)</div>
+    <div class="option">Dinamik Aksiyon Pozu (Dynamic Action Pose)</div>
+    <div class="option">Rahat Poz (Relaxed Pose)</div>
+    <div class="option">Savaş Duruşu (Battle Stance)</div>
+    <div class="option">Bağdaş Kurma (Sitting Cross-legged)</div>
+    <div class="option">Kahramanca Poz (Heroic Pose)</div>
+    <div class="option">Çömelme (Crouching)</div>
+    <div class="option">Kenarda Oturma (Sitting on Edge)</div>
+    <div class="option">Silah Tutma (Holding Weapon)</div>
+    <div class="option">Dans Pozu (Dancing Pose)</div>
+    <div class="option">Meditasyon (Meditating)</div>
+  </div>
+  
+  <!-- 15. Bakış Yönü (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Bakış Yönü</h2>
+  <div class="grid" data-category="lookdirection">
+    <div class="option">Karşıya Bakma (Looking Forward)</div>
+    <div class="option">Yukarı Bakma (Looking Up)</div>
+    <div class="option">Aşağı Bakma (Looking Down)</div>
+    <div class="option">Sola Bakma (Looking Left)</div>
+    <div class="option">Sağa Bakma (Looking Right)</div>
+    <div class="option">Omuz Üstünden Bakma (Looking Over Shoulder)</div>
+    <div class="option">Uzağa Bakma (Looking Away)</div>
+    <div class="option">İzleyiciye Bakma (Looking at Viewer)</div>
+    <div class="option">Ufka Bakma (Looking into Distance)</div>
+    <div class="option">Yukarı Doğru Bakış (Gazing Upwards)</div>
+    <div class="option">Aşağı Doğru Bakış (Gazing Downwards)</div>
+    <div class="option">Gözler Kapalı (Eyes Closed)</div>
+    <div class="option">Yandan Bakış (Sideways Glance)</div>
+    <div class="option">Yukarı Yandan Bakış (Upward Side Glance)</div>
+    <div class="option">Aşağı Yandan Bakış (Downward Side Glance)</div>
+    <div class="option">Yoğun Bakış (Staring Intensely)</div>
+    <div class="option">Nazik Bakış (Soft Gentle Gaze)</div>
+    <div class="option">Öfkeli Bakış (Angry Glare)</div>
+    <div class="option">Korkulu Bakış (Fearful Glance)</div>
+    <div class="option">Meraklı Bakış (Curious Look)</div>
+    <div class="option">Rüya Gibi Bakış (Dreamy Look)</div>
+  </div>
+  
+  <!-- 16. Kamera Açısı (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Kamera Açısı</h2>
+  <div class="grid" data-category="camera">
+    <div class="option">Göz Hizası Çekim (Eye Level Shot)</div>
+    <div class="option">Yüksek Açılı Çekim (High Angle Shot)</div>
+    <div class="option">Düşük Açılı Çekim (Low Angle Shot)</div>
+    <div class="option">Üstten Çekim (Overhead Shot)</div>
+    <div class="option">Kuş Bakışı (Bird's Eye View)</div>
+    <div class="option">Solucan Bakışı (Worm's Eye View)</div>
+    <div class="option">Hollanda Açısı (Dutch Angle (Tilted Shot))</div>
+    <div class="option">Yakın Çekim (Close-up Shot)</div>
+    <div class="option">Aşırı Yakın Çekim (Extreme Close-up)</div>
+    <div class="option">Orta Çekim (Medium Shot)</div>
+    <div class="option">Geniş Çekim (Wide Shot)</div>
+    <div class="option">Aşırı Geniş Çekim (Extreme Wide Shot)</div>
+    <div class="option">Omuz Üstü Çekim (Over the Shoulder Shot)</div>
+    <div class="option">Bakış Açısı Çekimi (Point of View Shot (POV))</div>
+    <div class="option">Takip Çekimi (Tracking Shot)</div>
+    <div class="option">Pan Çekimi (Panning Shot)</div>
+    <div class="option">Dolly Zoom Efekti (Dolly Zoom Effect)</div>
+    <div class="option">Eğim Çekimi (Tilt Shot)</div>
+    <div class="option">Vinç Çekimi (Crane Shot)</div>
+    <div class="option">El Kamerası Hissi (Handheld Camera Feel)</div>
+    <div class="option">Sabit Kamera Çekimi (Steadicam Shot)</div>
+    <div class="option">Drone Çekimi (Drone Shot)</div>
+    <div class="option">360-Derece Kamera Görünümü (360-Degree Camera View)</div>
+    <div class="option">Yavaş Yakınlaşma (Slow Zoom In)</div>
+    <div class="option">Hızlı Uzaklaşma (Fast Zoom Out)</div>
+  </div>
+  
+  <!-- 17. Malzeme / Yüzey Dokusu (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Malzeme / Yüzey Dokusu</h2>
+  <div class="grid" data-category="material">
+    <div class="option">Ahşap (Wood)</div>
+    <div class="option">Metal (Metal)</div>
+    <div class="option">Cam (Glass)</div>
+    <div class="option">Taş (Stone)</div>
+    <div class="option">Tuğla (Brick)</div>
+    <div class="option">Beton (Concrete)</div>
+    <div class="option">Kumaş (Fabric)</div>
+    <div class="option">Keçe (Felt)</div>
+    <div class="option">İpek (Silk)</div>
+    <div class="option">Yün (Wool)</div>
+    <div class="option">Deri (Leather)</div>
+    <div class="option">Kürk (Fur)</div>
+    <div class="option">Kağıt (Paper)</div>
+    <div class="option">Plastik (Plastic)</div>
+    <div class="option">Kauçuk (Rubber)</div>
+    <div class="option">Kristal (Crystal)</div>
+    <div class="option">Mermer (Marble)</div>
+    <div class="option">Altın (Gold)</div>
+    <div class="option">Gümüş (Silver)</div>
+    <div class="option">Bakır (Copper)</div>
+    <div class="option">Buz (Ice)</div>
+    <div class="option">Su (Water)</div>
+    <div class="option">Ateş (Fire)</div>
+    <div class="option">Bulut (Cloud)</div>
+    <div class="option">Kum (Sand)</div>
+    <div class="option">Toz (Dust)</div>
+    <div class="option">Lav (Lava)</div>
+    <div class="option">Kadife (Velvet)</div>
+    <div class="option">Kot (Denim)</div>
+    <div class="option">Tuval (Canvas)</div>
+    <div class="option">Köpük (Foam)</div>
+  </div>
+  
+  <!-- 18. Renk Paleti (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Renk Paleti</h2>
+  <div class="grid" data-category="colorpalette">
+    <div class="option">Canlı Renkler (Vibrant Colors)</div>
+    <div class="option">Soluk Renkler (Muted Colors)</div>
+    <div class="option">Pastel Renkler (Pastel Colors)</div>
+    <div class="option">Neon Renkler (Neon Colors)</div>
+    <div class="option">Tek Renk (Monochrome)</div>
+    <div class="option">Siyah Beyaz (Black and White)</div>
+    <div class="option">Sepya Tonu (Sepia Tone)</div>
+    <div class="option">Sıcak Renkler (Warm Colors)</div>
+    <div class="option">Soğuk Renkler (Cool Colors)</div>
+    <div class="option">Toprak Tonları (Earth Tones)</div>
+    <div class="option">Doygunluğu Azaltılmış Renkler (Desaturated Colors)</div>
+    <div class="option">Yüksek Kontrast Renkler (High Contrast Colors)</div>
+    <div class="option">Yumuşak Renk Paleti (Soft Color Palette)</div>
+    <div class="option">Koyu Renk Paleti (Dark Color Palette)</div>
+    <div class="option">Açık Renk Paleti (Light Color Palette)</div>
+    <div class="option">Altın Paleti (Golden Palette)</div>
+    <div class="option">Gümüş ve Mavi Paleti (Silver and Blue Palette)</div>
+    <div class="option">Ateş ve Buz Paleti (Fire and Ice Palette)</div>
+    <div class="option">Gün Batımı Renkleri (Sunset Colors)</div>
+    <div class="option">Okyanus Renkleri (Ocean Colors)</div>
+    <div class="option">Orman Renkleri (Forest Colors)</div>
+    <div class="option">Şeker Renkleri (Candy Colors)</div>
+    <div class="option">Gökkuşağı Renkleri (Rainbow Colors)</div>
+    <div class="option">Fantazi Renkleri (Fantasy Colors)</div>
+    <div class="option">Cyberpunk Paleti (Cyberpunk Palette)</div>
+    <div class="option">Vintage Paleti (Vintage Palette)</div>
+  </div>
+  
+  <!-- 19. Arka Plan Teması (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Arka Plan Teması</h2>
+  <div class="grid" data-category="backgroundtheme">
+    <div class="option">Fantazi Dünyası (Fantasy World)</div>
+    <div class="option">Bilimkurgu Dünyası (Sci-fi World)</div>
+    <div class="option">Ortaçağ Köyü (Medieval Village)</div>
+    <div class="option">Kıyamet Sonrası Şehir (Post-apocalyptic City)</div>
+    <div class="option">Cyberpunk Şehir Manzarası (Cyberpunk Cityscape)</div>
+    <div class="option">Steampunk Dünyası (Steampunk World)</div>
+    <div class="option">Mistik Orman (Mystical Forest)</div>
+    <div class="option">Perili Kale (Haunted Castle)</div>
+    <div class="option">Fütüristik Uzay İstasyonu (Futuristic Space Station)</div>
+    <div class="option">Uzaylı Gezegeni (Alien Planet)</div>
+    <div class="option">Çöl Çorak Toprakları (Desert Wasteland)</div>
+    <div class="option">Donmuş Tundra (Frozen Tundra)</div>
+    <div class="option">Güneşli Plaj (Sunny Beach)</div>
+    <div class="option">Dağ Manzarası (Mountain Landscape)</div>
+    <div class="option">Sualtı Şehri (Underwater City)</div>
+    <div class="option">Rüya Manzarası (Dreamscape)</div>
+    <div class="option">Gök Krallığı (Sky Kingdom)</div>
+    <div class="option">Yüzen Adalar (Floating Islands)</div>
+    <div class="option">Şehir Arka Sokağı (Urban Alleyway)</div>
+    <div class="option">Kraliyet Sarayı (Royal Palace)</div>
+    <div class="option">Gizli Bahçe (Secret Garden)</div>
+    <div class="option">Antik Tapınak (Ancient Temple)</div>
+    <div class="option">Masal Köyü (Fairy Tale Village)</div>
+    <div class="option">Fırtınalı Okyanus (Stormy Ocean)</div>
+    <div class="option">Gün Batımı Tarlası (Sunset Field)</div>
+    <div class="option">Yıldızlı Çöl (Starlit Desert)</div>
+    <div class="option">Buz Mağarası (Ice Cavern)</div>
+    <div class="option">Terk Edilmiş Lunapark (Abandoned Amusement Park)</div>
+  </div>
+  
+  <!-- 20. Sanat Akımı / Üslubu (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Sanat Akımı / Üslubu</h2>
+  <div class="grid" data-category="artmovement">
+    <div class="option">İzlenimcilik (Impressionism)</div>
+    <div class="option">Dışavurumculuk (Expressionism)</div>
+    <div class="option">Gerçeküstücülük (Surrealism)</div>
+    <div class="option">Kübizm (Cubism)</div>
+    <div class="option">Realizm (Realism)</div>
+    <div class="option">Romantizm (Romanticism)</div>
+    <div class="option">Sembolizm (Symbolism)</div>
+    <div class="option">Fütürizm (Futurism)</div>
+    <div class="option">Art Nouveau (Art Nouveau)</div>
+    <div class="option">Art Deco (Art Deco)</div>
+    <div class="option">Minimalizm (Minimalism)</div>
+    <div class="option">Pop Art (Pop Art)</div>
+    <div class="option">Soyut Sanat (Abstract Art)</div>
+    <div class="option">Barok (Baroque)</div>
+    <div class="option">Rokoko (Rococo)</div>
+    <div class="option">Gotik Sanat (Gothic Art)</div>
+    <div class="option">Rönesans (Renaissance)</div>
+    <div class="option">Neoklasizm (Neoclassicism)</div>
+    <div class="option">Konstrüktivizm (Constructivism)</div>
+    <div class="option">Kavramsal Sanat (Conceptual Art)</div>
+    <div class="option">Postmodernizm (Postmodernism)</div>
+    <div class="option">Dadaizm (Dadaism)</div>
+    <div class="option">Brütalizm (Brutalism)</div>
+    <div class="option">Sokak Sanatı (Street Art)</div>
+    <div class="option">Fantazi Sanatı (Fantasy Art)</div>
+    <div class="option">Çağdaş Sanat (Contemporary Art)</div>
+  </div>
+  
+  <!-- 21. Hikaye Unsuru (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Hikaye Unsuru</h2>
+  <div class="grid" data-category="storyelement">
+    <div class="option">Kayıp Bir Eserin Peşinde (Quest for a Lost Artifact)</div>
+    <div class="option">İyi ile Kötü Arasındaki Savaş (Battle Between Good and Evil)</div>
+    <div class="option">Yasak Aşk (Forbidden Love)</div>
+    <div class="option">Gizemli Bir Yabancı Belirir (Mysterious Stranger Appears)</div>
+    <div class="option">Bilinmeyen Topraklarda Yolculuk (Journey Through Unknown Lands)</div>
+    <div class="option">Tehlikeden Kaçış (Escape from Danger)</div>
+    <div class="option">Kimlik Arayışı (Search for Identity)</div>
+    <div class="option">Bir Krallığın Çöküşü (Fall of a Kingdom)</div>
+    <div class="option">Zorbalığa Karşı İsyan (Rebellion Against Tyranny)</div>
+    <div class="option">Gizli Güçlerin Keşfi (Discovery of Hidden Powers)</div>
+    <div class="option">Arkadaşlar Arasında İhanet (Betrayal Among Friends)</div>
+    <div class="option">Rüya Dünyasında Kaybolma (Lost in a Dreamworld)</div>
+    <div class="option">Zaman Yolculuğu Kazası (Time Travel Mishap)</div>
+    <div class="option">Kıyamet Sonrası Hayatta Kalma (Apocalyptic Survival)</div>
+    <div class="option">Uzun Bir Ayrılıktan Sonra Kavuşma (Reunion After a Long Separation)</div>
+    <div class="option">Bir Kahramanın Yükselişi (Rise of a Hero)</div>
+    <div class="option">Beklenmedik İttifak (Unexpected Alliance)</div>
+    <div class="option">Kutsal Bir Yeri Korumak (Protecting a Sacred Place)</div>
+    <div class="option">Antik Sırları Ortaya Çıkarma (Uncovering Ancient Secrets)</div>
+    <div class="option">Rekabetten Dostluğa (Rivalry Turned Friendship)</div>
+    <div class="option">Perili Ormanın Gizemi (Mystery of the Haunted Forest)</div>
+    <div class="option">Kurtarma Görevi (Rescue Mission)</div>
+    <div class="option">Kader Karşılaşması (Fateful Encounter)</div>
+    <div class="option">Yıldızlara Yolculuk (Journey to the Stars)</div>
+    <div class="option">Özgürlük Mücadelesi (Struggle for Freedom)</div>
+  </div>
+  
+  <!-- 22. Nesneler / Eşyalar (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Nesneler / Eşyalar</h2>
+  <div class="grid" data-category="objects">
+    <div class="option">Antik Kılıç (Ancient Sword)</div>
+    <div class="option">Büyülü Asa (Magic Staff)</div>
+    <div class="option">Hazine Sandığı (Treasure Chest)</div>
+    <div class="option">Gizemli Kitap (Mysterious Book)</div>
+    <div class="option">Yüzen Fenerler (Floating Lanterns)</div>
+    <div class="option">Kristal Küre (Crystal Ball)</div>
+    <div class="option">Altın Taç (Golden Crown)</div>
+    <div class="option">Eski Harita (Old Map)</div>
+    <div class="option">Büyülü İksir (Magic Potion)</div>
+    <div class="option">Mekanik Kanatlar (Mechanical Wings)</div>
+    <div class="option">Uzay Kaskı (Space Helmet)</div>
+    <div class="option">Fütüristik Silah (Futuristic Weapon)</div>
+    <div class="option">Bozuk Robot (Broken Robot)</div>
+    <div class="option">Uzaylı Eseri (Alien Artifact)</div>
+    <div class="option">Steampunk Gözlükleri (Steampunk Goggles)</div>
+    <div class="option">Kum Saati (Hourglass)</div>
+    <div class="option">Gizli Kapının Anahtarı (Key to Secret Door)</div>
+    <div class="option">Antik Kalıntı (Ancient Relic)</div>
+    <div class="option">Tüylü Kalem (Feathered Quill)</div>
+    <div class="option">Büyülü Muska (Magic Amulet)</div>
+    <div class="option">Büyü Parşömeni (Spell Scroll)</div>
+    <div class="option">Kayıp Pusula (Lost Compass)</div>
+    <div class="option">Savaş Kalkanı (Battle Shield)</div>
+    <div class="option">Ejderha Yumurtası (Dragon Egg)</div>
+    <div class="option">Korsan Bayrağı (Pirate Flag)</div>
+    <div class="option">Yüzen Kristal (Floating Crystal)</div>
+    <div class="option">Vintage Kamera (Vintage Camera)</div>
+    <div class="option">Kutsal Taş (Sacred Gemstone)</div>
+    <div class="option">Donmuş Gül (Frozen Rose)</div>
+  </div>
+  
+  <!-- 23. Yüz İfadesi Detayı (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Yüz İfadesi Detayı</h2>
+  <div class="grid" data-category="expressiondetail">
+    <div class="option">Geniş Gülümseme (Big Smile)</div>
+    <div class="option">Hafif Gülümseme (Subtle Smile)</div>
+    <div class="option">Geniş Açık Gözler (Wide Open Eyes)</div>
+    <div class="option">Daralmış Gözler (Narrowed Eyes)</div>
+    <div class="option">Çatık Kaşlar (Furrowed Brows)</div>
+    <div class="option">Kalkık Kaşlar (Raised Eyebrows)</div>
+    <div class="option">Gözyaşlı Gözler (Teary Eyes)</div>
+    <div class="option">Kızarmış Yanaklar (Blushing Cheeks)</div>
+    <div class="option">Açık Ağız (Open Mouth)</div>
+    <div class="option">Kapalı Ağız (Closed Mouth)</div>
+    <div class="option">Büzülmüş Dudaklar (Pursed Lips)</div>
+    <div class="option">Gülme İfadesi (Laughing Expression)</div>
+    <div class="option">Ağlama İfadesi (Crying Expression)</div>
+    <div class="option">Öfkeli Surat (Angry Scowl)</div>
+    <div class="option">Şok İfadesi (Shocked Expression)</div>
+    <div class="option">Somurtma (Pouting Lips)</div>
+    <div class="option">Sırıtma (Smirking)</div>
+    <div class="option">Kararlı Bakış (Determined Look)</div>
+    <div class="option">Şaşkın İfade (Confused Expression)</div>
+    <div class="option">Rüya Gibi Gözler (Dreamy Eyes)</div>
+    <div class="option">Dehşetli Bakış (Terrified Look)</div>
+    <div class="option">Huzurlu İfade (Serene Expression)</div>
+    <div class="option">Yaramaz Sırıtış (Mischievous Grin)</div>
+    <div class="option">Hüzünlü Gülümseme (Sad Smile)</div>
+  </div>
+  
+  <!-- 24. Ses / Hareket İfadesi (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Ses / Hareket İfadesi</h2>
+  <div class="grid" data-category="soundmotion">
+    <div class="option">Hafif Rüzgar Esintisi (Soft Wind Blowing)</div>
+    <div class="option">Hışırdayan Yapraklar (Rustling Leaves)</div>
+    <div class="option">Dalgaların Çarpışması (Waves Crashing)</div>
+    <div class="option">Kuş Cıvıltıları (Birds Chirping)</div>
+    <div class="option">Çakıl Taşlarında Ayak Sesleri (Footsteps on Gravel)</div>
+    <div class="option">Gök Gürültüsü (Thunder Rumbling)</div>
+    <div class="option">Yağmur Yağışı (Rain Falling)</div>
+    <div class="option">Ateş Çıtırtısı (Fire Crackling)</div>
+    <div class="option">Kılıç Şakırtısı (Sword Clashing)</div>
+    <div class="option">Atın Dörtnala Koşması (Horse Galloping)</div>
+    <div class="option">Şehir Trafik Gürültüsü (City Traffic Noise)</div>
+    <div class="option">Uzaktan Gelen Yankı (Distant Echo)</div>
+    <div class="option">Yaprakların Yavaşça Düşüşü (Leaves Falling Gently)</div>
+    <div class="option">Rüzgarda Dalgalanan Bayraklar (Flags Fluttering in Wind)</div>
+    <div class="option">Rüzgarda Uçuşan Saçlar (Hair Flowing in Breeze)</div>
+    <div class="option">Üstten Uçan Kuş (Bird Flying Overhead)</div>
+    <div class="option">Su Sıçraması (Water Splashing)</div>
+    <div class="option">Kalabalığın Tezahüratı (Crowd Cheering)</div>
+    <div class="option">Fısıldayan Sesler (Whispering Voices)</div>
+    <div class="option">Gıcırdayan Kapı (Door Creaking Open)</div>
+    <div class="option">Kalp Atışı Sesi (Heartbeat Sound)</div>
+    <div class="option">Sessizce Yağan Kar (Snow Falling Quietly)</div>
+    <div class="option">Uzaktan Patlama Sesi (Explosion in Distance)</div>
+    <div class="option">Çalan Müzik Aletleri (Musical Instruments Playing)</div>
+  </div>
+  
+  <!-- 25. Çevre ile Etkileşim (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Çevre ile Etkileşim</h2>
+  <div class="grid" data-category="environmentinteraction">
+    <div class="option">Ormanda Yürüme (Walking Through Forest)</div>
+    <div class="option">Su Yüzeyine Dokunma (Touching Water Surface)</div>
+    <div class="option">Kayada Oturma (Sitting on Rock)</div>
+    <div class="option">Ağaca Yaslanma (Leaning Against Tree)</div>
+    <div class="option">Tarlada Koşma (Running Across Field)</div>
+    <div class="option">Duvarların Arkasına Saklanma (Hiding Behind Wall)</div>
+    <div class="option">Yağmurda Durma (Standing in Rain)</div>
+    <div class="option">Suda Yüzme (Floating on Water)</div>
+    <div class="option">Dağa Tırmanma (Climbing Mountain)</div>
+    <div class="option">Bulutlar Arasında Uçma (Flying Through Clouds)</div>
+    <div class="option">Gökyüzüne Uzanma (Reaching for the Sky)</div>
+    <div class="option">Toz Kaldırma (Kicking up Dust)</div>
+    <div class="option">Kapı Açma (Opening a Door)</div>
+    <div class="option">Köprüden Geçme (Crossing a Bridge)</div>
+    <div class="option">Sualtına Dalma (Diving Underwater)</div>
+    <div class="option">Tepeden Kayma (Sliding Down Hill)</div>
+    <div class="option">Çayırda Dinlenme (Resting in Meadow)</div>
+    <div class="option">Ağaçtan Sallanma (Swinging from Tree)</div>
+    <div class="option">Sis İçinde Yürüme (Walking Through Mist)</div>
+    <div class="option">Uçurum Kenarında Durma (Standing on Cliff Edge)</div>
+    <div class="option">Yüzen Nesnelerle Etkileşim (Interacting with Floating Objects)</div>
+    <div class="option">Karanlıkta Meşale Tutma (Holding a Torch in Darkness)</div>
+    <div class="option">Harabelerde Koşma (Running Through Ruins)</div>
+    <div class="option">Dar Çıkıntıda Denge Kurma (Balancing on Narrow Ledge)</div>
+    <div class="option">Antik Tapınağı Keşfetme (Exploring Ancient Temple)</div>
+  </div>
+  
+  <!-- 26. Katmanlama ve Derinlik Efekti (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Katmanlama ve Derinlik Efekti</h2>
+  <div class="grid" data-category="layering">
+    <div class="option">Güçlü Ön Plan Öğesi (Strong Foreground Element)</div>
+    <div class="option">Bulanık Arka Plan (Blurred Background)</div>
+    <div class="option">Orta Plan Odak (Midground Focus)</div>
+    <div class="option">Üst Üste Binen Nesnelerle Derinlik (Depth with Overlapping Objects)</div>
+    <div class="option">Ön Plan Silüeti (Foreground Silhouette)</div>
+    <div class="option">Arka Plan Işık Parlaması (Background Light Glow)</div>
+    <div class="option">Katmanlı Manzara (Layered Landscape)</div>
+    <div class="option">Katmanlar Arası Sis (Fog Between Layers)</div>
+    <div class="option">Katmanlar Arasından Süzülen Güneş Işığı (Sunlight Filtering Through Layers)</div>
+    <div class="option">Ön Plan Hareket Bulanıklığı (Foreground Motion Blur)</div>
+    <div class="option">Doğal Öğelerle Çerçeveleme (Framing with Natural Elements)</div>
+    <div class="option">Çoklu Aksiyon Planları (Multiple Planes of Action)</div>
+    <div class="option">Katmanlar Arası Yönlendirici Çizgiler (Leading Lines Through Layers)</div>
+    <div class="option">Boyut Ölçeklendirme ile Derinlik (Depth from Size Scaling)</div>
+    <div class="option">Derinlik Yaratan Gölgeler (Shadows Creating Depth)</div>
+    <div class="option">Atmosferik Perspektif (Atmospheric Perspective)</div>
+    <div class="option">Işık ve Karanlık Kontrast Katmanları (Light and Dark Contrast Layers)</div>
+    <div class="option">Katmanlar Arası Odak Kayması (Focus Shift Between Layers)</div>
+    <div class="option">Yumuşak Odaklı Arka Plan (Soft Focus Background)</div>
+    <div class="option">Ön Plan Işık Parçacıkları (Foreground Light Particles)</div>
+  </div>
+  
+  <!-- 27. Animasyon Tarzı (Gelişmiş ve Alt Başlıksız) -->
+  <h2>Animasyon Tarzı</h2>
+  <div class="grid" data-category="animationstyle">
+    <div class="option">2D Geleneksel Animasyon (2D Traditional Animation)</div>
+    <div class="option">2D Dijital Animasyon (2D Digital Animation)</div>
+    <div class="option">3D CGI Animasyon (3D CGI Animation)</div>
+    <div class="option">Stop Motion Animasyon (Stop Motion Animation)</div>
+    <div class="option">Kil Animasyonu (Claymation)</div>
+    <div class="option">Anime Tarzı Animasyon (Anime Style Animation)</div>
+    <div class="option">Pixar Tarzı 3D Animasyon (Pixar-style 3D Animation)</div>
+    <div class="option">Disney Klasik 2D Animasyon (Disney Classic 2D Animation)</div>
+    <div class="option">Minimalist Animasyon (Minimalist Animation)</div>
+    <div class="option">Chibi Animasyon Tarzı (Chibi Animation Style)</div>
+    <div class="option">Hareket Grafikleri Animasyonu (Motion Graphics Animation)</div>
+    <div class="option">Kesme Animasyon (Cut-out Animation)</div>
+    <div class="option">Deneysel Animasyon (Experimental Animation)</div>
+    <div class="option">Rotoscope Animasyon (Rotoscope Animation)</div>
+    <div class="option">Taslak Kare Animasyonu (Sketchy Frame Animation)</div>
+    <div class="option">Suluboya Animasyon (Watercolor Animation)</div>
+    <div class="option">Mürekkep ve Fırça Animasyonu (Ink and Brush Animation)</div>
+    <div class="option">Düşük Kare Hızlı Animasyon (Low Frame Rate Animation)</div>
+    <div class="option">Yüksek Kare Hızlı Pürüzsüz Animasyon (High Frame Rate Smooth Animation)</div>
+    <div class="option">Kağıt Kesme Tarzı (Paper Cutout Style)</div>
+    <div class="option">Fantazi Animasyon (Fantasy Animation)</div>
+    <div class="option">Bilimkurgu Animasyon Tarzı (Sci-fi Animation Style)</div>
+    <div class="option">Karanlık Gotik Animasyon (Dark Gothic Animation)</div>
+  </div>
+
+
+
+
+
+
+  <!-- (Devam eden kategoriler burada olacak - kısa tutuyorum örnek olsun diye, kalan 23 kategori aynı formatta eklenecek) -->
+
+  <h2>Oluşan Prompt</h2>
+  <div id="prompt-output">Seçim yapıldıkça burada prompt oluşacak...</div>
+  <button onclick="copyPrompt()" style="margin-top:10px; padding:10px 20px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer;">Prompt'u Kopyala</button><br>
+
+  <button onclick="clearSelections()" style="margin-top:20px; padding:10px 20px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor:pointer;">Temizle</button><br>
+  
+<h3>recepyeni@gmail.com</h3>
+
+
+  <script>
+    const selectedOptions = [];
+    
+    function updatePrompt() {
+      let promptParts = [];
+    
+      selectedOptions.forEach(sel => {
+        if (sel.category === 'style') promptParts.push(`Create a ${sel.text} style illustration`);
+        if (sel.category === 'composition') promptParts.push(`using a ${sel.text} composition`);
+        if (sel.category === 'atmosphere') promptParts.push(`with a ${sel.text} atmosphere`);
+        if (sel.category === 'location') promptParts.push(`set in a ${sel.text}`);
+        if (sel.category === 'character') promptParts.push(`featuring a ${sel.text}`);
+        if (sel.category === 'emotion') promptParts.push(`expressing ${sel.text} emotion`);
+        if (sel.category === 'clothing') promptParts.push(`wearing ${sel.text} clothing`);
+        if (sel.category === 'lighting') promptParts.push(`lit with ${sel.text}`);
+        if (sel.category === 'format') promptParts.push(`format ${sel.text}`);
+        if (sel.category === 'effect') promptParts.push(`with ${sel.text} effect`);
+        if (sel.category === 'season') promptParts.push(`during ${sel.text}`);
+        if (sel.category === 'technique') promptParts.push(`using ${sel.text} technique`);
+        if (sel.category === 'backgroundstyle') promptParts.push(`with a ${sel.text} background`);
+        if (sel.category === 'pose') promptParts.push(`posed as ${sel.text}`);
+        if (sel.category === 'lookdirection') promptParts.push(`looking ${sel.text}`);
+        if (sel.category === 'camera') promptParts.push(`shot with a ${sel.text}`);
+        if (sel.category === 'material') promptParts.push(`featuring ${sel.text} materials`);
+        if (sel.category === 'colorpalette') promptParts.push(`with a ${sel.text} color palette`);
+        if (sel.category === 'backgroundtheme') promptParts.push(`background theme: ${sel.text}`);
+        if (sel.category === 'artmovement') promptParts.push(`inspired by ${sel.text} art style`);
+        if (sel.category === 'storyelement') promptParts.push(`telling a story about ${sel.text}`);
+        if (sel.category === 'objects') promptParts.push(`including ${sel.text}`);
+        if (sel.category === 'expressiondetail') promptParts.push(`with ${sel.text} facial expressions`);
+        if (sel.category === 'soundmotion') promptParts.push(`illustrating ${sel.text}`);
+        if (sel.category === 'environmentinteraction') promptParts.push(`with ${sel.text} interaction`);
+        if (sel.category === 'layering') promptParts.push(`with detailed ${sel.text}`);
+        if (sel.category === 'animationstyle') promptParts.push(`designed for ${sel.text} animation`);
+      });
+    
+      document.getElementById('prompt-output').textContent = promptParts.join(', ') + (promptParts.length > 0 ? '.' : '');
+    }
+    
+    document.querySelectorAll('.grid').forEach(grid => {
+      grid.addEventListener('click', function(e) {
+        if (e.target.classList.contains('option')) {
+          const category = grid.getAttribute('data-category');
+          const text = e.target.textContent;
+    
+          // Eğer zaten seçiliyse: kaldır
+          const index = selectedOptions.findIndex(opt => opt.category === category && opt.text === text);
+          if (index > -1) {
+            selectedOptions.splice(index, 1); // kaldır
+            e.target.classList.remove('selected');
+          } else {
+            selectedOptions.push({ category, text }); // ekle
+            e.target.classList.add('selected');
+          }
+    
+          updatePrompt();
+        }
+      });
+    });
+    
+    // Clear (Temizle) Butonu Fonksiyonu
+    function clearSelections() {
+      selectedOptions.length = 0;
+      document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+      updatePrompt();
+    }
+
+    function copyPrompt() {
+  const promptText = document.getElementById('prompt-output').textContent;
+  
+  if (promptText.trim() !== '') {
+    navigator.clipboard.writeText(promptText)
+      .then(() => {
+        alert('Prompt başarıyla kopyalandı! 📋');
+      })
+      .catch(err => {
+        alert('Kopyalama başarısız oldu. Tarayıcı izin vermiyor olabilir.');
+      });
+  } else {
+    alert('Kopyalanacak bir prompt yok!');
+  }
+}
+
+function randomGenerate() {
+  // Önce mevcut seçimleri temizleyelim
+  clearSelections();
+
+  // Her kategori için bir tane rastgele seç
+  document.querySelectorAll('.grid').forEach(grid => {
+    const options = Array.from(grid.querySelectorAll('.option'));
+    if (options.length > 0) {
+      const randomOption = options[Math.floor(Math.random() * options.length)];
+      const category = grid.getAttribute('data-category');
+      const text = randomOption.textContent;
+
+      selectedOptions.push({ category, text });
+      randomOption.classList.add('selected');
+    }
+  });
+
+  // Promptu güncelle
+  updatePrompt();
+
+  // Sayfayı oluşan prompt kısmına kaydır
+  document.getElementById('prompt-output').scrollIntoView({ behavior: 'smooth' });
+}
+
+
+    </script>
+    
+    
+</body>
+</html>
