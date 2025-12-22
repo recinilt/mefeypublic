@@ -15,12 +15,13 @@ import requests
 from PIL import Image
 from io import BytesIO
 import unicodedata
+from datetime import datetime
 
 # ============================================================================
 # API KEYS - MANUEL OLARAK EKLE
 # ============================================================================
-ANTHROPIC_API_KEY = "buraya ekle"  # Anthropic API Key buraya
-OPENAI_API_KEY = "buraya ekle"     # OpenAI API Key buraya
+ANTHROPIC_API_KEY = "api key buraya"  # Anthropic API Key buraya
+OPENAI_API_KEY = "api key buraya"     # OpenAI API Key buraya
 
 # ============================================================================
 # CONFIGURATION
@@ -28,9 +29,11 @@ OPENAI_API_KEY = "buraya ekle"     # OpenAI API Key buraya
 THUMBNAIL_SIZE = (150, 150)
 DEFAULT_IMAGE_SIZE = "1024x1024"
 REQUEST_DELAY = 2  # seconds between requests
+MAX_RETRIES = 3  # maximum retry attempts for failed requests
 OUTPUT_DIR = Path("generated_images")
 HTML_INPUT_FILE = "aipictureprompts.html"
 HTML_OUTPUT_FILE = "aipictureprompts_updated.html"
+PROGRESS_FILE = "progress.json"
 
 # ============================================================================
 # HELPER FUNCTIONS
@@ -52,8 +55,82 @@ def sanitize_filename(text):
     return text.lower().strip('_')
 
 
-def call_claude_api(prompt):
-    """Call Claude API to generate prompts"""
+def load_progress():
+    """Load progress from JSON file"""
+    if os.path.exists(PROGRESS_FILE):
+        try:
+            with open(PROGRESS_FILE, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️  Progress file corrupted: {e}")
+            return None
+    return None
+
+
+def save_progress(progress_data):
+    """Save progress to JSON file"""
+    try:
+        with open(PROGRESS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(progress_data, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"⚠️  Could not save progress: {e}")
+
+
+def is_image_completed(filename, progress_data):
+    """Check if an image was already generated"""
+    if progress_data and 'completed_images' in progress_data:
+        return filename in progress_data['completed_images']
+    return False
+
+
+def mark_image_completed(filename, progress_data):
+    """Mark an image as completed in progress data"""
+    if 'completed_images' not in progress_data:
+        progress_data['completed_images'] = []
+    progress_data['completed_images'].append(filename)
+    progress_data['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    save_progress(progress_data)
+
+
+def get_user_choice(prompt_text, valid_choices):
+    """Get user input with validation"""
+    while True:
+        try:
+            choice = input(prompt_text).strip()
+            if choice in valid_choices:
+                return choice
+            print(f"❌ Geçersiz seçim! Lütfen {'/'.join(valid_choices)} seçeneklerinden birini girin.")
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Script durduruldu!")
+            exit(0)
+
+
+def handle_error(error_msg, category_name, cat_idx, total_cats, style, style_idx, total_styles):
+    """Handle errors and ask user what to do"""
+    print()
+    print("=" * 70)
+    print(f"❌ 3 deneme sonrası başarısız!")
+    print(f"   Kategori: {category_name} ({cat_idx}/{total_cats})")
+    print(f"   Stil: {style} ({style_idx}/{total_styles})")
+    print(f"   Hata: {error_msg}")
+    print()
+    print("🔄 Ne yapmak istersiniz?")
+    print("   1 - Tekrar dene")
+    print("   2 - Bu görseli atla, devam et")
+    print("   3 - Scripti durdur")
+    print("=" * 70)
+    
+    choice = get_user_choice("Seçiminiz (1/2/3): ", ['1', '2', '3'])
+    
+    if choice == '3':
+        print("\n⚠️  Script durduruldu! Progress kaydedildi.")
+        exit(0)
+    
+    return choice  # '1' = retry, '2' = skip
+
+
+def call_claude_api(prompt, max_retries=MAX_RETRIES):
+    """Call Claude API to generate prompts with retry logic"""
     url = "https://api.anthropic.com/v1/messages"
     headers = {
         "Content-Type": "application/json",
@@ -69,18 +146,25 @@ def call_claude_api(prompt):
         ]
     }
     
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        result = response.json()
-        return result['content'][0]['text'].strip()
-    except Exception as e:
-        print(f"❌ Claude API Error: {e}")
-        return None
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=30)
+            response.raise_for_status()
+            result = response.json()
+            return result['content'][0]['text'].strip()
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"      ⚠️  Deneme {attempt + 1}/{max_retries} başarısız, tekrar deneniyor...")
+                time.sleep(REQUEST_DELAY)
+            else:
+                print(f"      ❌ Claude API Error (tüm denemeler başarısız): {e}")
+                return None
+    
+    return None
 
 
-def call_dalle_api(prompt, size="1024x1024"):
-    """Call DALL-E API to generate images"""
+def call_dalle_api(prompt, size="1024x1024", max_retries=MAX_RETRIES):
+    """Call DALL-E API to generate images with retry logic"""
     url = "https://api.openai.com/v1/images/generations"
     headers = {
         "Content-Type": "application/json",
@@ -95,20 +179,27 @@ def call_dalle_api(prompt, size="1024x1024"):
         "quality": "standard"
     }
     
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        result = response.json()
-        image_url = result['data'][0]['url']
-        
-        # Download the image
-        img_response = requests.get(image_url)
-        img_response.raise_for_status()
-        
-        return Image.open(BytesIO(img_response.content))
-    except Exception as e:
-        print(f"❌ DALL-E API Error: {e}")
-        return None
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, headers=headers, json=data, timeout=60)
+            response.raise_for_status()
+            result = response.json()
+            image_url = result['data'][0]['url']
+            
+            # Download the image
+            img_response = requests.get(image_url, timeout=30)
+            img_response.raise_for_status()
+            
+            return Image.open(BytesIO(img_response.content))
+        except Exception as e:
+            if attempt < max_retries - 1:
+                print(f"      ⚠️  Deneme {attempt + 1}/{max_retries} başarısız, tekrar deneniyor...")
+                time.sleep(REQUEST_DELAY)
+            else:
+                print(f"      ❌ DALL-E API Error (tüm denemeler başarısız): {e}")
+                return None
+    
+    return None
 
 
 def create_thumbnail(image, size=THUMBNAIL_SIZE):
@@ -196,6 +287,41 @@ def main():
     # Create output directory
     OUTPUT_DIR.mkdir(exist_ok=True)
     
+    # Check for existing progress
+    progress_data = load_progress()
+    if progress_data:
+        print("=" * 70)
+        print("📂 Önceki çalıştırma bulundu!")
+        completed_count = len(progress_data.get('completed_images', []))
+        print(f"   Tamamlanan: {completed_count} görsel")
+        print(f"   Tarih: {progress_data.get('timestamp', 'Bilinmiyor')}")
+        print()
+        print("✅ Kaldığı yerden devam edilsin mi?")
+        print("   1 - Evet, devam et")
+        print("   2 - Hayır, baştan başla (progress.json silinecek)")
+        print("=" * 70)
+        
+        choice = get_user_choice("Seçiminiz (1/2): ", ['1', '2'])
+        
+        if choice == '2':
+            if os.path.exists(PROGRESS_FILE):
+                os.remove(PROGRESS_FILE)
+            progress_data = {
+                'completed_images': [],
+                'total_categories': 0,
+                'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            print("✅ Progress temizlendi, baştan başlanıyor...")
+        else:
+            print("✅ Kaldığı yerden devam ediliyor...")
+        print()
+    else:
+        progress_data = {
+            'completed_images': [],
+            'total_categories': 0,
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+    
     # Read HTML
     print("📄 Reading HTML file...")
     if not os.path.exists(HTML_INPUT_FILE):
@@ -208,6 +334,9 @@ def main():
     # Parse categories
     print("🔍 Parsing categories and styles...")
     categories, soup = parse_html_categories(html_content)
+    
+    progress_data['total_categories'] = len(categories)
+    save_progress(progress_data)
     
     print(f"✅ Found {len(categories)} categories")
     print()
@@ -251,65 +380,114 @@ Respond with ONLY the base prompt, no explanation."""
         
         # Step 2: Generate images for each style
         for style_idx, style in enumerate(styles, 1):
-            print(f"  [{style_idx}/{len(styles)}] Processing: {style}")
-            
-            # Determine image size
-            image_size = get_image_size_for_style(cat_id, style)
-            if cat_id == 'format':
-                print(f"      📐 Size for this format: {image_size}")
-                time.sleep(REQUEST_DELAY)
-            
-            # Create full prompt
-            full_prompt = f"{base_prompt}, {style}"
-            print(f"      📝 Prompt: {full_prompt}")
-            
-            # Generate image
-            print(f"      🎨 Generating image...")
-            image = call_dalle_api(full_prompt, image_size)
-            
-            if image is None:
-                print(f"      ❌ Failed to generate image, continuing...")
-                continue
-            
-            # Save full image
+            # Check filename
             style_safe = sanitize_filename(style)
             cat_safe = sanitize_filename(cat_id)
             filename = f"{cat_idx:03d}_{cat_safe}_{style_idx:03d}_{style_safe}.png"
-            filepath = OUTPUT_DIR / filename
             
-            image.save(filepath)
-            print(f"      💾 Saved: {filename}")
+            # Skip if already completed
+            if is_image_completed(filename, progress_data):
+                print(f"  [{style_idx}/{len(styles)}] ✅ Zaten tamamlanmış: {style}")
+                continue
             
-            # Create and save thumbnail
-            thumbnail = create_thumbnail(image)
-            thumb_filename = f"thumb_{filename}"
-            thumb_filepath = OUTPUT_DIR / thumb_filename
-            thumbnail.save(thumb_filepath)
-            print(f"      🖼️  Thumbnail: {thumb_filename}")
+            print(f"  [{style_idx}/{len(styles)}] Processing: {style}")
             
-            # Update HTML - add image to the option element
-            option_elements = category['grid_element'].find_all('div', class_='option')
-            if style_idx - 1 < len(option_elements):
-                option = option_elements[style_idx - 1]
+            # Retry loop for this specific image
+            retry_user_choice = False
+            while True:
+                # Determine image size
+                image_size = get_image_size_for_style(cat_id, style)
+                if cat_id == 'format':
+                    print(f"      📐 Size for this format: {image_size}")
+                    time.sleep(REQUEST_DELAY)
                 
-                # Create img tag
-                img_tag = soup.new_tag('img', 
-                                       src=f"generated_images/{thumb_filename}",
-                                       alt=style,
-                                       attrs={
-                                           'class': 'style-thumbnail',
-                                           'data-fullimg': f"generated_images/{filename}",
-                                           'onclick': 'openLightbox(this.getAttribute("data-fullimg"))'
-                                       })
-                img_tag['style'] = 'display:block; margin:5px auto; cursor:pointer; border-radius:4px;'
+                # Create full prompt with category and style at beginning and end
+                full_prompt = f"Category: {cat_name} ({cat_id}), Style: {style}, {base_prompt}, Category: {cat_name} ({cat_id}), Style: {style}"
+                print(f"      📝 Prompt: {full_prompt[:100]}...")
                 
-                # Insert image at the beginning of the option div
-                option.insert(0, img_tag)
-            
-            print(f"      ✅ Updated HTML")
-            print()
-            
-            time.sleep(REQUEST_DELAY)
+                # Generate image
+                print(f"      🎨 Generating image...")
+                image = call_dalle_api(full_prompt, image_size)
+                
+                if image is None:
+                    # Auto-retry failed, ask user
+                    user_choice = handle_error(
+                        "Image generation failed",
+                        cat_name,
+                        cat_idx,
+                        len(categories),
+                        style,
+                        style_idx,
+                        len(styles)
+                    )
+                    
+                    if user_choice == '1':  # Retry
+                        print("      🔄 Tekrar deneniyor...")
+                        continue
+                    else:  # Skip (user_choice == '2')
+                        print(f"      ⏭️  Atlanıyor...")
+                        break
+                
+                # Success! Save the image
+                filepath = OUTPUT_DIR / filename
+                
+                try:
+                    image.save(filepath)
+                    print(f"      💾 Saved: {filename}")
+                    
+                    # Create and save thumbnail
+                    thumbnail = create_thumbnail(image)
+                    thumb_filename = f"thumb_{filename}"
+                    thumb_filepath = OUTPUT_DIR / thumb_filename
+                    thumbnail.save(thumb_filepath)
+                    print(f"      🖼️  Thumbnail: {thumb_filename}")
+                    
+                    # Update HTML - add image to the option element
+                    option_elements = category['grid_element'].find_all('div', class_='option')
+                    if style_idx - 1 < len(option_elements):
+                        option = option_elements[style_idx - 1]
+                        
+                        # Create img tag
+                        img_tag = soup.new_tag('img', 
+                                               src=f"generated_images/{thumb_filename}",
+                                               alt=style,
+                                               attrs={
+                                                   'class': 'style-thumbnail',
+                                                   'data-fullimg': f"generated_images/{filename}",
+                                                   'onclick': 'openLightbox(this.getAttribute("data-fullimg"))'
+                                               })
+                        img_tag['style'] = 'display:block; margin:5px auto; cursor:pointer; border-radius:4px;'
+                        
+                        # Insert image at the beginning of the option div
+                        option.insert(0, img_tag)
+                    
+                    # Mark as completed in progress
+                    mark_image_completed(filename, progress_data)
+                    
+                    print(f"      ✅ Completed and saved to progress")
+                    print()
+                    
+                    time.sleep(REQUEST_DELAY)
+                    break  # Success, exit retry loop
+                    
+                except Exception as e:
+                    # File save error
+                    user_choice = handle_error(
+                        f"File save error: {e}",
+                        cat_name,
+                        cat_idx,
+                        len(categories),
+                        style,
+                        style_idx,
+                        len(styles)
+                    )
+                    
+                    if user_choice == '1':  # Retry
+                        print("      🔄 Tekrar deneniyor...")
+                        continue
+                    else:  # Skip
+                        print(f"      ⏭️  Atlanıyor...")
+                        break
         
         print(f"✅ Completed category: {cat_name}")
         print()
