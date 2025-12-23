@@ -146,7 +146,7 @@
                 <!-- 03. Senaryo -->
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">03. Sözler & Zamanlama</label>
-                    <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]&#10;(Sözsüz Sahne)[14-20]"></textarea>
+                    <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]"></textarea>
                     
                     <div class="flex gap-2">
                         <button id="planBtn" class="flex-1 bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Edebi Senaryoyu Yaz</button>
@@ -166,7 +166,7 @@
                         <div class="h-full flex flex-col items-center justify-center text-slate-700">
                             <p class="text-sm font-semibold italic text-center px-10 leading-relaxed">
                                 Sinematik Manzara & Konsept Motoru Hazır.<br>
-                                <span class="text-[10px] opacity-40">Parantez içindeki () sahnelerde altyazı gösterilmeyecektir.</span>
+                                <span class="text-[10px] opacity-40">Tüm sahneler geniş açı ve edebi detaylarla kurgulanacaktır.</span>
                             </p>
                         </div>
                     </div>
@@ -261,6 +261,7 @@
                     document.querySelectorAll('.style-btn').forEach(x => x.classList.remove('selected'));
                     b.classList.add('selected');
                     selectedStyle = s;
+                    log(`Stil seçildi: ${s.name}`);
                 };
                 el.styles.appendChild(b);
             });
@@ -287,9 +288,11 @@
                         const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
                         throw new Error(err.error?.message || `HTTP ${res.status}`);
                     }
-                    return await res.json();
+                    const data = await res.json();
+                    return data;
                 } catch (e) {
                     if (i === retries - 1) throw e;
+                    log(`Hata, tekrar deneniyor (${i+1}/3)...`, "err");
                     await new Promise(r => setTimeout(r, delays[i]));
                 }
             }
@@ -299,7 +302,7 @@
             const f = e.target.files[0];
             if (!f) return;
             el.audio.src = URL.createObjectURL(f);
-            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; };
+            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; log(`Müzik hazır: ${Math.round(audioDuration)}s.`); };
         };
 
         el.refInput.onchange = (e) => {
@@ -309,58 +312,52 @@
             reader.onload = (event) => { 
                 referenceImageBase64 = event.target.result.split(',')[1]; 
                 el.refPreview.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover rounded-lg">`; 
+                log("Profil fotoğrafı karakter referansı olarak alındı."); 
             };
             reader.readAsDataURL(file);
         };
 
         function fmt(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
 
-        // --- SENARYO PLANLAMA ---
+        // --- SENARYO PLANLAMA (GELİŞMİŞ PROMPT MOTORU) ---
         document.getElementById('planBtn').onclick = async () => {
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             if (!txt || audioDuration === 0) return log("Müzik ve sözleri girin!", "err");
 
-            log("Senaryo kurgulanıyor...");
+            log("Edebi ve geniş açılı senaryo kurgulanıyor...");
             const lines = txt.split('\n').filter(l => l.includes('[') && l.includes(']'));
             const parsed = [];
 
             lines.forEach((l, index) => {
                 const match = l.match(/(.*?)\[(\d+)-(\d+)\]/);
-                if (match) {
-                    let caption = match[1].trim();
-                    let showSubtitle = true;
-                    if (caption.startsWith('(') && caption.endsWith(')')) {
-                        showSubtitle = false;
-                    }
-                    parsed.push({ id: index, caption: caption, start: parseInt(match[2]), end: parseInt(match[3]), showSubtitle: showSubtitle });
-                }
+                if (match) { parsed.push({ id: index, caption: match[1].trim(), start: parseInt(match[2]), end: parseInt(match[3]) }); }
             });
 
             try {
                 const systemPrompt = `Sen dünya çapında ödüllü bir konsept sanatçısı ve film yönetmenisin. 
-                GÖREVİN: Sana verilen şarkı sözleri için 5-6 CÜMLELİK edebi PARAGRAF PROMPT'lar oluşturmak.
+                GÖREVİN: Sana verilen her bir şarkı sözü satırı için 5-6 CÜMLELİK, son derece ayrıntılı, görsel derinliği olan bir PARAGRAF PROMPT oluşturmak.
                 
-                NOT: Bazı satırlar parantez içindedir. Bu satırlar videoda altyazı olarak gösterilmeyecektir ancak bu sahneler için yine de o tema ile ilgili çok görkemli görseller planlamalısın.
+                KESİN KURALLAR:
+                1. GENİŞ AÇI VE PANORAMA: ASLA yakın çekim (close-up) yapma. Tüm sahneler "Extreme wide angle long shot", "Cinematic panorama" veya "Aerial epic view" olmalı. Odak noktası devasa bir dünya/manzara olmalı.
+                2. SEMBOLİZM VE KONSEPT: "Koşmak" diyorsa sadece koşan birini değil; sonsuz bir ormanın içinde, devasa ağaçların arasında kaybolan bir silüeti kurgula. "Kul olmak" diyorsa; uçsuz bucaksız bir sahilde, gökyüzünden süzülen ışıklar altında diz çökmüş tek bir figürü kurgula.
+                3. STİL VE DOKU: "${selectedStyle.name}" stilini her cümlede vurgula. Eğer suluboya ise; ıslak boya izlerini, kağıdın pürüzlü dokusunu, fırça darbelerini anlat.
+                4. MOOD: "${mood || 'Dramatik ve Destansı'}" havasını ışık ve renklerle detaylandır.
+                5. REFERANS: Kullanıcı profil fotosu yüklediyse, o kişiyi stilize et (örneğin suluboyaya dönüştür) ve bu devasa manzaraların içine yerleştir. O kişiyi bir "karakter" olarak kullan, fotoğrafı olduğu gibi yapıştırma.
                 
-                KURALLAR:
-                1. GENİŞ AÇI: ASLA yakın çekim yapma. Hep "Extreme wide angle" kurgula.
-                2. SEMBOLİZM: Sözlerdeki metaforları devasa manzaralara dök.
-                3. STİL: "${selectedStyle.name}" stilini ve "${mood || 'Epic'}" ruh halini işle.
-                4. REFERANS: Karakter referansını stilize ederek manzaraya yerleştir.
-                
-                ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
+                ÇIKTI: Sadece bir JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce paragraf prompt.
+                Sözler: ${parsed.map(p => `${p.id}: ${p.caption}`).join(' | ')}`;
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: "Senaryoyu oluştur." }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt + "\nSözler: " + parsed.map(p => `${p.id}: ${p.caption}`).join(' | ') }] },
+                    contents: [{ parts: [{ text: "Lütfen her satır için epik ve geniş açılı paragraflar oluştur." }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
                     generationConfig: { responseMimeType: "application/json" }
                 });
 
                 scenes = parsed.map(p => ({ ...p, v_prompt: data[p.id] || p.caption, source: null }));
                 renderGrid();
                 el.generateAll.classList.remove('hidden');
-                log("Senaryo hazırlandı.");
+                log("Edebi senaryo planlaması tamamlandı.");
             } catch (e) {
                 log("Hata: " + e.message, "err");
             }
@@ -378,7 +375,7 @@
                         ${s.source ? `<img src="${s.source}" class="w-full h-full object-cover">` : '🎨 Hazır'}
                     </div>
                     <div class="p-3 bg-black/20 text-[9px]">
-                        <div class="font-black ${s.showSubtitle ? 'text-blue-400' : 'text-purple-400'} mb-1">${s.start}-${s.end}s ${!s.showSubtitle ? '(Sözsüz)' : ''}</div>
+                        <div class="font-black text-blue-400 mb-1">${s.start}-${s.end}s</div>
                         <div class="text-slate-300 truncate">${s.caption}</div>
                     </div>
                 `;
@@ -394,8 +391,10 @@
             try {
                 let finalSource;
                 if (referenceImageBase64) {
-                    const i2iPrompt = `MANDATORY: Transform the reference into ${selectedStyle.name} art. 
-                    Extreme wide angle. The person is a small figure in a massive landscape.
+                    // IMAGE-TO-IMAGE: Profil fotosunu sanat eserine dönüştürerek geniş açılı manzaraya yedir
+                    const i2iPrompt = `MANDATORY: Transform the person in the reference image into the exact style of ${selectedStyle.name}. 
+                    DO NOT paste the photo. The output MUST look like a handcrafted ${selectedStyle.name} artwork. 
+                    The final image must be an EXTREME WIDE ANGLE LONG SHOT showing the person as a small part of a massive, conceptual landscape.
                     Detailed Scene: ${scene.v_prompt}`;
 
                     const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
@@ -416,34 +415,22 @@
                 buildVideoLayers();
             } catch (e) {
                 thumb.innerHTML = '<span class="text-red-500">HATA</span>';
+                log(`Sahne ${id} başarısız oldu.`, "err");
             }
         }
 
         async function regenerateScene(id) {
-            const scene = scenes.find(s => s.id === id);
-            const mood = el.mood.value.trim();
-            log(`Sahne ${id} için yeni senaryo yazılıyor...`);
-            try {
-                const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı yeni bir epik konsept oluştur.` }] }],
-                    systemInstruction: { parts: [{ text: `Yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}, Duygu: ${mood || 'Epic'}.` }] }
-                });
-                const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (newPrompt) {
-                    scene.v_prompt = newPrompt;
-                    await generateSingleScene(id);
-                }
-            } catch (e) {
-                await generateSingleScene(id);
-            }
+            log(`Sahne ${id} yeniden işleniyor...`);
+            await generateSingleScene(id);
         }
 
         el.generateAll.onclick = async () => {
             el.generateAll.disabled = true;
+            log("Prodüksiyon motoru çalışıyor... Sanat eserleri üretiliyor.");
             for (let i = 0; i < scenes.length; i++) {
                 await generateSingleScene(scenes[i].id);
             }
-            log("Prodüksiyon tamamlandı!", "success");
+            log("Tüm sahneler sinematik geniş açıyla üretildi!", "success");
             el.generateAll.disabled = false;
             el.play.disabled = false;
             el.exportBtn.classList.remove('hidden');
@@ -482,15 +469,11 @@
                 if (item) item.classList.toggle('active', s.id === id);
             });
             const current = scenes.find(s => s.id === id);
-            if (current && current.showSubtitle) {
-                el.subtitle.innerText = current.caption;
-                el.subtitle.style.opacity = 1;
-            } else {
-                el.subtitle.style.opacity = 0;
-            }
+            if (current) { el.subtitle.innerText = current.caption; el.subtitle.style.opacity = 1; } else { el.subtitle.style.opacity = 0; }
         }
 
         el.exportBtn.onclick = async () => {
+            log("Video birleştiriliyor... Lütfen bitene kadar bekleyin.");
             const ctx = el.exportCanvas.getContext('2d');
             const stream = el.exportCanvas.captureStream(30);
             const audioCtx = new AudioContext();
@@ -504,8 +487,9 @@
                 const blob = new Blob(chunks, { type: 'video/mp4' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `AI_Clip_${Date.now()}.mp4`;
+                a.download = `AI_Clip_Art_${Date.now()}.mp4`;
                 a.click();
+                log("Video başarıyla indirildi!", "success");
             };
             el.audio.currentTime = 0; recorder.start(); el.audio.play();
             const loop = () => {
@@ -516,11 +500,9 @@
                     const item = document.getElementById(`v-item-${scene.id}`);
                     if (item) {
                         ctx.drawImage(item, 0, 0, 1280, 720);
-                        if (scene.showSubtitle) {
-                            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 600, 1280, 120);
-                            ctx.fillStyle = '#FFF'; ctx.font = 'bold 36px Outfit'; ctx.textAlign = 'center';
-                            ctx.fillText(scene.caption, 640, 670);
-                        }
+                        ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 600, 1280, 120);
+                        ctx.fillStyle = '#FFF'; ctx.font = 'bold 36px Outfit'; ctx.textAlign = 'center';
+                        ctx.fillText(scene.caption, 640, 670);
                     }
                 }
                 if (now < audioDuration && recorder.state === "recording") requestAnimationFrame(loop);
@@ -535,7 +517,7 @@
             el.refPreview.innerHTML = "👤"; el.grid.innerHTML = "";
             el.layers.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-700 italic text-sm">Temizlendi.</div>';
             el.subtitle.style.opacity = 0; el.play.disabled = true; el.exportBtn.classList.add('hidden');
-            initStyles();
+            initStyles(); log("Sıfırlandı.");
         };
 
         initStyles();
