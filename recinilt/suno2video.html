@@ -250,21 +250,40 @@
     <script>
         //const apiKey = ""; 
         
-        const ART_STYLES = [
-            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
+                const ART_STYLES = [
+            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
-            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich and dark textures." },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich textures." },
             { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
             { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
-            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching, raw emotional art." },
-            { id: "fantasy", name: "Fantastik", prompt: "High-fantasy concept art, ethereal magical lighting, majestic landscapes, digital masterpiece." },
-            { id: "anime", name: "Anime", prompt: "Modern high-quality anime background art, vibrant skies, detailed lighting, cinematic frame." },
+            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching." },
+            { id: "anime", name: "Anime", prompt: "High-quality modern anime art, vibrant, crisp lines, cinematic background." },
             { id: "pixel", name: "Pixel Art", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels." },
-            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic." },
+            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative." },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork." },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi." },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures." },
+            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette." },
+            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture." },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, brush strokes, zen." },
+            { id: "lowpoly", name: "Low Poly", prompt: "Geometric low poly design, modern digital faceted look." },
+            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic." },
+            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background." },
             { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery." },
-            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." }
+            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow." },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate." },
+            { id: "graffiti", name: "Graffiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style." },
+            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts." },
+            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, paper texture." },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
+            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern." },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." },
+            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor." },
+            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void." }
         ];
 
+        
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
         let scenes = [];
