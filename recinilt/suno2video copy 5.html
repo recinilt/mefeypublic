@@ -37,31 +37,24 @@
             height: 100%;
             object-fit: cover;
             opacity: 0;
-            transition: opacity 1.5s ease-in-out;
-            transform-origin: center center;
+            transition: opacity 1.2s ease-in-out;
+            transform: scale(1);
         }
 
-        /* Video FX Animasyonları */
-        .slide-item.active { opacity: 1; }
-        
-        /* Geçişlerdeki sıçramayı önlemek için animation-fill-mode: forwards kullanıyoruz */
-        .fx-zoom-in.active { animation: zoomIn 20s linear forwards; }
-        .fx-zoom-out.active { animation: zoomOut 20s linear forwards; }
-        .fx-pan-left.active { animation: panLeft 20s linear forwards; }
-        .fx-pan-right.active { animation: panRight 20s linear forwards; }
-        .fx-tilt-cw.active { animation: tiltCW 20s linear forwards; }
-        .fx-tilt-ccw.active { animation: tiltCCW 20s linear forwards; }
-        .fx-floating.active { animation: floating 20s ease-in-out infinite; }
-        .fx-pulse.active { animation: pulse 20s ease-in-out infinite; }
+        /* Ken Burns (Video FX) Animasyonu */
+        .slide-item.active.ken-burns {
+            opacity: 1;
+            animation: kenburns 15s linear infinite alternate;
+        }
 
-        @keyframes zoomIn { 0% { transform: scale(1); } 100% { transform: scale(1.3); } }
-        @keyframes zoomOut { 0% { transform: scale(1.3); } 100% { transform: scale(1); } }
-        @keyframes panLeft { 0% { transform: scale(1.2) translateX(5%); } 100% { transform: scale(1.2) translateX(-5%); } }
-        @keyframes panRight { 0% { transform: scale(1.2) translateX(-5%); } 100% { transform: scale(1.2) translateX(5%); } }
-        @keyframes tiltCW { 0% { transform: scale(1.2) rotate(0deg); } 100% { transform: scale(1.2) rotate(3deg); } }
-        @keyframes tiltCCW { 0% { transform: scale(1.2) rotate(0deg); } 100% { transform: scale(1.2) rotate(-3deg); } }
-        @keyframes floating { 0% { transform: scale(1.1) translateY(0); } 50% { transform: scale(1.1) translateY(-2%); } 100% { transform: scale(1.1) translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1.05); } 50% { transform: scale(1.15); } 100% { transform: scale(1.05); } }
+        .slide-item.active:not(.ken-burns) {
+            opacity: 1;
+        }
+
+        @keyframes kenburns {
+            0% { transform: scale(1.0); transform-origin: center center; }
+            100% { transform: scale(1.2); transform-origin: top left; }
+        }
 
         .style-btn {
             cursor: pointer;
@@ -150,17 +143,16 @@
                 <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
                     Music Video Studio Pro
                 </h1>
-                <p class="text-slate-400 mt-2 font-medium italic uppercase tracking-widest text-[10px]">Gelişmiş FX, Loop & AI Senaryolu Prodüksiyon</p>
+                <p class="text-slate-400 mt-2 font-medium italic uppercase tracking-widest text-[10px]">Geniş Açı, Parantez, Video & AI Senaryolu Klip</p>
             </div>
             <div id="apiStatus" class="glass px-6 py-3 rounded-full flex items-center gap-3 border-blue-500/20">
                 <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Yapay Zeka Hazır</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Yapay Zeka Aktif</span>
             </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Sol Kontrol Paneli -->
             <div class="lg:col-span-4 space-y-5">
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <div>
@@ -184,7 +176,7 @@
                         <button id="modeVideoAI" class="mode-btn">VİDEO (AI)</button>
                     </div>
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">03. Sanat Stili</label>
-                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll"></div>
+                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto pr-2 custom-scroll"></div>
                     <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Ruh Hali: Melankolik, Görkemli..." />
                 </div>
 
@@ -203,12 +195,11 @@
                 </div>
             </div>
 
-            <!-- Sağ Panel -->
             <div class="lg:col-span-8 space-y-6">
                 <div class="video-canvas group" id="videoArea">
                     <div id="imageLayer" class="absolute inset-0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-700">
-                            <p class="text-sm font-semibold italic text-center px-10">AI Video Studio Pro Hazır. Geniş açı ve pürüzsüz geçiş FX desteği aktif.</p>
+                            <p class="text-sm font-semibold italic text-center px-10 leading-relaxed">Sinematik Manzara Motoru. Geniş açı ve Loop (Döngü) desteği aktif.</p>
                         </div>
                     </div>
                     
@@ -236,8 +227,8 @@
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
                         <h3 class="text-lg font-bold">Sinematik Galeri <span id="scCount" class="text-blue-500 text-xs ml-2 px-2 py-0.5 bg-blue-500/10 rounded-full"></span></h3>
                         <div class="flex gap-2">
-                            <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">Üretimi Başlat</button>
-                            <button id="exportBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">İndir (MP4)</button>
+                            <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">Tümünü Üret</button>
+                            <button id="exportBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">Klibi İndir (MP4)</button>
                         </div>
                     </div>
                     <div id="scenesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
@@ -252,33 +243,43 @@
         //const apiKey = ""; 
         
         const ART_STYLES = [
-            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
+            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
-            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich and dark textures." },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich textures." },
             { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
-            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, vibrant hand-painted nature." },
-            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching, raw emotional art." },
-            { id: "fantasy", name: "Fantastik", prompt: "High-fantasy concept art, ethereal magical lighting, majestic landscapes, digital masterpiece." },
-            { id: "anime", name: "Anime", prompt: "Modern high-quality anime background art, vibrant skies, detailed lighting, cinematic frame." },
+            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
+            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching." },
+            { id: "anime", name: "Anime", prompt: "High-quality modern anime art, vibrant, crisp lines, cinematic background." },
             { id: "pixel", name: "Pixel Art", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels." },
             { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic." },
             { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative." },
             { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork." },
             { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi." },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures." },
+            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette." },
             { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture." },
             { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, brush strokes, zen." },
-            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
-            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery." },
             { id: "lowpoly", name: "Low Poly", prompt: "Geometric low poly design, modern digital faceted look." },
+            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic." },
+            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background." },
+            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery." },
+            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow." },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate." },
+            { id: "graffiti", name: "Graffiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style." },
+            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts." },
+            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, paper texture." },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
+            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern." },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." },
             { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor." },
-            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." }
+            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void." }
         ];
 
-        const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
+        
         let scenes = [];
         let selectedStyle = ART_STYLES[0];
-        let productionMode = "image"; 
+        let productionMode = "image"; // image, video (Ken Burns), videoAI (AI Generated)
         let audioDuration = 0;
         let isPlaying = false;
         let activeIdx = -1;
@@ -371,7 +372,7 @@
             const f = e.target.files[0];
             if (!f) return;
             el.audio.src = URL.createObjectURL(f);
-            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; log(`Müzik hazır.`); };
+            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; log(`Müzik yüklendi.`); };
         };
 
         el.refInput.onchange = (e) => {
@@ -425,13 +426,7 @@
                 });
 
                 const prompts = JSON.parse(data.candidates[0].content.parts[0].text);
-                scenes = parsed.map(p => ({ 
-                    ...p, 
-                    v_prompt: prompts[p.id] || p.caption, 
-                    source: null, 
-                    type: productionMode,
-                    fx: VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)]
-                }));
+                scenes = parsed.map(p => ({ ...p, v_prompt: prompts[p.id] || p.caption, source: null, type: productionMode }));
                 renderGrid();
                 el.generateAll.classList.remove('hidden');
                 log("Senaryo planlaması tamamlandı.");
@@ -447,7 +442,7 @@
                 c.onclick = () => regenerateScene(s.id);
                 c.innerHTML = `
                     <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center">
-                        ${s.source ? (s.type === 'videoAI' ? `<video src="${s.source}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${s.source}" class="w-full h-full object-cover">`) : '🎨 Hazır'}
+                        ${s.source ? (s.type.includes('video') ? `<video src="${s.source}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${s.source}" class="w-full h-full object-cover">`) : '🎨 Hazır'}
                     </div>
                     <div class="p-3 bg-black/20 text-[9px]">
                         <div class="font-black ${s.showSubtitle ? 'text-blue-400' : 'text-purple-400'} mb-1">${s.start}-${s.end}s ${!s.showSubtitle ? '(Sözsüz)' : ''}</div>
@@ -466,7 +461,11 @@
             try {
                 let finalSource;
                 if (scene.type === "videoAI") {
-                    const vPrompt = `MANDATORY: Generate a high quality 5-second cinematic video clip in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle. Scenario: ${scene.v_prompt}`;
+                    // GERÇEK AI VİDEO ÜRETİMİ
+                    const vPrompt = `MANDATORY: Generate a high quality 5-second cinematic video clip in the EXACT STYLE OF ${selectedStyle.name}. 
+                    Extreme wide angle view. The person from the reference image is the protagonist. 
+                    Description: ${scene.v_prompt}`;
+
                     const vData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
                         contents: [{ parts: [
                             { text: vPrompt }, 
@@ -474,13 +473,16 @@
                         ].filter(p => p !== null)}],
                         generationConfig: { responseModalities: ['VIDEO'] }
                     });
+                    
                     const vPart = vData.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('video/'));
-                    if (!vPart) throw new Error("Video üretilemedi.");
+                    if (!vPart) throw new Error("Video üretilemedi, model yanıt vermedi.");
+                    
                     finalSource = `data:${vPart.inlineData.mimeType};base64,${vPart.inlineData.data}`;
                 } else if (referenceImageBase64) {
+                    // IMAGE-TO-IMAGE
                     const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
                         contents: [{ parts: [
-                            { text: `A professional concept art masterpiece in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama. The person from the reference image is integrated as a small artistic figure. Paragraf: ${scene.v_prompt}` }, 
+                            { text: `A professional concept art masterpiece in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama. The person from the reference image is integrated as a small figure. NO PHOTO REALISM unless style is Realistic. Paragraf: ${scene.v_prompt}` }, 
                             { inlineData: { mimeType: "image/png", data: referenceImageBase64 } }
                         ]}],
                         generationConfig: { responseModalities: ['IMAGE'] }
@@ -488,18 +490,22 @@
                     const imgBase64 = i2iData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
                     finalSource = `data:image/png;base64,${imgBase64}`;
                 } else {
+                    // TEXT-TO-IMAGE
                     const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
-                        instances: { prompt: `${selectedStyle.prompt}, Extreme wide angle cinematic view. ${scene.v_prompt}` },
+                        instances: { prompt: `${selectedStyle.prompt}, Extreme wide angle cinematic view, deep landscape. ${scene.v_prompt}` },
                         parameters: { sampleCount: 1 }
                     });
                     finalSource = `data:image/png;base64,${t2iData.predictions[0].bytesBase64Encoded}`;
                 }
                 
                 scene.source = finalSource;
-                scene.fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
-                thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
+                if(scene.type === 'videoAI') {
+                    thumb.innerHTML = `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>`;
+                } else {
+                    thumb.innerHTML = `<img src="${finalSource}" class="w-full h-full object-cover">`;
+                }
                 buildVideoLayers();
-            } catch (e) { thumb.innerHTML = '<span class="text-red-500">HATA</span>'; log("Hata: " + e.message, "err"); }
+            } catch (e) { thumb.innerHTML = '<span class="text-red-500">HATA</span>'; log("Üretim hatası: " + e.message, "err"); }
         }
 
         async function regenerateScene(id) {
@@ -507,7 +513,7 @@
             log(`Sahne ${id} güncelleniyor...`);
             try {
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
+                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı, yeni bir epik konsept oluştur. 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
                 });
                 const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (newPrompt) { scene.v_prompt = newPrompt; await generateSingleScene(id); }
@@ -535,7 +541,7 @@
                         element = document.createElement('img');
                     }
                     element.src = s.source;
-                    element.className = `slide-item ${s.type === 'video' ? s.fx : ''}`;
+                    element.className = `slide-item ${s.type === 'video' ? 'ken-burns' : ''}`;
                     element.id = `v-item-${s.id}`;
                     el.layers.appendChild(element);
                 }
@@ -575,7 +581,7 @@
         }
 
         el.exportBtn.onclick = async () => {
-            log("Video kaydediliyor... Efektler ve Loop işleniyor.");
+            log("Video kaydediliyor... Loop ve Efektler işleniyor.");
             const ctx = el.exportCanvas.getContext('2d');
             const stream = el.exportCanvas.captureStream(30);
             const audioCtx = new AudioContext();
@@ -591,6 +597,7 @@
                 a.href = URL.createObjectURL(blob);
                 a.download = `AI_Clip_Pro_${Date.now()}.mp4`;
                 a.click();
+                log("Video indirildi!");
             };
             el.audio.currentTime = 0; recorder.start(); el.audio.play();
             const loop = () => {
@@ -600,36 +607,25 @@
                 if (scene && scene.source) {
                     const item = document.getElementById(`v-item-${scene.id}`);
                     if (item) {
-                        const elapsed = now - scene.start;
-                        const total = scene.end - scene.start;
-                        const progress = elapsed / total;
-                        
-                        ctx.save();
-                        
-                        // FX Hesaplamaları
+                        let scale = 1;
+                        let offset = 0;
                         if (scene.type === 'video') {
-                            let scale = 1; let tx = 0; let ty = 0; let rot = 0;
-                            if(scene.fx === 'fx-zoom-in') scale = 1 + progress * 0.3;
-                            if(scene.fx === 'fx-zoom-out') scale = 1.3 - progress * 0.3;
-                            if(scene.fx === 'fx-pan-left') { scale = 1.2; tx = 128 - (progress * 256); }
-                            if(scene.fx === 'fx-pan-right') { scale = 1.2; tx = -128 + (progress * 256); }
-                            if(scene.fx === 'fx-tilt-cw') { scale = 1.2; rot = progress * 0.05; }
-                            if(scene.fx === 'fx-tilt-ccw') { scale = 1.2; rot = -progress * 0.05; }
-                            if(scene.fx === 'fx-floating') { scale = 1.1; ty = Math.sin(progress * Math.PI * 2) * 20; }
-                            if(scene.fx === 'fx-pulse') scale = 1.1 + Math.sin(progress * Math.PI * 2) * 0.05;
-
-                            ctx.translate(640 + tx, 360 + ty);
-                            ctx.rotate(rot);
-                            ctx.scale(scale, scale);
-                            ctx.drawImage(item, -640, -360, 1280, 720);
-                        } else if(scene.type === 'videoAI') {
-                            const vDur = item.duration || 5;
-                            item.currentTime = elapsed % vDur;
-                            ctx.drawImage(item, 0, 0, 1280, 720);
-                        } else {
-                            ctx.drawImage(item, 0, 0, 1280, 720);
+                            const elapsed = now - scene.start;
+                            scale = 1 + (elapsed / (scene.end - scene.start)) * 0.2;
+                            offset = (elapsed / (scene.end - scene.start)) * -50;
                         }
                         
+                        ctx.save();
+                        ctx.translate(offset, offset);
+                        ctx.scale(scale, scale);
+                        
+                        if(scene.type === 'videoAI') {
+                            // Video Loop Mantığı
+                            const videoDuration = item.duration || 5;
+                            item.currentTime = (now - scene.start) % videoDuration;
+                        }
+                        
+                        ctx.drawImage(item, 0, 0, 1280, 720);
                         ctx.restore();
                         
                         if (scene.showSubtitle) {
