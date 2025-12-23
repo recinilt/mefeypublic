@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Music Video Creator Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #020617;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .video-container {
+            aspect-ratio: 16 / 9;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+            box-shadow: 0 0 50px -10px rgba(59, 130, 246, 0.3);
+        }
+
+        .slide-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out, transform 8s linear;
+        }
+
+        .slide-image.active {
+            opacity: 1;
+            transform: scale(1.08);
+        }
+
+        .style-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .style-card.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .loader {
+            border: 2px solid #1e293b;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            width: 100%;
+            border-radius: 2px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .scene-item {
+            transition: transform 0.2s ease;
+        }
+        .scene-item:hover { transform: translateY(-2px); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-10 text-center">
+            <h1 class="text-5xl font-extrabold tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
+                AI Müzik Klibi Studio
+            </h1>
+            <p class="text-slate-400 mt-3 text-sm font-medium uppercase tracking-[0.2em]">Saniyeli Sözler & 30+ Sanat Stili</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Sol Panel (Kontroller) -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Müzik Yükleme -->
+                <div class="glass-panel p-6 rounded-3xl">
+                    <label class="block text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                        <span class="p-1.5 bg-blue-500/20 rounded-lg text-blue-400">♫</span> MP3 Dosyası
+                    </label>
+                    <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" />
+                    <audio id="audioPlayer" class="hidden"></audio>
+                </div>
+
+                <!-- Stil Seçimi -->
+                <div class="glass-panel p-6 rounded-3xl">
+                    <label class="block text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
+                        <span class="p-1.5 bg-indigo-500/20 rounded-lg text-indigo-400">🎨</span> Görsel Stil Seçin
+                    </label>
+                    <div id="styleGrid" class="grid grid-cols-3 gap-2 h-48 overflow-y-auto pr-2">
+                        <!-- Stiller JS ile dolacak -->
+                    </div>
+                </div>
+
+                <!-- Şarkı Sözleri -->
+                <div class="glass-panel p-6 rounded-3xl">
+                    <label class="block text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                        <span class="p-1.5 bg-purple-500/20 rounded-lg text-purple-400">✎</span> Saniyeli Sözler
+                    </label>
+                    <textarea id="lyricsInput" rows="8" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-600" 
+                        placeholder="[0] Giriş müziği...&#10;[12] İlk satır burada başlar&#10;[25] Nakarat geliyor..."></textarea>
+                    
+                    <button id="generateScenesBtn" class="w-full mt-4 bg-white text-slate-950 hover:bg-slate-200 font-bold py-4 rounded-2xl transition-all shadow-xl shadow-white/5 flex justify-center items-center gap-2">
+                        <span>Sahneleri Hazırla</span>
+                    </button>
+                </div>
+
+                <div id="statusBox" class="hidden glass-panel p-5 rounded-3xl border-blue-500/20 bg-blue-500/5">
+                    <div id="statusList" class="space-y-2 text-xs font-medium"></div>
+                </div>
+            </div>
+
+            <!-- Sağ Panel (Video & Önizleme) -->
+            <div class="lg:col-span-8 space-y-6">
+                <!-- Video Alanı -->
+                <div class="video-container group" id="videoArea">
+                    <div id="imageLayer">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 space-y-4">
+                            <div class="w-16 h-16 border-2 border-dashed border-slate-700 rounded-full flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            </div>
+                            <p class="text-sm font-medium">Müzik ve sözleri girip "Sahneleri Hazırla" deyin.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="subtitleOverlay" class="absolute bottom-12 left-0 right-0 text-center px-12 pointer-events-none transition-all duration-500">
+                        <span class="bg-black/80 backdrop-blur-md px-6 py-3 rounded-2xl text-xl font-bold border border-white/10 text-white hidden inline-block" id="subtitleText"></span>
+                    </div>
+
+                    <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/40 to-transparent flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button id="playBtn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform disabled:opacity-20" disabled>
+                            <svg id="playIcon" class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                        </button>
+                        <div class="flex-1">
+                            <div class="progress-bar overflow-hidden">
+                                <div id="playbackProgress" class="progress-fill"></div>
+                            </div>
+                            <div class="flex justify-between mt-2">
+                                <span id="timeDisplay" class="text-[10px] font-bold text-slate-400 tracking-tighter">00:00 / 00:00</span>
+                                <span id="currentStatus" class="text-[10px] font-bold text-blue-400 uppercase">Hazır</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sahne Önizlemeleri -->
+                <div class="glass-panel p-8 rounded-3xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            Sahne Galerisi <span id="sceneCount" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-400">0</span>
+                        </h2>
+                        <button id="generateImagesBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/20">
+                            Tüm Görselleri AI ile Çiz
+                        </button>
+                    </div>
+                    <div id="scenesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Sahneler -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3"></div>
+
+    <script>
+        const apiKey = ""; // Canvas ortamında otomatik dolar
+        
+        // --- 30+ STİL LİSTESİ ---
+        const ART_STYLES = [
+            { id: "realistic", name: "Gerçekçi Foto", prompt: "Hyper-realistic cinematic photography, 8k, highly detailed" },
+            { id: "watercolor", name: "Suluboya", prompt: "Beautiful watercolor painting, soft edges, artistic splashes" },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classic oil painting, thick brushstrokes, masterpiece style" },
+            { id: "neon", name: "Neon / Cyberpunk", prompt: "Futuristic cyberpunk, neon lights, glowing atmosphere, synthwave" },
+            { id: "anime", name: "Anime / Manga", prompt: "Modern high-quality anime style, vibrant colors, Makoto Shinkai vibes" },
+            { id: "pixel", name: "Pixel Art", prompt: "Retro 16-bit pixel art, video game aesthetic" },
+            { id: "sketch", name: "Karakalem", prompt: "Detailed charcoal pencil sketch on textured paper" },
+            { id: "3d", name: "3D Render", prompt: "Cute 3D Pixar style render, soft lighting, octane render" },
+            { id: "surreal", name: "Sürrealizm", prompt: "Surrealist dreamlike art, Salvador Dali style, abstract concepts" },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, dramatic shadows" },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk, gears, brass, vintage machinery, smoke" },
+            { id: "popart", name: "Pop Art", prompt: "Andy Warhol style pop art, bold colors, halftone patterns" },
+            { id: "vaporwave", name: "Vaporwave", prompt: "90s vaporwave aesthetic, glitch art, pink and teal palette" },
+            { id: "minimalist", name: "Minimalist", prompt: "Simple minimalist flat design, clean lines, pastel colors" },
+            { id: "ghibli", name: "Studio Ghibli", prompt: "Studio Ghibli hand-drawn animation style, nostalgic nature" },
+            { id: "cybernetic", name: "Siber Genetik", prompt: "Bio-mechanical art, intricate circuits, futuristic tech" },
+            { id: "origami", name: "Origami", prompt: "Paper craft, origami style, sharp folds, paper texture" },
+            { id: "ink", name: "Mürekkep / Sumi-e", prompt: "Traditional Japanese ink wash painting, zen atmosphere" },
+            { id: "retro_future", name: "Retro Futurizm", prompt: "1950s version of the future, space age, vintage sci-fi" },
+            { id: "clay", name: "Kil / Hamur", prompt: "Stop-motion claymation style, tactile texture, clay models" },
+            { id: "lowpoly", name: "Low Poly", prompt: "Geometric low poly art, faceted surfaces, modern digital look" },
+            { id: "renaissance", name: "Rönesans", prompt: "Italian Renaissance fresco, religious art style, Da Vinci vibes" },
+            { id: "graffiti", name: "Graffiti / Street", prompt: "Urban street art, graffiti mural, spray paint, vibrant" },
+            { id: "blueprint", name: "Teknik Çizim", prompt: "Technical blueprint, architectural lines, blue background" },
+            { id: "fantasy", name: "Epic Fantasy", prompt: "High fantasy digital art, dragons, magic, golden hour" },
+            { id: "comic", name: "Çizgi Roman", prompt: "Marvel/DC comic book style, dynamic action, ink shading" },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print style, Great Wave vibes" },
+            { id: "abstract", name: "Soyut", prompt: "Abstract expressionism, emotional colors, no clear shapes" },
+            { id: "disco", name: "70s Disco", prompt: "Glitzy 70s disco style, sparkle, flares, vintage glamour" },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient Roman mosaic art, small tile patterns" },
+            { id: "cinematic_noir", name: "Film Noir", prompt: "Black and white film noir, high contrast, detective mood" }
+        ];
+
+        let scenes = [];
+        let selectedStyle = ART_STYLES[0];
+        let audioDuration = 0;
+        let isPlaying = false;
+
+        // DOM Elements
+        const elements = {
+            audio: document.getElementById('audioPlayer'),
+            lyrics: document.getElementById('lyricsInput'),
+            styleGrid: document.getElementById('styleGrid'),
+            scenesGrid: document.getElementById('scenesGrid'),
+            playBtn: document.getElementById('playBtn'),
+            statusList: document.getElementById('statusList'),
+            timeDisplay: document.getElementById('timeDisplay'),
+            progress: document.getElementById('playbackProgress')
+        };
+
+        // --- STİL PANELİNİ DOLDUR ---
+        function initStyles() {
+            elements.styleGrid.innerHTML = '';
+            ART_STYLES.forEach(style => {
+                const card = document.createElement('div');
+                card.className = `style-card glass-panel p-2 rounded-xl text-[10px] font-bold text-center flex flex-col items-center justify-center gap-1 ${style.id === selectedStyle.id ? 'selected' : ''}`;
+                card.innerHTML = `<span>${style.name}</span>`;
+                card.onclick = () => {
+                    document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    selectedStyle = style;
+                    showToast(`${style.name} stili seçildi`);
+                };
+                elements.styleGrid.appendChild(card);
+            });
+        }
+
+        // --- YARDIMCI ARAÇLAR ---
+        function addStatus(msg, type = 'info') {
+            document.getElementById('statusBox').classList.remove('hidden');
+            const item = document.createElement('div');
+            item.className = `flex items-center gap-2 ${type === 'error' ? 'text-red-400' : 'text-slate-400'}`;
+            item.innerHTML = `<span>•</span> <span>${msg}</span>`;
+            elements.statusList.appendChild(item);
+            elements.statusList.scrollTop = elements.statusList.scrollHeight;
+        }
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = "bg-slate-800 border border-white/10 px-4 py-3 rounded-xl text-xs font-bold shadow-2xl animate-bounce";
+            t.innerText = msg;
+            document.getElementById('toastContainer').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        async function fetchAI(endpoint, body) {
+            const res = await fetch(`${endpoint}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error?.message || 'API Hatası');
+            }
+            return res.json();
+        }
+
+        // --- SES İŞLEMLERİ ---
+        document.getElementById('audioInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            elements.audio.src = URL.createObjectURL(file);
+            elements.audio.onloadedmetadata = () => {
+                audioDuration = elements.audio.duration;
+                elements.timeDisplay.innerText = `00:00 / ${formatTime(audioDuration)}`;
+                addStatus(`Müzik yüklendi (${Math.round(audioDuration)} sn)`);
+            };
+        };
+
+        function formatTime(s) {
+            const m = Math.floor(s / 60);
+            const sec = Math.floor(s % 60);
+            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+        }
+
+        // --- SAHNE PLANLAMA ---
+        document.getElementById('generateScenesBtn').onclick = async () => {
+            const text = elements.lyrics.value.trim();
+            if (!text || audioDuration === 0) return showToast("Müzik yükleyin ve saniyeli sözleri girin!");
+
+            addStatus("Şarkı satırları işleniyor...", "info");
+            
+            // Regex ile [saniye] Sözler formatını ayıkla
+            const lines = text.split('\n');
+            const parsedScenes = [];
+
+            lines.forEach(line => {
+                const match = line.match(/\[(\d+)\]\s*(.*)/);
+                if (match) {
+                    parsedScenes.push({
+                        timestamp: parseInt(match[1]),
+                        caption: match[2].trim(),
+                        visual_prompt: "" 
+                    });
+                }
+            });
+
+            if (parsedScenes.length === 0) {
+                addStatus("Hata: Saniyeli söz formatı bulunamadı! Örn: [10] Merhaba", "error");
+                return;
+            }
+
+            // Gemini ile görsel betimlemeleri üret
+            addStatus("Görsel betimlemeler (AI) hazırlanıyor...", "loading");
+            try {
+                const prompt = `Aşağıdaki şarkı sözlerini birer birer oku ve her biri için Imagen 4.0'da kullanılacak, seçilen "${selectedStyle.name}" stiline uygun İngilizce sanatsal promptlar yaz. 
+                Sadece JSON dizisi döndür.
+                Örnek: [{"visual_prompt": "A lone warrior in watercolor style..."}]
+                Sözler: ${parsedScenes.map(s => s.caption).join(' | ')}`;
+
+                const data = await fetchAI('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { responseMimeType: "application/json" }
+                });
+
+                const aiPrompts = JSON.parse(data.candidates[0].content.parts[0].text);
+                
+                scenes = parsedScenes.map((s, i) => ({
+                    ...s,
+                    visual_prompt: `${selectedStyle.prompt}, ${aiPrompts[i]?.visual_prompt || s.caption}`
+                }));
+
+                renderGrid();
+                document.getElementById('generateImagesBtn').classList.remove('hidden');
+                addStatus("Sahneler hazırlandı. Şimdi görselleri oluşturun.");
+            } catch (e) {
+                addStatus("Planlama Hatası: " + e.message, "error");
+            }
+        };
+
+        function renderGrid() {
+            elements.scenesGrid.innerHTML = '';
+            document.getElementById('sceneCount').innerText = scenes.length;
+            scenes.forEach((s, i) => {
+                const div = document.createElement('div');
+                div.className = 'scene-item bg-slate-900 rounded-xl overflow-hidden border border-slate-800';
+                div.innerHTML = `
+                    <div id="thumb-${i}" class="aspect-video bg-slate-950 flex items-center justify-center text-[8px] text-slate-700 italic text-center p-2">
+                        Hazır
+                    </div>
+                    <div class="p-2 bg-black/40">
+                        <div class="text-[9px] text-blue-400 font-bold mb-1">${formatTime(s.timestamp)}</div>
+                        <div class="text-[9px] text-slate-300 truncate">${s.caption}</div>
+                    </div>
+                `;
+                elements.scenesGrid.appendChild(div);
+            });
+        }
+
+        // --- GÖRSEL ÜRETİM ---
+        document.getElementById('generateImagesBtn').onclick = async () => {
+            const btn = document.getElementById('generateImagesBtn');
+            btn.disabled = true;
+            btn.innerText = "Görseller Çiziliyor...";
+            
+            addStatus("AI Sanatçısı çalışmaya başladı (Imagen 4.0)...");
+
+            for (let i = 0; i < scenes.length; i++) {
+                const thumb = document.getElementById(`thumb-${i}`);
+                thumb.innerHTML = '<div class="loader"></div>';
+                
+                try {
+                    const data = await fetchAI('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
+                        instances: { prompt: scenes[i].visual_prompt },
+                        parameters: { sampleCount: 1 }
+                    });
+
+                    const base64 = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    scenes[i].imageData = base64;
+                    thumb.innerHTML = `<img src="${base64}" class="w-full h-full object-cover">`;
+                } catch (e) {
+                    thumb.innerHTML = '<span class="text-red-500">X</span>';
+                    console.error(e);
+                }
+            }
+
+            addStatus("Tüm görseller hazır!", "success");
+            btn.innerText = "Klibi Oynat";
+            elements.playBtn.disabled = false;
+            prepareLayers();
+        };
+
+        function prepareLayers() {
+            const layer = document.getElementById('imageLayer');
+            layer.innerHTML = '';
+            scenes.forEach((s, i) => {
+                if (s.imageData) {
+                    const img = document.createElement('img');
+                    img.src = s.imageData;
+                    img.className = 'slide-image';
+                    img.id = `slide-${i}`;
+                    layer.appendChild(img);
+                }
+            });
+        }
+
+        // --- PLAYER MANTIĞI ---
+        elements.playBtn.onclick = () => {
+            if (isPlaying) {
+                elements.audio.pause();
+                document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+                document.getElementById('currentStatus').innerText = "Duraklatıldı";
+            } else {
+                elements.audio.play();
+                document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+                document.getElementById('currentStatus').innerText = "Oynatılıyor";
+            }
+            isPlaying = !isPlaying;
+        };
+
+        elements.audio.ontimeupdate = () => {
+            const now = elements.audio.currentTime;
+            elements.progress.style.width = `${(now / audioDuration) * 100}%`;
+            elements.timeDisplay.innerText = `${formatTime(now)} / ${formatTime(audioDuration)}`;
+            
+            // Sahne ve Altyazı Değişimi
+            let activeIdx = -1;
+            for (let i = 0; i < scenes.length; i++) {
+                if (now >= scenes[i].timestamp) activeIdx = i;
+            }
+
+            if (activeIdx !== -1) {
+                // Görsel Geçişi
+                document.querySelectorAll('.slide-image').forEach((img, idx) => {
+                    img.classList.toggle('active', idx === activeIdx);
+                });
+
+                // Altyazı
+                const sub = document.getElementById('subtitleText');
+                sub.innerText = scenes[activeIdx].caption;
+                sub.classList.remove('hidden');
+            }
+        };
+
+        elements.audio.onended = () => {
+            isPlaying = false;
+            document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+            document.getElementById('subtitleText').classList.add('hidden');
+        };
+
+        // Başlangıç
+        initStyles();
+    </script>
+</body>
+</html>
