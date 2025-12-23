@@ -1847,9 +1847,7 @@ illâ hû❤️`
             unknown: 0
         };
         let currentOpenCategory = null;
-        let starredEsma = []; // Yıldızlı esmalar (kategori bazlı)
-        let starredBaybars = []; // Yıldızlı Baybars tanımları
-        let starredAvcioglu = []; // Yıldızlı Avcıoğlu tanımları
+        let starredEsma = []; // Yıldızlı esmalar
 
         // LocalStorage'dan yıldızlıları yükle
         function loadStarredEsma() {
@@ -1857,54 +1855,27 @@ illâ hû❤️`
             if (saved) {
                 starredEsma = JSON.parse(saved);
             }
-            
-            const savedBaybars = localStorage.getItem('esmaulhusna_starred_baybars');
-            if (savedBaybars) {
-                starredBaybars = JSON.parse(savedBaybars);
-            }
-            
-            const savedAvcioglu = localStorage.getItem('esmaulhusna_starred_avcioglu');
-            if (savedAvcioglu) {
-                starredAvcioglu = JSON.parse(savedAvcioglu);
-            }
         }
 
         // Yıldızlıları kaydet
         function saveStarredEsma() {
             localStorage.setItem('esmaulhusna_starred', JSON.stringify(starredEsma));
-            localStorage.setItem('esmaulhusna_starred_baybars', JSON.stringify(starredBaybars));
-            localStorage.setItem('esmaulhusna_starred_avcioglu', JSON.stringify(starredAvcioglu));
         }
 
         // Esma yıldızlı mı kontrol et
-        function isStarred(esmaName, type = 'normal') {
-            if (type === 'baybars') {
-                return starredBaybars.includes(esmaName);
-            } else if (type === 'avcioglu') {
-                return starredAvcioglu.includes(esmaName);
-            } else {
-                return starredEsma.includes(esmaName);
-            }
+        function isStarred(esmaName) {
+            return starredEsma.includes(esmaName);
         }
 
         // Yıldız toggle
-        function toggleStar(esmaName, event, type = 'normal') {
+        function toggleStar(esmaName, event) {
             event.stopPropagation();
             
-            let targetArray;
-            if (type === 'baybars') {
-                targetArray = starredBaybars;
-            } else if (type === 'avcioglu') {
-                targetArray = starredAvcioglu;
-            } else {
-                targetArray = starredEsma;
-            }
-            
-            const index = targetArray.indexOf(esmaName);
+            const index = starredEsma.indexOf(esmaName);
             if (index > -1) {
-                targetArray.splice(index, 1);
+                starredEsma.splice(index, 1);
             } else {
-                targetArray.push(esmaName);
+                starredEsma.push(esmaName);
             }
             
             saveStarredEsma();
@@ -1988,7 +1959,7 @@ illâ hû❤️`
                 const item = BaybarsEmre[term];
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
-                const starred = isStarred(item.esma, 'baybars') ? 'starred' : '';
+                const starred = isStarred(item.esma) ? 'starred' : '';
                 
                 const esmaInfo = document.createElement('div');
                 esmaInfo.className = 'esma-info';
@@ -2001,7 +1972,7 @@ illâ hû❤️`
                 starSpan.className = `esma-star ${starred}`;
                 starSpan.textContent = '⭐';
                 starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e, 'baybars');
+                    toggleStar(item.esma, e);
                 });
                 
                 esmaDiv.appendChild(esmaInfo);
@@ -2050,7 +2021,7 @@ illâ hû❤️`
                 const item = AvciogluData[term];
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
-                const starred = isStarred(item.esma, 'avcioglu') ? 'starred' : '';
+                const starred = isStarred(item.esma) ? 'starred' : '';
                 
                 const esmaInfo = document.createElement('div');
                 esmaInfo.className = 'esma-info';
@@ -2063,11 +2034,12 @@ illâ hû❤️`
                 starSpan.className = `esma-star ${starred}`;
                 starSpan.textContent = '⭐';
                 starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e, 'avcioglu');
+                    toggleStar(item.esma, e);
                 });
                 
                 esmaDiv.appendChild(esmaInfo);
                 esmaDiv.appendChild(starSpan);
+                content.appendChild(esmaDiv);
                 content.appendChild(esmaDiv);
                 
                 termContainer.appendChild(btn);
@@ -2099,35 +2071,19 @@ illâ hû❤️`
             const grid = document.getElementById('starredGrid');
             grid.innerHTML = ''; // Temizle
             
-            const totalStarred = starredEsma.length + starredBaybars.length + starredAvcioglu.length;
-            
-            if (totalStarred === 0) {
+            if (starredEsma.length === 0) {
                 grid.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Henüz yıldızlı esma yok. Esmalar listesinden yıldız ekleyin.</p>';
                 return;
             }
             
-            // Kategori bazlı yıldızlı esmaları topla
+            // Yıldızlı esmaları topla
             let starredItems = [];
             Object.values(esmaData).forEach(category => {
                 category.forEach(item => {
                     if (starredEsma.includes(item.esma)) {
-                        starredItems.push({...item, type: 'normal'});
+                        starredItems.push(item);
                     }
                 });
-            });
-            
-            // Baybars yıldızlıları ekle
-            Object.values(BaybarsEmre).forEach(item => {
-                if (starredBaybars.includes(item.esma)) {
-                    starredItems.push({...item, type: 'baybars'});
-                }
-            });
-            
-            // Avcıoğlu yıldızlıları ekle
-            Object.values(AvciogluData).forEach(item => {
-                if (starredAvcioglu.includes(item.esma)) {
-                    starredItems.push({...item, type: 'avcioglu'});
-                }
             });
             
             // Göster
@@ -2139,14 +2095,14 @@ illâ hû❤️`
                 esmaInfo.className = 'esma-info';
                 esmaInfo.innerHTML = `
                     <div class="esma-name">${item.esma}</div>
-                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                    <div class="esma-meaning">${item.meaning}</div>
                 `;
                 
                 const starSpan = document.createElement('span');
                 starSpan.className = 'esma-star starred';
                 starSpan.textContent = '⭐';
                 starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e, item.type);
+                    toggleStar(item.esma, e);
                     // Listeyi yenile
                     initStarredList();
                 });
@@ -2716,36 +2672,18 @@ illâ hû❤️`
             text += '========================================\n\n';
             text += 'Export Tarihi: ' + new Date().toLocaleString('tr-TR') + '\n\n';
 
-            const totalStarred = starredEsma.length + starredBaybars.length + starredAvcioglu.length;
-            
-            if (totalStarred === 0) {
+            if (starredEsma.length === 0) {
                 text += 'Henüz yıldızlı esma yok.\n';
                 return text;
             }
 
             let starredItems = [];
-            
-            // Kategori bazlı esmalar
             Object.values(esmaData).forEach(category => {
                 category.forEach(item => {
                     if (starredEsma.includes(item.esma)) {
                         starredItems.push(item);
                     }
                 });
-            });
-            
-            // Baybars tanımları
-            Object.values(BaybarsEmre).forEach(item => {
-                if (starredBaybars.includes(item.esma)) {
-                    starredItems.push(item);
-                }
-            });
-            
-            // Avcıoğlu tanımları
-            Object.values(AvciogluData).forEach(item => {
-                if (starredAvcioglu.includes(item.esma)) {
-                    starredItems.push(item);
-                }
             });
 
             starredItems.forEach((item, index) => {
