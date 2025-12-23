@@ -157,33 +157,6 @@
             background: white;
             border-left: 3px solid var(--primary);
             border-radius: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .esma-info {
-            flex: 1;
-        }
-
-        .esma-star {
-            font-size: 1.5em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-            margin-left: 10px;
-        }
-
-        .esma-star:hover {
-            transform: scale(1.2);
-        }
-
-        .esma-star.starred {
-            color: #ffd700;
-        }
-
-        .esma-star:not(.starred) {
-            color: #ddd;
         }
 
         .esma-name {
@@ -970,7 +943,6 @@
             <div class="mode-selector">
                 <button class="mode-btn active" onclick="selectMode('category')">📚 Kategorilere Göre</button>
                 <button class="mode-btn" onclick="selectMode('shuffle')">🔀 Karıştır (Tümü)</button>
-                <button class="mode-btn" onclick="selectMode('starred')">⭐ Yıldızlılar</button>
                 <button class="mode-btn" onclick="selectMode('baybars')">💜 Vahdetî Derviş Jargonu</button>
                 <button class="mode-btn" onclick="selectMode('avcioglu')">📖 AVCIOĞLU'na Göre</button>
             </div>
@@ -1077,10 +1049,6 @@
                 <div class="export-menu-item" onclick="exportData('shuffle')">
                     <span>🔀</span>
                     <div>Tüm Esmalar (Karışık)</div>
-                </div>
-                <div class="export-menu-item" onclick="exportData('starred')">
-                    <span>⭐</span>
-                    <div>Yıldızlı Esmalar</div>
                 </div>
                 <div class="export-menu-item" onclick="exportData('baybars')">
                     <span>💜</span>
@@ -1845,47 +1813,6 @@ illâ hû❤️`
             unknown: 0
         };
         let currentOpenCategory = null;
-        let starredEsma = []; // Yıldızlı esmalar
-
-        // LocalStorage'dan yıldızlıları yükle
-        function loadStarredEsma() {
-            const saved = localStorage.getItem('esmaulhusna_starred');
-            if (saved) {
-                starredEsma = JSON.parse(saved);
-            }
-        }
-
-        // Yıldızlıları kaydet
-        function saveStarredEsma() {
-            localStorage.setItem('esmaulhusna_starred', JSON.stringify(starredEsma));
-        }
-
-        // Esma yıldızlı mı kontrol et
-        function isStarred(esmaName) {
-            return starredEsma.includes(esmaName);
-        }
-
-        // Yıldız toggle
-        function toggleStar(esmaName, event) {
-            event.stopPropagation();
-            
-            const index = starredEsma.indexOf(esmaName);
-            if (index > -1) {
-                starredEsma.splice(index, 1);
-            } else {
-                starredEsma.push(esmaName);
-            }
-            
-            saveStarredEsma();
-            
-            // Yıldız ikonunu güncelle
-            const starIcon = event.target;
-            if (starIcon.classList.contains('starred')) {
-                starIcon.classList.remove('starred');
-            } else {
-                starIcon.classList.add('starred');
-            }
-        }
 
         // Initialize categories
         function initCategories() {
@@ -1906,13 +1833,9 @@ illâ hû❤️`
                 esmaData[category].forEach(item => {
                     const esmaDiv = document.createElement('div');
                     esmaDiv.className = 'esma-item';
-                    const starred = isStarred(item.esma) ? 'starred' : '';
                     esmaDiv.innerHTML = `
-                        <div class="esma-info">
-                            <div class="esma-name">${item.esma}</div>
-                            <div class="esma-meaning">${item.meaning}</div>
-                        </div>
-                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
+                        <div class="esma-name">${item.esma}</div>
+                        <div class="esma-meaning">${item.meaning}</div>
                     `;
                     content.appendChild(esmaDiv);
                 });
@@ -1942,13 +1865,9 @@ illâ hû❤️`
                 const item = BaybarsEmre[term];
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
-                const starred = isStarred(item.esma) ? 'starred' : '';
                 esmaDiv.innerHTML = `
-                    <div class="esma-info">
-                        <div class="esma-name">${item.esma}</div>
-                        <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
-                    </div>
-                    <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
+                    <div class="esma-name">${item.esma}</div>
+                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
                 `;
                 content.appendChild(esmaDiv);
                 
@@ -1994,13 +1913,9 @@ illâ hû❤️`
                 const item = AvciogluData[term];
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
-                const starred = isStarred(item.esma) ? 'starred' : '';
                 esmaDiv.innerHTML = `
-                    <div class="esma-info">
-                        <div class="esma-name">${item.esma}</div>
-                        <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
-                    </div>
-                    <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
+                    <div class="esma-name">${item.esma}</div>
+                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
                 `;
                 content.appendChild(esmaDiv);
                 
@@ -2068,12 +1983,6 @@ illâ hû❤️`
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
                 avciogluSelector.classList.add('active');
-            } else if (mode === 'starred') {
-                categorySelector.classList.remove('active');
-                baybarsSelector.classList.remove('active');
-                avciogluSelector.classList.remove('active');
-                selectedCategory = null;
-                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             } else {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
@@ -2107,11 +2016,6 @@ illâ hû❤️`
                 return;
             }
 
-            if (currentMode === 'starred' && starredEsma.length === 0) {
-                alert('Henüz yıldızlı esma yok! Esmalar listesinden yıldız ekleyin.');
-                return;
-            }
-
             // Prepare cards
             if (currentMode === 'shuffle') {
                 currentCards = [];
@@ -2119,18 +2023,6 @@ illâ hû❤️`
                     currentCards = currentCards.concat(category);
                 });
                 // SHUFFLE EVERY TIME - FIX #1
-                currentCards = currentCards.sort(() => Math.random() - 0.5);
-            } else if (currentMode === 'starred') {
-                // Yıldızlılar modu
-                currentCards = [];
-                Object.values(esmaData).forEach(category => {
-                    category.forEach(item => {
-                        if (starredEsma.includes(item.esma)) {
-                            currentCards.push(item);
-                        }
-                    });
-                });
-                // Yıldızlıları da karıştır
                 currentCards = currentCards.sort(() => Math.random() - 0.5);
             } else if (currentMode === 'baybars') {
                 // Vahdetî Derviş Jargonu mode
@@ -2503,10 +2395,6 @@ illâ hû❤️`
                     content = generateShuffleExport();
                     filename = 'esmaulhusna-tum-esmalar.txt';
                     break;
-                case 'starred':
-                    content = generateStarredExport();
-                    filename = 'esmaulhusna-yildizlilar.txt';
-                    break;
                 case 'baybars':
                     content = generateBaybarsExport();
                     filename = 'esmaulhusna-vahdeti-dervis-jargonu.txt';
@@ -2568,37 +2456,6 @@ illâ hû❤️`
             });
 
             text += `\nToplam: ${allEsma.length} Esma\n`;
-
-            return text;
-        }
-
-        // Yıldızlılar export
-        function generateStarredExport() {
-            let text = '========================================\n';
-            text += 'ESMÂ-Ü\'L-HÜSNÂ - YILDIZLI ESMALAR\n';
-            text += '========================================\n\n';
-            text += 'Export Tarihi: ' + new Date().toLocaleString('tr-TR') + '\n\n';
-
-            if (starredEsma.length === 0) {
-                text += 'Henüz yıldızlı esma yok.\n';
-                return text;
-            }
-
-            let starredItems = [];
-            Object.values(esmaData).forEach(category => {
-                category.forEach(item => {
-                    if (starredEsma.includes(item.esma)) {
-                        starredItems.push(item);
-                    }
-                });
-            });
-
-            starredItems.forEach((item, index) => {
-                text += `${index + 1}. ${item.esma}\n`;
-                text += `   ${item.meaning}\n\n`;
-            });
-
-            text += `\nToplam: ${starredItems.length} Yıldızlı Esma\n`;
 
             return text;
         }
@@ -2700,7 +2557,6 @@ illâ hû❤️`
 
         // Initialize on load
         window.onload = function() {
-            loadStarredEsma();
             initCategories();
             initBaybarsDefinitions();
             initAvciogluDefinitions();
