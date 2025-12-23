@@ -1951,75 +1951,9 @@ illâ hû❤️`
             
             saveStarredEsma();
             
-            // Tüm görünümleri güncelle
+            // Eğer starred mode aktifse, listeyi yenile
             if (currentMode === 'starred') {
                 initStarredList();
-            }
-            
-            // Kategori görünümünü güncelle
-            Object.keys(esmaData).forEach(category => {
-                const content = document.getElementById(`content-${category}`);
-                if (content && content.classList.contains('active')) {
-                    // İçeriği yeniden oluştur
-                    content.innerHTML = '';
-                    esmaData[category].forEach(item => {
-                        const esmaDiv = document.createElement('div');
-                        esmaDiv.className = 'esma-item';
-                        const starred = isStarred(item.esma) ? 'starred' : '';
-                        
-                        esmaDiv.innerHTML = `
-                            <div class="esma-info">
-                                <div class="esma-name">${item.esma}</div>
-                                <div class="esma-meaning">${item.meaning}</div>
-                            </div>
-                            <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
-                        `;
-                        
-                        content.appendChild(esmaDiv);
-                    });
-                }
-            });
-            
-            // Baybars görünümünü güncelle
-            const baybarsContent = document.getElementById('baybarsContent');
-            if (baybarsContent && baybarsContent.children.length > 0) {
-                baybarsContent.innerHTML = '';
-                Object.values(BaybarsEmre).forEach(item => {
-                    const esmaDiv = document.createElement('div');
-                    esmaDiv.className = 'esma-item';
-                    const starred = starredBaybars.includes(item.esma) ? 'starred' : '';
-                    
-                    esmaDiv.innerHTML = `
-                        <div class="esma-info">
-                            <div class="esma-name">${item.esma}</div>
-                            <div class="esma-meaning">${item.meaning}</div>
-                        </div>
-                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event, 'baybars')">⭐</span>
-                    `;
-                    
-                    baybarsContent.appendChild(esmaDiv);
-                });
-            }
-            
-            // Avcıoğlu görünümünü güncelle
-            const avciogluContent = document.getElementById('avciogluContent');
-            if (avciogluContent && avciogluContent.children.length > 0) {
-                avciogluContent.innerHTML = '';
-                Object.values(AvciogluData).forEach(item => {
-                    const esmaDiv = document.createElement('div');
-                    esmaDiv.className = 'esma-item';
-                    const starred = starredAvcioglu.includes(item.esma) ? 'starred' : '';
-                    
-                    esmaDiv.innerHTML = `
-                        <div class="esma-info">
-                            <div class="esma-name">${item.esma}</div>
-                            <div class="esma-meaning">${item.meaning}</div>
-                        </div>
-                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event, 'avcioglu')">⭐</span>
-                    `;
-                    
-                    avciogluContent.appendChild(esmaDiv);
-                });
             }
         }
 

@@ -1851,67 +1851,29 @@ illâ hû❤️`
         let starredBaybars = []; // Yıldızlı Baybars tanımları
         let starredAvcioglu = []; // Yıldızlı Avcıoğlu tanımları
 
-        // Versiyon kontrol ve eski verileri temizleme
-        const STORAGE_VERSION = '2.0';
-        
-        function checkAndMigrateStorage() {
-            const currentVersion = localStorage.getItem('esmaulhusna_version');
-            
-            // Eğer versiyon yoksa veya eski versiyonsa, eski verileri temizle
-            if (!currentVersion || currentVersion !== STORAGE_VERSION) {
-                // Eski localStorage key'lerini temizle
-                localStorage.removeItem('esmaulhusna_starred');
-                localStorage.removeItem('esmaulhusna_starred_baybars');
-                localStorage.removeItem('esmaulhusna_starred_avcioglu');
-                localStorage.removeItem('esmaulhusna_notes');
-                
-                // Yeni versiyonu kaydet
-                localStorage.setItem('esmaulhusna_version', STORAGE_VERSION);
-                
-                console.log('Storage migrated to version ' + STORAGE_VERSION);
-            }
-        }
-
         // LocalStorage'dan yıldızlıları yükle
         function loadStarredEsma() {
-            // Önce versiyon kontrolü yap
-            checkAndMigrateStorage();
-            
-            // Yeni key formatı ile verileri yükle
-            const savedNormal = localStorage.getItem('esmaulhusna_v2_starred_normal');
-            if (savedNormal) {
-                try {
-                    starredEsma = JSON.parse(savedNormal);
-                } catch (e) {
-                    starredEsma = [];
-                }
+            const saved = localStorage.getItem('esmaulhusna_starred');
+            if (saved) {
+                starredEsma = JSON.parse(saved);
             }
             
-            const savedBaybars = localStorage.getItem('esmaulhusna_v2_starred_baybars');
+            const savedBaybars = localStorage.getItem('esmaulhusna_starred_baybars');
             if (savedBaybars) {
-                try {
-                    starredBaybars = JSON.parse(savedBaybars);
-                } catch (e) {
-                    starredBaybars = [];
-                }
+                starredBaybars = JSON.parse(savedBaybars);
             }
             
-            const savedAvcioglu = localStorage.getItem('esmaulhusna_v2_starred_avcioglu');
+            const savedAvcioglu = localStorage.getItem('esmaulhusna_starred_avcioglu');
             if (savedAvcioglu) {
-                try {
-                    starredAvcioglu = JSON.parse(savedAvcioglu);
-                } catch (e) {
-                    starredAvcioglu = [];
-                }
+                starredAvcioglu = JSON.parse(savedAvcioglu);
             }
         }
 
         // Yıldızlıları kaydet
         function saveStarredEsma() {
-            // Yeni key formatı ile kaydet
-            localStorage.setItem('esmaulhusna_v2_starred_normal', JSON.stringify(starredEsma));
-            localStorage.setItem('esmaulhusna_v2_starred_baybars', JSON.stringify(starredBaybars));
-            localStorage.setItem('esmaulhusna_v2_starred_avcioglu', JSON.stringify(starredAvcioglu));
+            localStorage.setItem('esmaulhusna_starred', JSON.stringify(starredEsma));
+            localStorage.setItem('esmaulhusna_starred_baybars', JSON.stringify(starredBaybars));
+            localStorage.setItem('esmaulhusna_starred_avcioglu', JSON.stringify(starredAvcioglu));
         }
 
         // Esma yıldızlı mı kontrol et
@@ -1940,86 +1902,24 @@ illâ hû❤️`
             
             const index = targetArray.indexOf(esmaName);
             if (index > -1) {
-                // Yıldızı kaldır
                 targetArray.splice(index, 1);
-                event.target.classList.remove('starred');
             } else {
-                // Yıldız ekle
                 targetArray.push(esmaName);
-                event.target.classList.add('starred');
             }
             
             saveStarredEsma();
             
-            // Tüm görünümleri güncelle
+            // Yıldız ikonunu güncelle
+            const starIcon = event.target;
+            if (starIcon.classList.contains('starred')) {
+                starIcon.classList.remove('starred');
+            } else {
+                starIcon.classList.add('starred');
+            }
+            
+            // Eğer starred mode aktifse, listeyi yenile
             if (currentMode === 'starred') {
                 initStarredList();
-            }
-            
-            // Kategori görünümünü güncelle
-            Object.keys(esmaData).forEach(category => {
-                const content = document.getElementById(`content-${category}`);
-                if (content && content.classList.contains('active')) {
-                    // İçeriği yeniden oluştur
-                    content.innerHTML = '';
-                    esmaData[category].forEach(item => {
-                        const esmaDiv = document.createElement('div');
-                        esmaDiv.className = 'esma-item';
-                        const starred = isStarred(item.esma) ? 'starred' : '';
-                        
-                        esmaDiv.innerHTML = `
-                            <div class="esma-info">
-                                <div class="esma-name">${item.esma}</div>
-                                <div class="esma-meaning">${item.meaning}</div>
-                            </div>
-                            <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
-                        `;
-                        
-                        content.appendChild(esmaDiv);
-                    });
-                }
-            });
-            
-            // Baybars görünümünü güncelle
-            const baybarsContent = document.getElementById('baybarsContent');
-            if (baybarsContent && baybarsContent.children.length > 0) {
-                baybarsContent.innerHTML = '';
-                Object.values(BaybarsEmre).forEach(item => {
-                    const esmaDiv = document.createElement('div');
-                    esmaDiv.className = 'esma-item';
-                    const starred = starredBaybars.includes(item.esma) ? 'starred' : '';
-                    
-                    esmaDiv.innerHTML = `
-                        <div class="esma-info">
-                            <div class="esma-name">${item.esma}</div>
-                            <div class="esma-meaning">${item.meaning}</div>
-                        </div>
-                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event, 'baybars')">⭐</span>
-                    `;
-                    
-                    baybarsContent.appendChild(esmaDiv);
-                });
-            }
-            
-            // Avcıoğlu görünümünü güncelle
-            const avciogluContent = document.getElementById('avciogluContent');
-            if (avciogluContent && avciogluContent.children.length > 0) {
-                avciogluContent.innerHTML = '';
-                Object.values(AvciogluData).forEach(item => {
-                    const esmaDiv = document.createElement('div');
-                    esmaDiv.className = 'esma-item';
-                    const starred = starredAvcioglu.includes(item.esma) ? 'starred' : '';
-                    
-                    esmaDiv.innerHTML = `
-                        <div class="esma-info">
-                            <div class="esma-name">${item.esma}</div>
-                            <div class="esma-meaning">${item.meaning}</div>
-                        </div>
-                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event, 'avcioglu')">⭐</span>
-                    `;
-                    
-                    avciogluContent.appendChild(esmaDiv);
-                });
             }
         }
 
@@ -2600,19 +2500,15 @@ illâ hû❤️`
 
         // LocalStorage'dan notları yükle
         function loadNotes() {
-            const savedNotes = localStorage.getItem('esmaulhusna_v2_notes');
+            const savedNotes = localStorage.getItem('esmaulhusna_notes');
             if (savedNotes) {
-                try {
-                    notes = JSON.parse(savedNotes);
-                } catch (e) {
-                    notes = [];
-                }
+                notes = JSON.parse(savedNotes);
             }
         }
 
         // LocalStorage'a notları kaydet
         function saveNotesToStorage() {
-            localStorage.setItem('esmaulhusna_v2_notes', JSON.stringify(notes));
+            localStorage.setItem('esmaulhusna_notes', JSON.stringify(notes));
         }
 
         // Notları listele
