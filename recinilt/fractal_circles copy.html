@@ -2,8 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Sonsuz Çember Fraktalı - Mobil Uyumlu</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonsuz Çember Fraktalı - Özelleştirilebilir</title>
     <style>
         body {
             margin: 0;
@@ -12,16 +12,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Mobilde sayfa kaymasını ve seçmeyi engeller */
-            touch-action: none; 
-            -webkit-user-select: none;
-            user-select: none;
         }
         canvas {
             display: block;
             image-rendering: crisp-edges;
-            /* Tarayıcının varsayılan zoom hareketini devre dışı bırakır, kontrolü JS'ye verir */
-            touch-action: none; 
         }
         #ui {
             position: absolute;
@@ -37,7 +31,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            pointer-events: auto; /* UI elemanlarına dokunulabilsin */
         }
         .control-group {
             display: flex;
@@ -66,7 +59,7 @@
             <input type="range" id="layer-slider" min="1" max="5" value="3">
         </div>
         <div style="font-size: 10px; color: #888; margin-top: 5px;">
-            PC: Tekerlek | Mobil: İki Parmak
+            Yakınlaşmak için tekerleği kaydırın
         </div>
     </div>
     <canvas id="fractalCanvas"></canvas>
@@ -84,11 +77,8 @@
         let baseDepth = 0;
         let maxLayers = 3;
         
-        // Çember dizilim oranı
+        // Çember dizilim oranı artık 5.0
         const FRACTAL_RATIO = 5.0; 
-
-        // Mobil Zoom Değişkenleri
-        let initialTouchDistance = null;
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -104,8 +94,9 @@
             layerDisplay.innerText = maxLayers;
         });
 
-        // --- ZOOM MANTIĞI FONKSİYONU ---
-        function applyZoom(delta) {
+        // Fare tekerleği ile sonsuz zoom
+        window.addEventListener('wheel', (e) => {
+            const delta = e.deltaY > 0 ? 0.97 : 1.03;
             scale *= delta;
 
             // SONSUZ DÖNGÜ MANTIĞI:
@@ -119,67 +110,37 @@
             
             depthDisplay.innerText = baseDepth;
             zoomDisplay.innerText = scale.toFixed(2);
-        }
-
-        // MOUSE TEKERLEĞİ (PC)
-        window.addEventListener('wheel', (e) => {
-            const delta = e.deltaY > 0 ? 0.97 : 1.03;
-            applyZoom(delta);
-        }, { passive: true });
-
-        // DOKUNMATİK (MOBİL) MANTIĞI
-        function getDistance(touches) {
-            return Math.hypot(
-                touches[0].clientX - touches[1].clientX,
-                touches[0].clientY - touches[1].clientY
-            );
-        }
-
-        window.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                initialTouchDistance = getDistance(e.touches);
-            }
-        }, { passive: false });
-
-        window.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 2 && initialTouchDistance !== null) {
-                e.preventDefault(); // Sayfanın kaymasını engelle
-                
-                const currentDistance = getDistance(e.touches);
-                const ratio = currentDistance / initialTouchDistance;
-
-                // Parmak hareketine göre zoom hızı ayarı
-                // Bilgisayardaki yumuşaklığa yakın olması için küçük bir çarpan
-                const zoomFactor = ratio > 1 ? 1.02 : 0.98;
-                applyZoom(zoomFactor);
-
-                initialTouchDistance = currentDistance;
-            }
-        }, { passive: false });
-
-        window.addEventListener('touchend', () => {
-            initialTouchDistance = null;
         });
 
         /**
          * Fraktal Çember Çizimi
+         * @param {number} x - Merkez X
+         * @param {number} y - Merkez Y
+         * @param {number} r - Yarıçap
+         * @param {number} currentDepth - Derinlik
          */
         function drawCircles(x, y, r, currentDepth) {
             const sR = r * scale;
 
+            // Görünürlük kontrolü
             if (sR < 0.2 || sR > width * 3) return;
 
+            // Çizim
             ctx.beginPath();
             ctx.arc(x, y, sR, 0, Math.PI * 2);
             ctx.strokeStyle = '#ff0000';
+            
+            // Katman derinliğine göre incelen çizgiler (Görsel netlik için)
             ctx.lineWidth = Math.max(0.3, 1.5 - (currentDepth * 0.3));
             ctx.stroke();
 
+            // Kullanıcının seçtiği katman sayısına kadar in
             if (currentDepth < maxLayers - 1) {
                 const nextR = r / FRACTAL_RATIO;
                 const distance = r - nextR;
-                const count = 8;
 
+                // 8'li dizilim (5 ölçeğinde daha geniş alan olduğu için daha çok çember sığar)
+                const count = 8;
                 for (let i = 0; i < count; i++) {
                     const angle = (i / count) * Math.PI * 2;
                     const nextX = x + Math.cos(angle) * distance * scale;
@@ -187,6 +148,7 @@
                     drawCircles(nextX, nextY, nextR, currentDepth + 1);
                 }
                 
+                // Merkez çemberi
                 drawCircles(x, y, nextR, currentDepth + 1);
             }
         }
