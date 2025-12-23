@@ -172,7 +172,6 @@
             transition: all 0.3s ease;
             user-select: none;
             margin-left: 10px;
-            filter: grayscale(100%) brightness(0.8);
         }
 
         .esma-star:hover {
@@ -180,7 +179,11 @@
         }
 
         .esma-star.starred {
-            filter: grayscale(0%) brightness(1);
+            color: #ffd700;
+        }
+
+        .esma-star:not(.starred) {
+            color: #ddd;
         }
 
         .esma-name {
@@ -985,11 +988,6 @@
             <div class="category-selector" id="avciogluSelector">
                 <h4 style="margin-bottom: 10px; color: var(--text-primary);">AVCIOĞLU'na Göre Esma Mealleri</h4>
                 <div id="avciogluGrid"></div>
-            </div>
-
-            <div class="category-selector" id="starredSelector">
-                <h4 style="margin-bottom: 10px; color: var(--text-primary);">Yıldızlı Esmalar</h4>
-                <div id="starredGrid"></div>
             </div>
 
             <div class="learning-mode">
@@ -1887,11 +1885,6 @@ illâ hû❤️`
             } else {
                 starIcon.classList.add('starred');
             }
-            
-            // Eğer starred mode aktifse, listeyi yenile
-            if (currentMode === 'starred') {
-                initStarredList();
-            }
         }
 
         // Initialize categories
@@ -1914,23 +1907,13 @@ illâ hû❤️`
                     const esmaDiv = document.createElement('div');
                     esmaDiv.className = 'esma-item';
                     const starred = isStarred(item.esma) ? 'starred' : '';
-                    
-                    const esmaInfo = document.createElement('div');
-                    esmaInfo.className = 'esma-info';
-                    esmaInfo.innerHTML = `
-                        <div class="esma-name">${item.esma}</div>
-                        <div class="esma-meaning">${item.meaning}</div>
+                    esmaDiv.innerHTML = `
+                        <div class="esma-info">
+                            <div class="esma-name">${item.esma}</div>
+                            <div class="esma-meaning">${item.meaning}</div>
+                        </div>
+                        <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
                     `;
-                    
-                    const starSpan = document.createElement('span');
-                    starSpan.className = `esma-star ${starred}`;
-                    starSpan.textContent = '⭐';
-                    starSpan.addEventListener('click', function(e) {
-                        toggleStar(item.esma, e);
-                    });
-                    
-                    esmaDiv.appendChild(esmaInfo);
-                    esmaDiv.appendChild(starSpan);
                     content.appendChild(esmaDiv);
                 });
                 
@@ -1960,23 +1943,13 @@ illâ hû❤️`
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
                 const starred = isStarred(item.esma) ? 'starred' : '';
-                
-                const esmaInfo = document.createElement('div');
-                esmaInfo.className = 'esma-info';
-                esmaInfo.innerHTML = `
-                    <div class="esma-name">${item.esma}</div>
-                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                esmaDiv.innerHTML = `
+                    <div class="esma-info">
+                        <div class="esma-name">${item.esma}</div>
+                        <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                    </div>
+                    <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
                 `;
-                
-                const starSpan = document.createElement('span');
-                starSpan.className = `esma-star ${starred}`;
-                starSpan.textContent = '⭐';
-                starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e);
-                });
-                
-                esmaDiv.appendChild(esmaInfo);
-                esmaDiv.appendChild(starSpan);
                 content.appendChild(esmaDiv);
                 
                 termContainer.appendChild(btn);
@@ -2022,24 +1995,13 @@ illâ hû❤️`
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
                 const starred = isStarred(item.esma) ? 'starred' : '';
-                
-                const esmaInfo = document.createElement('div');
-                esmaInfo.className = 'esma-info';
-                esmaInfo.innerHTML = `
-                    <div class="esma-name">${item.esma}</div>
-                    <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                esmaDiv.innerHTML = `
+                    <div class="esma-info">
+                        <div class="esma-name">${item.esma}</div>
+                        <div class="esma-meaning" style="white-space: pre-line;">${item.meaning}</div>
+                    </div>
+                    <span class="esma-star ${starred}" onclick="toggleStar('${item.esma}', event)">⭐</span>
                 `;
-                
-                const starSpan = document.createElement('span');
-                starSpan.className = `esma-star ${starred}`;
-                starSpan.textContent = '⭐';
-                starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e);
-                });
-                
-                esmaDiv.appendChild(esmaInfo);
-                esmaDiv.appendChild(starSpan);
-                content.appendChild(esmaDiv);
                 content.appendChild(esmaDiv);
                 
                 termContainer.appendChild(btn);
@@ -2064,53 +2026,6 @@ illâ hû❤️`
             // Toggle current term
             content.classList.toggle('active');
             currentOpenAvciogluTerm = content.classList.contains('active') ? term : null;
-        }
-
-        // Initialize starred list
-        function initStarredList() {
-            const grid = document.getElementById('starredGrid');
-            grid.innerHTML = ''; // Temizle
-            
-            if (starredEsma.length === 0) {
-                grid.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Henüz yıldızlı esma yok. Esmalar listesinden yıldız ekleyin.</p>';
-                return;
-            }
-            
-            // Yıldızlı esmaları topla
-            let starredItems = [];
-            Object.values(esmaData).forEach(category => {
-                category.forEach(item => {
-                    if (starredEsma.includes(item.esma)) {
-                        starredItems.push(item);
-                    }
-                });
-            });
-            
-            // Göster
-            starredItems.forEach(item => {
-                const esmaDiv = document.createElement('div');
-                esmaDiv.className = 'esma-item';
-                
-                const esmaInfo = document.createElement('div');
-                esmaInfo.className = 'esma-info';
-                esmaInfo.innerHTML = `
-                    <div class="esma-name">${item.esma}</div>
-                    <div class="esma-meaning">${item.meaning}</div>
-                `;
-                
-                const starSpan = document.createElement('span');
-                starSpan.className = 'esma-star starred';
-                starSpan.textContent = '⭐';
-                starSpan.addEventListener('click', function(e) {
-                    toggleStar(item.esma, e);
-                    // Listeyi yenile
-                    initStarredList();
-                });
-                
-                esmaDiv.appendChild(esmaInfo);
-                esmaDiv.appendChild(starSpan);
-                grid.appendChild(esmaDiv);
-            });
         }
 
         function toggleCategoryContent(category) {
@@ -2140,37 +2055,29 @@ illâ hû❤️`
             const categorySelector = document.getElementById('categorySelector');
             const baybarsSelector = document.getElementById('baybarsSelector');
             const avciogluSelector = document.getElementById('avciogluSelector');
-            const starredSelector = document.getElementById('starredSelector');
             
             if (mode === 'category') {
                 categorySelector.classList.add('active');
                 baybarsSelector.classList.remove('active');
                 avciogluSelector.classList.remove('active');
-                starredSelector.classList.remove('active');
             } else if (mode === 'baybars') {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.add('active');
                 avciogluSelector.classList.remove('active');
-                starredSelector.classList.remove('active');
             } else if (mode === 'avcioglu') {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
                 avciogluSelector.classList.add('active');
-                starredSelector.classList.remove('active');
             } else if (mode === 'starred') {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
                 avciogluSelector.classList.remove('active');
-                starredSelector.classList.add('active');
                 selectedCategory = null;
                 document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
-                // Yıldızlı listeyi güncelle
-                initStarredList();
             } else {
                 categorySelector.classList.remove('active');
                 baybarsSelector.classList.remove('active');
                 avciogluSelector.classList.remove('active');
-                starredSelector.classList.remove('active');
                 selectedCategory = null;
                 document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
             }
