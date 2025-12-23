@@ -2130,22 +2130,8 @@ illâ hû❤️`
                 }
             });
             
-            // Her esma için başlık ve açılabilir içerik oluştur
-            starredItems.forEach((item, index) => {
-                const itemContainer = document.createElement('div');
-                itemContainer.style.marginBottom = '10px';
-                
-                // Başlık butonu
-                const btn = document.createElement('button');
-                btn.className = 'category-btn';
-                btn.textContent = item.esma;
-                btn.onclick = () => toggleStarredContent(index);
-                
-                // İçerik (kapalı olarak başlıyor)
-                const content = document.createElement('div');
-                content.className = 'category-content';
-                content.id = `starred-content-${index}`;
-                
+            // Göster
+            starredItems.forEach(item => {
                 const esmaDiv = document.createElement('div');
                 esmaDiv.className = 'esma-item';
                 
@@ -2167,30 +2153,8 @@ illâ hû❤️`
                 
                 esmaDiv.appendChild(esmaInfo);
                 esmaDiv.appendChild(starSpan);
-                content.appendChild(esmaDiv);
-                
-                itemContainer.appendChild(btn);
-                itemContainer.appendChild(content);
-                grid.appendChild(itemContainer);
+                grid.appendChild(esmaDiv);
             });
-        }
-
-        let currentOpenStarredItem = null;
-
-        function toggleStarredContent(index) {
-            const content = document.getElementById(`starred-content-${index}`);
-            
-            // Önceki açık içeriği kapat
-            if (currentOpenStarredItem !== null && currentOpenStarredItem !== index) {
-                const prevContent = document.getElementById(`starred-content-${currentOpenStarredItem}`);
-                if (prevContent) {
-                    prevContent.classList.remove('active');
-                }
-            }
-            
-            // Mevcut içeriği aç/kapat
-            content.classList.toggle('active');
-            currentOpenStarredItem = content.classList.contains('active') ? index : null;
         }
 
         function toggleCategoryContent(category) {
