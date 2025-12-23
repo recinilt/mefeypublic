@@ -35,7 +35,7 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Tarayıcı önizlemesinde basıklığı önler */
+            object-fit: cover;
             opacity: 0;
             transition: opacity 1.5s ease-in-out;
             transform-origin: center center;
@@ -44,6 +44,7 @@
         /* Video FX Animasyonları */
         .slide-item.active { opacity: 1; }
         
+        /* Geçişlerdeki sıçramayı önlemek için animation-fill-mode: forwards kullanıyoruz */
         .fx-zoom-in.active { animation: zoomIn 20s linear forwards; }
         .fx-zoom-out.active { animation: zoomOut 20s linear forwards; }
         .fx-pan-left.active { animation: panLeft 20s linear forwards; }
@@ -149,11 +150,11 @@
                 <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
                     Music Video Studio Pro
                 </h1>
-                <p class="text-slate-400 mt-2 font-medium italic uppercase tracking-widest text-[10px]">Geniş Açı, FX, Loop & Senaryolu Prodüksiyon</p>
+                <p class="text-slate-400 mt-2 font-medium italic uppercase tracking-widest text-[10px]">Gelişmiş FX, Loop & AI Senaryolu Prodüksiyon</p>
             </div>
             <div id="apiStatus" class="glass px-6 py-3 rounded-full flex items-center gap-3 border-blue-500/20">
                 <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Sinematik Motor Hazır</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Yapay Zeka Hazır</span>
             </div>
         </header>
 
@@ -207,7 +208,7 @@
                 <div class="video-canvas group" id="videoArea">
                     <div id="imageLayer" class="absolute inset-0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-700">
-                            <p class="text-sm font-semibold italic text-center px-10">AI Video Studio Pro Hazır. Tüm oranlar MP4 kaydında korunacaktır.</p>
+                            <p class="text-sm font-semibold italic text-center px-10">AI Video Studio Pro Hazır. Geniş açı ve pürüzsüz geçiş FX desteği aktif.</p>
                         </div>
                     </div>
                     
@@ -255,13 +256,21 @@
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
             { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich and dark textures." },
             { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
-            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
+            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, vibrant hand-painted nature." },
             { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching, raw emotional art." },
             { id: "fantasy", name: "Fantastik", prompt: "High-fantasy concept art, ethereal magical lighting, majestic landscapes, digital masterpiece." },
             { id: "anime", name: "Anime", prompt: "Modern high-quality anime background art, vibrant skies, detailed lighting, cinematic frame." },
             { id: "pixel", name: "Pixel Art", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels." },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic." },
+            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative." },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork." },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi." },
+            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture." },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, brush strokes, zen." },
             { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
             { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery." },
+            { id: "lowpoly", name: "Low Poly", prompt: "Geometric low poly design, modern digital faceted look." },
+            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor." },
             { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." }
         ];
 
@@ -362,7 +371,7 @@
             const f = e.target.files[0];
             if (!f) return;
             el.audio.src = URL.createObjectURL(f);
-            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; };
+            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; log(`Müzik hazır.`); };
         };
 
         el.refInput.onchange = (e) => {
@@ -442,7 +451,7 @@
                     </div>
                     <div class="p-3 bg-black/20 text-[9px]">
                         <div class="font-black ${s.showSubtitle ? 'text-blue-400' : 'text-purple-400'} mb-1">${s.start}-${s.end}s ${!s.showSubtitle ? '(Sözsüz)' : ''}</div>
-                        <div class="text-slate-300 truncate font-semibold">${s.caption}</div>
+                        <div class="text-slate-300 truncate">${s.caption}</div>
                     </div>
                 `;
                 el.grid.appendChild(c);
@@ -457,7 +466,7 @@
             try {
                 let finalSource;
                 if (scene.type === "videoAI") {
-                    const vPrompt = `MANDATORY: Generate a high quality 5-second cinematic video clip in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama. Scenario: ${scene.v_prompt}`;
+                    const vPrompt = `MANDATORY: Generate a high quality 5-second cinematic video clip in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle. Scenario: ${scene.v_prompt}`;
                     const vData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
                         contents: [{ parts: [
                             { text: vPrompt }, 
@@ -471,7 +480,7 @@
                 } else if (referenceImageBase64) {
                     const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
                         contents: [{ parts: [
-                            { text: `A professional concept art masterpiece in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama landscape. The person from the reference image is integrated as a small artistic figure. Paragraf: ${scene.v_prompt}` }, 
+                            { text: `A professional concept art masterpiece in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama. The person from the reference image is integrated as a small artistic figure. Paragraf: ${scene.v_prompt}` }, 
                             { inlineData: { mimeType: "image/png", data: referenceImageBase64 } }
                         ]}],
                         generationConfig: { responseModalities: ['IMAGE'] }
@@ -480,7 +489,7 @@
                     finalSource = `data:image/png;base64,${imgBase64}`;
                 } else {
                     const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
-                        instances: { prompt: `${selectedStyle.prompt}, Extreme wide angle cinematic view, panoramic landscape. ${scene.v_prompt}` },
+                        instances: { prompt: `${selectedStyle.prompt}, Extreme wide angle cinematic view. ${scene.v_prompt}` },
                         parameters: { sampleCount: 1 }
                     });
                     finalSource = `data:image/png;base64,${t2iData.predictions[0].bytesBase64Encoded}`;
@@ -490,7 +499,7 @@
                 scene.fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
                 thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
                 buildVideoLayers();
-            } catch (e) { thumb.innerHTML = '<span class="text-red-500 font-bold text-[10px]">HATA</span>'; log("Hata: " + e.message, "err"); }
+            } catch (e) { thumb.innerHTML = '<span class="text-red-500">HATA</span>'; log("Hata: " + e.message, "err"); }
         }
 
         async function regenerateScene(id) {
@@ -565,31 +574,8 @@
             else { el.subtitle.style.opacity = 0; }
         }
 
-        // --- ASPECT RATIO AWARE DRAWING ---
-        function drawCoverImage(ctx, item, x, y, w, h) {
-            const imgW = item.naturalWidth || item.videoWidth || 1280;
-            const imgH = item.naturalHeight || item.videoHeight || 720;
-            const imgRatio = imgW / imgH;
-            const targetRatio = w / h;
-            
-            let drawW, drawH, sx, sy, sw, sh;
-            
-            if (imgRatio > targetRatio) {
-                // Image is wider than canvas
-                drawH = h;
-                drawW = h * imgRatio;
-            } else {
-                // Image is taller than canvas
-                drawW = w;
-                drawH = w / imgRatio;
-            }
-            
-            // Center the image relative to -drawW/2 offset (since we use ctx.translate)
-            ctx.drawImage(item, -drawW / 2, -drawH / 2, drawW, drawH);
-        }
-
         el.exportBtn.onclick = async () => {
-            log("Video kaydediliyor... En boy oranı optimize ediliyor.");
+            log("Video kaydediliyor... Efektler ve Loop işleniyor.");
             const ctx = el.exportCanvas.getContext('2d');
             const stream = el.exportCanvas.captureStream(30);
             const audioCtx = new AudioContext();
@@ -603,18 +589,14 @@
                 const blob = new Blob(chunks, { type: 'video/mp4' });
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(blob);
-                a.download = `AI_Clip_Pro_HD_${Date.now()}.mp4`;
+                a.download = `AI_Clip_Pro_${Date.now()}.mp4`;
                 a.click();
-                log("Video indirildi!");
             };
             el.audio.currentTime = 0; recorder.start(); el.audio.play();
             const loop = () => {
                 const now = el.audio.currentTime;
                 const scene = scenes.find(s => now >= s.start && now < s.end);
-                
-                ctx.fillStyle = '#000'; 
-                ctx.fillRect(0, 0, 1280, 720);
-                
+                ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 1280, 720);
                 if (scene && scene.source) {
                     const item = document.getElementById(`v-item-${scene.id}`);
                     if (item) {
@@ -624,9 +606,9 @@
                         
                         ctx.save();
                         
-                        let scale = 1; let tx = 0; let ty = 0; let rot = 0;
-                        
+                        // FX Hesaplamaları
                         if (scene.type === 'video') {
+                            let scale = 1; let tx = 0; let ty = 0; let rot = 0;
                             if(scene.fx === 'fx-zoom-in') scale = 1 + progress * 0.3;
                             if(scene.fx === 'fx-zoom-out') scale = 1.3 - progress * 0.3;
                             if(scene.fx === 'fx-pan-left') { scale = 1.2; tx = 128 - (progress * 256); }
@@ -635,34 +617,28 @@
                             if(scene.fx === 'fx-tilt-ccw') { scale = 1.2; rot = -progress * 0.05; }
                             if(scene.fx === 'fx-floating') { scale = 1.1; ty = Math.sin(progress * Math.PI * 2) * 20; }
                             if(scene.fx === 'fx-pulse') scale = 1.1 + Math.sin(progress * Math.PI * 2) * 0.05;
-                            
+
                             ctx.translate(640 + tx, 360 + ty);
                             ctx.rotate(rot);
                             ctx.scale(scale, scale);
-                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                            ctx.drawImage(item, -640, -360, 1280, 720);
                         } else if(scene.type === 'videoAI') {
                             const vDur = item.duration || 5;
                             item.currentTime = elapsed % vDur;
-                            ctx.translate(640, 360);
-                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                            ctx.drawImage(item, 0, 0, 1280, 720);
                         } else {
-                            ctx.translate(640, 360);
-                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                            ctx.drawImage(item, 0, 0, 1280, 720);
                         }
                         
                         ctx.restore();
                         
                         if (scene.showSubtitle) {
-                            ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
-                            ctx.fillRect(0, 600, 1280, 120);
-                            ctx.fillStyle = '#FFF'; 
-                            ctx.font = 'bold 36px Outfit'; 
-                            ctx.textAlign = 'center';
+                            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, 600, 1280, 120);
+                            ctx.fillStyle = '#FFF'; ctx.font = 'bold 36px Outfit'; ctx.textAlign = 'center';
                             ctx.fillText(scene.caption, 640, 670);
                         }
                     }
                 }
-                
                 if (now < audioDuration && recorder.state === "recording") requestAnimationFrame(loop);
                 else { if (recorder.state === "recording") recorder.stop(); el.audio.pause(); }
             };
