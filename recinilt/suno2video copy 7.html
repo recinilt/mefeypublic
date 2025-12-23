@@ -570,22 +570,12 @@
             scenes.forEach(s => {
                 const item = document.getElementById(`v-item-${s.id}`);
                 if (item) {
-                    // Düzeltme: Geçiş sırasında sıçramayı önlemek için 'active' sınıfını gecikmeli kaldırıyoruz
-                    if (s.id === id) {
-                        item.classList.add('active');
-                        if(s.type === 'videoAI') {
-                            item.currentTime = (el.audio.currentTime - s.start) % (item.duration || 5);
-                            item.play().catch(() => {});
-                        }
-                    } else {
-                        // Bir önceki sahnenin animasyonu opacity 0 olana kadar devam etsin
-                        const sceneId = s.id;
-                        setTimeout(() => {
-                            if (activeIdx !== sceneId) {
-                                item.classList.remove('active');
-                                if(s.type === 'videoAI') item.pause();
-                            }
-                        }, 1500); // .slide-item transition süresi ile uyumlu (1.5s)
+                    item.classList.toggle('active', s.id === id);
+                    if(s.type === 'videoAI' && s.id === id) {
+                        item.currentTime = (el.audio.currentTime - s.start) % (item.duration || 5);
+                        item.play().catch(() => {});
+                    } else if(s.type === 'videoAI') {
+                        item.pause();
                     }
                 }
             });
