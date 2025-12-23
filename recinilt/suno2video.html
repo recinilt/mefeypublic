@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Music Video Studio Pro - Video Export Edition</title>
+    <title>AI Music Video Studio Pro - Video Production</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -30,35 +30,33 @@
             box-shadow: 0 0 100px -20px rgba(59, 130, 246, 0.4);
         }
 
-        .slide-img {
+        .slide-item {
             position: absolute;
             inset: 0;
             width: 100%;
             height: 100%;
             object-fit: cover;
             opacity: 0;
-            transition: opacity 1.2s ease-in-out, transform 15s linear;
+            transition: opacity 1s ease-in-out;
         }
 
-        .slide-img.active {
+        .slide-item.active {
             opacity: 1;
-            transform: scale(1.1);
         }
 
         .style-btn {
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             border: 1px solid rgba(255,255,255,0.05);
             background: rgba(255,255,255,0.02);
-            text-transform: uppercase;
             font-size: 10px;
             font-weight: 800;
+            text-align: center;
         }
 
         .style-btn.selected {
             border-color: #3b82f6;
             background: rgba(59, 130, 246, 0.2);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
         }
 
         .loader-ring {
@@ -83,7 +81,6 @@
             height: 100%;
             background: linear-gradient(90deg, #3b82f6, #a855f7);
             width: 0%;
-            transition: width 0.1s linear;
         }
 
         .subtitle-box {
@@ -94,26 +91,26 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
 
-        #refPreview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0.75rem;
-        }
+        #exportCanvas { display: none; }
         
-        /* Export Canvas hidden */
-        #exportCanvas {
-            display: none;
+        .mode-toggle {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
         }
-
-        .recording-pulse {
-            animation: pulse-red 2s infinite;
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 800;
+            transition: all 0.3s;
         }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
         }
     </style>
 </head>
@@ -125,11 +122,11 @@
                 <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
                     Music Video Studio Pro
                 </h1>
-                <p class="text-slate-400 mt-2 font-medium italic">Senkronize Görsel & Video Export Desteği</p>
+                <p class="text-slate-400 mt-2 font-medium italic">Senaryo & Video Prodüksiyon Desteği</p>
             </div>
             <div id="apiStatus" class="glass px-6 py-3 rounded-full flex items-center gap-3 border-blue-500/20">
                 <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Yapay Zeka Hazır</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Stüdyo Aktif</span>
             </div>
         </header>
 
@@ -137,42 +134,38 @@
             
             <!-- Sol Kontrol Paneli -->
             <div class="lg:col-span-4 space-y-5">
-                <!-- 01. Ses Dosyası -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">01. Ses Dosyası</label>
-                    <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-600 file:text-white cursor-pointer" />
-                    <audio id="audioPlayer" crossOrigin="anonymous" class="hidden"></audio>
-                </div>
-
-                <!-- 02. Referans Resim -->
-                <div class="glass p-5 rounded-[2rem] border border-blue-500/10">
-                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 block">02. Referans Resim</label>
-                    <div class="flex gap-3 items-center">
-                        <div id="refPreview" class="w-12 h-12 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center text-lg shrink-0">🖼️</div>
-                        <input type="file" id="refImageInput" accept="image/*" class="block w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[9px] file:bg-slate-800 file:text-slate-300" />
-                    </div>
-                </div>
-
-                <!-- 03. Stil -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">03. Görsel Stil</label>
-                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-2 custom-scroll"></div>
-                </div>
-
-                <!-- 04. Duygu & Sözler -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <div class="mb-4">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">04. Duygu</label>
-                        <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Mutlu, epik..." />
-                    </div>
+                <!-- 01. Ses & Referans -->
+                <div class="glass p-5 rounded-[2rem] space-y-4">
                     <div>
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">05. Sözler [Zamanlama]</label>
-                        <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]"></textarea>
+                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">01. Ses & Stil Referansı</label>
+                        <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-blue-600 file:text-white" />
+                        <audio id="audioPlayer" crossOrigin="anonymous" class="hidden"></audio>
                     </div>
+                    <div class="flex gap-3 items-center pt-2 border-t border-white/5">
+                        <div id="refPreview" class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-lg shrink-0">🖼️</div>
+                        <input type="file" id="refImageInput" accept="image/*" class="block w-full text-[10px] text-slate-500 file:py-1 file:px-2 file:bg-slate-800 file:text-slate-300 rounded" />
+                    </div>
+                </div>
+
+                <!-- 02. Üretim Ayarları -->
+                <div class="glass p-5 rounded-[2rem] space-y-4">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">02. Üretim Modu</label>
+                    <div class="mode-toggle">
+                        <button id="modeImage" class="mode-btn active">RESİM SAHNE</button>
+                        <button id="modeVideo" class="mode-btn">VİDEO KLİP</button>
+                    </div>
+                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-32 overflow-y-auto pr-2 custom-scroll"></div>
+                    <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Duygu: Epik, Melankolik..." />
+                </div>
+
+                <!-- 03. Sözler & Senaryo -->
+                <div class="glass p-5 rounded-[2rem] space-y-4">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">03. Sözler & Senaryo</label>
+                    <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]"></textarea>
                     
-                    <div class="grid grid-cols-2 gap-3 mt-4">
-                        <button id="planBtn" class="bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Planla</button>
-                        <button id="resetBtn" class="bg-slate-800 text-slate-400 font-bold py-3 rounded-xl hover:bg-red-900/10 transition-all uppercase text-[10px]">Sıfırla</button>
+                    <div class="flex gap-2">
+                        <button id="planBtn" class="flex-1 bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Planla & Senaryo Yaz</button>
+                        <button id="resetBtn" class="bg-slate-800 text-slate-400 font-bold px-4 rounded-xl hover:bg-red-900/10 transition-all uppercase text-[10px]">✕</button>
                     </div>
                 </div>
 
@@ -186,7 +179,7 @@
                 <div class="video-canvas group" id="videoArea">
                     <div id="imageLayer" class="absolute inset-0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-700">
-                            <p class="text-sm font-semibold italic">Yapay zeka klibiniz burada canlanacak.</p>
+                            <p class="text-sm font-semibold italic">Senaryolu klibiniz burada canlanacak.</p>
                         </div>
                     </div>
                     
@@ -210,16 +203,13 @@
                     </div>
                 </div>
 
+                <!-- Galeri & Kontroller -->
                 <div class="glass p-8 rounded-[2.5rem]">
                     <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-                        <h3 class="text-lg font-bold">Galeri <span id="scCount" class="text-blue-500 text-xs ml-2 px-2 py-0.5 bg-blue-500/10 rounded-full"></span></h3>
-                        <div class="flex gap-3">
-                            <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all">
-                                Görselleri Üret
-                            </button>
-                            <button id="exportBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2">
-                                <span>Klibi Kaydet & İndir</span>
-                            </button>
+                        <h3 class="text-lg font-bold">Sahne Galerisi <span id="scCount" class="text-blue-500 text-xs ml-2 px-2 py-0.5 bg-blue-500/10 rounded-full"></span></h3>
+                        <div class="flex gap-2">
+                            <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">Üretimi Başlat</button>
+                            <button id="exportBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase">Klibi İndir (MP4)</button>
                         </div>
                     </div>
                     <div id="scenesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
@@ -228,11 +218,12 @@
         </div>
     </div>
 
-    <!-- Hidden Canvas for Video Export -->
+    <!-- Export Canvas -->
     <canvas id="exportCanvas" width="1280" height="720"></canvas>
 
+    <script src="gemini.js"></script>
     <script>
-        const apiKey = ""; 
+        //const apiKey = ""; 
         
         const ART_STYLES = [
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic photography, highly detailed, 8k" },
@@ -241,23 +232,16 @@
             { id: "cyber", name: "Cyberpunk", prompt: "Neon cyberpunk city, futuristic atmosphere" },
             { id: "anime", name: "Anime", prompt: "High-quality anime art, vibrant, crisp lines" },
             { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli aesthetic, nostalgic, hand-painted" },
-            { id: "pixel", name: "Pixel Art", prompt: "Detailed 16-bit pixel art, retro gaming" },
-            { id: "sketch", name: "Karakalem", prompt: "Detailed charcoal sketch, crosshatching" },
             { id: "3d", name: "3D Stylized", prompt: "Cute 3D Pixar style render, soft lighting" },
-            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere" },
-            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract" },
-            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, gears" },
-            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch" },
-            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes" },
             { id: "noir", name: "Noir", prompt: "Cinematic film noir, black and white" },
             { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour" }
         ];
 
         let scenes = [];
         let selectedStyle = ART_STYLES[0];
+        let productionMode = "image"; // image or video
         let audioDuration = 0;
         let isPlaying = false;
-        let isRecording = false;
         let activeIdx = -1;
         let referenceImageBase64 = null;
 
@@ -281,14 +265,16 @@
             exportBtn: document.getElementById('exportBtn'),
             scCount: document.getElementById('scCount'),
             renderStatus: document.getElementById('renderStatus'),
-            exportCanvas: document.getElementById('exportCanvas')
+            exportCanvas: document.getElementById('exportCanvas'),
+            modeImage: document.getElementById('modeImage'),
+            modeVideo: document.getElementById('modeVideo')
         };
 
         function initStyles() {
             el.styles.innerHTML = '';
             ART_STYLES.forEach(s => {
                 const b = document.createElement('div');
-                b.className = `style-btn p-2 rounded-xl text-center flex items-center justify-center ${s.id === selectedStyle.id ? 'selected' : ''}`;
+                b.className = `style-btn p-2 rounded-xl ${s.id === selectedStyle.id ? 'selected' : ''}`;
                 b.innerText = s.name;
                 b.onclick = () => {
                     document.querySelectorAll('.style-btn').forEach(x => x.classList.remove('selected'));
@@ -299,10 +285,22 @@
             });
         }
 
+        // --- Mod Değişimi ---
+        el.modeImage.onclick = () => {
+            productionMode = "image";
+            el.modeImage.classList.add('active');
+            el.modeVideo.classList.remove('active');
+        };
+        el.modeVideo.onclick = () => {
+            productionMode = "video";
+            el.modeVideo.classList.add('active');
+            el.modeImage.classList.remove('active');
+        };
+
         function log(msg, type = 'info') {
             document.getElementById('statusConsole').classList.remove('hidden');
             const d = document.createElement('div');
-            d.innerHTML = `<span class="opacity-30 mr-2">${new Date().toLocaleTimeString()}</span> <span class="${type === 'err' ? 'text-red-400' : 'text-blue-400'}">${msg}</span>`;
+            d.innerHTML = `<span class="opacity-30 mr-2">${new Date().toLocaleTimeString()}</span> <span class="${type === 'err' ? 'text-red-400 font-bold' : 'text-blue-400'}">${msg}</span>`;
             el.logs.appendChild(d);
             el.logs.scrollTop = el.logs.scrollHeight;
         }
@@ -316,11 +314,19 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(body)
                     });
+                    
                     if (!res.ok) {
-                        const err = await res.json();
+                        const err = await res.json().catch(() => ({ error: { message: `HTTP ${res.status}` } }));
                         throw new Error(err.error?.message || `HTTP ${res.status}`);
                     }
-                    return await res.json();
+
+                    // Boş yanıt kontrolü
+                    const text = await res.text();
+                    if (!text || text.trim() === "") {
+                        throw new Error("API boş bir yanıt döndürdü (Empty Response).");
+                    }
+                    
+                    return JSON.parse(text);
                 } catch (e) {
                     if (i === retries - 1) throw e;
                     await new Promise(r => setTimeout(r, delays[i]));
@@ -328,7 +334,7 @@
             }
         }
 
-        // --- Dosya Yüklemeleri ---
+        // --- Dosya İşlemleri ---
         el.audioInput.onchange = (e) => {
             const f = e.target.files[0];
             if (!f) return;
@@ -336,7 +342,7 @@
             el.audio.onloadedmetadata = () => {
                 audioDuration = el.audio.duration;
                 el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                log(`Müzik yüklendi: ${Math.round(audioDuration)}s.`);
+                log(`Müzik: ${Math.round(audioDuration)}s.`);
             };
         };
 
@@ -358,13 +364,13 @@
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        // --- Planlama ---
+        // --- PLANLAMA & SENARYO ---
         document.getElementById('planBtn').onclick = async () => {
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             if (!txt || audioDuration === 0) return log("Müzik ve sözleri girin!", "err");
 
-            log("Metin işleniyor...");
+            log("Senaryo yazılıyor...");
             const lines = txt.split('\n').filter(l => l.includes('[') && l.includes(']'));
             const parsed = [];
 
@@ -381,21 +387,19 @@
                 }
             });
 
-            if (parsed.length === 0) return log("Hatalı format! [Başlangıç-Bitiş] gerekli.", "err");
-
             try {
-                const systemPrompt = `Music video director. Style: "${selectedStyle.name}". Mood: "${mood || 'vibrant'}". 
-                ${referenceImageBase64 ? 'Reference image is the basis for character/style.' : ''}
-                Return a JSON object where keys are indices and values are English cinematic prompts.
+                const systemPrompt = `Music video director. Write a detailed cinematic scenario for each lyric part.
+                Mode: ${productionMode}. Style: ${selectedStyle.name}. Mood: ${mood || 'cinematic'}.
+                Return JSON object keys indices, values detailed English scenario.
                 Lyrics: ${parsed.map(p => `${p.id}: ${p.caption}`).join(' | ')}`;
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: "Plan scenes." }] }],
+                    contents: [{ parts: [{ text: "Write scenario." }] }],
                     systemInstruction: { parts: [{ text: systemPrompt }] },
                     generationConfig: { responseMimeType: "application/json" }
                 });
 
-                const aiResponse = JSON.parse(data.candidates[0].content.parts[0].text);
+                const aiResponse = data;
                 
                 scenes = parsed.map(p => ({
                     ...p,
@@ -404,7 +408,7 @@
 
                 renderGrid();
                 el.generateAll.classList.remove('hidden');
-                log("Senaryo planlandı.");
+                log("Senaryo hazırlandı. Üretime geçebilirsiniz.");
             } catch (e) {
                 log("Hata: " + e.message, "err");
             }
@@ -417,7 +421,9 @@
                 const c = document.createElement('div');
                 c.className = "bg-slate-950 rounded-2xl border border-white/5 overflow-hidden";
                 c.innerHTML = `
-                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center italic">Bekliyor</div>
+                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center italic">
+                        ${productionMode === 'video' ? '🎬 Video' : '🖼️ Resim'} Bekliyor
+                    </div>
                     <div class="p-3 bg-black/20 text-[9px]">
                         <div class="font-black text-blue-400 mb-1">${s.start}-${s.end}s</div>
                         <div class="text-slate-500 truncate">${s.caption}</div>
@@ -427,11 +433,11 @@
             });
         }
 
-        // --- Görsel Üretim ---
+        // --- GÖRSEL & VİDEO ÜRETİM ---
         el.generateAll.onclick = async () => {
             el.generateAll.disabled = true;
-            el.generateAll.innerText = "Üretiliyor...";
-            log("AI Sanatçısı sahneleri çiziyor...");
+            el.generateAll.innerText = "İŞLENİYOR...";
+            log(`AI Prodüksiyon başladı: ${productionMode.toUpperCase()} Modu...`);
 
             for (let i = 0; i < scenes.length; i++) {
                 const scene = scenes[i];
@@ -439,55 +445,88 @@
                 t.innerHTML = '<div class="loader-ring"></div>';
                 
                 try {
-                    let resultImage;
-                    if (referenceImageBase64) {
-                        const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+                    let finalSource;
+
+                    if (productionMode === "video") {
+                        // Video Generation (Deneysel Modality)
+                        const vData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
                             contents: [{
                                 parts: [
-                                    { text: scene.v_prompt },
-                                    { inlineData: { mimeType: "image/png", data: referenceImageBase64 } }
-                                ]
+                                    { text: `Generate a 3-5 second video clip based on this prompt: ${scene.v_prompt}. Reference the visual style and content.` },
+                                    referenceImageBase64 ? { inlineData: { mimeType: "image/png", data: referenceImageBase64 } } : null
+                                ].filter(Boolean)
                             }],
-                            generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+                            generationConfig: { responseModalities: ['VIDEO'] }
                         });
-                        const base64 = i2iData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                        resultImage = `data:image/png;base64,${base64}`;
+                        
+                        const vBase64 = vData.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('video/'))?.inlineData?.data;
+                        
+                        if (!vBase64) {
+                            throw new Error("Video modalitesi bu istek için veri döndürmedi (Model yanıtında video verisi yok). Lütfen 'Resim Sahne' modunu deneyin.");
+                        }
+                        
+                        finalSource = `data:video/mp4;base64,${vBase64}`;
                     } else {
-                        const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
-                            instances: { prompt: scene.v_prompt },
-                            parameters: { sampleCount: 1 }
-                        });
-                        resultImage = `data:image/png;base64,${t2iData.predictions[0].bytesBase64Encoded}`;
+                        // Image Generation
+                        if (referenceImageBase64) {
+                            const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+                                contents: [{ parts: [{ text: scene.v_prompt }, { inlineData: { mimeType: "image/png", data: referenceImageBase64 } }] }],
+                                generationConfig: { responseModalities: ['IMAGE'] }
+                            });
+                            const imgBase64 = i2iData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                            if (!imgBase64) throw new Error("Görsel üretilemedi.");
+                            finalSource = `data:image/png;base64,${imgBase64}`;
+                        } else {
+                            const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
+                                instances: { prompt: scene.v_prompt },
+                                parameters: { sampleCount: 1 }
+                            });
+                            const b64 = t2iData.predictions?.[0]?.bytesBase64Encoded;
+                            if (!b64) throw new Error("Görsel üretimi başarısız.");
+                            finalSource = `data:image/png;base64,${b64}`;
+                        }
                     }
 
-                    scene.imgData = resultImage;
-                    const img = new Image();
-                    img.src = resultImage;
-                    scene.imgObj = img; // Preload for canvas
+                    scene.source = finalSource;
+                    scene.type = productionMode;
                     
-                    t.innerHTML = `<img src="${resultImage}" class="w-full h-full object-cover rounded-lg">`;
+                    if (productionMode === "video") {
+                        t.innerHTML = `<video src="${finalSource}" class="w-full h-full object-cover rounded-lg" muted loop autoplay></video>`;
+                    } else {
+                        t.innerHTML = `<img src="${finalSource}" class="w-full h-full object-cover rounded-lg">`;
+                    }
                 } catch (e) {
                     t.innerHTML = '<span class="text-red-500 font-bold text-[8px]">HATA</span>';
+                    log(`Sahne ${scene.id} Hatası: ${e.message}`, "err");
+                    // Hata durumunda üretimi durdurma, devam etmeyi dene ya da butonu aktifleştir
                 }
             }
 
-            log("Tüm sahneler hazır!", "success");
+            log("Prodüksiyon tamamlandı!", "success");
+            el.generateAll.disabled = false;
             el.generateAll.innerText = "Yeniden Üret";
             el.play.disabled = false;
             el.exportBtn.classList.remove('hidden');
-            el.renderStatus.innerText = "Oynat / Kaydet";
             buildVideoLayers();
         };
 
         function buildVideoLayers() {
             el.layers.innerHTML = '';
-            scenes.sort((a,b) => a.start - b.start).forEach(s => {
-                if (s.imgData) {
-                    const img = document.createElement('img');
-                    img.src = s.imgData;
-                    img.className = 'slide-img';
-                    img.id = `v-img-${s.id}`;
-                    el.layers.appendChild(img);
+            scenes.forEach(s => {
+                if (s.source) {
+                    let element;
+                    if (s.type === "video") {
+                        element = document.createElement('video');
+                        element.muted = true;
+                        element.loop = true;
+                        element.playsInline = true;
+                    } else {
+                        element = document.createElement('img');
+                    }
+                    element.src = s.source;
+                    element.className = 'slide-item';
+                    element.id = `v-item-${s.id}`;
+                    el.layers.appendChild(element);
                 }
             });
         }
@@ -496,6 +535,7 @@
         el.play.onclick = () => {
             if (isPlaying) {
                 el.audio.pause();
+                document.querySelectorAll('video.slide-item').forEach(v => v.pause());
                 document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
             } else {
                 el.audio.play();
@@ -505,7 +545,6 @@
         };
 
         el.audio.ontimeupdate = () => {
-            if (isRecording) return;
             const now = el.audio.currentTime;
             el.progress.style.width = `${(now / audioDuration) * 100}%`;
             el.time.innerText = `${fmt(now)} / ${fmt(audioDuration)}`;
@@ -518,8 +557,18 @@
 
         function updateVisuals(id) {
             scenes.forEach(s => {
-                const img = document.getElementById(`v-img-${s.id}`);
-                if (img) img.classList.toggle('active', s.id === id);
+                const item = document.getElementById(`v-item-${s.id}`);
+                if (item) {
+                    item.classList.toggle('active', s.id === id);
+                    if (s.type === "video") {
+                        if (s.id === id) {
+                            item.currentTime = 0;
+                            item.play().catch(() => {});
+                        } else {
+                            item.pause();
+                        }
+                    }
+                }
             });
             const current = scenes.find(s => s.id === id);
             if (current) {
@@ -530,102 +579,77 @@
             }
         }
 
-        // --- VIDEO EXPORT (CANVAS RECORDING) ---
+        // --- EXPORT (MP4) ---
         el.exportBtn.onclick = async () => {
-            if (isRecording) return;
-            isRecording = true;
-            el.exportBtn.disabled = true;
-            el.exportBtn.innerHTML = '<span>Kayıt Yapılıyor...</span>';
-            el.exportBtn.classList.add('recording-pulse');
-            log("Klip kaydı başladı. Şarkı bitene kadar bekleyin...");
-
+            log("Video kayıt işlemi başlatıldı. Lütfen bekleyin...");
             const ctx = el.exportCanvas.getContext('2d');
-            const stream = el.exportCanvas.captureStream(30); // 30 FPS
+            const stream = el.exportCanvas.captureStream(30);
             
-            // Audio capture
+            // Audio Context Setup
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             const source = audioCtx.createMediaElementSource(el.audio);
-            const destination = audioCtx.createMediaStreamDestination();
-            source.connect(destination);
+            const dest = audioCtx.createMediaStreamDestination();
+            source.connect(dest);
             source.connect(audioCtx.destination);
             
-            const combinedStream = new MediaStream([
-                ...stream.getVideoTracks(),
-                ...destination.stream.getAudioTracks()
-            ]);
-
-            const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+            const combined = new MediaStream([...stream.getVideoTracks(), ...dest.stream.getAudioTracks()]);
+            const recorder = new MediaRecorder(combined, { mimeType: 'video/webm;codecs=vp9,opus' });
             const chunks = [];
 
-            recorder.ondataavailable = (e) => chunks.push(e.data);
+            recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `AI_Music_Video_${Date.now()}.mp4`;
+                a.href = URL.createObjectURL(blob);
+                a.download = `AI_Production_${Date.now()}.mp4`;
                 a.click();
-                
-                // Cleanup
-                isRecording = false;
-                el.exportBtn.disabled = false;
-                el.exportBtn.innerHTML = '<span>Klibi Kaydet & İndir</span>';
-                el.exportBtn.classList.remove('recording-pulse');
-                log("Video başarıyla indirildi!", "success");
+                log("Video indirildi!", "success");
             };
 
-            // Start everything
             el.audio.currentTime = 0;
             recorder.start();
             el.audio.play();
 
-            const renderLoop = () => {
-                if (!isRecording) return;
+            const loop = () => {
                 const now = el.audio.currentTime;
                 const scene = scenes.find(s => now >= s.start && now < s.end);
-
-                // Background
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, 1280, 720);
 
-                if (scene && scene.imgObj) {
-                    const img = scene.imgObj;
-                    const scale = Math.max(1280 / img.width, 720 / img.height);
-                    const x = (1280 - img.width * scale) / 2;
-                    const y = (720 - img.height * scale) / 2;
-                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                    
-                    // Altyazı Kutusu
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                    ctx.fillRect(0, 600, 1280, 120);
-                    
-                    // Altyazı Yazısı
-                    ctx.fillStyle = '#FFF';
-                    ctx.font = 'bold 36px Outfit';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(scene.caption, 640, 670);
+                if (scene) {
+                    const item = document.getElementById(`v-item-${scene.id}`);
+                    if (item) {
+                        ctx.drawImage(item, 0, 0, 1280, 720);
+                        
+                        // Altyazı
+                        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                        ctx.fillRect(0, 600, 1280, 120);
+                        ctx.fillStyle = '#FFF';
+                        ctx.font = 'bold 36px Outfit';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(scene.caption, 640, 670);
+                    }
                 }
 
-                if (now < audioDuration) {
-                    requestAnimationFrame(renderLoop);
-                } else {
-                    recorder.stop();
-                    el.audio.pause();
+                if (now < audioDuration && recorder.state === "recording") requestAnimationFrame(loop);
+                else { 
+                    if (recorder.state === "recording") recorder.stop(); 
+                    el.audio.pause(); 
                 }
             };
-            renderLoop();
+            loop();
         };
 
         el.reset.onclick = () => {
-            scenes = []; activeIdx = -1; isPlaying = false; audioDuration = 0; referenceImageBase64 = null;
-            el.audioInput.value = ""; el.audio.pause(); el.audio.src = "";
+            scenes = []; activeIdx = -1; isPlaying = false; referenceImageBase64 = null;
+            el.audioInput.value = ""; el.audio.src = "";
             el.lyrics.value = ""; el.mood.value = ""; el.refInput.value = "";
             el.refPreview.innerHTML = "🖼️"; el.grid.innerHTML = "";
-            el.layers.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-700 italic text-sm">Temizlendi.</div>';
-            el.subtitle.style.opacity = 0; el.time.innerText = "00:00 / 00:00"; el.progress.style.width = "0%";
-            el.play.disabled = true; el.generateAll.classList.add('hidden'); el.exportBtn.classList.add('hidden');
+            el.layers.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-700 italic text-sm">Sıfırlandı.</div>';
+            el.subtitle.style.opacity = 0; el.play.disabled = true;
+            el.exportBtn.classList.add('hidden');
             initStyles();
-            log("Çalışma alanı sıfırlandı.");
+            log("Stüdyo sıfırlandı.");
         };
 
         initStyles();
