@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Music Video Studio Pro - Video Export Edition</title>
+    <title>AI Music Video Studio Pro - Reference Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
@@ -100,127 +100,118 @@
             object-fit: cover;
             border-radius: 0.75rem;
         }
-        
-        /* Export Canvas hidden */
-        #exportCanvas {
-            display: none;
-        }
-
-        .recording-pulse {
-            animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
     </style>
 </head>
-<body class="p-4 md:p-8 lg:p-12">
+<body class="p-6 md:p-12">
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
+        <header class="mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
             <div>
-                <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
-                    Music Video Studio Pro
+                <h1 class="text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
+                    Music Video AI Studio Pro
                 </h1>
-                <p class="text-slate-400 mt-2 font-medium italic">Senkronize Görsel & Video Export Desteği</p>
+                <p class="text-slate-400 mt-2 font-medium">Reference & Mood Edition: Kişiselleştirilmiş Klip</p>
             </div>
             <div id="apiStatus" class="glass px-6 py-3 rounded-full flex items-center gap-3 border-blue-500/20">
                 <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
-                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Yapay Zeka Hazır</span>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">AI Bağlantısı Aktif</span>
             </div>
         </header>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
             
-            <!-- Sol Kontrol Paneli -->
-            <div class="lg:col-span-4 space-y-5">
+            <!-- Kontrol Paneli -->
+            <div class="lg:col-span-4 space-y-6">
                 <!-- 01. Ses Dosyası -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">01. Ses Dosyası</label>
-                    <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-600 file:text-white cursor-pointer" />
-                    <audio id="audioPlayer" crossOrigin="anonymous" class="hidden"></audio>
+                <div class="glass p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">01. Ses Dosyası</label>
+                    <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer" />
+                    <audio id="audioPlayer" class="hidden"></audio>
                 </div>
 
-                <!-- 02. Referans Resim -->
-                <div class="glass p-5 rounded-[2rem] border border-blue-500/10">
-                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3 block">02. Referans Resim</label>
-                    <div class="flex gap-3 items-center">
-                        <div id="refPreview" class="w-12 h-12 bg-slate-900 rounded-lg border border-slate-800 flex items-center justify-center text-lg shrink-0">🖼️</div>
-                        <input type="file" id="refImageInput" accept="image/*" class="block w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[9px] file:bg-slate-800 file:text-slate-300" />
+                <!-- 02. Referans Resim (YENİ) -->
+                <div class="glass p-6 rounded-[2rem] border border-blue-500/20">
+                    <label class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-3 block">02. Referans Resim (Opsiyonel)</label>
+                    <div class="flex gap-4 items-center">
+                        <div id="refPreview" class="w-16 h-16 bg-slate-900 rounded-xl border border-slate-800 flex items-center justify-center text-[20px] shrink-0">
+                            📷
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" id="refImageInput" accept="image/*" class="block w-full text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:bg-slate-800 file:text-slate-300 cursor-pointer" />
+                            <p class="text-[9px] text-slate-500 mt-1 italic">Kendi fotoğrafınızı veya stil örneği yükleyin.</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 03. Stil -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 block">03. Görsel Stil</label>
-                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto pr-2 custom-scroll"></div>
+                <!-- 03. Görsel Stil -->
+                <div class="glass p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">03. Görsel Stil</label>
+                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-2"></div>
                 </div>
 
-                <!-- 04. Duygu & Sözler -->
-                <div class="glass p-5 rounded-[2rem]">
-                    <div class="mb-4">
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">04. Duygu</label>
-                        <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Mutlu, epik..." />
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">05. Sözler [Zamanlama]</label>
-                        <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]"></textarea>
-                    </div>
+                <!-- 04. Duygu / Ruh Hali -->
+                <div class="glass p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">04. Duygu / Ruh Hali</label>
+                    <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs focus:ring-2 focus:ring-blue-500/40 outline-none text-white" 
+                        placeholder="Örn: Mutlu, epik, karanlık..." />
+                </div>
+
+                <!-- 05. Sözler ve Zamanlama -->
+                <div class="glass p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">05. Sözler [Zaman Aralığı]</label>
+                    <textarea id="lyricsInput" rows="6" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-4 text-xs font-mono focus:ring-2 focus:ring-blue-500/40 outline-none text-blue-100" 
+                        placeholder="Metin[0-14]&#10;Koşturdum[14-20]"></textarea>
                     
                     <div class="grid grid-cols-2 gap-3 mt-4">
-                        <button id="planBtn" class="bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Planla</button>
-                        <button id="resetBtn" class="bg-slate-800 text-slate-400 font-bold py-3 rounded-xl hover:bg-red-900/10 transition-all uppercase text-[10px]">Sıfırla</button>
+                        <button id="planBtn" class="bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">
+                            Sahneleri Planla
+                        </button>
+                        <button id="resetBtn" class="bg-slate-800 text-slate-400 font-bold py-3 rounded-xl hover:bg-red-900/20 hover:text-red-400 transition-all uppercase text-[10px]">
+                            Sıfırla
+                        </button>
                     </div>
                 </div>
 
-                <div id="statusConsole" class="hidden glass p-4 rounded-2xl border-blue-500/10 max-h-40 overflow-hidden">
-                    <div id="statusLogs" class="space-y-1 text-[9px] font-mono text-slate-400"></div>
+                <div id="statusConsole" class="hidden glass p-4 rounded-2xl border-blue-500/10">
+                    <div id="statusLogs" class="space-y-1 text-[9px] font-mono text-slate-400 max-h-32 overflow-y-auto"></div>
                 </div>
             </div>
 
-            <!-- Sağ Panel: Video Alanı -->
-            <div class="lg:col-span-8 space-y-6">
+            <!-- Sağ Panel: Video & Galeri -->
+            <div class="lg:col-span-8 space-y-8">
                 <div class="video-canvas group" id="videoArea">
                     <div id="imageLayer" class="absolute inset-0">
                         <div class="h-full flex flex-col items-center justify-center text-slate-700">
-                            <p class="text-sm font-semibold italic">Yapay zeka klibiniz burada canlanacak.</p>
+                            <p class="text-sm font-semibold">Senaryo ve görseller burada senkronize olacak.</p>
                         </div>
                     </div>
                     
-                    <div class="subtitle-box absolute bottom-0 left-0 right-0 p-12 text-center pointer-events-none">
-                        <h2 id="subtitleText" class="text-xl md:text-3xl font-black text-white opacity-0 transition-all duration-500"></h2>
+                    <div class="subtitle-box absolute bottom-0 left-0 right-0 p-16 text-center pointer-events-none">
+                        <h2 id="subtitleText" class="text-2xl md:text-3xl font-black text-white opacity-0 transition-all duration-500"></h2>
                     </div>
 
-                    <div class="absolute bottom-6 left-6 right-6 flex items-center gap-5 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60 backdrop-blur-xl p-4 rounded-3xl border border-white/5">
-                        <button id="playBtn" disabled class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all">
-                            <svg id="playIcon" class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    <div class="absolute bottom-8 left-8 right-8 flex items-center gap-6 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60 backdrop-blur-xl p-5 rounded-3xl border border-white/5">
+                        <button id="playBtn" disabled class="w-14 h-14 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all">
+                            <svg id="playIcon" class="w-6 h-6 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </button>
                         <div class="flex-1">
-                            <div class="progress-bar mb-2">
+                            <div class="progress-bar mb-3">
                                 <div id="progressBar" class="progress-fill"></div>
                             </div>
-                            <div class="flex justify-between text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                            <div class="flex justify-between text-[10px] font-black text-slate-400 uppercase">
                                 <span id="timeDisplay">00:00 / 00:00</span>
-                                <span id="renderStatus">Beklemede</span>
+                                <span id="renderStatus">Hazır Değil</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="glass p-8 rounded-[2.5rem]">
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
-                        <h3 class="text-lg font-bold">Galeri <span id="scCount" class="text-blue-500 text-xs ml-2 px-2 py-0.5 bg-blue-500/10 rounded-full"></span></h3>
-                        <div class="flex gap-3">
-                            <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all">
-                                Görselleri Üret
-                            </button>
-                            <button id="exportBtn" class="hidden bg-red-600 hover:bg-red-500 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all flex items-center gap-2">
-                                <span>Klibi Kaydet & İndir</span>
-                            </button>
-                        </div>
+                    <div class="flex justify-between items-center mb-8">
+                        <h3 class="text-xl font-bold">Sahne Galerisi <span id="scCount" class="text-blue-500 text-xs font-black ml-2 px-3 py-1 bg-blue-500/10 rounded-full"></span></h3>
+                        <button id="generateAllBtn" class="hidden bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-2xl text-[11px] font-black transition-all uppercase tracking-widest shadow-xl shadow-blue-500/20">
+                            Görselleri Çiz (AI)
+                        </button>
                     </div>
                     <div id="scenesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
                 </div>
@@ -228,16 +219,14 @@
         </div>
     </div>
 
-    <!-- Hidden Canvas for Video Export -->
-    <canvas id="exportCanvas" width="1280" height="720"></canvas>
-
+    <script src="gemini.js"></script>
     <script>
-        const apiKey = ""; 
+        //const apiKey = ""; 
         
         const ART_STYLES = [
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic photography, highly detailed, 8k" },
-            { id: "watercolor", name: "Suluboya", prompt: "Artistic watercolor painting, vibrant textures" },
-            { id: "oil", name: "Yağlı Boya", prompt: "Masterpiece oil painting, heavy brushstrokes, rich textures" },
+            { id: "watercolor", name: "Suluboya", prompt: "Artistic watercolor painting, vibrant colors" },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting, heavy brushstrokes, rich textures" },
             { id: "cyber", name: "Cyberpunk", prompt: "Neon cyberpunk city, futuristic atmosphere" },
             { id: "anime", name: "Anime", prompt: "High-quality anime art, vibrant, crisp lines" },
             { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli aesthetic, nostalgic, hand-painted" },
@@ -246,9 +235,12 @@
             { id: "3d", name: "3D Stylized", prompt: "Cute 3D Pixar style render, soft lighting" },
             { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere" },
             { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract" },
-            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, gears" },
-            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch" },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass, gears" },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, lo-fi colors" },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors" },
             { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes" },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting" },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting style" },
             { id: "noir", name: "Noir", prompt: "Cinematic film noir, black and white" },
             { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour" }
         ];
@@ -257,7 +249,6 @@
         let selectedStyle = ART_STYLES[0];
         let audioDuration = 0;
         let isPlaying = false;
-        let isRecording = false;
         let activeIdx = -1;
         let referenceImageBase64 = null;
 
@@ -278,17 +269,15 @@
             layers: document.getElementById('imageLayer'),
             reset: document.getElementById('resetBtn'),
             generateAll: document.getElementById('generateAllBtn'),
-            exportBtn: document.getElementById('exportBtn'),
             scCount: document.getElementById('scCount'),
-            renderStatus: document.getElementById('renderStatus'),
-            exportCanvas: document.getElementById('exportCanvas')
+            renderStatus: document.getElementById('renderStatus')
         };
 
         function initStyles() {
             el.styles.innerHTML = '';
             ART_STYLES.forEach(s => {
                 const b = document.createElement('div');
-                b.className = `style-btn p-2 rounded-xl text-center flex items-center justify-center ${s.id === selectedStyle.id ? 'selected' : ''}`;
+                b.className = `style-btn p-3 rounded-xl text-center flex items-center justify-center ${s.id === selectedStyle.id ? 'selected' : ''}`;
                 b.innerText = s.name;
                 b.onclick = () => {
                     document.querySelectorAll('.style-btn').forEach(x => x.classList.remove('selected'));
@@ -302,11 +291,12 @@
         function log(msg, type = 'info') {
             document.getElementById('statusConsole').classList.remove('hidden');
             const d = document.createElement('div');
-            d.innerHTML = `<span class="opacity-30 mr-2">${new Date().toLocaleTimeString()}</span> <span class="${type === 'err' ? 'text-red-400' : 'text-blue-400'}">${msg}</span>`;
+            d.innerHTML = `<span class="opacity-20 mr-2">${new Date().toLocaleTimeString()}</span> <span class="${type === 'err' ? 'text-red-400' : 'text-blue-400'}">${msg}</span>`;
             el.logs.appendChild(d);
             el.logs.scrollTop = el.logs.scrollHeight;
         }
 
+        // --- API CALL HELPERS ---
         async function apiCall(url, body, retries = 5) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i < retries; i++) {
@@ -328,7 +318,7 @@
             }
         }
 
-        // --- Dosya Yüklemeleri ---
+        // --- FILE HANDLERS ---
         el.audioInput.onchange = (e) => {
             const f = e.target.files[0];
             if (!f) return;
@@ -336,7 +326,7 @@
             el.audio.onloadedmetadata = () => {
                 audioDuration = el.audio.duration;
                 el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                log(`Müzik yüklendi: ${Math.round(audioDuration)}s.`);
+                log(`Müzik hazır: ${Math.round(audioDuration)}s.`);
             };
         };
 
@@ -345,9 +335,10 @@
             if (!file) return;
             const reader = new FileReader();
             reader.onload = (event) => {
-                referenceImageBase64 = event.target.result.split(',')[1];
-                el.refPreview.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover rounded-lg">`;
-                log("Referans resim yüklendi.");
+                const base64 = event.target.result.split(',')[1];
+                referenceImageBase64 = base64;
+                el.refPreview.innerHTML = `<img src="${event.target.result}">`;
+                log("Referans resim başarıyla yüklendi.");
             };
             reader.readAsDataURL(file);
         };
@@ -358,13 +349,13 @@
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        // --- Planlama ---
+        // --- PLANNING ---
         document.getElementById('planBtn').onclick = async () => {
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
-            if (!txt || audioDuration === 0) return log("Müzik ve sözleri girin!", "err");
+            if (!txt || audioDuration === 0) return log("Eksik veri: Müzik ve sözleri girin.", "err");
 
-            log("Metin işleniyor...");
+            log("Metin ayrıştırılıyor...");
             const lines = txt.split('\n').filter(l => l.includes('[') && l.includes(']'));
             const parsed = [];
 
@@ -381,16 +372,18 @@
                 }
             });
 
-            if (parsed.length === 0) return log("Hatalı format! [Başlangıç-Bitiş] gerekli.", "err");
+            if (parsed.length === 0) return log("Hatalı format. Örn: Metin[0-14]", "err");
 
+            log(`${parsed.length} sahne planlanıyor...`);
             try {
-                const systemPrompt = `Music video director. Style: "${selectedStyle.name}". Mood: "${mood || 'vibrant'}". 
-                ${referenceImageBase64 ? 'Reference image is the basis for character/style.' : ''}
-                Return a JSON object where keys are indices and values are English cinematic prompts.
+                const systemPrompt = `Music video director. Generate detailed cinematic image prompts for style: "${selectedStyle.name}". 
+                Overall mood: "${mood || 'vibrant'}". 
+                ${referenceImageBase64 ? 'CRITICAL: The reference image provided is the basis for character and style. Keep all scenes consistent with the reference image.' : ''}
+                Return a JSON object where keys are indices (0, 1, 2...) and values are English prompts.
                 Lyrics: ${parsed.map(p => `${p.id}: ${p.caption}`).join(' | ')}`;
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: "Plan scenes." }] }],
+                    contents: [{ parts: [{ text: "Generate scene prompts based on lyrics." }] }],
                     systemInstruction: { parts: [{ text: systemPrompt }] },
                     generationConfig: { responseMimeType: "application/json" }
                 });
@@ -399,7 +392,7 @@
                 
                 scenes = parsed.map(p => ({
                     ...p,
-                    v_prompt: `${selectedStyle.prompt}, ${aiResponse[p.id] || p.caption}, Atmosphere: ${mood || 'cinematic'}`
+                    v_prompt: `${selectedStyle.prompt}, ${aiResponse[p.id] || p.caption}, Atmosphere: ${mood || 'vibrant'}`
                 }));
 
                 renderGrid();
@@ -417,7 +410,9 @@
                 const c = document.createElement('div');
                 c.className = "bg-slate-950 rounded-2xl border border-white/5 overflow-hidden";
                 c.innerHTML = `
-                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center italic">Bekliyor</div>
+                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center italic">
+                        Yükleniyor...
+                    </div>
                     <div class="p-3 bg-black/20 text-[9px]">
                         <div class="font-black text-blue-400 mb-1">${s.start}-${s.end}s</div>
                         <div class="text-slate-500 truncate">${s.caption}</div>
@@ -427,11 +422,11 @@
             });
         }
 
-        // --- Görsel Üretim ---
+        // --- GENERATION (IMAGE-TO-IMAGE SUPPORT) ---
         el.generateAll.onclick = async () => {
             el.generateAll.disabled = true;
-            el.generateAll.innerText = "Üretiliyor...";
-            log("AI Sanatçısı sahneleri çiziyor...");
+            el.generateAll.innerText = "ÜRETİLİYOR...";
+            log(`AI sanatçısı çalışıyor... ${referenceImageBase64 ? '(Referans Resim Kullanılıyor)' : '(Imagen 4.0)'}`);
 
             for (let i = 0; i < scenes.length; i++) {
                 const scene = scenes[i];
@@ -440,7 +435,9 @@
                 
                 try {
                     let resultImage;
+
                     if (referenceImageBase64) {
+                        // Image-to-Image Workflow (Gemini Image Preview)
                         const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
                             contents: [{
                                 parts: [
@@ -451,8 +448,10 @@
                             generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
                         });
                         const base64 = i2iData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                        if (!base64) throw new Error("Image could not be generated from reference.");
                         resultImage = `data:image/png;base64,${base64}`;
                     } else {
+                        // Standard Text-to-Image (Imagen 4.0)
                         const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
                             instances: { prompt: scene.v_prompt },
                             parameters: { sampleCount: 1 }
@@ -460,31 +459,27 @@
                         resultImage = `data:image/png;base64,${t2iData.predictions[0].bytesBase64Encoded}`;
                     }
 
-                    scene.imgData = resultImage;
-                    const img = new Image();
-                    img.src = resultImage;
-                    scene.imgObj = img; // Preload for canvas
-                    
-                    t.innerHTML = `<img src="${resultImage}" class="w-full h-full object-cover rounded-lg">`;
+                    scene.img = resultImage;
+                    t.innerHTML = `<img src="${resultImage}" class="w-full h-full object-cover">`;
                 } catch (e) {
                     t.innerHTML = '<span class="text-red-500 font-bold text-[8px]">HATA</span>';
+                    log(`Sahne ${scene.id} hatası: ` + e.message, "err");
                 }
             }
 
-            log("Tüm sahneler hazır!", "success");
-            el.generateAll.innerText = "Yeniden Üret";
+            log("Tüm görseller hazır!", "success");
+            el.generateAll.innerText = "ÜRETİM TAMAM";
             el.play.disabled = false;
-            el.exportBtn.classList.remove('hidden');
-            el.renderStatus.innerText = "Oynat / Kaydet";
-            buildVideoLayers();
+            el.renderStatus.innerText = "Oynatmaya Hazır";
+            buildVideo();
         };
 
-        function buildVideoLayers() {
+        function buildVideo() {
             el.layers.innerHTML = '';
             scenes.sort((a,b) => a.start - b.start).forEach(s => {
-                if (s.imgData) {
+                if (s.img) {
                     const img = document.createElement('img');
-                    img.src = s.imgData;
+                    img.src = s.img;
                     img.className = 'slide-img';
                     img.id = `v-img-${s.id}`;
                     el.layers.appendChild(img);
@@ -492,7 +487,7 @@
             });
         }
 
-        // --- Oynatıcı ---
+        // --- PLAYBACK ---
         el.play.onclick = () => {
             if (isPlaying) {
                 el.audio.pause();
@@ -505,7 +500,6 @@
         };
 
         el.audio.ontimeupdate = () => {
-            if (isRecording) return;
             const now = el.audio.currentTime;
             el.progress.style.width = `${(now / audioDuration) * 100}%`;
             el.time.innerText = `${fmt(now)} / ${fmt(audioDuration)}`;
@@ -530,100 +524,23 @@
             }
         }
 
-        // --- VIDEO EXPORT (CANVAS RECORDING) ---
-        el.exportBtn.onclick = async () => {
-            if (isRecording) return;
-            isRecording = true;
-            el.exportBtn.disabled = true;
-            el.exportBtn.innerHTML = '<span>Kayıt Yapılıyor...</span>';
-            el.exportBtn.classList.add('recording-pulse');
-            log("Klip kaydı başladı. Şarkı bitene kadar bekleyin...");
-
-            const ctx = el.exportCanvas.getContext('2d');
-            const stream = el.exportCanvas.captureStream(30); // 30 FPS
-            
-            // Audio capture
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioCtx.createMediaElementSource(el.audio);
-            const destination = audioCtx.createMediaStreamDestination();
-            source.connect(destination);
-            source.connect(audioCtx.destination);
-            
-            const combinedStream = new MediaStream([
-                ...stream.getVideoTracks(),
-                ...destination.stream.getAudioTracks()
-            ]);
-
-            const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus' });
-            const chunks = [];
-
-            recorder.ondataavailable = (e) => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `AI_Music_Video_${Date.now()}.mp4`;
-                a.click();
-                
-                // Cleanup
-                isRecording = false;
-                el.exportBtn.disabled = false;
-                el.exportBtn.innerHTML = '<span>Klibi Kaydet & İndir</span>';
-                el.exportBtn.classList.remove('recording-pulse');
-                log("Video başarıyla indirildi!", "success");
-            };
-
-            // Start everything
-            el.audio.currentTime = 0;
-            recorder.start();
-            el.audio.play();
-
-            const renderLoop = () => {
-                if (!isRecording) return;
-                const now = el.audio.currentTime;
-                const scene = scenes.find(s => now >= s.start && now < s.end);
-
-                // Background
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, 1280, 720);
-
-                if (scene && scene.imgObj) {
-                    const img = scene.imgObj;
-                    const scale = Math.max(1280 / img.width, 720 / img.height);
-                    const x = (1280 - img.width * scale) / 2;
-                    const y = (720 - img.height * scale) / 2;
-                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                    
-                    // Altyazı Kutusu
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                    ctx.fillRect(0, 600, 1280, 120);
-                    
-                    // Altyazı Yazısı
-                    ctx.fillStyle = '#FFF';
-                    ctx.font = 'bold 36px Outfit';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(scene.caption, 640, 670);
-                }
-
-                if (now < audioDuration) {
-                    requestAnimationFrame(renderLoop);
-                } else {
-                    recorder.stop();
-                    el.audio.pause();
-                }
-            };
-            renderLoop();
+        el.audio.onended = () => {
+            isPlaying = false;
+            document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+            el.subtitle.style.opacity = 0;
         };
 
         el.reset.onclick = () => {
-            scenes = []; activeIdx = -1; isPlaying = false; audioDuration = 0; referenceImageBase64 = null;
+            scenes = []; activeIdx = -1; isPlaying = false; audioDuration = 0;
+            referenceImageBase64 = null;
             el.audioInput.value = ""; el.audio.pause(); el.audio.src = "";
             el.lyrics.value = ""; el.mood.value = ""; el.refInput.value = "";
-            el.refPreview.innerHTML = "🖼️"; el.grid.innerHTML = "";
-            el.layers.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-700 italic text-sm">Temizlendi.</div>';
+            el.refPreview.innerHTML = "📷";
+            el.grid.innerHTML = "";
+            el.layers.innerHTML = '<div class="h-full flex flex-col items-center justify-center text-slate-700"><p class="text-sm font-semibold">Senaryo ve görseller burada senkronize olacak.</p></div>';
             el.subtitle.style.opacity = 0; el.time.innerText = "00:00 / 00:00"; el.progress.style.width = "0%";
-            el.play.disabled = true; el.generateAll.classList.add('hidden'); el.exportBtn.classList.add('hidden');
+            el.play.disabled = true; el.generateAll.classList.add('hidden');
+            el.renderStatus.innerText = "Sistem Beklemede";
             initStyles();
             log("Çalışma alanı sıfırlandı.");
         };
