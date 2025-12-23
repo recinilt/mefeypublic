@@ -380,21 +380,8 @@
         el.audioInput.onchange = (e) => {
             const f = e.target.files[0];
             if (!f) return;
-            
-            // Mobil uyumluluk için event listener src atanmadan önce tanımlanır
-            const handleMetadata = () => {
-                if (el.audio.duration && el.audio.duration !== Infinity) {
-                    audioDuration = el.audio.duration;
-                    el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                    log("Müzik yüklendi: " + fmt(audioDuration));
-                }
-            };
-            
-            el.audio.onloadedmetadata = handleMetadata;
-            el.audio.ondurationchange = handleMetadata; // Mobil için ek güvence
-            
             el.audio.src = URL.createObjectURL(f);
-            el.audio.load(); // Mobil tarayıcılarda okumayı zorla
+            el.audio.onloadedmetadata = () => { audioDuration = el.audio.duration; el.time.innerText = `00:00 / ${fmt(audioDuration)}`; };
         };
 
         el.refInput.onchange = (e) => {
@@ -408,23 +395,11 @@
             reader.readAsDataURL(file);
         };
 
-        function fmt(s) { 
-            if(!s || isNaN(s)) return "00:00";
-            const m = Math.floor(s/60); 
-            const sec = Math.floor(s%60); 
-            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; 
-        }
+        function fmt(s) { const m = Math.floor(s/60); const sec = Math.floor(s%60); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
 
         document.getElementById('planBtn').onclick = async () => {
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
-            
-            // Mobil için son saniye kontrolü (eğer event kaçırıldıysa)
-            if (audioDuration === 0 && el.audio.duration > 0 && el.audio.duration !== Infinity) {
-                audioDuration = el.audio.duration;
-                el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-            }
-            
             if (!txt || audioDuration === 0) return log("Müzik ve sözleri girin!", "err");
 
             log("Senaryo kurgulanıyor...");
@@ -595,6 +570,7 @@
             scenes.forEach(s => {
                 const item = document.getElementById(`v-item-${s.id}`);
                 if (item) {
+                    // Düzeltme: Geçiş sırasında sıçramayı önlemek için 'active' sınıfını gecikmeli kaldırıyoruz
                     if (s.id === id) {
                         item.classList.add('active');
                         if(s.type === 'videoAI') {
@@ -602,13 +578,14 @@
                             item.play().catch(() => {});
                         }
                     } else {
+                        // Bir önceki sahnenin animasyonu opacity 0 olana kadar devam etsin
                         const sceneId = s.id;
                         setTimeout(() => {
                             if (activeIdx !== sceneId) {
                                 item.classList.remove('active');
                                 if(s.type === 'videoAI') item.pause();
                             }
-                        }, 1500); 
+                        }, 1500); // .slide-item transition süresi ile uyumlu (1.5s)
                     }
                 }
             });
@@ -624,16 +601,19 @@
             const imgRatio = imgW / imgH;
             const targetRatio = w / h;
             
-            let drawW, drawH;
+            let drawW, drawH, sx, sy, sw, sh;
             
             if (imgRatio > targetRatio) {
+                // Image is wider than canvas
                 drawH = h;
                 drawW = h * imgRatio;
             } else {
+                // Image is taller than canvas
                 drawW = w;
                 drawH = w / imgRatio;
             }
             
+            // Center the image relative to -drawW/2 offset (since we use ctx.translate)
             ctx.drawImage(item, -drawW / 2, -drawH / 2, drawW, drawH);
         }
 
