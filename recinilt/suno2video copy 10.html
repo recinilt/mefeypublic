@@ -159,10 +159,12 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
+            <!-- Sol Kontrol Paneli -->
             <div class="lg:col-span-4 space-y-5">
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <div>
                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">01. Ses & Profil Fotoğrafı</label>
+                        <!-- Mobil Android için accept özelliği detaylandırıldı -->
                         <input type="file" id="audioInput" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-blue-600 file:text-white" />
                         <audio id="audioPlayer" crossOrigin="anonymous" preload="auto" playsinline class="hidden"></audio>
                     </div>
@@ -201,6 +203,7 @@
                 </div>
             </div>
 
+            <!-- Sağ Panel -->
             <div class="lg:col-span-8 space-y-6">
                 <div class="video-canvas group" id="videoArea">
                     <div id="imageLayer" class="absolute inset-0">
@@ -251,59 +254,34 @@
         const ART_STYLES = [
             { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
             { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
-            { id: "hyperrealistic", name: "Hiperrealistik", prompt: "8k ultra-high resolution photography, hyper-detailed textures, lifelike surfaces, ray-tracing, masterpiece lighting, extreme realism." },
             { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich textures." },
             { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
             { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
             { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching." },
             { id: "anime", name: "Anime", prompt: "High-quality modern anime art, vibrant, crisp lines, cinematic background." },
-            { id: "manga", name: "Manga", prompt: "Classic black and white manga ink style, professional screentone patterns, dynamic action lines, high contrast." },
-            { id: "pixel", name: "Piksel Sanatı", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels, vibrant color palette." },
-            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic shadows, Victorian horror elements." },
-            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative landscapes, Dalí inspired." },
-            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork, copper textures." },
-            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi, aesthetic statues." },
-            { id: "synthwave", name: "Synthwave", prompt: "Retro 80s aesthetic, glowing neon grids, sunset chrome, purple and pink horizons, futuristic retro." },
-            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures, high impact." },
-            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette, lots of negative space." },
-            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture, handcrafted look." },
-            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, elegant brush strokes, zen atmosphere." },
-            { id: "lowpoly", name: "Düşük Poligon", prompt: "Geometric low poly design, modern digital faceted look, stylized 3D." },
-            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic, atomic age design." },
-            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background, engineering draft." },
-            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery, monochrome cinematic." },
-            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow, mythical landscapes." },
-            { id: "dark_fantasy", name: "Karanlık Fantazi", prompt: "Grim dark fantasy art, moody lighting, ancient ruins, mysterious and ominous atmosphere, sharp detail." },
-            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate patterns." },
-            { id: "graffiti", name: "Grafiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style, dripping paint." },
-            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts, data corruption aesthetic." },
-            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, delicate paper texture." },
-            { id: "paper_cutout", name: "Kağıt Kesme", prompt: "Layered paper cutout art, 3D depth effect, clean edges, handcrafted paper texture, shadows." },
-            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style, flat wood-pressed colors." },
-            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern composition." },
-            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic, chiaroscuro lighting." },
-            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor, vibrant lights." },
-            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void, minimalist glowing lines." },
-            { id: "style3d", name: "3D", prompt: "Advanced 3D render, Octane render, Unreal Engine 5 style, volumetric lighting, high fidelity." },
-            { id: "style2d", name: "2D", prompt: "Clean 2D vector-style illustration, professional graphic design, flat colors with subtle shading." },
-            { id: "isometric", name: "İzometrik", prompt: "Isometric 3D projection, tilt-shift photography effect, detailed miniature world, clean aesthetic." },
-            { id: "vector", name: "Vektör Sanatı", prompt: "High-quality vector art, Adobe Illustrator style, clean paths, vibrant gradients." },
-            { id: "charcoal", name: "Kömür Çizimi", prompt: "Rough charcoal drawing, heavy texture, smudge effects, high contrast monochrome." },
-            { id: "pastel", name: "Pastel Çizimi", prompt: "Soft pastel chalk drawing, blended colors, powdery texture, dreamlike hazy atmosphere." },
-            { id: "acrylic", name: "Akrilik Boyama", prompt: "Modern acrylic painting, vibrant colors, visible palette knife strokes, textured canvas." },
-            { id: "digital_painting", name: "Dijital Boyama", prompt: "Professional digital painting, smooth blending, concept art quality, epic scale and detail." },
-            { id: "concept_art", name: "Konsept Sanatı", prompt: "Epic movie concept art, sweeping scale, cinematic mood, detailed world-building visuals." },
-            { id: "matte_painting", name: "Mat Boyama", prompt: "Professional film matte painting, photorealistic landscape extensions, epic horizon, seamless detail." },
-            { id: "photobash", name: "Fotoğraf Birleştirme", prompt: "Detailed photobash concept art, kit-bashing elements, realistic textures merged with artistic painting." },
-            { id: "collage", name: "Kolaj", prompt: "Artistic mixed media collage, layered paper textures, vintage clippings, eclectic composition." },
-            { id: "scifi", name: "Bilimkurgu", prompt: "Futuristic sci-fi environment, advanced technology, interstellar scale, high-tech details, sleek design." },
-            { id: "art_nouveau", name: "Art Nouveau", prompt: "Elegant Art Nouveau style, flowing organic lines, floral motifs, Alphonse Mucha aesthetic, intricate gold details." },
-            { id: "impressionism", name: "İzlenimcilik", prompt: "Impressionist oil painting, small thin brushstrokes, emphasis on light and its changing qualities, airy." },
-            { id: "expressionism", name: "Dışavurumculuk", prompt: "Emotional expressionist art, distorted forms, bold colors, intense brushwork, high emotion." },
-            { id: "cubism", name: "Kübizm", prompt: "Classic cubist painting, fragmented objects, multiple viewpoints, geometric shapes, avant-garde." },
-            { id: "storybook", name: "Hikaye Kitabı", prompt: "Classic storybook illustration, whimsical atmosphere, detailed hand-drawn charm, magical feeling." },
-            { id: "kids_book", name: "Çocuk Kitabı", prompt: "Cute children's book style, friendly characters, vibrant colors, simple shapes, joyful mood." },
-            { id: "sticker", name: "Çıkartma Sanatı", prompt: "Die-cut sticker art, thick white border, vibrant colors, clean pop aesthetic, vector look." }
+            { id: "pixel", name: "Pixel Art", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels." },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic." },
+            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative." },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork." },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi." },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures." },
+            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette." },
+            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture." },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, brush strokes, zen." },
+            { id: "lowpoly", name: "Low Poly", prompt: "Geometric low poly design, modern digital faceted look." },
+            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic." },
+            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background." },
+            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery." },
+            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow." },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate." },
+            { id: "graffiti", name: "Graffiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style." },
+            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts." },
+            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, paper texture." },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style." },
+            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern." },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic." },
+            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor." },
+            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void." }
         ];
 
 
@@ -404,6 +382,7 @@
             const f = e.target.files[0];
             if (!f) return;
             
+            // Mobil uyumluluk için süre okuma fonksiyonu
             const checkAndSetDuration = () => {
                 if (el.audio.duration && el.audio.duration !== Infinity && !isNaN(el.audio.duration)) {
                     audioDuration = el.audio.duration;
@@ -422,6 +401,7 @@
             el.audio.src = url;
             el.audio.load();
 
+            // Mobil cihazlarda bazen metadata tetiklenmez, periyodik kontrol ekleyelim
             let attempts = 0;
             const pollDuration = setInterval(() => {
                 attempts++;
@@ -451,6 +431,7 @@
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             
+            // Mobil için son saniye kontrolü: Eğer duration hala 0 ise direkt elementten okumayı dene
             if (audioDuration === 0 && el.audio.duration > 0 && el.audio.duration !== Infinity) {
                 audioDuration = el.audio.duration;
                 el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
@@ -648,6 +629,7 @@
             else { el.subtitle.style.opacity = 0; }
         }
 
+        // --- ASPECT RATIO AWARE DRAWING ---
         function drawCoverImage(ctx, item, x, y, w, h) {
             const imgW = item.naturalWidth || item.videoWidth || 1280;
             const imgH = item.naturalHeight || item.videoHeight || 720;
