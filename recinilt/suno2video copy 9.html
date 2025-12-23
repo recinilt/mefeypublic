@@ -164,9 +164,8 @@
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <div>
                         <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">01. Ses & Profil Fotoğrafı</label>
-                        <!-- Mobil Android için accept özelliği detaylandırıldı -->
-                        <input type="file" id="audioInput" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-blue-600 file:text-white" />
-                        <audio id="audioPlayer" crossOrigin="anonymous" preload="auto" playsinline class="hidden"></audio>
+                        <input type="file" id="audioInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-[9px] file:font-bold file:bg-blue-600 file:text-white" />
+                        <audio id="audioPlayer" crossOrigin="anonymous" class="hidden"></audio>
                     </div>
                     <div class="flex gap-3 items-center pt-2 border-t border-white/5">
                         <div id="refPreview" class="w-12 h-12 bg-slate-900 rounded-lg flex items-center justify-center text-xl shrink-0">👤</div>
@@ -382,31 +381,20 @@
             const f = e.target.files[0];
             if (!f) return;
             
-            // Mobil uyumluluk için süre okuma fonksiyonu
-            const checkAndSetDuration = () => {
-                if (el.audio.duration && el.audio.duration !== Infinity && !isNaN(el.audio.duration)) {
+            // Mobil uyumluluk için event listener src atanmadan önce tanımlanır
+            const handleMetadata = () => {
+                if (el.audio.duration && el.audio.duration !== Infinity) {
                     audioDuration = el.audio.duration;
                     el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                    log("Müzik Hazır: " + fmt(audioDuration));
-                    return true;
+                    log("Müzik yüklendi: " + fmt(audioDuration));
                 }
-                return false;
             };
-
-            el.audio.onloadedmetadata = checkAndSetDuration;
-            el.audio.oncanplaythrough = checkAndSetDuration;
-            el.audio.ondurationchange = checkAndSetDuration;
             
-            const url = URL.createObjectURL(f);
-            el.audio.src = url;
-            el.audio.load();
-
-            // Mobil cihazlarda bazen metadata tetiklenmez, periyodik kontrol ekleyelim
-            let attempts = 0;
-            const pollDuration = setInterval(() => {
-                attempts++;
-                if (checkAndSetDuration() || attempts > 50) clearInterval(pollDuration);
-            }, 100);
+            el.audio.onloadedmetadata = handleMetadata;
+            el.audio.ondurationchange = handleMetadata; // Mobil için ek güvence
+            
+            el.audio.src = URL.createObjectURL(f);
+            el.audio.load(); // Mobil tarayıcılarda okumayı zorla
         };
 
         el.refInput.onchange = (e) => {
@@ -431,7 +419,7 @@
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             
-            // Mobil için son saniye kontrolü: Eğer duration hala 0 ise direkt elementten okumayı dene
+            // Mobil için son saniye kontrolü (eğer event kaçırıldıysa)
             if (audioDuration === 0 && el.audio.duration > 0 && el.audio.duration !== Infinity) {
                 audioDuration = el.audio.duration;
                 el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
