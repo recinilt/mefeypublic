@@ -319,6 +319,20 @@ sevap, Horasan Türkçesinde "ticaret" demektir.
 bu durumu kınayanlara da "biz âşığız tüccar değiliz" derler.
 
 illâ hû❤️`
+            },
+            "sekinet": {
+                esma: "sekinet",
+                meaning: `sekinet
+
+dendiğinde, İnsan korku ve kaygılarına karşı en fazla sabredebilir, sakinleşmeye çalışabilir.  göğsü hep endişelidir. ötesini bilemez yapamaz.
+
+fakat bir lütuf olarak kalbine SEKİNET indirildiğinde, insanda endişe olsa da artık içte ne korku kalır ne endişe,    
+varlığını arka planda kalıcı bir mihver hâl olarak duru bir deniz gibi huzur ve sakinlik bürür. farkındalıkla bununla bütünleştiğinde sapienscik de biraz rahatlar gevşer.
+bunu talep etmenin yolu, Vahdet Sırrı'nı hep hatırda tutarak (kalbinde zikrederek) yaşamaya çalışmaktır.
+
+Rabbim, kalplerimize sekinet hâli lutfet.
+
+illâ hû❤️`
             }
         };
 
