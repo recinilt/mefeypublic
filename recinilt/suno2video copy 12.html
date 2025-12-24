@@ -494,7 +494,7 @@
             if (!f) return;
             
             const checkAndSetDuration = () => {
-                if (el.audio.duration && el.audio.duration !== Infinity && !isNaN(el.audio.duration) && el.audio.duration > 0) {
+                if (el.audio.duration && el.audio.duration !== Infinity && !isNaN(el.audio.duration)) {
                     audioDuration = el.audio.duration;
                     el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
                     log("Müzik Hazır: " + fmt(audioDuration));
@@ -540,24 +540,12 @@
             const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             
-            // --- MOBİL İÇİN DÜZELTME BAŞLANGICI ---
-            // Sadece duration'a bakmak yerine, dosyanın gerçekten seçili olup olmadığına bakıyoruz.
-            if (el.audioInput.files.length === 0) return log("Lütfen bir ses dosyası (MP3/WAV) seçin!", "err");
-            if (!txt) return log("Lütfen şarkı sözlerini ve zamanlamaları girin!", "err");
-
-            // Eğer süre hala 0 ise (mobil sorunu), tekrar algılamayı dene veya varsayılan bir değer ata.
-            if (!audioDuration || audioDuration === 0) {
-                if (el.audio.duration && !isNaN(el.audio.duration) && el.audio.duration !== Infinity && el.audio.duration > 0) {
-                    audioDuration = el.audio.duration;
-                    el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                } else {
-                    // Mobil tarayıcı meta veriyi yüklemediyse, kullanıcıyı engelleme.
-                    // Varsayılan süre ata, "Oynat"a basınca güncellenir.
-                    log("Bilgi: Ses süresi mobilde 'Oynat'a basınca güncellenecek. İşlem devam ediyor...", "info");
-                    audioDuration = 200; // Hata vermemesi için geçici süre
-                }
+            if (audioDuration === 0 && el.audio.duration > 0 && el.audio.duration !== Infinity) {
+                audioDuration = el.audio.duration;
+                el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
             }
-            // --- MOBİL İÇİN DÜZELTME BİTİŞİ ---
+            
+            if (!txt || audioDuration === 0) return log("Müzik ve sözleri girin!", "err");
 
             log("Senaryo kurgulanıyor...");
             const lines = txt.split('\n').filter(l => l.includes('[') && l.includes(']'));
@@ -861,14 +849,6 @@
         }
 
         el.play.onclick = () => {
-            // Check Duration Again on Play (Mobile Fix)
-            if (audioDuration === 0 || audioDuration === 200) { // 200 was our temporary fallback
-                if(el.audio.duration && !isNaN(el.audio.duration)) {
-                    audioDuration = el.audio.duration;
-                    el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
-                }
-            }
-            
             if (isPlaying) { el.audio.pause(); document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>'; }
             else { el.audio.play(); document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; }
             isPlaying = !isPlaying;
