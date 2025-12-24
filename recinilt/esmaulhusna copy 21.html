@@ -1878,7 +1878,7 @@ illâ hû❤️`
             checkAndMigrateStorage();
             
             // Yeni key formatı ile verileri yükle
-            const savedNormal = localStorage.getItem('esmaulhusna_v3_starred_normal');
+            const savedNormal = localStorage.getItem('esmaulhusna_v2_starred_normal');
             if (savedNormal) {
                 try {
                     starredEsma = JSON.parse(savedNormal);
@@ -1887,7 +1887,7 @@ illâ hû❤️`
                 }
             }
             
-            const savedBaybars = localStorage.getItem('esmaulhusna_v3_starred_baybars');
+            const savedBaybars = localStorage.getItem('esmaulhusna_v2_starred_baybars');
             if (savedBaybars) {
                 try {
                     starredBaybars = JSON.parse(savedBaybars);
@@ -1896,7 +1896,7 @@ illâ hû❤️`
                 }
             }
             
-            const savedAvcioglu = localStorage.getItem('esmaulhusna_v3_starred_avcioglu');
+            const savedAvcioglu = localStorage.getItem('esmaulhusna_v2_starred_avcioglu');
             if (savedAvcioglu) {
                 try {
                     starredAvcioglu = JSON.parse(savedAvcioglu);
@@ -1909,9 +1909,9 @@ illâ hû❤️`
         // Yıldızlıları kaydet
         function saveStarredEsma() {
             // Yeni key formatı ile kaydet
-            localStorage.setItem('esmaulhusna_v3_starred_normal', JSON.stringify(starredEsma));
-            localStorage.setItem('esmaulhusna_v3_starred_baybars', JSON.stringify(starredBaybars));
-            localStorage.setItem('esmaulhusna_v3_starred_avcioglu', JSON.stringify(starredAvcioglu));
+            localStorage.setItem('esmaulhusna_v2_starred_normal', JSON.stringify(starredEsma));
+            localStorage.setItem('esmaulhusna_v2_starred_baybars', JSON.stringify(starredBaybars));
+            localStorage.setItem('esmaulhusna_v2_starred_avcioglu', JSON.stringify(starredAvcioglu));
         }
 
         // Esma yıldızlı mı kontrol et
@@ -2620,7 +2620,7 @@ illâ hû❤️`
 
         // LocalStorage'dan notları yükle
         function loadNotes() {
-            const savedNotes = localStorage.getItem('esmaulhusna_v3_notes');
+            const savedNotes = localStorage.getItem('esmaulhusna_v2_notes');
             if (savedNotes) {
                 try {
                     notes = JSON.parse(savedNotes);
@@ -2632,7 +2632,7 @@ illâ hû❤️`
 
         // LocalStorage'a notları kaydet
         function saveNotesToStorage() {
-            localStorage.setItem('esmaulhusna_v3_notes', JSON.stringify(notes));
+            localStorage.setItem('esmaulhusna_v2_notes', JSON.stringify(notes));
         }
 
         // Notları listele
