@@ -35,7 +35,7 @@
             inset: 0;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* Tarayıcı önizlemesinde basıklığı önler */
             opacity: 0;
             transition: opacity 1.5s ease-in-out;
             transform-origin: center center;
@@ -137,35 +137,6 @@
             background: #3b82f6;
             color: white;
         }
-        
-        /* Modal Styles */
-        .modal-backdrop {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 50;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-        .modal-backdrop.open {
-            opacity: 1;
-            pointer-events: all;
-        }
-        .modal-content {
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-backdrop.open .modal-content {
-            transform: scale(1);
-        }
-
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
     </style>
@@ -272,53 +243,10 @@
         </div>
     </div>
 
-    <!-- Scene Editor Modal -->
-    <div id="sceneModal" class="modal-backdrop">
-        <div class="modal-content glass w-full max-w-4xl p-6 rounded-3xl m-4 relative flex flex-col gap-6">
-            <button id="closeModal" class="absolute top-4 right-4 bg-slate-800/50 hover:bg-red-500/50 text-white p-2 rounded-full transition-all">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview Area -->
-                <div class="space-y-2">
-                    <div id="modalPreviewBox" class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 flex items-center justify-center relative shadow-2xl">
-                        <!-- Image/Video will be injected here -->
-                    </div>
-                    <div id="modalDimensions" class="text-center text-[10px] font-mono text-slate-500 tracking-widest uppercase">
-                        <!-- Dimensions will be injected here -->
-                    </div>
-                </div>
-
-                <!-- Controls Area -->
-                <div class="flex flex-col gap-4">
-                    <div>
-                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Prompt (Senaryo)</h3>
-                        <textarea id="modalPrompt" rows="6" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 outline-none focus:border-blue-500 transition-colors custom-scroll"></textarea>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3 mt-auto">
-                        <button id="modalRegenBtn" class="bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
-                            <span>🎲</span> Yeni Prompt & Üret
-                        </button>
-                        <button id="modalUploadBtn" class="bg-slate-700 hover:bg-slate-600 text-white p-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
-                            <span>📁</span> Resim Yükle
-                        </button>
-                        <input type="file" id="modalFileInput" accept="image/*" class="hidden">
-                    </div>
-                    
-                    <button id="modalRegenImageOnlyBtn" class="hidden w-full bg-indigo-600 hover:bg-indigo-500 text-white p-3 rounded-xl text-xs font-bold transition-all items-center justify-center gap-2">
-                        <span>🎨</span> Sadece Görüntüyü Yenile
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <canvas id="exportCanvas" width="1280" height="720"></canvas>
     <script src="gemini.js"></script>
     <script>
-        const apiKey = ""; 
+        //const apiKey = ""; 
         
         const ART_STYLES = [
             { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
@@ -388,7 +316,6 @@
         let isPlaying = false;
         let activeIdx = -1;
         let referenceImageBase64 = null;
-        let currentModalSceneId = null;
 
         const el = {
             audio: document.getElementById('audioPlayer'),
@@ -413,18 +340,7 @@
             exportCanvas: document.getElementById('exportCanvas'),
             modeImage: document.getElementById('modeImage'),
             modeVideo: document.getElementById('modeVideo'),
-            modeVideoAI: document.getElementById('modeVideoAI'),
-            
-            // Modal Elements
-            modal: document.getElementById('sceneModal'),
-            modalClose: document.getElementById('closeModal'),
-            modalPreview: document.getElementById('modalPreviewBox'),
-            modalPrompt: document.getElementById('modalPrompt'),
-            modalRegenBtn: document.getElementById('modalRegenBtn'),
-            modalUploadBtn: document.getElementById('modalUploadBtn'),
-            modalFileInput: document.getElementById('modalFileInput'),
-            modalDimensions: document.getElementById('modalDimensions'),
-            modalRegenImageOnlyBtn: document.getElementById('modalRegenImageOnlyBtn')
+            modeVideoAI: document.getElementById('modeVideoAI')
         };
 
         function initStyles() {
@@ -594,12 +510,9 @@
             scenes.forEach((s) => {
                 const c = document.createElement('div');
                 c.className = "scene-card bg-slate-950 rounded-2xl border border-white/5 overflow-hidden";
-                
-                // Changed onClick handler to open modal instead of regeneration
-                c.onclick = () => openSceneModal(s.id);
-                
+                c.onclick = () => regenerateScene(s.id);
                 c.innerHTML = `
-                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center overflow-hidden">
+                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center">
                         ${s.source ? (s.type === 'videoAI' ? `<video src="${s.source}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${s.source}" class="w-full h-full object-cover">`) : '🎨 Hazır'}
                     </div>
                     <div class="p-3 bg-black/20 text-[9px]">
@@ -611,135 +524,10 @@
             });
         }
 
-        // --- NEW MODAL LOGIC ---
-        function openSceneModal(id) {
-            const scene = scenes.find(s => s.id === id);
-            if(!scene) return;
-            
-            currentModalSceneId = id;
-            el.modalPrompt.value = scene.v_prompt || "";
-            el.modal.classList.add('open');
-            
-            updateModalPreview(scene);
-        }
-
-        function updateModalPreview(scene) {
-            el.modalPreview.innerHTML = "";
-            el.modalDimensions.innerHTML = "BOYUTLAR HESAPLANIYOR...";
-            
-            if (scene.source) {
-                if (scene.type === 'videoAI') {
-                    const vid = document.createElement('video');
-                    vid.src = scene.source;
-                    vid.className = "w-full h-full object-contain";
-                    vid.controls = true;
-                    vid.autoplay = true;
-                    vid.loop = true;
-                    
-                    vid.onloadedmetadata = () => {
-                        el.modalDimensions.innerHTML = `VIDEO: ${vid.videoWidth} x ${vid.videoHeight}px | SÜRE: ${vid.duration.toFixed(1)}s`;
-                    };
-                    
-                    el.modalPreview.appendChild(vid);
-                } else {
-                    const img = document.createElement('img');
-                    img.src = scene.source;
-                    img.className = "w-full h-full object-contain";
-                    
-                    img.onload = () => {
-                        el.modalDimensions.innerHTML = `RESİM: ${img.naturalWidth} x ${img.naturalHeight}px`;
-                    };
-                    
-                    el.modalPreview.appendChild(img);
-                }
-            } else {
-                el.modalPreview.innerHTML = `<span class="text-slate-600 text-xs font-bold">GÖRÜNTÜ YOK</span>`;
-                el.modalDimensions.innerHTML = "-";
-            }
-        }
-
-        el.modalClose.onclick = () => {
-            el.modal.classList.remove('open');
-            currentModalSceneId = null;
-        };
-        
-        // Close on clicking backdrop
-        el.modal.onclick = (e) => {
-            if(e.target === el.modal) {
-                el.modal.classList.remove('open');
-                currentModalSceneId = null;
-            }
-        };
-
-        // Regenerate Prompt & Image (Old click behavior, now in modal)
-        el.modalRegenBtn.onclick = async () => {
-            if (currentModalSceneId === null) return;
-            const scene = scenes.find(s => s.id === currentModalSceneId);
-            
-            // Set loading state in modal
-            el.modalPreview.innerHTML = '<div class="loader-ring"></div>';
-            el.modalDimensions.innerText = "YENİLENİYOR...";
-            
-            log(`Sahne ${currentModalSceneId} için yeni prompt ve resim üretiliyor...`);
-            
-            try {
-                // 1. Generate new prompt
-                const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
-                });
-                
-                const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                if (newPrompt) {
-                    scene.v_prompt = newPrompt;
-                    el.modalPrompt.value = newPrompt; // Update text area
-                }
-                
-                // 2. Generate Image/Video
-                await generateSingleScene(currentModalSceneId);
-                
-                // 3. Update Modal View is handled in generateSingleScene now
-                
-            } catch (e) {
-                log("Yenileme hatası: " + e.message, "err");
-                updateModalPreview(scene); // Restore if failed
-            }
-        };
-
-        // Upload Button Logic
-        el.modalUploadBtn.onclick = () => el.modalFileInput.click();
-        
-        el.modalFileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (!file || currentModalSceneId === null) return;
-            
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const scene = scenes.find(s => s.id === currentModalSceneId);
-                scene.source = event.target.result;
-                // Determine type based on file (simple check, assuming image for now as requested)
-                // If user uploads video, we might need more logic, but for "Resim Yükle" button, image is assumed.
-                scene.type = 'image'; // Force type to image for manual uploads usually
-                
-                // Update Thumbnail
-                const thumb = document.getElementById(`thumb-${scene.id}`);
-                if(thumb) thumb.innerHTML = `<img src="${scene.source}" class="w-full h-full object-cover">`;
-                
-                // Update Modal
-                updateModalPreview(scene);
-                
-                // Update Layers
-                buildVideoLayers();
-                
-                log("Resim manuel olarak güncellendi.");
-            };
-            reader.readAsDataURL(file);
-            el.modalFileInput.value = ''; // Reset input
-        };
-
         async function generateSingleScene(id) {
             const scene = scenes.find(s => s.id === id);
             const thumb = document.getElementById(`thumb-${id}`);
-            if(thumb) thumb.innerHTML = '<div class="loader-ring"></div>';
+            thumb.innerHTML = '<div class="loader-ring"></div>';
             
             try {
                 let finalSource;
@@ -775,30 +563,22 @@
                 
                 scene.source = finalSource;
                 scene.fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
-                
-                // Update Thumbnail
-                if(thumb) {
-                    thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
-                }
-                
-                // Update Modal if open for this scene
-                if (currentModalSceneId === id) {
-                    updateModalPreview(scene);
-                }
-
+                thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
                 buildVideoLayers();
-            } catch (e) { 
-                if(thumb) thumb.innerHTML = '<span class="text-red-500 font-bold text-[10px]">HATA</span>'; 
-                log("Hata: " + e.message, "err"); 
-                // If modal is open, show error there too
-                if (currentModalSceneId === id) {
-                    el.modalPreview.innerHTML = '<span class="text-red-500 font-bold">Üretim Hatası</span>';
-                }
-            }
+            } catch (e) { thumb.innerHTML = '<span class="text-red-500 font-bold text-[10px]">HATA</span>'; log("Hata: " + e.message, "err"); }
         }
 
-        // Removed old regenerateScene function as it's no longer used directly by click
-        // The logic is now inside openSceneModal and modalRegenBtn.onclick
+        async function regenerateScene(id) {
+            const scene = scenes.find(s => s.id === id);
+            log(`Sahne ${id} güncelleniyor...`);
+            try {
+                const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
+                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
+                });
+                const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (newPrompt) { scene.v_prompt = newPrompt; await generateSingleScene(id); }
+            } catch (e) { await generateSingleScene(id); }
+        }
 
         el.generateAll.onclick = async () => {
             el.generateAll.disabled = true;
