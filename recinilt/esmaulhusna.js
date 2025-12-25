@@ -125,6 +125,7 @@ const esmaData = {
         };
 
         // Vahdetî Derviş Jargonu Tanımları - Baybars Emre
+        /*
         const BaybarsEmre = {
             "Celâl - Cemâl": {
                 esma: "Celâl - Cemâl",
@@ -348,7 +349,7 @@ piştik elhamdülillah.
 illâ hû❤️`
             }
         };
-
+        */
         // AVCIOĞLU'na Göre Esma Mealleri
         const AvciogluData = {
             "er-Rahmân er-Rahîm": {
