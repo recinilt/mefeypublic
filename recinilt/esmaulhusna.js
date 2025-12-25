@@ -333,6 +333,19 @@ bunu talep etmenin yolu, Vahdet Sırrı'nı hep hatırda tutarak (kalbinde zikre
 Rabbim, kalplerimize sekinet hâli lutfet.
 
 illâ hû❤️`
+            },
+            "miskin": {
+                esma: "miskin",
+                meaning: `miskin 
+
+halk arasında, tembel, işi gücü, malı mülkü hiçbir şeyi olmayan demek olsa da,
+
+vahdet jargonunda miskin; insanın "en değerli" şeyi olan benliğini yok etmiş, tüm kimliklerinden sıyrılmış, Hak'ta varlığını erittiği sekinet ve sakinlik hâli kastedilir.
+
+Yûnus miskin, çiğ idik,
+piştik elhamdülillah.
+
+illâ hû❤️`
             }
         };
 
