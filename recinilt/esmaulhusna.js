@@ -347,6 +347,10 @@ Yûnus miskin, çiğ idik,
 piştik elhamdülillah.
 
 illâ hû❤️`
+            },
+            "deneme": {
+                esma: "deneme",
+                meaning: `deneme`
             }
         };
         
