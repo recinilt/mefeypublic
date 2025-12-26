@@ -217,9 +217,7 @@
 
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">04. Sözler & Zamanlama</label>
-                    <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="{Global Kural: Okyanus}
-Metin(Gizli Görsel)[0-14]
-(Sadece Görsel)[14-20]"></textarea>
+                    <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="Metin[0-14]&#10;(Sözsüz Sahne)[14-20]"></textarea>
                     
                     <div class="flex gap-2">
                         <button id="planBtn" class="flex-1 bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Senaryoyu Yaz</button>
@@ -384,6 +382,7 @@ Metin(Gizli Görsel)[0-14]
             { id: "sticker", name: "Çıkartma Sanatı", prompt: "Die-cut sticker art, thick white border, vibrant colors, clean pop aesthetic, vector look." }
         ];
 
+
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
         let scenes = [];
@@ -537,113 +536,69 @@ Metin(Gizli Görsel)[0-14]
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; 
         }
 
-        // --- UPDATED PARSING & PLANNING LOGIC ---
         document.getElementById('planBtn').onclick = async () => {
-            let txt = el.lyrics.value.trim();
+            const txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
             
+            // --- MOBİL İÇİN DÜZELTME BAŞLANGICI ---
+            // Sadece duration'a bakmak yerine, dosyanın gerçekten seçili olup olmadığına bakıyoruz.
             if (el.audioInput.files.length === 0) return log("Lütfen bir ses dosyası (MP3/WAV) seçin!", "err");
             if (!txt) return log("Lütfen şarkı sözlerini ve zamanlamaları girin!", "err");
 
+            // Eğer süre hala 0 ise (mobil sorunu), tekrar algılamayı dene veya varsayılan bir değer ata.
             if (!audioDuration || audioDuration === 0) {
                 if (el.audio.duration && !isNaN(el.audio.duration) && el.audio.duration !== Infinity && el.audio.duration > 0) {
                     audioDuration = el.audio.duration;
                     el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
                 } else {
+                    // Mobil tarayıcı meta veriyi yüklemediyse, kullanıcıyı engelleme.
+                    // Varsayılan süre ata, "Oynat"a basınca güncellenir.
                     log("Bilgi: Ses süresi mobilde 'Oynat'a basınca güncellenecek. İşlem devam ediyor...", "info");
-                    audioDuration = 200;
+                    audioDuration = 200; // Hata vermemesi için geçici süre
                 }
             }
+            // --- MOBİL İÇİN DÜZELTME BİTİŞİ ---
 
             log("Senaryo kurgulanıyor...");
-            
-            // 1. EXTRACT MASTER PROMPT {}
-            let masterPrompt = "";
-            const masterMatch = txt.match(/\{([\s\S]*?)\}/);
-            if (masterMatch) {
-                masterPrompt = masterMatch[1].trim();
-                // Remove the master prompt from the text so it doesn't interfere with parsing
-                txt = txt.replace(masterMatch[0], "");
-                log(`Master Prompt Algılandı: ${masterPrompt}`);
-            }
-
-            // 2. PARSE LINES
-            const lines = txt.split('\n');
+            const lines = txt.split('\n').filter(l => l.includes('[') && l.includes(']'));
             const parsed = [];
 
             lines.forEach((l, index) => {
-                // Find timestamp [start-end]
-                const timeMatch = l.match(/\[(\d+)-(\d+)\]/);
-                
-                if (timeMatch) {
-                    const rawLine = l.replace(timeMatch[0], "").trim(); // Remove timestamp part
-                    let caption = "";
-                    let visualContext = "";
+                const match = l.match(/(.*?)\[(\d+)-(\d+)\]/);
+                if (match) {
+                    let caption = match[1].trim();
                     let showSubtitle = true;
-
-                    // Check for specific visual prompt in parenthesis ()
-                    const visualMatch = rawLine.match(/\((.*?)\)/);
-
-                    if (visualMatch) {
-                        // Priority: Content inside () is for the Visual Prompt
-                        visualContext = visualMatch[1].trim();
-                        
-                        // Subtitle is the text WITHOUT the () part
-                        caption = rawLine.replace(visualMatch[0], "").trim();
-                    } else {
-                        // No (), use full text for both
-                        visualContext = rawLine;
-                        caption = rawLine;
-                    }
-
-                    // Special Case: If the ORIGINAL text was JUST (...) e.g. "(Waves)" -> Subtitle should be hidden/empty
-                    if (rawLine.startsWith('(') && rawLine.endsWith(')')) {
+                    if (caption.startsWith('(') && caption.endsWith(')')) {
                         showSubtitle = false;
-                        caption = "";
+                        caption = caption.slice(1, -1);
                     }
-
-                    // Push formatted object
-                    parsed.push({ 
-                        id: index, 
-                        caption: caption, 
-                        visualContext: visualContext, // Send this to Gemini for prompt gen
-                        start: parseFloat(timeMatch[1]), 
-                        end: parseFloat(timeMatch[2]), 
-                        showSubtitle: showSubtitle && caption.length > 0 
-                    });
+                    parsed.push({ id: index, caption: caption, start: parseFloat(match[2]), end: parseFloat(match[3]), showSubtitle: showSubtitle });
                 }
             });
 
             try {
-                // Modified System Prompt to include Master Prompt logic
                 const systemPrompt = `Sen bir klip yönetmenisin. Her satır için 5-6 CÜMLELİK edebi bir PARAGRAF PROMPT oluştur.
                 KURALLAR:
                 1. GENİŞ AÇI: ASLA yakın çekim yapma. Hep "Extreme wide angle panorama" kurgula.
-                2. SEMBOLİZM: Aşağıda verilen "Visual Instruction" kısmını devasa manzaralara dök.
+                2. SEMBOLİZM: Sözlerdeki metaforları devasa manzaralara dök.
                 3. STİL: "${selectedStyle.name}" stilini işle.
                 4. MOOD: "${mood || 'Epic'}" ruh halini ekle.
-                ${masterPrompt ? `5. GLOBAL KURAL (MASTER PROMPT): "${masterPrompt}". Bu kuralı ve temayı HER sahneye mutlaka uygula.` : ''}
                 ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
-
-                // Prepare input for Gemini: ID + Visual Instruction
-                const inputList = parsed.map(p => `ID ${p.id}: Visual Instruction: "${p.visualContext}"`).join(' | ');
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
                     contents: [{ parts: [{ text: "Senaryoyu oluştur." }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt + "\nLİSTE: " + inputList }] },
+                    systemInstruction: { parts: [{ text: systemPrompt + "\nSözler: " + parsed.map(p => `${p.id}: ${p.caption}`).join(' | ') }] },
                     generationConfig: { responseMimeType: "application/json" }
                 });
 
                 const prompts = JSON.parse(data.candidates[0].content.parts[0].text);
-                
                 scenes = parsed.map(p => ({ 
                     ...p, 
-                    v_prompt: prompts[p.id] || p.visualContext, // Use generated prompt or fallback
+                    v_prompt: prompts[p.id] || p.caption, 
                     source: null, 
                     type: productionMode,
                     fx: VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)]
                 }));
-
                 renderGrid();
                 el.generateAll.classList.remove('hidden');
                 log("Senaryo planlaması tamamlandı.");
@@ -657,6 +612,7 @@ Metin(Gizli Görsel)[0-14]
                 const c = document.createElement('div');
                 c.className = "scene-card bg-slate-950 rounded-2xl border border-white/5 overflow-hidden";
                 
+                // Changed onClick handler to open modal instead of regeneration
                 c.onclick = () => openSceneModal(s.id);
                 
                 c.innerHTML = `
@@ -665,13 +621,14 @@ Metin(Gizli Görsel)[0-14]
                     </div>
                     <div class="p-3 bg-black/20 text-[9px]">
                         <div class="font-black ${s.showSubtitle ? 'text-blue-400' : 'text-purple-400'} mb-1">${s.start}-${s.end}s ${!s.showSubtitle ? '(Sözsüz)' : ''}</div>
-                        <div class="text-slate-300 truncate font-semibold">${s.caption || '<span class="italic opacity-50">Sadece Görsel</span>'}</div>
+                        <div class="text-slate-300 truncate font-semibold">${s.caption}</div>
                     </div>
                 `;
                 el.grid.appendChild(c);
             });
         }
 
+        // --- NEW MODAL LOGIC ---
         function openSceneModal(id) {
             const scene = scenes.find(s => s.id === id);
             if(!scene) return;
@@ -723,6 +680,7 @@ Metin(Gizli Görsel)[0-14]
             currentModalSceneId = null;
         };
         
+        // Close on clicking backdrop
         el.modal.onclick = (e) => {
             if(e.target === el.modal) {
                 el.modal.classList.remove('open');
@@ -730,15 +688,18 @@ Metin(Gizli Görsel)[0-14]
             }
         };
 
+        // NEW BUTTON LOGIC: Run with current text
         el.modalRunPromptBtn.onclick = async () => {
              if (currentModalSceneId === null) return;
              const scene = scenes.find(s => s.id === currentModalSceneId);
              
+             // Update scene prompt from textarea
              const userPrompt = el.modalPrompt.value.trim();
              if(!userPrompt) return alert("Lütfen bir prompt yazın.");
              
              scene.v_prompt = userPrompt;
              
+             // UI Loading
              el.modalPreview.innerHTML = '<div class="loader-ring"></div>';
              el.modalDimensions.innerText = "YENİLENİYOR...";
              
@@ -746,35 +707,39 @@ Metin(Gizli Görsel)[0-14]
              await generateSingleScene(currentModalSceneId);
         };
 
+        // Regenerate Prompt & Image (Old click behavior)
         el.modalRegenBtn.onclick = async () => {
             if (currentModalSceneId === null) return;
             const scene = scenes.find(s => s.id === currentModalSceneId);
             
+            // Set loading state in modal
             el.modalPreview.innerHTML = '<div class="loader-ring"></div>';
             el.modalDimensions.innerText = "YENİLENİYOR...";
             
             log(`Sahne ${currentModalSceneId} için yeni AI prompt üretiliyor...`);
             
             try {
-                // Use visualContext instead of caption for better regeneration based on user intent
+                // 1. Generate new prompt
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                    contents: [{ parts: [{ text: `Original Visual Intent: ${scene.visualContext}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
+                    contents: [{ parts: [{ text: `Lyric: ${scene.caption}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
                 });
                 
                 const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
                 if (newPrompt) {
                     scene.v_prompt = newPrompt;
-                    el.modalPrompt.value = newPrompt;
+                    el.modalPrompt.value = newPrompt; // Update text area
                 }
                 
+                // 2. Generate Image/Video
                 await generateSingleScene(currentModalSceneId);
                 
             } catch (e) {
                 log("Yenileme hatası: " + e.message, "err");
-                updateModalPreview(scene);
+                updateModalPreview(scene); // Restore if failed
             }
         };
 
+        // Upload Button Logic
         el.modalUploadBtn.onclick = () => el.modalFileInput.click();
         
         el.modalFileInput.onchange = (e) => {
@@ -785,18 +750,22 @@ Metin(Gizli Görsel)[0-14]
             reader.onload = (event) => {
                 const scene = scenes.find(s => s.id === currentModalSceneId);
                 scene.source = event.target.result;
-                scene.type = 'image';
+                scene.type = 'image'; // Force type to image for manual uploads usually
                 
+                // Update Thumbnail
                 const thumb = document.getElementById(`thumb-${scene.id}`);
                 if(thumb) thumb.innerHTML = `<img src="${scene.source}" class="w-full h-full object-cover">`;
                 
+                // Update Modal
                 updateModalPreview(scene);
+                
+                // Update Layers
                 buildVideoLayers();
                 
                 log("Resim manuel olarak güncellendi.");
             };
             reader.readAsDataURL(file);
-            el.modalFileInput.value = '';
+            el.modalFileInput.value = ''; // Reset input
         };
 
         async function generateSingleScene(id) {
@@ -839,10 +808,12 @@ Metin(Gizli Görsel)[0-14]
                 scene.source = finalSource;
                 scene.fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
                 
+                // Update Thumbnail
                 if(thumb) {
                     thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
                 }
                 
+                // Update Modal if open for this scene
                 if (currentModalSceneId === id) {
                     updateModalPreview(scene);
                 }
@@ -851,11 +822,15 @@ Metin(Gizli Görsel)[0-14]
             } catch (e) { 
                 if(thumb) thumb.innerHTML = '<span class="text-red-500 font-bold text-[10px]">HATA</span>'; 
                 log("Hata: " + e.message, "err"); 
+                // If modal is open, show error there too
                 if (currentModalSceneId === id) {
                     el.modalPreview.innerHTML = '<span class="text-red-500 font-bold">Üretim Hatası</span>';
                 }
             }
         }
+
+        // Removed old regenerateScene function as it's no longer used directly by click
+        // The logic is now inside openSceneModal and modalRegenBtn.onclick
 
         el.generateAll.onclick = async () => {
             el.generateAll.disabled = true;
@@ -886,7 +861,8 @@ Metin(Gizli Görsel)[0-14]
         }
 
         el.play.onclick = () => {
-            if (audioDuration === 0 || audioDuration === 200) {
+            // Check Duration Again on Play (Mobile Fix)
+            if (audioDuration === 0 || audioDuration === 200) { // 200 was our temporary fallback
                 if(el.audio.duration && !isNaN(el.audio.duration)) {
                     audioDuration = el.audio.duration;
                     el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
@@ -1033,12 +1009,7 @@ Metin(Gizli Görsel)[0-14]
         };
 
         el.reset.onclick = () => { location.reload(); };
-
-        // Ensure initStyles runs after load
-        window.addEventListener('load', () => {
-            initStyles();
-            log("Sistem hazır.", "success");
-        });
+        initStyles();
     </script>
 </body>
 </html>
