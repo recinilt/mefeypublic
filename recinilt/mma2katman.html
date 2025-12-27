@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobil uyum için kritik -->
+<title>Video Takip Listesi</title>
+<style>
+    /* --- TASARIM AYARLARI --- */
+    :root {
+        --primary-color: #2563eb; /* Ana renk (Mavi) */
+        --success-color: #16a34a; /* Başarı rengi (Yeşil) */
+        --bg-color: #f1f5f9;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-sub: #64748b;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        margin: 0;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--text-main);
+        text-align: center;
+    }
+
+    /* Liste Konteynerı */
+    .list-container {
+        width: 100%;
+        max-width: 600px; /* Mobilde tam ekran, PC'de dar */
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* Video Kartı Tasarımı */
+    .video-card {
+        background-color: var(--card-bg);
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        display: flex;
+        align-items: flex-start; /* Üstten hizala */
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .video-card:active {
+        transform: scale(0.98);
+    }
+
+    /* Tamamlanmış (Checked) Durum */
+    .video-card.checked {
+        border-color: var(--success-color);
+        background-color: #f0fdf4; /* Açık yeşil arka plan */
+    }
+
+    /* Checkbox Kutusu Görünümü */
+    .checkbox-indicator {
+        width: 24px;
+        height: 24px;
+        border: 2px solid #cbd5e1;
+        border-radius: 6px;
+        margin-right: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0; /* Küçülmesini engelle */
+        margin-top: 2px; /* Metinle hizalamak için hafif aşağı */
+        transition: all 0.3s;
+    }
+
+    .video-card.checked .checkbox-indicator {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .checkbox-indicator::after {
+        content: '✓';
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        display: none;
+    }
+
+    .video-card.checked .checkbox-indicator::after {
+        display: block;
+    }
+
+    /* Video Metin Alanı */
+    .video-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .video-title {
+        font-size: 1rem;
+        font-weight: 500;
+        line-height: 1.5;
+        /* Uzun metinlerin alt satıra geçmesini sağlayan kodlar: */
+        white-space: normal; 
+        word-wrap: break-word;
+        overflow-wrap: break-word; 
+    }
+
+    .video-status {
+        font-size: 0.85rem;
+        color: var(--text-sub);
+        margin-top: 4px;
+    }
+
+    .video-card.checked .video-status {
+        color: var(--success-color);
+        font-weight: 600;
+    }
+
+    /* Sıfırla Butonu */
+    .reset-btn {
+        margin-top: 40px;
+        margin-bottom: 40px;
+        padding: 12px 30px;
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
+        transition: background 0.2s;
+    }
+
+    .reset-btn:hover {
+        background-color: #dc2626;
+    }
+
+</style>
+</head>
+<body>
+
+    <h1>II. Katman İzleme Listesi</h1>
+
+    <div class="list-container" id="app">
+        <!-- Javascript burayı dolduracak -->
+    </div>
+
+    <button class="reset-btn" onclick="resetAll()">Listeyi Sıfırla</button>
+
+<script>
+    /* ================================================================
+       KULLANICI AYARLARI: VİDEO LİSTESİ BURAYA GİRİLECEK
+       ================================================================
+       Aşağıdaki listeye videolarını tek tek ekleyebilirsin.
+       Format: { isim: "Videonun Adı", url: "Videonun Linki" },
+    */
+    
+    const videoListesi = [
+        { isim: "II.Katman_001 İnsan Nedir? Yeryüzündeki En Zor Soru", url: "https://www.youtube.com/watch?v=spTTbAHOpHY" },
+        { isim: "II.KATMAN_002. Metot Farklılığı ve Uyarılar", url: "https://www.youtube.com/watch?v=bdztTf6hNjU" },
+        { isim: "II.Katman_003. Kendini Tanımak", url: "https://www.youtube.com/watch?v=WrYeVt88LAs" },
+        { isim: "II.Katman_004. Sapiensin Nitelikli Benlik Farkındalığı", url: "https://www.youtube.com/watch?v=zXF0AcMDoJA" },
+        { isim: "II.Katman_005. Sapiensin Organizmal Benliği", url: "https://www.youtube.com/watch?v=f7TU0CXPBtk" },
+        { isim: "II.Katman_006.1. Sapiensin Karakter Benliği_1.Bölüm", url: "https://www.youtube.com/watch?v=RWrTfl2OKDM" },
+        { isim: "II.Katman_006.2. Sapiensin Karakter Benliği_2.Bölüm", url: "https://www.youtube.com/watch?v=Vjyj18TO_t0" },
+        { isim: "II.Katman_006.3. Sapiensin Karakter Benliği_3.Bölüm", url: "https://www.youtube.com/watch?v=-FAPLiGAREo" },
+        { isim: "II.Katman_006.4. Sapiensin Karakter Benliği_4.Bölüm", url: "https://www.youtube.com/watch?v=6NJqwH_U_g4" },
+        { isim: "II.Katman_007. Sapiensin Varoluşsal Benliği", url: "https://www.youtube.com/watch?v=nGOLZ8EmtOs" },
+        { isim: "II.Katman_008. Sapiensde BEYİN, DNA ve GEN", url: "https://www.youtube.com/watch?v=NFyom5zw-3A" },
+        { isim: "II.Katman_009. Sapiensin En Dipteki 2 Temel Motor Güdüsü", url: "https://www.youtube.com/watch?v=Rbzgaj6M3Xc" },
+        { isim: "II.Katman_010. Mutlak GÜVENDE Hissetmek Güdüsü", url: "https://www.youtube.com/watch?v=p3xWftda7tM" },
+        { isim: "II.Katman_011. Mutlak DEĞERLİ Hissetmek Güdüsü", url: "https://www.youtube.com/watch?v=BkDOeX7Ake8" },
+        { isim: "II.Katman_012 Sapienste AKIL ve ZİHİN", url: "https://www.youtube.com/watch?v=l4pAe8ONqGQ" },
+        { isim: "II.Katman_013 Sapienste ZİHİN DURUMLARI", url: "https://www.youtube.com/watch?v=U7kikp8UaRM" },
+        { isim: "II.Katman_014.1. Sapienste ŞARTLANDIRILMIŞ ZİHİN_1.Bölüm", url: "https://www.youtube.com/watch?v=48UoLgs6lpg" },
+        { isim: "II.Katman_014.2. Sapienste ŞARTLANDIRILMIŞ ZİHİN_2.Bölüm", url: "https://www.youtube.com/watch?v=dhc9-PPIdcY" },
+        { isim: "II.Katman_015. Sapienste BİLİNÇ, FARKINDALIK, BİLİNÇDIŞI", url: "https://www.youtube.com/watch?v=WvG4oawyFbM" },
+        { isim: "II.Katman_016. Sapienste KAPANMAYAN YARIK", url: "https://www.youtube.com/watch?v=uhsK-hiaX7w" },
+        { isim: "II.Katman_017. Sapienste (büyük) EKSİK ve The Arzu", url: "https://www.youtube.com/watch?v=PWNiQZj4TXk" },
+        { isim: "II.Katman_018. Kapsayarak Aşma Pratikleri Bölümü_Giriş ve Tanıtım", url: "https://www.youtube.com/watch?v=zmwmNvZYBk4" },
+        { isim: "II.Katman_019_01.Psikolojik Savunma Mekanizmaları_1.Bölüm", url: "https://www.youtube.com/watch?v=WjRQgIJd5PM" },
+        { isim: "II.Katman_019_01.Psikolojik Savunma Mekanizmaları_2.Bölüm", url: "https://www.youtube.com/watch?v=CHtjWoZbM9s" },
+        { isim: "II.Katman_020 (Gerçek) Meditasyon ve Meditatif Hâl", url: "https://www.youtube.com/watch?v=QP3OMFRunl4" },
+        { isim: "II.Katman_021   Duygular (Zihin Durumları)", url: "https://www.youtube.com/watch?v=aWSix1pdhnc" },
+        { isim: "II.Katman_022  Mutluluk Hâlini Açığa Çıkarmakta 3 Temel Aşama", url: "https://www.youtube.com/watch?v=44AF4AobWZI" },
+        { isim: "II.Katman_023  Tüm Etiketlerinden Kurtulmuşluk Meditatif Hâli", url: "https://www.youtube.com/watch?v=V5dJWFkFafA" },
+        { isim: "II.Katman_024  Keder, Depresyon, Melankoli ve Yas Tutmak", url: "https://www.youtube.com/watch?v=H4P15y_FVJY" }
+    ];
+
+
+    // Local Storage Anahtarı (Tarayıcı hafızası için)
+    const STORAGE_KEY = 'manuel_playlist_v2';
+    const container = document.getElementById('app');
+
+    // Kayıtlı veriyi çek veya boş obje oluştur
+    let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    // Listeyi Ekrana Basan Fonksiyon
+    function renderList() {
+        container.innerHTML = ''; // Önce temizle
+
+        videoListesi.forEach((video, index) => {
+            const isChecked = checkedItems[index] === true;
+            
+            // Kart oluştur
+            const card = document.createElement('div');
+            card.className = `video-card ${isChecked ? 'checked' : ''}`;
+            card.onclick = () => toggleVideo(index, video.url);
+
+            // İçerik HTML'i
+            card.innerHTML = `
+                <div class="checkbox-indicator"></div>
+                <div class="video-info">
+                    <div class="video-title">${video.isim}</div>
+                    <div class="video-status">${isChecked ? 'Tamamlandı' : 'İzlenecek'}</div>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+    }
+
+    // Tıklama İşlemi
+    function toggleVideo(index, url) {
+        // Eğer zaten işaretliyse, işareti kaldır ve çık (linki açma)
+        if (checkedItems[index]) {
+            delete checkedItems[index];
+            saveAndRender();
+            return;
+        }
+
+        // İşaretli değilse: İşaretle VE Linki Aç
+        checkedItems[index] = true;
+        saveAndRender();
+
+        // Link boş değilse yeni sekmede aç
+        if (url && url.length > 5) {
+            window.open(url, '_blank');
+        } else {
+            alert("Bu video için henüz link girmemişsiniz. Lütfen kodun içindeki 'videoListesi' kısmını düzenleyin.");
+        }
+    }
+
+    // Kaydet ve Yenile
+    function saveAndRender() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems));
+        renderList();
+    }
+
+    // Listeyi Sıfırla
+    function resetAll() {
+        if (confirm("Tüm izleme geçmişini silmek istediğine emin misin?")) {
+            checkedItems = {};
+            saveAndRender();
+        }
+    }
+
+    // Başlangıçta çalıştır
+    renderList();
+
+</script>
+
+</body>
+</html>
