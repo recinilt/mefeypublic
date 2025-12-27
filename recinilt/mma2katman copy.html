@@ -2,13 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Mobil uyum için kritik -->
 <title>Video Takip Listesi</title>
 <style>
     /* --- TASARIM AYARLARI --- */
     :root {
-        --primary-color: #2563eb;
-        --success-color: #16a34a;
+        --primary-color: #2563eb; /* Ana renk (Mavi) */
+        --success-color: #16a34a; /* Başarı rengi (Yeşil) */
         --bg-color: #f1f5f9;
         --card-bg: #ffffff;
         --text-main: #1e293b;
@@ -34,51 +34,52 @@
         text-align: center;
     }
 
+    /* Liste Konteynerı */
     .list-container {
         width: 100%;
-        max-width: 600px;
+        max-width: 600px; /* Mobilde tam ekran, PC'de dar */
         display: flex;
         flex-direction: column;
         gap: 12px;
     }
 
+    /* Video Kartı Tasarımı */
     .video-card {
         background-color: var(--card-bg);
         padding: 16px;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         display: flex;
-        align-items: flex-start;
+        align-items: flex-start; /* Üstten hizala */
+        cursor: pointer;
         transition: all 0.2s ease;
         border: 2px solid transparent;
         position: relative;
         overflow: hidden;
     }
 
+    .video-card:active {
+        transform: scale(0.98);
+    }
+
+    /* Tamamlanmış (Checked) Durum */
     .video-card.checked {
         border-color: var(--success-color);
-        background-color: #f0fdf4;
+        background-color: #f0fdf4; /* Açık yeşil arka plan */
     }
 
-    /* Checkbox Alanı */
-    .checkbox-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-right: 16px;
-        flex-shrink: 0;
-        gap: 4px;
-    }
-
+    /* Checkbox Kutusu Görünümü */
     .checkbox-indicator {
         width: 24px;
         height: 24px;
         border: 2px solid #cbd5e1;
         border-radius: 6px;
+        margin-right: 16px;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
+        flex-shrink: 0; /* Küçülmesini engelle */
+        margin-top: 2px; /* Metinle hizalamak için hafif aşağı */
         transition: all 0.3s;
     }
 
@@ -99,35 +100,21 @@
         display: block;
     }
 
-    /* İzlenme Sayacı */
-    .watch-counter {
-        font-size: 0.75rem;
-        color: var(--text-sub);
-        font-weight: 600;
-        margin-top: 2px;
-        display: none;
-    }
-
-    .video-card.checked .watch-counter {
-        display: block;
-        color: var(--success-color);
-    }
-
-    /* Video Bilgi Alanı */
+    /* Video Metin Alanı */
     .video-info {
         flex: 1;
         display: flex;
         flex-direction: column;
-        cursor: pointer;
     }
 
     .video-title {
         font-size: 1rem;
         font-weight: 500;
         line-height: 1.5;
+        /* Uzun metinlerin alt satıra geçmesini sağlayan kodlar: */
         white-space: normal; 
         word-wrap: break-word;
-        overflow-wrap: break-word;
+        overflow-wrap: break-word; 
     }
 
     .video-status {
@@ -141,78 +128,23 @@
         font-weight: 600;
     }
 
-    /* +/- Butonları */
-    .counter-controls {
-        display: none;
-        flex-direction: column;
-        gap: 4px;
-        margin-left: 12px;
-        flex-shrink: 0;
-    }
-
-    .video-card.checked .counter-controls {
-        display: flex;
-    }
-
-    .counter-btn {
-        width: 28px;
-        height: 28px;
-        border: none;
-        border-radius: 6px;
-        background-color: #e2e8f0;
-        color: var(--text-main);
-        font-size: 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
-    }
-
-    .counter-btn:active {
-        transform: scale(0.9);
-    }
-
-    .counter-btn:hover {
-        background-color: #cbd5e1;
-    }
-
-    .counter-btn.plus {
-        background-color: var(--success-color);
-        color: white;
-    }
-
-    .counter-btn.plus:hover {
-        background-color: #15803d;
-    }
-
-    .counter-btn.minus {
-        background-color: #ef4444;
-        color: white;
-    }
-
-    .counter-btn.minus:hover {
-        background-color: #dc2626;
-    }
-
     /* Sıfırla Butonu */
     .reset-btn {
         margin-top: 40px;
         margin-bottom: 40px;
         padding: 12px 30px;
-        background-color: #f59e0b;
+        background-color: #ef4444;
         color: white;
         border: none;
         border-radius: 50px;
         font-weight: bold;
         cursor: pointer;
-        box-shadow: 0 4px 6px rgba(245, 158, 11, 0.3);
+        box-shadow: 0 4px 6px rgba(239, 68, 68, 0.3);
         transition: background 0.2s;
     }
 
     .reset-btn:hover {
-        background-color: #d97706;
+        background-color: #dc2626;
     }
 
 </style>
@@ -221,11 +153,20 @@
 
     <h1>II. Katman İzleme Listesi</h1>
 
-    <div class="list-container" id="app"></div>
+    <div class="list-container" id="app">
+        <!-- Javascript burayı dolduracak -->
+    </div>
 
-    <button class="reset-btn" onclick="resetChecks()">Checkleri Kaldır</button>
+    <button class="reset-btn" onclick="resetAll()">Listeyi Sıfırla</button>
 
 <script>
+    /* ================================================================
+       KULLANICI AYARLARI: VİDEO LİSTESİ BURAYA GİRİLECEK
+       ================================================================
+       Aşağıdaki listeye videolarını tek tek ekleyebilirsin.
+       Format: { isim: "Videonun Adı", url: "Videonun Linki" },
+    */
+    
     const videoListesi = [
         { isim: "II.Katman_001 İnsan Nedir? Yeryüzündeki En Zor Soru", url: "https://www.youtube.com/watch?v=spTTbAHOpHY" },
         { isim: "II.KATMAN_002. Metot Farklılığı ve Uyarılar", url: "https://www.youtube.com/watch?v=bdztTf6hNjU" },
@@ -258,35 +199,32 @@
         { isim: "II.Katman_024  Keder, Depresyon, Melankoli ve Yas Tutmak", url: "https://www.youtube.com/watch?v=H4P15y_FVJY" }
     ];
 
-    const STORAGE_KEY = 'manuel_playlist_v3';
+
+    // Local Storage Anahtarı (Tarayıcı hafızası için)
+    const STORAGE_KEY = 'manuel_playlist_v2';
     const container = document.getElementById('app');
 
-    // Veri yapısı: { index: { checked: true, count: 2 } }
-    let videoData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    // Kayıtlı veriyi çek veya boş obje oluştur
+    let checkedItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
+    // Listeyi Ekrana Basan Fonksiyon
     function renderList() {
-        container.innerHTML = '';
+        container.innerHTML = ''; // Önce temizle
 
         videoListesi.forEach((video, index) => {
-            const data = videoData[index] || { checked: false, count: 0 };
-            const isChecked = data.checked;
-            const watchCount = data.count || 0;
+            const isChecked = checkedItems[index] === true;
             
+            // Kart oluştur
             const card = document.createElement('div');
             card.className = `video-card ${isChecked ? 'checked' : ''}`;
+            card.onclick = () => toggleVideo(index, video.url);
 
+            // İçerik HTML'i
             card.innerHTML = `
-                <div class="checkbox-area">
-                    <div class="checkbox-indicator" onclick="toggleCheck(${index})"></div>
-                    <div class="watch-counter">${watchCount}x</div>
-                </div>
-                <div class="video-info" onclick="openVideo(${index}, '${video.url}')">
+                <div class="checkbox-indicator"></div>
+                <div class="video-info">
                     <div class="video-title">${video.isim}</div>
                     <div class="video-status">${isChecked ? 'Tamamlandı' : 'İzlenecek'}</div>
-                </div>
-                <div class="counter-controls">
-                    <button class="counter-btn plus" onclick="changeCount(${index}, 1)">+</button>
-                    <button class="counter-btn minus" onclick="changeCount(${index}, -1)">−</button>
                 </div>
             `;
 
@@ -294,98 +232,44 @@
         });
     }
 
-    function toggleCheck(index) {
-        if (!videoData[index]) {
-            videoData[index] = { checked: false, count: 0 };
-        }
-        
-        if (videoData[index].checked) {
-            // İşareti kaldır
-            videoData[index].checked = false;
-        } else {
-            // İşaretle ve sayacı artır
-            videoData[index].checked = true;
-            videoData[index].count = (videoData[index].count || 0) + 1;
-        }
-        
-        saveAndRender();
-    }
-
-    function openVideo(index, url) {
-        // Eğer checked değilse, check yap
-        if (!videoData[index] || !videoData[index].checked) {
-            toggleCheck(index);
-        }
-
-        if (!url || url.length < 5) {
-            alert("Bu video için henüz link girmemişsiniz.");
+    // Tıklama İşlemi
+    function toggleVideo(index, url) {
+        // Eğer zaten işaretliyse, işareti kaldır ve çık (linki açma)
+        if (checkedItems[index]) {
+            delete checkedItems[index];
+            saveAndRender();
             return;
         }
 
-        // Mobil cihaz kontrolü
-        const isMobile = /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
-        
-        if (isMobile) {
-            // Mobilde YouTube app'te aç
-            if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                // YouTube video ID'sini çıkar
-                let videoId = '';
-                if (url.includes('watch?v=')) {
-                    videoId = url.split('watch?v=')[1].split('&')[0];
-                } else if (url.includes('youtu.be/')) {
-                    videoId = url.split('youtu.be/')[1].split('?')[0];
-                }
-                
-                // YouTube app'te açmayı dene, başarısız olursa browser'da aç
-                const appUrl = `vnd.youtube://${videoId}`;
-                const webUrl = `https://www.youtube.com/watch?v=${videoId}`;
-                
-                window.location.href = appUrl;
-                setTimeout(() => {
-                    window.open(webUrl, '_blank');
-                }, 500);
-            } else {
-                // Diğer linkler için Instagram Chrome açma desteği
-                const intentUrl = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
-                
-                // Önce intent'i dene
-                window.location.href = intentUrl;
-                
-                // Başarısız olursa normal link
-                setTimeout(() => {
-                    window.open(url, '_blank');
-                }, 500);
-            }
-        } else {
-            // PC'de normal aç
-            window.open(url, '_blank');
-        }
-    }
-
-    function changeCount(index, delta) {
-        event.stopPropagation();
-        
-        if (!videoData[index]) {
-            videoData[index] = { checked: true, count: 0 };
-        }
-        
-        videoData[index].count = Math.max(0, (videoData[index].count || 0) + delta);
+        // İşaretli değilse: İşaretle VE Linki Aç
+        checkedItems[index] = true;
         saveAndRender();
+
+        // Link boş değilse yeni sekmede aç
+        if (url && url.length > 5) {
+            window.open(url, '_blank');
+        } else {
+            alert("Bu video için henüz link girmemişsiniz. Lütfen kodun içindeki 'videoListesi' kısmını düzenleyin.");
+        }
     }
 
+    // Kaydet ve Yenile
     function saveAndRender() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(videoData));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(checkedItems));
         renderList();
     }
 
-    function resetChecks() {
-        if (confirm("Tüm işaretleri kaldırmak istediğine emin misin?")) {
-            videoData = {};
+    // Listeyi Sıfırla
+    function resetAll() {
+        if (confirm("Tüm izleme geçmişini silmek istediğine emin misin?")) {
+            checkedItems = {};
             saveAndRender();
         }
     }
 
+    // Başlangıçta çalıştır
     renderList();
+
 </script>
 
 </body>
