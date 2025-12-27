@@ -4,18 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="gunes-hilal.ico">
-    <meta http-cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    
-    <!-- Instagram'ın in-app browser'ını devre dışı bırak, Chrome'da aç -->
-    <meta property="al:android:url" content="intent://YOUR_DOMAIN/esmaulhusna.html#Intent;scheme=https;package=com.android.chrome;end" />
-    <meta property="al:android:app_name" content="Chrome" />
-    <meta property="al:android:package" content="com.android.chrome" />
-    <meta property="al:ios:url" content="googlechrome://YOUR_DOMAIN/esmaulhusna.html" />
-    <meta property="al:ios:app_store_id" content="535886823" />
-    <meta property="al:ios:app_name" content="Chrome" />
-    
     <title>Esmâ-ü'l-Hüsnâ Hafıza Kartları</title>
     <style>
         * {
@@ -2351,61 +2342,6 @@ dendiğinde; ...
         });
 
         // ==================== EXPORT SİSTEMİ SONU ====================
-
-        // ==================== YOUTUBE LİNK YÖNETİCİSİ ====================
-        
-        /**
-         * YouTube linkini mobil cihazda YouTube uygulamasında açar
-         * @param {string} videoId - YouTube video ID'si (örn: "dQw4w9WgXcQ")
-         * @param {string} fullUrl - Tam YouTube URL'si (opsiyonel, fallback için)
-         */
-        function openYouTubeInApp(videoId, fullUrl = null) {
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const isAndroid = /android/i.test(userAgent);
-            const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-            
-            // Fallback URL
-            const webUrl = fullUrl || `https://www.youtube.com/watch?v=${videoId}`;
-            
-            if (isAndroid) {
-                // Android için YouTube app intent
-                const androidUrl = `intent://www.youtube.com/watch?v=${videoId}#Intent;scheme=https;package=com.google.android.youtube;end`;
-                window.location.href = androidUrl;
-            } else if (isIOS) {
-                // iOS için YouTube app URL scheme
-                const iosUrl = `youtube://watch?v=${videoId}`;
-                
-                // iOS'ta app yoksa web'e fallback
-                const timeout = setTimeout(function() {
-                    window.location.href = webUrl;
-                }, 1000);
-                
-                window.location.href = iosUrl;
-                
-                // Eğer app açıldıysa timeout'u temizle
-                window.addEventListener('blur', function() {
-                    clearTimeout(timeout);
-                });
-            } else {
-                // Desktop veya diğer cihazlar için normal web URL
-                window.location.href = webUrl;
-            }
-        }
-        
-        /**
-         * YouTube linkli buton veya element oluşturma örneği
-         * Kullanım: createYouTubeButton('dQw4w9WgXcQ', 'Video İzle')
-         */
-        function createYouTubeButton(videoId, buttonText) {
-            const button = document.createElement('button');
-            button.textContent = buttonText;
-            button.onclick = function() {
-                openYouTubeInApp(videoId);
-            };
-            return button;
-        }
-        
-        // ==================== YOUTUBE LİNK YÖNETİCİSİ SONU ====================
 
         // Initialize on load
         window.onload = function() {
