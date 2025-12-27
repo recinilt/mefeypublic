@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NotebookLM Video Çalışmaları</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700&display=swap');
+        
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151932;
+            --bg-tertiary: #1d2342;
+            --accent-primary: #00ff88;
+            --accent-secondary: #ff0080;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0b8;
+            --border-color: #2a3150;
+            --shadow: rgba(0, 255, 136, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+        
+        /* Background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 128, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* Header */
+        header {
+            background: var(--bg-secondary);
+            border-bottom: 2px solid var(--border-color);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        nav {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.6rem 1.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .nav-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--shadow);
+        }
+        
+        .nav-btn.active {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border-color: var(--accent-primary);
+        }
+        
+        /* Main Layout */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-right: 2px solid var(--border-color);
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .video-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .video-item {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            padding: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-primary);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .video-item:hover::before,
+        .video-item.active::before {
+            transform: scaleY(1);
+        }
+        
+        .video-item:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(5px);
+        }
+        
+        .video-item.active {
+            border-color: var(--accent-primary);
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .video-item h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-family: 'Syne', sans-serif;
+        }
+        
+        .video-item .file-count {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Files Grid */
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .file-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .file-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 60%, rgba(0, 255, 136, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .file-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+        
+        .file-card:hover::after {
+            opacity: 1;
+        }
+        
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .file-name {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            word-break: break-word;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .file-type {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 39, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-primary);
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 255, 136, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        
+        @keyframes modalSlideIn {
+            from { transform: scale(0.9) translateY(20px); }
+            to { transform: scale(1) translateY(0); }
+        }
+        
+        .modal-header {
+            background: var(--bg-tertiary);
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .modal-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+        }
+        
+        .modal-close {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-close:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+            transform: rotate(90deg);
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-body iframe,
+        .modal-body img,
+        .modal-body video,
+        .modal-body audio {
+            width: 100%;
+            max-width: 100%;
+            border: none;
+        }
+        
+        .modal-body video,
+        .modal-body audio {
+            background: #000;
+        }
+        
+        .modal-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .modal-body th,
+        .modal-body td {
+            padding: 0.8rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+        
+        .modal-body th {
+            background: var(--bg-tertiary);
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        
+        .download-btn {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 128, 0.3);
+        }
+        
+        /* Notes Section */
+        .notes-container {
+            max-width: 1000px;
+        }
+        
+        .note-input-area {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .note-input-area h2 {
+            font-family: 'Syne', sans-serif;
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .note-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .note-form input,
+        .note-form textarea {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 1rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .note-form input:focus,
+        .note-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--shadow);
+        }
+        
+        .note-form textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .note-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .note-tags input {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .tag-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--accent-primary);
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            border: 1px solid var(--accent-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .tag-remove {
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .add-note-btn {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            align-self: flex-start;
+        }
+        
+        .add-note-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 128, 0.3);
+        }
+        
+        /* Notes List */
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .note-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .note-card:hover {
+            border-color: var(--accent-primary);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+        
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+        
+        .note-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .note-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .note-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .note-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .note-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .note-btn.delete:hover {
+            border-color: var(--accent-secondary);
+            color: var(--accent-secondary);
+        }
+        
+        .note-content {
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            white-space: pre-wrap;
+        }
+        
+        .note-tags-display {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--accent-primary);
+        }
+        
+        /* Floating Notes Button */
+        .floating-notes-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: rgba(0, 255, 136, 0.9);
+            color: var(--bg-primary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 25px;
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1500;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+        
+        .floating-notes-btn:hover {
+            background: var(--accent-primary);
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(0, 255, 136, 0.4);
+        }
+        
+        /* Notes Modal */
+        .notes-modal {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 0;
+            width: 400px;
+            height: calc(100vh - 80px);
+            background: var(--bg-secondary);
+            border-left: 2px solid var(--accent-primary);
+            z-index: 1500;
+            box-shadow: -5px 0 30px rgba(0, 255, 136, 0.2);
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        
+        .notes-modal.active {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .notes-panel {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .notes-panel-header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: var(--bg-primary);
+            padding: 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .notes-panel-header h2 {
+            margin: 0;
+            font-size: 1.3em;
+            font-family: 'Syne', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .notes-panel-close {
+            background: rgba(10, 14, 39, 0.2);
+            border: none;
+            color: var(--bg-primary);
+            font-size: 1.5em;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .notes-panel-close:hover {
+            background: rgba(10, 14, 39, 0.4);
+            transform: rotate(90deg);
+        }
+        
+        .notes-panel-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .notes-panel-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .notes-panel-body::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        .notes-panel-body::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 4px;
+        }
+
+        .notes-panel-body::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-secondary);
+        }
+        
+        .quick-note-form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+        }
+        
+        .quick-note-form input,
+        .quick-note-form textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            margin-bottom: 12px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        
+        .quick-note-form input:focus,
+        .quick-note-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 20px var(--shadow);
+        }
+        
+        .quick-note-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .quick-note-form input::placeholder,
+        .quick-note-form textarea::placeholder {
+            color: var(--text-secondary);
+        }
+        
+        .save-note-btn {
+            width: 100%;
+            padding: 10px 16px;
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .save-note-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 128, 0.3);
+        }
+        
+        /* Quick notes list specific styles */
+        .notes-modal .note-card {
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+        
+        .notes-modal .note-title {
+            font-size: 1em;
+        }
+        
+        .notes-modal .note-content {
+            font-size: 0.85em;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .notes-modal .empty-state {
+            padding: 2rem 1rem;
+        }
+        
+        .notes-modal .empty-state h3 {
+            font-size: 1.2em;
+        }
+        
+        .notes-modal .empty-state p {
+            font-size: 0.9em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 2px solid var(--border-color);
+            }
+            
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .modal-content {
+                max-width: 95%;
+                max-height: 95%;
+            }
+            
+            /* Notes sidebar in mobile - full width overlay but positioned at bottom */
+            .notes-modal {
+                top: auto;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 70vh;
+                border-left: none;
+                border-top: 2px solid var(--accent-primary);
+                border-radius: 20px 20px 0 0;
+            }
+            
+            @keyframes slideInRight {
+                from {
+                    transform: translateY(100%);
+                }
+                to {
+                    transform: translateY(0);
+                }
+            }
+            
+            .floating-notes-btn {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+        }
+        
+        /* Loading animation */
+        .loading {
+            color: var(--accent-primary);
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">NotebookLM Studio</div>
+        <nav>
+            <button class="nav-btn active" data-section="videos">Videolar</button>
+            <button class="nav-btn" data-section="notes">Notlarım</button>
+        </nav>
+    </header>
+
+    <!-- Floating Notes Button -->
+    <button class="floating-notes-btn" id="floatingNotesBtn">📝 Hızlı Not</button>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <h2>Video Serisi</h2>
+            <div class="video-list" id="videoList"></div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Videos Section -->
+            <section class="section active" id="videosSection">
+                <div id="filesContainer">
+                    <div class="empty-state">
+                        <h3>Bir video seçin</h3>
+                        <p>NotebookLM çalışmalarını görüntülemek için sol taraftan bir video seçin.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notes Section -->
+            <section class="section" id="notesSection">
+                <div class="notes-container">
+                    <div class="note-input-area">
+                        <h2>Yeni Not Ekle</h2>
+                        <form class="note-form" id="noteForm">
+                            <input type="text" id="noteTitle" placeholder="Not Başlığı" required>
+                            <textarea id="noteContent" placeholder="Not içeriği..." required></textarea>
+                            <div class="note-tags">
+                                <input type="text" id="noteTags" placeholder="Etiketler (virgülle ayırın)">
+                            </div>
+                            <div id="currentTags"></div>
+                            <button type="submit" class="add-note-btn">Not Ekle</button>
+                        </form>
+                    </div>
+                    <div class="notes-list" id="notesList"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="fileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">Dosya</h3>
+                <button class="modal-close" id="modalClose">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="notes-modal" id="notesModal">
+        <div class="notes-panel">
+            <div class="notes-panel-header">
+                <h2>📝 Hızlı Not</h2>
+                <button class="notes-panel-close" id="notesClose">×</button>
+            </div>
+            <div class="notes-panel-body">
+                <form class="quick-note-form" id="quickNoteForm">
+                    <input type="text" id="quickNoteTitle" placeholder="Not Başlığı" required>
+                    <textarea id="quickNoteContent" placeholder="Notunuzu buraya yazın..." required></textarea>
+                    <input type="text" id="quickNoteTags" placeholder="Etiketler (virgülle ayırın)">
+                    <button type="submit" class="save-note-btn">Kaydet</button>
+                </form>
+                <div class="notes-list" id="quickNotesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================
+        // VERİ YAPISI - Buraya videolarınızı ekleyin
+        // =========================
+        const videos = [
+            {
+                id: 1,
+                title: "Aynadaki İlahi",
+                folder: "v01",
+                files: [
+                    { name: "Aynadaki_İlahi.mp4", type: "video" }
+                ]
+            },
+            {
+                id: 2,
+                title: "Ben Kimim: Karakter Benlik ve İlahi İsimler",
+                folder: "v02",
+                files: [
+                    { name: "Ben_Kimim__Karakter_Benlik_ve_İlahi_İsimler.m4a", type: "audio" }
+                ]
+            },
+            {
+                id: 3,
+                title: "Character Self to Unity",
+                folder: "baybars-notebook-manager/v03",
+                files: [
+                    { name: "Aynadaki_İlahi.mp4", type: "video" },
+                    { name: "Ben_Kimim__Karakter_Benlik_ve_İlahi_İsimler.m4a", type: "audio" },
+                    { name: "Character_Self_to_Unity.pdf", type: "pdf" },
+                    { name: "flashcards.csv", type: "csv" },
+                    { name: "NotebookLMMindMap.png", type: "image" },
+                    { name: "unnamed.png", type: "image" },
+                    { name: "v03.pdf", type: "pdf" }
+                ]
+            },
+            {
+                id: 4,
+                title: "Tasavvuf Bilgi Kartı",
+                folder: "v04",
+                files: [
+                    // Dosyaları buraya ekleyin
+                    // Örnek: { name: "dosya.pdf", type: "pdf" }
+                ]
+            },
+            {
+                id: 5,
+                title: "Vahdet Bilinci: Benlikten Halifeliğe",
+                folder: "v05",
+                files: [
+                    // Dosyaları buraya ekleyin
+                ]
+            },
+            {
+                id: 6,
+                title: "Diyalektik Dergah Toplantısı Analizi",
+                folder: "v06",
+                files: [
+                    // Dosyaları buraya ekleyin
+                ]
+            },
+            {
+                id: 7,
+                title: "Esmau'l Hüsna ve Vahdet Bilinci",
+                folder: "v07",
+                files: [
+                    // Dosyaları buraya ekleyin
+                ]
+            }
+        ];
+
+        // =========================
+        // FILE TYPE ICONS
+        // =========================
+        const fileIcons = {
+            pdf: '📄',
+            video: '🎬',
+            audio: '🎵',
+            image: '🖼️',
+            csv: '📊',
+            docx: '📝'
+        };
+
+        // =========================
+        // STATE
+        // =========================
+        let currentVideoId = null;
+        let notes = JSON.parse(localStorage.getItem('notebookLM_notes')) || [];
+
+        // =========================
+        // INIT
+        // =========================
+        function init() {
+            renderVideoList();
+            renderNotes();
+            setupEventListeners();
+        }
+
+        // =========================
+        // VIDEO LIST
+        // =========================
+        function renderVideoList() {
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = videos.map(video => `
+                <div class="video-item" data-video-id="${video.id}">
+                    <h3>${video.title}</h3>
+                    <p class="file-count">${video.files.length} dosya</p>
+                </div>
+            `).join('');
+        }
+
+        // =========================
+        // FILES DISPLAY
+        // =========================
+        function showVideoFiles(videoId) {
+            currentVideoId = videoId;
+            const video = videos.find(v => v.id === videoId);
+            
+            // Update active state
+            document.querySelectorAll('.video-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.videoId == videoId);
+            });
+
+            const container = document.getElementById('filesContainer');
+            
+            if (video.files.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>${video.title}</h3>
+                        <p>Bu video için henüz dosya eklenmemiş.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <h2 style="font-family: 'Syne', sans-serif; color: var(--accent-primary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 2px;">${video.title}</h2>
+                <div class="files-grid">
+                    ${video.files.map(file => `
+                        <div class="file-card" data-file="${video.folder}/${file.name}" data-type="${file.type}">
+                            <div class="file-icon">${fileIcons[file.type] || '📁'}</div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-type">${file.type}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // =========================
+        // MODAL
+        // =========================
+        function openFileModal(fileName, fileType) {
+            const modal = document.getElementById('fileModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalTitle.textContent = fileName;
+            modalBody.innerHTML = '<div class="loading">Yükleniyor...</div>';
+            
+            modal.classList.add('active');
+
+            setTimeout(() => {
+                let content = '';
+                
+                switch(fileType) {
+                    case 'pdf':
+                        content = `
+                            <iframe src="${fileName}" style="width: 100%; height: 600px;"></iframe>
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                        break;
+                    
+                    case 'image':
+                        content = `
+                            <img src="${fileName}" alt="${fileName}" style="max-width: 100%; height: auto;">
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                        break;
+                    
+                    case 'video':
+                        content = `
+                            <video controls id="modalVideo" style="width: 100%; max-height: 600px;">
+                                <source src="${fileName}" type="video/mp4">
+                                Tarayıcınız video etiketini desteklemiyor.
+                            </video>
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                        break;
+                    
+                    case 'audio':
+                        content = `
+                            <audio controls id="modalAudio" style="width: 100%;">
+                                <source src="${fileName}" type="audio/mp4">
+                                Tarayıcınız audio etiketini desteklemiyor.
+                            </audio>
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                        break;
+                    
+                    case 'csv':
+                        fetch(fileName)
+                            .then(response => response.text())
+                            .then(csvData => {
+                                const table = csvToTable(csvData);
+                                modalBody.innerHTML = `
+                                    ${table}
+                                    <a href="${fileName}" download class="download-btn">İndir</a>
+                                `;
+                            })
+                            .catch(error => {
+                                modalBody.innerHTML = `
+                                    <p>CSV dosyası yüklenemedi.</p>
+                                    <a href="${fileName}" download class="download-btn">İndir</a>
+                                `;
+                            });
+                        return;
+                    
+                    case 'docx':
+                        content = `
+                            <p style="margin-bottom: 1rem;">DOCX dosyaları tarayıcıda önizlenemiyor.</p>
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                        break;
+                    
+                    default:
+                        content = `
+                            <p>Bu dosya türü önizlenemiyor.</p>
+                            <a href="${fileName}" download class="download-btn">İndir</a>
+                        `;
+                }
+                
+                modalBody.innerHTML = content;
+            }, 300);
+        }
+
+        function csvToTable(csvData) {
+            const rows = csvData.trim().split('\n');
+            const headers = rows[0].split(',');
+            
+            let table = '<table><thead><tr>';
+            headers.forEach(header => {
+                table += `<th>${header.trim()}</th>`;
+            });
+            table += '</tr></thead><tbody>';
+            
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].split(',');
+                table += '<tr>';
+                cells.forEach(cell => {
+                    table += `<td>${cell.trim()}</td>`;
+                });
+                table += '</tr>';
+            }
+            
+            table += '</tbody></table>';
+            return table;
+        }
+
+        function closeModal() {
+            // Pause any playing media
+            const video = document.getElementById('modalVideo');
+            const audio = document.getElementById('modalAudio');
+            
+            if (video) {
+                video.pause();
+            }
+            if (audio) {
+                audio.pause();
+            }
+            
+            document.getElementById('fileModal').classList.remove('active');
+        }
+
+        // =========================
+        // QUICK NOTES
+        // =========================
+        function toggleQuickNotes() {
+            const modal = document.getElementById('notesModal');
+            modal.classList.toggle('active');
+            if (modal.classList.contains('active')) {
+                renderQuickNotes();
+            }
+        }
+
+        function closeQuickNotes() {
+            document.getElementById('notesModal').classList.remove('active');
+        }
+
+        function addQuickNote(title, content, tags) {
+            const note = {
+                id: Date.now(),
+                title,
+                content,
+                tags: tags.split(',').map(t => t.trim()).filter(t => t),
+                date: new Date().toLocaleString('tr-TR')
+            };
+            
+            notes.unshift(note);
+            saveNotes();
+            renderQuickNotes();
+            renderNotes(); // Update main notes list too
+        }
+
+        function renderQuickNotes() {
+            const notesList = document.getElementById('quickNotesList');
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Henüz not yok</h3>
+                        <p>Yukarıdaki formu kullanarak ilk notunuzu ekleyin.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notesList.innerHTML = notes.slice(0, 5).map(note => `
+                <div class="note-card">
+                    <div class="note-header">
+                        <div>
+                            <div class="note-title">${note.title}</div>
+                            <div class="note-date">${note.date}</div>
+                        </div>
+                        <div class="note-actions">
+                            <button class="note-btn delete" data-note-id="${note.id}" title="Sil">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="note-content">${note.content}</div>
+                    ${note.tags.length > 0 ? `
+                        <div class="note-tags-display">
+                            ${note.tags.map(tag => `<span class="tag-badge">#${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+            
+            if (notes.length > 5) {
+                notesList.innerHTML += `<p style="text-align: center; color: var(--text-secondary); margin-top: 1rem;">Tüm notları görmek için "Notlarım" sekmesine gidin.</p>`;
+            }
+        }
+
+        // =========================
+        // NOTES
+        // =========================
+        function addNote(title, content, tags) {
+            const note = {
+                id: Date.now(),
+                title,
+                content,
+                tags: tags.split(',').map(t => t.trim()).filter(t => t),
+                date: new Date().toLocaleString('tr-TR')
+            };
+            
+            notes.unshift(note);
+            saveNotes();
+            renderNotes();
+        }
+
+        function deleteNote(id) {
+            if (confirm('Bu notu silmek istediğinizden emin misiniz?')) {
+                notes = notes.filter(note => note.id !== id);
+                saveNotes();
+                renderNotes();
+            }
+        }
+
+        function editNote(id) {
+            const note = notes.find(n => n.id === id);
+            if (!note) return;
+
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteContent').value = note.content;
+            document.getElementById('noteTags').value = note.tags.join(', ');
+            
+            deleteNote(id);
+            
+            document.getElementById('noteTitle').focus();
+        }
+
+        function renderNotes() {
+            const notesList = document.getElementById('notesList');
+            
+            if (notes.length === 0) {
+                notesList.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Henüz not yok</h3>
+                        <p>Yukarıdaki formu kullanarak ilk notunuzu ekleyin.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            notesList.innerHTML = notes.map(note => `
+                <div class="note-card">
+                    <div class="note-header">
+                        <div>
+                            <div class="note-title">${note.title}</div>
+                            <div class="note-date">${note.date}</div>
+                        </div>
+                        <div class="note-actions">
+                            <button class="note-btn edit" data-note-id="${note.id}" title="Düzenle">✏️</button>
+                            <button class="note-btn delete" data-note-id="${note.id}" title="Sil">🗑️</button>
+                        </div>
+                    </div>
+                    <div class="note-content">${note.content}</div>
+                    ${note.tags.length > 0 ? `
+                        <div class="note-tags-display">
+                            ${note.tags.map(tag => `<span class="tag-badge">#${tag}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notebookLM_notes', JSON.stringify(notes));
+        }
+
+        // =========================
+        // EVENT LISTENERS
+        // =========================
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const section = btn.dataset.section;
+                    
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById(section + 'Section').classList.add('active');
+                });
+            });
+
+            // Video selection
+            document.getElementById('videoList').addEventListener('click', (e) => {
+                const videoItem = e.target.closest('.video-item');
+                if (videoItem) {
+                    const videoId = parseInt(videoItem.dataset.videoId);
+                    showVideoFiles(videoId);
+                }
+            });
+
+            // File cards
+            document.getElementById('filesContainer').addEventListener('click', (e) => {
+                const fileCard = e.target.closest('.file-card');
+                if (fileCard) {
+                    const fileName = fileCard.dataset.file;
+                    const fileType = fileCard.dataset.type;
+                    openFileModal(fileName, fileType);
+                }
+            });
+
+            // Modal close
+            document.getElementById('modalClose').addEventListener('click', closeModal);
+            document.getElementById('fileModal').addEventListener('click', (e) => {
+                if (e.target.id === 'fileModal') {
+                    closeModal();
+                }
+            });
+
+            // Floating Notes Button
+            document.getElementById('floatingNotesBtn').addEventListener('click', toggleQuickNotes);
+            
+            // Notes Modal
+            document.getElementById('notesClose').addEventListener('click', closeQuickNotes);
+            
+            // Quick Note Form
+            document.getElementById('quickNoteForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('quickNoteTitle').value;
+                const content = document.getElementById('quickNoteContent').value;
+                const tags = document.getElementById('quickNoteTags').value;
+                
+                addQuickNote(title, content, tags);
+                
+                document.getElementById('quickNoteForm').reset();
+                document.getElementById('quickNoteTitle').focus();
+            });
+
+            // Quick Notes Delete
+            document.getElementById('quickNotesList').addEventListener('click', (e) => {
+                const deleteBtn = e.target.closest('.note-btn.delete');
+                
+                if (deleteBtn) {
+                    const noteId = parseInt(deleteBtn.dataset.noteId);
+                    deleteNote(noteId);
+                    renderQuickNotes();
+                }
+            });
+
+            // Note form
+            document.getElementById('noteForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const title = document.getElementById('noteTitle').value;
+                const content = document.getElementById('noteContent').value;
+                const tags = document.getElementById('noteTags').value;
+                
+                addNote(title, content, tags);
+                
+                document.getElementById('noteForm').reset();
+            });
+
+            // Note actions
+            document.getElementById('notesList').addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.note-btn.edit');
+                const deleteBtn = e.target.closest('.note-btn.delete');
+                
+                if (editBtn) {
+                    const noteId = parseInt(editBtn.dataset.noteId);
+                    editNote(noteId);
+                    // Switch to notes section
+                    document.querySelector('[data-section="notes"]').click();
+                }
+                
+                if (deleteBtn) {
+                    const noteId = parseInt(deleteBtn.dataset.noteId);
+                    deleteNote(noteId);
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    // Close notes modal if open, otherwise close file modal
+                    const notesModal = document.getElementById('notesModal');
+                    const fileModal = document.getElementById('fileModal');
+                    
+                    if (notesModal.classList.contains('active')) {
+                        closeQuickNotes();
+                    } else if (fileModal.classList.contains('active')) {
+                        closeModal();
+                    }
+                }
+            });
+        }
+
+        // =========================
+        // START
+        // =========================
+        init();
+    </script>
+</body>
+</html>
