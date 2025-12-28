@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobil Uyumlu Sesli Okuyucu</title>
+    <title>Mobil Uyumlu Profesyonel Okuyucu</title>
     <style>
         :root {
             --bg-color: #11111b;
             --container-bg: #1e1e2e;
             --text-color: #cdd6f4;
             --accent-color: #89b4fa;
+            --highlight-bg: rgba(137, 180, 250, 0.4);
+            --highlight-color: #fff;
             --btn-bg: #313244;
-            --btn-hover: #45475a;
             --stop-color: #f38ba8;
         }
 
@@ -48,37 +49,68 @@
             text-align: center;
         }
 
-        /* Metin Alanı */
+        .text-wrapper {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+
         textarea {
             width: 100%;
-            height: 250px; /* Mobilde daha fazla alan */
+            height: 100%;
             background-color: #181825;
             color: #fff;
             border: 2px solid #313244;
             border-radius: 12px;
             padding: 1rem;
-            font-size: 1.1rem;
-            line-height: 1.5;
-            resize: vertical;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            resize: none;
             box-sizing: border-box;
             outline: none;
             transition: border-color 0.3s;
+            font-family: inherit;
         }
 
-        textarea:focus {
-            border-color: var(--accent-color);
+        textarea:focus { border-color: var(--accent-color); }
+
+        #read-display {
+            display: none;
+            width: 100%;
+            height: 100%;
+            background-color: #181825;
+            color: #a6adc8;
+            border: 2px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            box-sizing: border-box;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            scroll-behavior: smooth;
         }
 
-        /* Kontrol Grupları */
+        .highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-color);
+            border-radius: 4px;
+            padding: 2px 0;
+            font-weight: bold;
+        }
+
+        /* Aktif cümle vurgusu (daha hafif) */
+        .sentence-active {
+            color: #fff;
+        }
+
         .controls-wrapper {
             display: flex;
             flex-direction: column;
             gap: 15px;
         }
 
-        .voice-section {
-            width: 100%;
-        }
+        .voice-section { width: 100%; }
 
         select {
             width: 100%;
@@ -88,7 +120,7 @@
             color: white;
             border: 1px solid transparent;
             font-size: 1rem;
-            appearance: none; /* Mobilde varsayılan stili kaldır */
+            appearance: none;
         }
 
         .action-buttons {
@@ -106,7 +138,6 @@
             border-radius: 12px;
         }
 
-        /* Buton Stilleri */
         button {
             padding: 14px;
             border-radius: 10px;
@@ -115,12 +146,10 @@
             font-size: 1rem;
             cursor: pointer;
             transition: transform 0.1s, background-color 0.2s;
-            touch-action: manipulation; /* Dokunmatik gecikmesini önler */
+            touch-action: manipulation;
         }
 
-        button:active {
-            transform: scale(0.96);
-        }
+        button:active { transform: scale(0.96); }
 
         .btn-play { background-color: var(--accent-color); color: #11111b; }
         .btn-stop { background-color: var(--stop-color); color: #11111b; }
@@ -135,15 +164,12 @@
             justify-content: center;
         }
 
-        .btn-speed:active { background-color: rgba(255,255,255,0.1); }
-
         .current-speed-label {
             font-family: monospace;
             font-size: 1.1rem;
             color: #fff;
         }
 
-        /* Overlay (Hız Göstergesi) */
         .speed-overlay {
             position: fixed;
             top: 50%;
@@ -162,7 +188,6 @@
             backdrop-filter: blur(5px);
         }
 
-        /* Bilgi metni */
         .info {
             text-align: center;
             font-size: 0.8rem;
@@ -170,7 +195,6 @@
             margin-top: 5px;
         }
 
-        /* Mobil Düzenlemeler */
         @media (min-width: 600px) {
             .controls-wrapper {
                 flex-direction: row;
@@ -186,25 +210,25 @@
 <body>
 
     <div class="container">
-        <h1>Sesli Okuyucu (Pro)</h1>
+        <h1>Uzun Metin Okuyucu</h1>
         
-        <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben Android uyumlu yeni asistanınım. Google Türkçe ses motorunu kullanarak okuyacağım.</textarea>
+        <div class="text-wrapper">
+            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Artık çok uzun metinleri bile sorunsuz okuyabilirim. Metni cümlelere bölerek yönetiyorum, bu sayede mobilde ses kesilmez ve hız değiştirdiğinde cümlenin başından devam ederim.</textarea>
+            <div id="read-display"></div>
+        </div>
         
         <div class="controls-wrapper">
-            <!-- Ses Seçimi -->
             <div class="voice-section">
                 <select id="voice-select">
-                    <option value="">Sesler yükleniyor (Lütfen bekleyin)...</option>
+                    <option value="">Sesler yükleniyor...</option>
                 </select>
             </div>
 
-            <!-- Oynat / Durdur -->
             <div class="action-buttons">
-                <button id="play-btn" class="btn-play">▶ Oku / Duraklat</button>
+                <button id="play-btn" class="btn-play">▶ Oku</button>
                 <button id="stop-btn" class="btn-stop">■ Durdur</button>
             </div>
 
-            <!-- Hız Kontrolleri -->
             <div class="speed-controls">
                 <button id="slow-down-btn" class="btn-speed">−</button>
                 <span id="speed-display-static" class="current-speed-label">1.0x</span>
@@ -217,12 +241,12 @@
         </div>
     </div>
 
-    <!-- Ekranda beliren büyük hız göstergesi -->
     <div id="speed-overlay" class="speed-overlay">1.0x</div>
 
     <script>
         const synth = window.speechSynthesis;
         const textInput = document.getElementById('text-input');
+        const readDisplay = document.getElementById('read-display');
         const voiceSelect = document.getElementById('voice-select');
         const playBtn = document.getElementById('play-btn');
         const stopBtn = document.getElementById('stop-btn');
@@ -231,49 +255,38 @@
         const speedOverlay = document.getElementById('speed-overlay');
         const speedDisplayStatic = document.getElementById('speed-display-static');
 
-        // LocalStorage'dan hızı çek, yoksa 1.0 yap
         let savedRate = localStorage.getItem('tts_speed');
         let currentRate = savedRate ? parseFloat(savedRate) : 1.0;
-        
-        // İlk açılışta hız göstergesini güncelle
         speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
 
         let voices = [];
         let isSpeaking = false;
         let isPaused = false;
-        let utterance = null;
-        let charIndex = 0; 
-
-        // 1. Sesleri Yükle ve Google Önceliklendir
+        let isManualStop = false; // Kullanıcı mı durdurdu yoksa cümle mi bitti?
+        
+        // CHUNKING SİSTEMİ DEĞİŞKENLERİ
+        let textChunks = []; // Cümle cümle parçalanmış metin
+        let currentChunkIndex = 0; // Hangi cümledeyiz
+        
+        // 1. SESLERİ YÜKLE
         function populateVoices() {
             voices = synth.getVoices();
-            
-            // Eğer sesler henüz gelmediyse (Android bazen boş döner), select'i temizleme
             if(voices.length === 0) return;
-            
             voiceSelect.innerHTML = '';
 
-            // Sıralama Algoritması: 
-            // 1. Google Türkçe
-            // 2. Diğer Türkçe sesler
-            // 3. Diğerleri
             voices.sort((a, b) => {
                 const aName = a.name.toLowerCase();
                 const bName = b.name.toLowerCase();
                 const aLang = a.lang.toLowerCase();
                 const bLang = b.lang.toLowerCase();
                 
-                // Google Türkçe kontrolü
                 const aIsGoogleTr = aName.includes('google') && aLang.includes('tr');
                 const bIsGoogleTr = bName.includes('google') && bLang.includes('tr');
                 
                 if (aIsGoogleTr && !bIsGoogleTr) return -1;
                 if (!aIsGoogleTr && bIsGoogleTr) return 1;
-
-                // Genel Türkçe kontrolü
                 if (aLang.includes('tr') && !bLang.includes('tr')) return -1;
                 if (!aLang.includes('tr') && bLang.includes('tr')) return 1;
-                
                 return 0;
             });
 
@@ -281,169 +294,233 @@
                 const option = document.createElement('option');
                 option.textContent = `${voice.name} (${voice.lang})`; 
                 option.setAttribute('data-name', voice.name);
-                option.setAttribute('data-lang', voice.lang); // Lang attribute'u sakla
+                option.setAttribute('data-lang', voice.lang);
                 voiceSelect.appendChild(option);
             });
-            
-            // Eğer hiç ses yoksa uyar
-            if(voiceSelect.options.length === 0) {
-                 const option = document.createElement('option');
-                 option.textContent = "Ses bulunamadı - Sayfayı yenileyin";
-                 voiceSelect.appendChild(option);
-            }
         }
-
-        // Android için sesler bazen geç yüklenir, tekrar dene
         populateVoices();
         if (speechSynthesis.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = populateVoices;
         }
 
-        // 2. Okuma Fonksiyonu
-        function speak(startIndex = 0) {
-            // Android: Önce iptal et, bazen kuyrukta takılı kalır
+        // 2. METNİ PARÇALA VE GÖRÜNTÜ OLUŞTUR
+        function processText(text) {
+            // Basit cümle bölme: Nokta, Ünlem, Soru İşareti veya satır sonu
+            // Regex açıklaması: ([^.!?\n]+[.!?\n]+) -> Cümle sonuna kadar al, ayıracı da dahil et
+            // Bu regex tam mükemmel değil ama TTS için yeterli.
+            
+            // Daha sağlam bir regex:
+            const rawChunks = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g);
+            
+            textChunks = [];
+            readDisplay.innerHTML = '';
+            
+            if (!rawChunks) return;
+
+            let globalCharIndex = 0;
+
+            rawChunks.forEach((chunkText, index) => {
+                const cleanText = chunkText.trim();
+                if(cleanText.length === 0) return;
+
+                // Veri yapısına ekle
+                textChunks.push({
+                    text: cleanText,
+                    start: globalCharIndex,
+                    originalIndex: index
+                });
+
+                // Ekrana ekle (Span içinde Span)
+                // Dış span: Cümle, İç spanlar: Kelimeler (Vurgu için)
+                const sentenceSpan = document.createElement('div');
+                sentenceSpan.className = 'sentence-block';
+                sentenceSpan.style.display = 'inline'; // Akış bozulmasın
+                sentenceSpan.id = `chunk-${index}`;
+                
+                // Kelimeleri parçala
+                const words = chunkText.split(/(\s+)/);
+                words.forEach(word => {
+                    const wordSpan = document.createElement('span');
+                    wordSpan.textContent = word;
+                    if(word.trim().length > 0) {
+                        wordSpan.className = 'word';
+                    }
+                    sentenceSpan.appendChild(wordSpan);
+                });
+
+                readDisplay.appendChild(sentenceSpan);
+                globalCharIndex += chunkText.length;
+            });
+            
+            textInput.style.display = 'none';
+            readDisplay.style.display = 'block';
+        }
+
+        function highlightChunk(index) {
+            // Önceki vurguları temizle
+            document.querySelectorAll('.sentence-active').forEach(el => el.classList.remove('sentence-active'));
+            document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
+
+            const sentenceEl = document.getElementById(`chunk-${index}`);
+            if (sentenceEl) {
+                sentenceEl.classList.add('sentence-active');
+                sentenceEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                
+                // Cümlenin tamamını hafifçe vurgula (Mobil takip için daha iyi)
+                // Kelime kelime vurgu mobilde bazen senkron sorunu yaşatır, cümle bazlı daha stabil.
+                sentenceEl.querySelectorAll('.word').forEach(w => w.classList.add('highlight'));
+            }
+        }
+
+        function resetView() {
+            textInput.style.display = 'block';
+            readDisplay.style.display = 'none';
+            playBtn.textContent = "▶ Oku";
+            currentChunkIndex = 0;
+            isSpeaking = false;
+            isPaused = false;
+        }
+
+        // 3. PARÇA OKUMA MANTIĞI (En Kritik Kısım)
+        function playCurrentChunk() {
+            if (currentChunkIndex >= textChunks.length) {
+                resetView();
+                return;
+            }
+
+            // Önceki her şeyi iptal et (temiz sayfa)
             synth.cancel();
 
-            const text = textInput.value;
-            const textToSpeak = text.substring(startIndex); 
-
-            if (textToSpeak.trim() === '') return;
-
-            utterance = new SpeechSynthesisUtterance(textToSpeak);
+            const chunkData = textChunks[currentChunkIndex];
+            const utterance = new SpeechSynthesisUtterance(chunkData.text);
             
-            // --- KRİTİK ANDROID AYARI ---
-            // Ses seçilmiş olsa bile, utterance.lang'i manuel olarak tr-TR yapmazsak
-            // Android bazen default (İngilizce) motorda kalır.
-            
-            let selectedLang = 'tr-TR'; // Varsayılan Türkçe
+            // GC Önlemi
+            window.currentUtterance = utterance;
 
+            // Ses Ayarları
+            let selectedLang = 'tr-TR';
             if (voiceSelect.selectedOptions.length > 0) {
-                const selectedOptionName = voiceSelect.selectedOptions[0].getAttribute('data-name');
-                const selectedOptionLang = voiceSelect.selectedOptions[0].getAttribute('data-lang');
-                
-                const selectedVoice = voices.find(voice => voice.name === selectedOptionName);
-                
-                if (selectedVoice) {
-                    utterance.voice = selectedVoice;
-                    // Sesin kendi dilini kullan
-                    selectedLang = selectedVoice.lang;
-                } else if (selectedOptionLang) {
-                     // Ses objesi bulunamadı ama lang belli (Fallback)
-                     selectedLang = selectedOptionLang;
-                }
+                const name = voiceSelect.selectedOptions[0].getAttribute('data-name');
+                const lang = voiceSelect.selectedOptions[0].getAttribute('data-lang');
+                const voice = voices.find(v => v.name === name);
+                if (voice) {
+                    utterance.voice = voice;
+                    selectedLang = voice.lang;
+                } else if (lang) selectedLang = lang;
             }
-            
-            utterance.lang = selectedLang; // Bunu atamak Android için çok önemli!
+            utterance.lang = selectedLang;
             utterance.rate = currentRate;
 
-            // Hata ayıklama ve takip için
-            utterance.onboundary = (event) => {
-                charIndex = startIndex + event.charIndex; 
-            };
+            // Görsel Vurgu
+            highlightChunk(currentChunkIndex);
 
+            // Olaylar
             utterance.onend = () => {
-                isSpeaking = false;
-                isPaused = false;
-                charIndex = 0;
-                playBtn.textContent = "▶ Oku";
+                if (isManualStop) return; // Eğer kullanıcı durdurduysa sonrakine geçme
+                
+                // Bir sonraki cümleye geç
+                currentChunkIndex++;
+                playCurrentChunk(); 
             };
 
             utterance.onerror = (e) => {
-                console.error("TTS Hatası:", e);
-                isSpeaking = false;
-                playBtn.textContent = "▶ Oku";
+                if (e.error === 'interrupted' || e.error === 'canceled') return;
+                console.error("Hata:", e);
+                // Hata olsa bile devam etmeye çalış
+                if (!isManualStop) {
+                    currentChunkIndex++;
+                    playCurrentChunk();
+                }
             };
 
-            // Mobilde sesin başlaması için kullanıcı etkileşimi gerekebilir
             synth.speak(utterance);
+        }
+
+        // 4. KONTROLLER
+        function startReading() {
+            const text = textInput.value;
+            if (!text.trim()) return;
+
+            // Eğer hiç başlamamışsak (veya resetlenmişse), metni işle
+            if (!isSpeaking && !isPaused) {
+                processText(text);
+                currentChunkIndex = 0;
+            }
             
+            isManualStop = false;
             isSpeaking = true;
             isPaused = false;
             playBtn.textContent = "⏸ Duraklat";
+            
+            playCurrentChunk();
         }
 
-        // 3. Kontrol Fonksiyonları
         function togglePlay() {
-            // Sesler yüklenmemişse tekrar dene
-            if(voices.length === 0) populateVoices();
+            if (voices.length === 0) populateVoices();
 
-            if (synth.speaking && !isPaused) {
-                synth.pause();
+            if (isSpeaking && !isPaused) {
+                // DURAKLATMA: Aslında "Durdur ve index'i sakla" yapıyoruz (Mobilde en güvenli yol)
+                isManualStop = true;
+                synth.cancel();
                 isPaused = true;
                 playBtn.textContent = "▶ Devam Et";
-            } else if (isPaused) {
-                synth.resume();
-                isPaused = false;
-                playBtn.textContent = "⏸ Duraklat";
             } else {
-                speak(0); 
+                // DEVAM ETME
+                isManualStop = false;
+                isPaused = false;
+                isSpeaking = true;
+                playBtn.textContent = "⏸ Duraklat";
+                playCurrentChunk(); // Kaldığı chunk index'inden devam eder
             }
         }
 
         function stopSpeech() {
+            isManualStop = true;
             synth.cancel();
-            isSpeaking = false;
-            isPaused = false;
-            charIndex = 0;
-            playBtn.textContent = "▶ Oku";
+            resetView();
         }
 
-        // Hız Değiştirme ve Kaydetme
         function changeSpeed(amount) {
             currentRate = Math.max(0.5, Math.min(3.0, currentRate + amount));
-            currentRate = Math.round(currentRate * 10) / 10; 
-
-            // LocalStorage'a kaydet
+            currentRate = Math.round(currentRate * 10) / 10;
             localStorage.setItem('tts_speed', currentRate);
 
-            showSpeedFeedback();
+            // Görsel
+            speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
+            speedOverlay.innerText = `${currentRate.toFixed(1)}x`;
+            speedOverlay.style.opacity = '1';
+            setTimeout(() => { speedOverlay.style.opacity = '0'; }, 800);
 
-            // Eğer konuşuyorsa anlık güncelle (Hot-swap)
-            if (synth.speaking && !isPaused) {
-                // Durdur ve yeni hızla başlat
+            // Eğer okuyorsa, durdur ve yeni hızla AYNI cümleden devam et
+            if (isSpeaking && !isPaused) {
+                isManualStop = true; // onend tetiklenip index artmasın diye
                 synth.cancel();
-                speak(charIndex);
+                
+                // Kısa bir gecikme ile yeniden başlat (Browser'ın kendine gelmesi için)
+                setTimeout(() => {
+                    isManualStop = false;
+                    playCurrentChunk();
+                }, 50);
             }
         }
 
-        // Görsel Geri Bildirim
-        let overlayTimeout;
-        function showSpeedFeedback() {
-            // Küçük göstergeyi güncelle
-            speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
-
-            // Büyük overlay'i göster
-            speedOverlay.innerText = `${currentRate.toFixed(1)}x`;
-            speedOverlay.style.opacity = '1';
-            
-            clearTimeout(overlayTimeout);
-            overlayTimeout = setTimeout(() => {
-                speedOverlay.style.opacity = '0';
-            }, 800);
-        }
-
-        // 4. Olay Dinleyicileri
-        playBtn.addEventListener('click', togglePlay);
-        stopBtn.addEventListener('click', stopSpeech);
+        // Event Listeners
+        playBtn.addEventListener('click', () => {
+            if(!isSpeaking && !isPaused) startReading();
+            else togglePlay();
+        });
         
-        // Ekran butonları için
+        stopBtn.addEventListener('click', stopSpeech);
         speedUpBtn.addEventListener('click', () => changeSpeed(0.1));
         slowDownBtn.addEventListener('click', () => changeSpeed(-0.1));
 
-        // Klavye Kontrolleri
         document.addEventListener('keydown', (e) => {
             if (document.activeElement === textInput) return;
-
-            if (e.code === 'Space') {
-                e.preventDefault(); 
-                togglePlay();
-            } else if (e.code === 'ArrowUp') {
-                e.preventDefault();
-                changeSpeed(0.1);
-            } else if (e.code === 'ArrowDown') {
-                e.preventDefault();
-                changeSpeed(-0.1);
+            if (e.code === 'Space') { e.preventDefault(); 
+                if(!isSpeaking && !isPaused) startReading(); else togglePlay(); 
             }
+            else if (e.code === 'ArrowUp') { e.preventDefault(); changeSpeed(0.1); }
+            else if (e.code === 'ArrowDown') { e.preventDefault(); changeSpeed(-0.1); }
         });
     </script>
 </body>
