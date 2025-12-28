@@ -99,6 +99,7 @@
             font-weight: bold;
         }
 
+        /* Aktif cümle vurgusu (daha hafif) */
         .sentence-active {
             color: #fff;
         }
@@ -193,14 +194,6 @@
             color: #6c7086;
             margin-top: 5px;
         }
-        
-        .status-msg {
-            font-size: 0.75rem;
-            color: #a6adc8;
-            margin-top: 2px;
-            display: block;
-            min-height: 1.2em;
-        }
 
         @media (min-width: 600px) {
             .controls-wrapper {
@@ -220,7 +213,7 @@
         <h1>Uzun Metin Okuyucu</h1>
         
         <div class="text-wrapper">
-            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben okurken ekranın kapanmasını engelleyen yeni sürümüm. Okuma başladığında telefonun uyku moduna geçmez, böylece kesintisiz dinleyebilirsin.</textarea>
+            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Artık çok uzun metinleri bile sorunsuz okuyabilirim. Metni cümlelere bölerek yönetiyorum, bu sayede mobilde ses kesilmez ve hız değiştirdiğinde cümlenin başından devam ederim.</textarea>
             <div id="read-display"></div>
         </div>
         
@@ -229,7 +222,6 @@
                 <select id="voice-select">
                     <option value="">Sesler yükleniyor...</option>
                 </select>
-                <span id="wake-status" class="status-msg"></span>
             </div>
 
             <div class="action-buttons">
@@ -262,7 +254,6 @@
         const slowDownBtn = document.getElementById('slow-down-btn');
         const speedOverlay = document.getElementById('speed-overlay');
         const speedDisplayStatic = document.getElementById('speed-display-static');
-        const wakeStatus = document.getElementById('wake-status');
 
         let savedRate = localStorage.getItem('tts_speed');
         let currentRate = savedRate ? parseFloat(savedRate) : 1.0;
@@ -271,35 +262,13 @@
         let voices = [];
         let isSpeaking = false;
         let isPaused = false;
-        let isManualStop = false;
+        let isManualStop = false; // Kullanıcı mı durdurdu yoksa cümle mi bitti?
         
-        let textChunks = [];
-        let currentChunkIndex = 0;
+        // CHUNKING SİSTEMİ DEĞİŞKENLERİ
+        let textChunks = []; // Cümle cümle parçalanmış metin
+        let currentChunkIndex = 0; // Hangi cümledeyiz
         
-        // --- EKRAN UYANIK TUTMA (WAKE LOCK) ---
-        let wakeLock = null;
-
-        async function requestWakeLock() {
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    wakeStatus.textContent = "Ekran uyanık tutuluyor.";
-                }
-            } catch (err) {
-                console.log('Ekran kilidi hatası:', err);
-            }
-        }
-
-        function releaseWakeLock() {
-            if (wakeLock !== null) {
-                wakeLock.release().then(() => {
-                    wakeLock = null;
-                    wakeStatus.textContent = "";
-                });
-            }
-        }
-        // -------------------------------------
-
+        // 1. SESLERİ YÜKLE
         function populateVoices() {
             voices = synth.getVoices();
             if(voices.length === 0) return;
@@ -334,29 +303,41 @@
             speechSynthesis.onvoiceschanged = populateVoices;
         }
 
+        // 2. METNİ PARÇALA VE GÖRÜNTÜ OLUŞTUR
         function processText(text) {
+            // Basit cümle bölme: Nokta, Ünlem, Soru İşareti veya satır sonu
+            // Regex açıklaması: ([^.!?\n]+[.!?\n]+) -> Cümle sonuna kadar al, ayıracı da dahil et
+            // Bu regex tam mükemmel değil ama TTS için yeterli.
+            
+            // Daha sağlam bir regex:
             const rawChunks = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g);
+            
             textChunks = [];
             readDisplay.innerHTML = '';
             
             if (!rawChunks) return;
 
             let globalCharIndex = 0;
+
             rawChunks.forEach((chunkText, index) => {
                 const cleanText = chunkText.trim();
                 if(cleanText.length === 0) return;
 
+                // Veri yapısına ekle
                 textChunks.push({
                     text: cleanText,
                     start: globalCharIndex,
                     originalIndex: index
                 });
 
+                // Ekrana ekle (Span içinde Span)
+                // Dış span: Cümle, İç spanlar: Kelimeler (Vurgu için)
                 const sentenceSpan = document.createElement('div');
                 sentenceSpan.className = 'sentence-block';
-                sentenceSpan.style.display = 'inline';
+                sentenceSpan.style.display = 'inline'; // Akış bozulmasın
                 sentenceSpan.id = `chunk-${index}`;
                 
+                // Kelimeleri parçala
                 const words = chunkText.split(/(\s+)/);
                 words.forEach(word => {
                     const wordSpan = document.createElement('span');
@@ -376,6 +357,7 @@
         }
 
         function highlightChunk(index) {
+            // Önceki vurguları temizle
             document.querySelectorAll('.sentence-active').forEach(el => el.classList.remove('sentence-active'));
             document.querySelectorAll('.highlight').forEach(el => el.classList.remove('highlight'));
 
@@ -383,6 +365,9 @@
             if (sentenceEl) {
                 sentenceEl.classList.add('sentence-active');
                 sentenceEl.scrollIntoView({ behavior: "smooth", block: "center" });
+                
+                // Cümlenin tamamını hafifçe vurgula (Mobil takip için daha iyi)
+                // Kelime kelime vurgu mobilde bazen senkron sorunu yaşatır, cümle bazlı daha stabil.
                 sentenceEl.querySelectorAll('.word').forEach(w => w.classList.add('highlight'));
             }
         }
@@ -394,22 +379,25 @@
             currentChunkIndex = 0;
             isSpeaking = false;
             isPaused = false;
-            // Okuma bittiğinde veya resetlendiğinde kilidi kaldır
-            releaseWakeLock();
         }
 
+        // 3. PARÇA OKUMA MANTIĞI (En Kritik Kısım)
         function playCurrentChunk() {
             if (currentChunkIndex >= textChunks.length) {
                 resetView();
                 return;
             }
 
+            // Önceki her şeyi iptal et (temiz sayfa)
             synth.cancel();
 
             const chunkData = textChunks[currentChunkIndex];
             const utterance = new SpeechSynthesisUtterance(chunkData.text);
+            
+            // GC Önlemi
             window.currentUtterance = utterance;
 
+            // Ses Ayarları
             let selectedLang = 'tr-TR';
             if (voiceSelect.selectedOptions.length > 0) {
                 const name = voiceSelect.selectedOptions[0].getAttribute('data-name');
@@ -423,10 +411,14 @@
             utterance.lang = selectedLang;
             utterance.rate = currentRate;
 
+            // Görsel Vurgu
             highlightChunk(currentChunkIndex);
 
+            // Olaylar
             utterance.onend = () => {
-                if (isManualStop) return; 
+                if (isManualStop) return; // Eğer kullanıcı durdurduysa sonrakine geçme
+                
+                // Bir sonraki cümleye geç
                 currentChunkIndex++;
                 playCurrentChunk(); 
             };
@@ -434,6 +426,7 @@
             utterance.onerror = (e) => {
                 if (e.error === 'interrupted' || e.error === 'canceled') return;
                 console.error("Hata:", e);
+                // Hata olsa bile devam etmeye çalış
                 if (!isManualStop) {
                     currentChunkIndex++;
                     playCurrentChunk();
@@ -443,10 +436,12 @@
             synth.speak(utterance);
         }
 
+        // 4. KONTROLLER
         function startReading() {
             const text = textInput.value;
             if (!text.trim()) return;
 
+            // Eğer hiç başlamamışsak (veya resetlenmişse), metni işle
             if (!isSpeaking && !isPaused) {
                 processText(text);
                 currentChunkIndex = 0;
@@ -457,9 +452,6 @@
             isPaused = false;
             playBtn.textContent = "⏸ Duraklat";
             
-            // Okuma başlarken ekran kilidi iste
-            requestWakeLock();
-            
             playCurrentChunk();
         }
 
@@ -467,30 +459,25 @@
             if (voices.length === 0) populateVoices();
 
             if (isSpeaking && !isPaused) {
-                // DURAKLATMA
+                // DURAKLATMA: Aslında "Durdur ve index'i sakla" yapıyoruz (Mobilde en güvenli yol)
                 isManualStop = true;
                 synth.cancel();
                 isPaused = true;
                 playBtn.textContent = "▶ Devam Et";
-                // Duraklatınca pil koruması için kilidi kaldırabiliriz (tercih meselesi)
-                // Kullanıcı tekrar 'devam' diyene kadar ekran kararabilir.
-                releaseWakeLock();
             } else {
                 // DEVAM ETME
                 isManualStop = false;
                 isPaused = false;
                 isSpeaking = true;
                 playBtn.textContent = "⏸ Duraklat";
-                // Tekrar kilit iste
-                requestWakeLock();
-                playCurrentChunk();
+                playCurrentChunk(); // Kaldığı chunk index'inden devam eder
             }
         }
 
         function stopSpeech() {
             isManualStop = true;
             synth.cancel();
-            resetView(); // resetView içinde releaseWakeLock çağrılır
+            resetView();
         }
 
         function changeSpeed(amount) {
@@ -498,14 +485,18 @@
             currentRate = Math.round(currentRate * 10) / 10;
             localStorage.setItem('tts_speed', currentRate);
 
+            // Görsel
             speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
             speedOverlay.innerText = `${currentRate.toFixed(1)}x`;
             speedOverlay.style.opacity = '1';
             setTimeout(() => { speedOverlay.style.opacity = '0'; }, 800);
 
+            // Eğer okuyorsa, durdur ve yeni hızla AYNI cümleden devam et
             if (isSpeaking && !isPaused) {
-                isManualStop = true;
+                isManualStop = true; // onend tetiklenip index artmasın diye
                 synth.cancel();
+                
+                // Kısa bir gecikme ile yeniden başlat (Browser'ın kendine gelmesi için)
                 setTimeout(() => {
                     isManualStop = false;
                     playCurrentChunk();
@@ -513,6 +504,7 @@
             }
         }
 
+        // Event Listeners
         playBtn.addEventListener('click', () => {
             if(!isSpeaking && !isPaused) startReading();
             else togglePlay();
