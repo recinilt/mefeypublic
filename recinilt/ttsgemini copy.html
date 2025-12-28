@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Text-to-Speech</title>
+    <style>
+        :root {
+            --bg-color: #1e1e2e;
+            --text-color: #cdd6f4;
+            --accent-color: #89b4fa;
+            --secondary-bg: #313244;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Sayfa kaymasını engeller */
+        }
+
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: var(--secondary-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: #181825;
+            color: #fff;
+            border: 2px solid #45475a;
+            border-radius: 10px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            resize: none;
+            box-sizing: border-box; /* Padding taşmasını engeller */
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+        }
+
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        select {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 8px;
+            background: #45475a;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 10px 25px;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .btn-play { background-color: var(--accent-color); color: #1e1e2e; }
+        .btn-stop { background-color: #f38ba8; color: #1e1e2e; }
+
+        .speed-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .instructions {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: #a6adc8;
+            text-align: center;
+        }
+
+        .key {
+            background: #45475a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Doğal Ses Okuyucu</h1>
+        
+        <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben senin yeni okuma asistanınım. Aşağıdaki kontrolleri veya klavyeni kullanarak beni yönetebilirsin. Yukarı ok tuşu ile hızlanırım, aşağı ok tuşu ile yavaşlarım.</textarea>
+        
+        <div class="controls">
+            <select id="voice-select"></select>
+            <div style="display: flex; gap: 10px;">
+                <button id="play-btn" class="btn-play">Oku / Duraklat</button>
+                <button id="stop-btn" class="btn-stop">Durdur</button>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <span class="key">Space</span>: Oku/Duraklat &nbsp;|&nbsp; 
+            <span class="key">↑</span>: Hızlandır &nbsp;|&nbsp; 
+            <span class="key">↓</span>: Yavaşlat
+        </div>
+
+        <div id="speed-display" class="speed-overlay">1.0x</div>
+    </div>
+
+    <script>
+        const synth = window.speechSynthesis;
+        const textInput = document.getElementById('text-input');
+        const voiceSelect = document.getElementById('voice-select');
+        const playBtn = document.getElementById('play-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const speedDisplay = document.getElementById('speed-display');
+
+        let voices = [];
+        let currentRate = 1.0;
+        let isSpeaking = false;
+        let isPaused = false;
+        let utterance = null;
+        let charIndex = 0; // Kaldığımız yeri tutmak için
+
+        // 1. Sesleri Yükle ve Türkçe'yi önceliklendir
+        function populateVoices() {
+            voices = synth.getVoices();
+            voiceSelect.innerHTML = '';
+
+            // Türkçe sesleri başa alarak sırala
+            voices.sort((a, b) => {
+                const aTr = a.lang.includes('tr');
+                const bTr = b.lang.includes('tr');
+                if (aTr && !bTr) return -1;
+                if (!aTr && bTr) return 1;
+                return 0;
+            });
+
+            voices.forEach((voice) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.setAttribute('data-lang', voice.lang);
+                option.setAttribute('data-name', voice.name);
+                voiceSelect.appendChild(option);
+            });
+        }
+
+        populateVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoices;
+        }
+
+        // 2. Okuma Fonksiyonu
+        function speak(startIndex = 0) {
+            if (synth.speaking) synth.cancel();
+
+            const text = textInput.value;
+            // Kaldığımız yerden (startIndex) sonrasını alıyoruz
+            const textToSpeak = text.substring(startIndex); 
+
+            if (textToSpeak.trim() === '') return;
+
+            utterance = new SpeechSynthesisUtterance(textToSpeak);
+            
+            // Seçili sesi ata
+            const selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
+            const selectedVoice = voices.find(voice => voice.name === selectedOption);
+            if (selectedVoice) utterance.voice = selectedVoice;
+
+            utterance.rate = currentRate;
+
+            // Hangi karakterde olduğumuzu takip et (Boundary Event)
+            utterance.onboundary = (event) => {
+                // startIndex ekleyerek metnin toplamındaki gerçek pozisyonu buluyoruz
+                charIndex = startIndex + event.charIndex; 
+            };
+
+            utterance.onend = () => {
+                isSpeaking = false;
+                isPaused = false;
+                charIndex = 0; // Bittiğinde sıfırla
+            };
+
+            synth.speak(utterance);
+            isSpeaking = true;
+            isPaused = false;
+        }
+
+        // 3. Kontrol Fonksiyonları
+        function togglePlay() {
+            if (synth.speaking && !isPaused) {
+                synth.pause();
+                isPaused = true;
+            } else if (isPaused) {
+                synth.resume();
+                isPaused = false;
+            } else {
+                speak(0); // Baştan başla
+            }
+        }
+
+        function stopSpeech() {
+            synth.cancel();
+            isSpeaking = false;
+            isPaused = false;
+            charIndex = 0;
+        }
+
+        // Hız değiştirme ve anlık uygulama (Hot-swap)
+        function changeSpeed(amount) {
+            currentRate = Math.max(0.5, Math.min(3.0, currentRate + amount));
+            currentRate = Math.round(currentRate * 10) / 10; // Ondalık düzeltme
+
+            showSpeedOverlay();
+
+            // Eğer şu an konuşuyorsa, durdur ve kaldığı yerden yeni hızla devam et
+            if (synth.speaking && !isPaused) {
+                synth.cancel(); // Mevcut konuşmayı iptal et
+                speak(charIndex); // Kaldığı yerden (charIndex) yeni hızla başlat
+            }
+        }
+
+        // Hızı ekranda gösterme efekti
+        let overlayTimeout;
+        function showSpeedOverlay() {
+            speedDisplay.innerText = `Hız: ${currentRate}x`;
+            speedDisplay.style.opacity = '1';
+            clearTimeout(overlayTimeout);
+            overlayTimeout = setTimeout(() => {
+                speedDisplay.style.opacity = '0';
+            }, 800);
+        }
+
+        // 4. Event Listeners (Olay Dinleyicileri)
+        playBtn.addEventListener('click', togglePlay);
+        stopBtn.addEventListener('click', stopSpeech);
+
+        // Klavye Kontrolleri
+        document.addEventListener('keydown', (e) => {
+            // Textarea içindeyken ok tuşları imleci oynatsın, hızı değiştirmesin
+            if (document.activeElement === textInput) return;
+
+            if (e.code === 'Space') {
+                e.preventDefault(); // Sayfayı kaydırmayı engelle
+                togglePlay();
+            } else if (e.code === 'ArrowUp') {
+                e.preventDefault();
+                changeSpeed(0.1);
+            } else if (e.code === 'ArrowDown') {
+                e.preventDefault();
+                changeSpeed(-0.1);
+            }
+        });
+    </script>
+</body>
+</html>
