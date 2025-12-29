@@ -24,6 +24,24 @@
             margin: 0 auto;
         }
 
+        .hero-image {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            object-fit: cover;
+            max-height: 400px;
+        }
+
         .card {
             background: white;
             border-radius: 20px;
@@ -306,6 +324,15 @@
                 font-size: 1.8em;
             }
 
+            .hero-image {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .hero-image img {
+                max-height: 300px;
+            }
+
             .stat-value {
                 font-size: 2em;
             }
@@ -319,7 +346,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚭 Serap & Recep Sigara Bıraktıran Site</h1>
+        <div class="hero-image">
+            <img src="sigara.png" alt="Sigara Bırakma Motivasyon">
+        </div>
+        
+        <h1>🚭 Sigara Bırakma Yolculuğum</h1>
 
         <div class="card">
             <button class="settings-toggle" onclick="toggleSettings()">⚙️ Ayarlar</button>
