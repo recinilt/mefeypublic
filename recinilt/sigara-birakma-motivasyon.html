@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚭 Serap & Recep Sigara Bıraktırma Sitesi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-image {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            object-fit: cover;
+            max-height: 400px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .settings-toggle {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .settings-toggle:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .settings-panel {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .currency-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .currency-group input {
+            flex: 1;
+        }
+
+        .currency-group select {
+            width: 100px;
+        }
+
+        .milestone-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .milestone-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .milestone-item {
+            margin-bottom: 10px;
+        }
+
+        .milestone-item label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 18px;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .motivation-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-style: italic;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .milestones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .milestone-badge {
+            background: white;
+            border: 3px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .milestone-badge.achieved {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+
+        .milestone-badge.achieved .milestone-icon {
+            transform: scale(1.1);
+        }
+
+        .milestone-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+            transition: transform 0.3s;
+        }
+
+        .milestone-day {
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .milestone-reward {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .achievements-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .buying-power {
+            background: #fff9e6;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .buying-power h3 {
+            color: #f5a623;
+            margin-bottom: 15px;
+        }
+
+        .buying-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .buying-item:last-child {
+            border-bottom: none;
+        }
+
+        .setup-message {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .setup-message h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .hero-image {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .hero-image img {
+                max-height: 300px;
+            }
+
+            .stat-value {
+                font-size: 2em;
+            }
+
+            .motivation-card {
+                font-size: 1.1em;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero-image">
+            <img src="sigara.png" alt="Sigara Bırakma Motivasyon">
+        </div>
+        
+        <h1>🚭 Serap & Recep Sigara Bıraktırma Sitesi</h1>
+
+        <div class="card">
+            <button class="settings-toggle" onclick="toggleSettings()">⚙️ Ayarlar</button>
+
+            <div class="settings-panel" id="settingsPanel">
+                <form id="settingsForm">
+                    <div class="form-group">
+                        <label>💰 Paket Fiyatı</label>
+                        <div class="currency-group">
+                            <input type="number" id="packagePrice" step="0.01" required placeholder="Örn: 60">
+                            <select id="currency">
+                                <option value="TL">TL</option>
+                                <option value="GBP">£ (GBP)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>📦 Günlük Paket Sayısı</label>
+                        <input type="number" id="packagesPerDay" step="0.1" required placeholder="Örn: 1">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📅 Sigarayı Bırakma Tarihi</label>
+                        <input type="date" id="quitDate" required>
+                    </div>
+
+                    <div class="milestone-section">
+                        <h3>🏆 Kilometre Taşı Ödülleri</h3>
+                        <div class="milestone-item">
+                            <label>3. Gün Ödülü</label>
+                            <input type="text" id="reward3" placeholder="Örn: Sevdiğim yemeği yiyeceğim">
+                        </div>
+                        <div class="milestone-item">
+                            <label>7. Gün Ödülü</label>
+                            <input type="text" id="reward7" placeholder="Örn: Sinemaya gideceğim">
+                        </div>
+                        <div class="milestone-item">
+                            <label>14. Gün Ödülü</label>
+                            <input type="text" id="reward14" placeholder="Örn: Yeni bir kitap alacağım">
+                        </div>
+                        <div class="milestone-item">
+                            <label>28. Gün Ödülü</label>
+                            <input type="text" id="reward28" placeholder="Örn: Kendime bir hediye alacağım">
+                        </div>
+                        <div class="milestone-item">
+                            <label>60. Gün Ödülü</label>
+                            <input type="text" id="reward60" placeholder="Örn: Kısa bir tatile çıkacağım">
+                        </div>
+                        <div class="milestone-item">
+                            <label>90. Gün Ödülü</label>
+                            <input type="text" id="reward90" placeholder="Örn: İstediğim bir şeyi alacağım">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="save-btn">💾 Kaydet ve Başla</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="motivation-card" id="motivationQuote"></div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-label">Sigarasız Geçen</div>
+                    <div class="stat-value" id="daysPassed">0</div>
+                    <div class="stat-label">Gün</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Tasarruf</div>
+                    <div class="stat-value" id="totalSavings">0</div>
+                    <div class="stat-label" id="currencyLabel">TL</div>
+                </div>
+            </div>
+
+            <div class="card progress-section">
+                <h2>📊 İlerleme</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar">0%</div>
+                </div>
+                <p style="text-align: center; color: #666; margin-top: 10px;" id="progressText"></p>
+            </div>
+
+            <div class="card achievements-section">
+                <h2>🏆 Kilometre Taşları</h2>
+                <div class="milestones-grid" id="milestonesGrid"></div>
+            </div>
+
+            <div class="card">
+                <div class="buying-power">
+                    <h3>💸 Bu Parayla Alınabilecekler</h3>
+                    <div id="buyingPowerList"></div>
+                </div>
+            </div>
+
+            <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <h2 style="color: white; text-align: center; margin-bottom: 20px;">📈 İstatistikler</h2>
+                <div style="display: grid; gap: 15px;">
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                        <strong>Haftalık Tasarruf:</strong> <span id="weeklySavings">0</span> <span id="weeklyCurrency"></span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                        <strong>Aylık Tasarruf:</strong> <span id="monthlySavings">0</span> <span id="monthlyCurrency"></span>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                        <strong>İçilmeyen Sigara:</strong> <span id="cigarettesAvoided">0</span> adet
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="setupMessage" class="card setup-message">
+            <div class="emoji">🎯</div>
+            <h2>Hadi Başlayalım!</h2>
+            <p>Sigarasız bir hayata ilk adımı atmak için yukarıdaki "Ayarlar" butonuna tıklayın ve bilgilerinizi girin.</p>
+        </div>
+    </div>
+
+    <script>
+        const motivationalQuotes = [
+            "Bugün sigarasız geçirdiğin her dakika, yarın için daha güçlü bir temel oluşturur! 💪",
+            "Sen sigara içmek zorunda olan biri değilsin. Sen özgürsün! 🦋",
+            "Her geçen gün, vücudun iyileşiyor ve güçleniyor! 🌱",
+            "Sigarayı bırakmak imkansız değil, sadece önemli bir karardır! ✨",
+            "Kendine verdiğin bu hediyeyi kutla, bunu hak ediyorsun! 🎁",
+            "Bugün bir gün daha güçlüsün, bir gün daha özgürsün! 🌟",
+            "Zorluklara göğüs geriyor ve kazanıyorsun! Her gün bir zafer! 🏆",
+            "Ciğerlerin şükrediyorlar, cüzdanın mutlu, sağlığın yerinde! ❤️",
+            "Eski alışkanlıkların seni tanımlamaz. Yeni başarıların tanımlar! 🚀",
+            "Her gün, sigara olmadan da harika olabileceğinin kanıtısın! 🌈",
+            "Bu yolculukta her adım, daha sağlıklı bir geleceğe açılan kapı! 🚪",
+            "Geçmişte verdiğin en iyi kararlardan biri, bugün ödüllerini veriyor! 💎",
+            "Zorluklarla baş etme gücün, hayal ettiğinden çok daha güçlü! 💫",
+            "Şu an yaptığın fedakarlık, gelecekteki en büyük kazancın! 📈",
+            "Kendine olan güvenin her geçen gün artıyor! İnanılmazsın! ⭐",
+            "Sigara içmeyerek, kendini sevmenin en güzel yolunu seçtin! 💝",
+            "Her yeni gün, temiz bir nefes alma özgürlüğün! 🌬️",
+            "Bu süreçte öğrendiğin disiplin, hayatının her alanına yayılacak! 🎯",
+            "Sigarasız bir hayat, gerçekten yaşanmış bir hayattır! 🌺",
+            "İrade gösteriyorsun ve bu inanılmaz bir başarı! 🎖️",
+            "Vücudun sana teşekkür ediyor, her hücren yenileniyor! 🔬",
+            "Bugün kendini hiç bu kadar gurur verici hissetmemiştin! 🦸",
+            "Zorluğun ötesinde büyük bir özgürlük var ve sen oradasın! 🗽",
+            "Kendine olan sevgin ve saygın, sigarayı bırakmakla başladı! 👑",
+            "Her geçen gün biraz daha hafifledin, biraz daha güçlendin! 🌸",
+            "Sigara dumanı yerine hayallerinin peşinden koşuyorsun artık! 🌠",
+            "Bu karar senin, bu başarı senin, bu gurur senin! 🏅",
+            "Eski ben gitti, yeni ben daha güçlü ve sağlıklı! 🦅",
+            "Her zorluğun üstesinden geldin, bundan sonraki her şey daha kolay! 🌄",
+            "Sigarasız olmak bir süper güç! Ve sen bu güce sahipsin! ⚡"
+        ];
+
+        const milestones = [
+            { day: 3, icon: '🌱', key: 'reward3' },
+            { day: 7, icon: '🎯', key: 'reward7' },
+            { day: 14, icon: '💪', key: 'reward14' },
+            { day: 28, icon: '🏆', key: 'reward28' },
+            { day: 60, icon: '⭐', key: 'reward60' },
+            { day: 90, icon: '👑', key: 'reward90' }
+        ];
+
+        function loadSettings() {
+            const settings = localStorage.getItem('quitSmokingSettings');
+            if (settings) {
+                const data = JSON.parse(settings);
+                document.getElementById('packagePrice').value = data.packagePrice;
+                document.getElementById('currency').value = data.currency;
+                document.getElementById('packagesPerDay').value = data.packagesPerDay;
+                document.getElementById('quitDate').value = data.quitDate;
+                document.getElementById('reward3').value = data.rewards.reward3 || '';
+                document.getElementById('reward7').value = data.rewards.reward7 || '';
+                document.getElementById('reward14').value = data.rewards.reward14 || '';
+                document.getElementById('reward28').value = data.rewards.reward28 || '';
+                document.getElementById('reward60').value = data.rewards.reward60 || '';
+                document.getElementById('reward90').value = data.rewards.reward90 || '';
+                return true;
+            }
+            return false;
+        }
+
+        function saveSettings(event) {
+            event.preventDefault();
+            const settings = {
+                packagePrice: parseFloat(document.getElementById('packagePrice').value),
+                currency: document.getElementById('currency').value,
+                packagesPerDay: parseFloat(document.getElementById('packagesPerDay').value),
+                quitDate: document.getElementById('quitDate').value,
+                rewards: {
+                    reward3: document.getElementById('reward3').value,
+                    reward7: document.getElementById('reward7').value,
+                    reward14: document.getElementById('reward14').value,
+                    reward28: document.getElementById('reward28').value,
+                    reward60: document.getElementById('reward60').value,
+                    reward90: document.getElementById('reward90').value
+                }
+            };
+            localStorage.setItem('quitSmokingSettings', JSON.stringify(settings));
+            document.getElementById('settingsPanel').style.display = 'none';
+            showMainContent();
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function calculateStats() {
+            const settings = JSON.parse(localStorage.getItem('quitSmokingSettings'));
+            if (!settings) return null;
+
+            const quitDate = new Date(settings.quitDate);
+            const today = new Date();
+            const daysPassed = Math.floor((today - quitDate) / (1000 * 60 * 60 * 24));
+
+            if (daysPassed < 0) {
+                return { daysPassed: 0, totalSavings: 0, settings };
+            }
+
+            const dailyCost = settings.packagePrice * settings.packagesPerDay;
+            const totalSavings = (dailyCost * daysPassed).toFixed(2);
+            const weeklySavings = (dailyCost * 7).toFixed(2);
+            const monthlySavings = (dailyCost * 30).toFixed(2);
+            const cigarettesAvoided = Math.floor(daysPassed * settings.packagesPerDay * 20);
+
+            return {
+                daysPassed,
+                totalSavings,
+                weeklySavings,
+                monthlySavings,
+                cigarettesAvoided,
+                settings
+            };
+        }
+
+        function getRandomQuote() {
+            return motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+        }
+
+        function getBuyingPower(amount, currency) {
+            const items = currency === 'TL' ? [
+                { name: 'Kitap', price: 150, icon: '📚' },
+                { name: 'Sinema Bileti', price: 200, icon: '🎬' },
+                { name: 'Restoran Yemeği', price: 500, icon: '🍽️' },
+                { name: 'Ayakkabı', price: 2000, icon: '👟' },
+                { name: 'Telefon', price: 15000, icon: '📱' },
+                { name: 'Dizüstü Bilgisayar', price: 30000, icon: '💻' }
+            ] : [
+                { name: 'Book', price: 10, icon: '📚' },
+                { name: 'Cinema Ticket', price: 12, icon: '🎬' },
+                { name: 'Restaurant Meal', price: 25, icon: '🍽️' },
+                { name: 'Shoes', price: 80, icon: '👟' },
+                { name: 'Phone', price: 500, icon: '📱' },
+                { name: 'Laptop', price: 1000, icon: '💻' }
+            ];
+
+            return items.filter(item => amount >= item.price).map(item => {
+                const count = Math.floor(amount / item.price);
+                return `${item.icon} ${count} ${item.name}`;
+            });
+        }
+
+        function showMainContent() {
+            const stats = calculateStats();
+            if (!stats) return;
+
+            document.getElementById('setupMessage').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+            document.getElementById('motivationQuote').textContent = getRandomQuote();
+            document.getElementById('daysPassed').textContent = stats.daysPassed;
+            document.getElementById('totalSavings').textContent = stats.totalSavings;
+            document.getElementById('currencyLabel').textContent = stats.settings.currency;
+            document.getElementById('weeklySavings').textContent = stats.weeklySavings;
+            document.getElementById('monthlySavings').textContent = stats.monthlySavings;
+            document.getElementById('weeklyCurrency').textContent = stats.settings.currency;
+            document.getElementById('monthlyCurrency').textContent = stats.settings.currency;
+            document.getElementById('cigarettesAvoided').textContent = stats.cigarettesAvoided;
+
+            const nextMilestone = milestones.find(m => m.day > stats.daysPassed);
+            const progress = nextMilestone 
+                ? Math.min(100, (stats.daysPassed / nextMilestone.day) * 100)
+                : 100;
+            
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressBar').textContent = Math.round(progress) + '%';
+            
+            if (nextMilestone) {
+                const daysLeft = nextMilestone.day - stats.daysPassed;
+                document.getElementById('progressText').textContent = 
+                    `${nextMilestone.day}. güne ${daysLeft} gün kaldı! ${nextMilestone.icon}`;
+            } else {
+                document.getElementById('progressText').textContent = 
+                    'Tüm kilometre taşlarını geçtin! Muhteşemsin! 🎉';
+            }
+
+            const milestonesHtml = milestones.map(milestone => {
+                const achieved = stats.daysPassed >= milestone.day;
+                const reward = stats.settings.rewards[milestone.key];
+                return `
+                    <div class="milestone-badge ${achieved ? 'achieved' : ''}">
+                        <div class="milestone-icon">${milestone.icon}</div>
+                        <div class="milestone-day">${milestone.day}. Gün</div>
+                        ${reward ? `<div class="milestone-reward">${reward}</div>` : ''}
+                        ${achieved ? '<div style="color: #4CAF50; margin-top: 5px;">✓ Tamamlandı!</div>' : ''}
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('milestonesGrid').innerHTML = milestonesHtml;
+
+            const buyingPower = getBuyingPower(parseFloat(stats.totalSavings), stats.settings.currency);
+            const buyingHtml = buyingPower.length > 0 
+                ? buyingPower.map(item => `<div class="buying-item"><span>${item}</span></div>`).join('')
+                : '<p style="text-align: center;">Biraz daha biriktir, harika şeyler alabileceksin! 🎁</p>';
+            document.getElementById('buyingPowerList').innerHTML = buyingHtml;
+        }
+
+        document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+
+        window.onload = function() {
+            const hasSettings = loadSettings();
+            if (hasSettings) {
+                showMainContent();
+            } else {
+                document.getElementById('setupMessage').style.display = 'block';
+                document.getElementById('settingsPanel').style.display = 'block';
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('quitDate').value = today;
+            }
+        };
+    </script>
+</body>
+</html>
