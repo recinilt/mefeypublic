@@ -347,6 +347,16 @@ Yûnus miskin, çiğ idik,
 piştik elhamdülillah.
 
 illâ hû❤️`
+            },
+            "çıkar göğsünde çırpınan kuşu": {
+                esma: "çıkar göğsünde çırpınan kuşu",
+                meaning: `"çıkar göğsünde çırpınan kuşu"
+
+dendiğinde, bir derdin var söylemek istiyorsun ama ıkınıp sıkılıyor, diyemiyorsun, söyle de rahatla, derdin de uçsun gitsin ey yâren" manasına gelir.
+
+ârifler de dediler ki: ama onu başka bir kafese sokacak kişiye söylemeyesin.!
+
+yani, her şey herkese her yerde, her zaman söylenmez, söylenecek yeri ve zamanı da, söylenecek gönlü genişleri de bilmek lazım.`
             }
         };
         
