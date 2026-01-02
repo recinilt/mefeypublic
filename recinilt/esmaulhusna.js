@@ -356,7 +356,10 @@ dendiğinde, bir derdin var söylemek istiyorsun ama ıkınıp sıkılıyor, diy
 
 ârifler de dediler ki: ama onu başka bir kafese sokacak kişiye söylemeyesin.!
 
-yani, her şey herkese her yerde, her zaman söylenmez, söylenecek yeri ve zamanı da, söylenecek gönlü genişleri de bilmek lazım.`
+yani, her şey herkese her yerde, her zaman söylenmez, söylenecek yeri ve zamanı da, söylenecek gönlü genişleri de bilmek lazım.
+
+yolculuğun başı incitmemektir, sonu incinmemek.
+`
             }
         };
         
