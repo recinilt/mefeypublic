@@ -348,12 +348,9 @@
     <!-- Canvas is dynamic now, defined in JS -->
     <canvas id="exportCanvas" style="display:none;"></canvas>
     
-    <script src="gemini.js"></script>
-    <script src="suno2video.js"></script>
     <script>
-        //gemini.js'ten alınan API anahtarı:
-        //const apiKey = ""; 
-        //art_styles, suno2video.js'ten alınan diğer yardımcı işlevler ve sabitler de dahil edilmiştir.
+        //gemini.je'ten alınan API anahtarı:
+        const apiKey = ""; 
 
         // Aspect Ratio Definitions
         const ASPECT_RATIOS = {
@@ -363,7 +360,16 @@
             "4:3": { width: 1024, height: 768, label: "4:3", apiRatio: "4:3" }
         };
 
-        
+        const ART_STYLES = [
+            { id: 'cinematic', name: 'Cinematic', prompt: 'Cinematic shot, 8k resolution, photorealistic, dramatic lighting, depth of field, movie scene' },
+            { id: 'anime', name: 'Anime', prompt: 'Anime style, Studio Ghibli, vibrant colors, detailed background, 2D animation style' },
+            { id: 'cyberpunk', name: 'Cyberpunk', prompt: 'Cyberpunk city, neon lights, futuristic, high tech, rain, night time, blade runner style' },
+            { id: 'oil', name: 'Oil Painting', prompt: 'Oil painting style, textured brushstrokes, artistic, van gogh style, masterpiece' },
+            { id: 'watercolor', name: 'Watercolor', prompt: 'Watercolor painting, soft colors, artistic, dreamy, paper texture' },
+            { id: 'fantasy', name: 'Dark Fantasy', prompt: 'Dark fantasy, lord of the rings style, magical, mystical, detailed, epic' },
+            { id: 'scifi', name: 'Sci-Fi', prompt: 'Science fiction, space station, futuristic, alien planet, high detail, star wars style' },
+            { id: 'bw', name: 'Noir', prompt: 'Black and white photography, film noir, high contrast, dramatic shadows, classic movie' }
+        ];
 
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 

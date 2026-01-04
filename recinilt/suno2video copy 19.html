@@ -21,25 +21,13 @@
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .video-canvas-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
+        .video-canvas {
+            aspect-ratio: 16 / 9;
             background: #000;
+            position: relative;
+            overflow: hidden;
             border-radius: 2rem;
             box-shadow: 0 0 100px -20px rgba(59, 130, 246, 0.4);
-            overflow: hidden;
-            position: relative;
-        }
-
-        .video-canvas {
-            /* Default 16/9, changed via JS */
-            aspect-ratio: 16 / 9;
-            width: 100%;
-            max-height: 70vh; /* Prevent excessive height on mobile for 9:16 */
-            background: #000;
-            position: relative;
-            overflow: hidden;
         }
 
         .slide-item {
@@ -74,7 +62,7 @@
         @keyframes floating { 0% { transform: scale(1.1) translateY(0); } 50% { transform: scale(1.1) translateY(-2%); } 100% { transform: scale(1.1) translateY(0); } }
         @keyframes pulse { 0% { transform: scale(1.05); } 50% { transform: scale(1.15); } 100% { transform: scale(1.05); } }
 
-        .style-btn, .ratio-btn {
+        .style-btn {
             cursor: pointer;
             transition: all 0.2s ease;
             border: 1px solid rgba(255,255,255,0.05);
@@ -84,7 +72,7 @@
             text-align: center;
         }
 
-        .style-btn.selected, .ratio-btn.selected {
+        .style-btn.selected {
             border-color: #3b82f6;
             background: rgba(59, 130, 246, 0.2);
         }
@@ -215,22 +203,15 @@
                     </div>
                 </div>
 
-                <!-- Aspect Ratio Selector -->
                 <div class="glass p-5 rounded-[2rem] space-y-4">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">02. Video Formatı</label>
-                    <div id="ratioGrid" class="grid grid-cols-4 gap-2">
-                        <!-- Filled by JS -->
-                    </div>
-                </div>
-
-                <div class="glass p-5 rounded-[2rem] space-y-4">
-                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">03. Üretim Modu & Stil</label>
-                    <div class="mode-toggle mb-3">
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">02. Üretim Modu</label>
+                    <div class="mode-toggle">
                         <button id="modeImage" class="mode-btn active">RESİM</button>
                         <button id="modeVideo" class="mode-btn">VİDEO (FX)</button>
                         <button id="modeVideoAI" class="mode-btn">VİDEO (AI)</button>
                     </div>
-                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll mb-2"></div>
+                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">03. Sanat Stili</label>
+                    <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll"></div>
                     <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Ruh Hali: Melankolik, Görkemli..." />
                 </div>
 
@@ -253,22 +234,18 @@
             </div>
 
             <div class="lg:col-span-8 space-y-6">
-                <!-- Video Area Container -->
-                <div class="video-canvas-container group" id="videoContainer">
-                    <div class="video-canvas" id="videoArea">
-                        <div id="imageLayer" class="absolute inset-0">
-                            <div class="h-full flex flex-col items-center justify-center text-slate-700">
-                                <p class="text-sm font-semibold italic text-center px-10">AI Video Studio Pro Hazır. Tüm oranlar MP4 kaydında korunacaktır.</p>
-                            </div>
-                        </div>
-                        
-                        <div class="subtitle-box absolute bottom-0 left-0 right-0 p-12 text-center pointer-events-none">
-                            <h2 id="subtitleText" class="text-xl md:text-3xl font-black text-white opacity-0 transition-all duration-500"></h2>
+                <div class="video-canvas group" id="videoArea">
+                    <div id="imageLayer" class="absolute inset-0">
+                        <div class="h-full flex flex-col items-center justify-center text-slate-700">
+                            <p class="text-sm font-semibold italic text-center px-10">AI Video Studio Pro Hazır. Tüm oranlar MP4 kaydında korunacaktır.</p>
                         </div>
                     </div>
                     
-                    <!-- Controls Overlay (Absolute to container) -->
-                    <div class="absolute bottom-6 left-6 right-6 flex items-center gap-5 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60 backdrop-blur-xl p-4 rounded-3xl border border-white/5 shadow-2xl z-20">
+                    <div class="subtitle-box absolute bottom-0 left-0 right-0 p-12 text-center pointer-events-none">
+                        <h2 id="subtitleText" class="text-xl md:text-3xl font-black text-white opacity-0 transition-all duration-500"></h2>
+                    </div>
+
+                    <div class="absolute bottom-6 left-6 right-6 flex items-center gap-5 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60 backdrop-blur-xl p-4 rounded-3xl border border-white/5 shadow-2xl">
                         <button id="playBtn" disabled class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all">
                             <svg id="playIcon" class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                         </button>
@@ -308,7 +285,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Preview Area -->
                 <div class="space-y-2">
-                    <div id="modalPreviewBox" class="bg-black rounded-xl overflow-hidden border border-white/10 flex items-center justify-center relative shadow-2xl" style="aspect-ratio: 16/9;">
+                    <div id="modalPreviewBox" class="aspect-video bg-black rounded-xl overflow-hidden border border-white/10 flex items-center justify-center relative shadow-2xl">
                         <!-- Image/Video will be injected here -->
                     </div>
                     <div id="modalDimensions" class="text-center text-[10px] font-mono text-slate-500 tracking-widest uppercase">
@@ -345,31 +322,19 @@
         </div>
     </div>
 
-    <!-- Canvas is dynamic now, defined in JS -->
-    <canvas id="exportCanvas" style="display:none;"></canvas>
-    
+    <canvas id="exportCanvas" width="1280" height="720"></canvas>
     <script src="gemini.js"></script>
     <script src="suno2video.js"></script>
     <script>
-        //gemini.js'ten alınan API anahtarı:
+        //gemini.je'ten alınan API anahtarı:
         //const apiKey = ""; 
-        //art_styles, suno2video.js'ten alınan diğer yardımcı işlevler ve sabitler de dahil edilmiştir.
 
-        // Aspect Ratio Definitions
-        const ASPECT_RATIOS = {
-            "16:9": { width: 1280, height: 720, label: "16:9", apiRatio: "16:9" },
-            "9:16": { width: 720, height: 1280, label: "9:16", apiRatio: "9:16" },
-            "1:1": { width: 1080, height: 1080, label: "1:1", apiRatio: "1:1" },
-            "4:3": { width: 1024, height: 768, label: "4:3", apiRatio: "4:3" }
-        };
-
+        // Missing Constant: Art Styles is in suno2viddeo.js
         
-
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
         let scenes = [];
         let selectedStyle = ART_STYLES[0];
-        let currentRatio = ASPECT_RATIOS["16:9"];
         let productionMode = "image"; 
         let audioDuration = 0;
         let isPlaying = false;
@@ -384,7 +349,6 @@
             refPreview: document.getElementById('refPreview'),
             lyrics: document.getElementById('lyricsInput'),
             styles: document.getElementById('styleGrid'),
-            ratioGrid: document.getElementById('ratioGrid'),
             mood: document.getElementById('moodInput'),
             grid: document.getElementById('scenesGrid'),
             play: document.getElementById('playBtn'),
@@ -399,7 +363,6 @@
             scCount: document.getElementById('scCount'),
             renderStatus: document.getElementById('renderStatus'),
             exportCanvas: document.getElementById('exportCanvas'),
-            videoArea: document.getElementById('videoArea'),
             modeImage: document.getElementById('modeImage'),
             modeVideo: document.getElementById('modeVideo'),
             modeVideoAI: document.getElementById('modeVideoAI'),
@@ -417,8 +380,7 @@
             modalRegenImageOnlyBtn: document.getElementById('modalRegenImageOnlyBtn')
         };
 
-        function initUI() {
-            // Init Styles
+        function initStyles() {
             el.styles.innerHTML = '';
             ART_STYLES.forEach(s => {
                 const b = document.createElement('div');
@@ -431,30 +393,6 @@
                 };
                 el.styles.appendChild(b);
             });
-
-            // Init Ratios
-            el.ratioGrid.innerHTML = '';
-            Object.keys(ASPECT_RATIOS).forEach(key => {
-                const r = ASPECT_RATIOS[key];
-                const b = document.createElement('div');
-                b.className = `ratio-btn p-2 rounded-xl ${r.apiRatio === currentRatio.apiRatio ? 'selected' : ''}`;
-                b.innerText = r.label;
-                b.onclick = () => {
-                    document.querySelectorAll('.ratio-btn').forEach(x => x.classList.remove('selected'));
-                    b.classList.add('selected');
-                    setAspectRatio(key);
-                };
-                el.ratioGrid.appendChild(b);
-            });
-        }
-
-        function setAspectRatio(key) {
-            currentRatio = ASPECT_RATIOS[key];
-            // Update Preview CSS
-            el.videoArea.style.aspectRatio = key.replace(':', '/');
-            // Update Modal Preview CSS
-            el.modalPreview.style.aspectRatio = key.replace(':', '/');
-            log(`Video Formatı Değişti: ${currentRatio.label} (${currentRatio.width}x${currentRatio.height})`);
         }
 
         function setMode(mode) {
@@ -546,7 +484,7 @@
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        // --- PARSING & PLANNING LOGIC ---
+        // --- UPDATED PARSING & PLANNING LOGIC ---
         document.getElementById('planBtn').onclick = async () => {
             let txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
@@ -566,7 +504,7 @@
 
             log("Senaryo kurgulanıyor...");
             
-            // DEEP REFERENCE IMAGE ANALYSIS
+            // --- NEW: DEEP REFERENCE IMAGE ANALYSIS ---
             let characterDesc = "";
             if (referenceImageBase64) {
                  log("Referans resim DERİNLEMESİNE analiz ediliyor...");
@@ -585,8 +523,9 @@
                      log("Referans resim analizi başarısız oldu, atlanıyor.", "err");
                  }
             }
+            // ---------------------------------------------
 
-            // EXTRACT MASTER PROMPT
+            // 1. EXTRACT MASTER PROMPT {}
             let masterPrompt = "";
             const masterMatch = txt.match(/\{([\s\S]*?)\}/);
             if (masterMatch) {
@@ -595,12 +534,13 @@
                 log(`Master Prompt Algılandı: ${masterPrompt}`);
             }
 
-            // PARSE LINES (Hybrid: Custom + SRT)
+            // 2. PARSE LINES (Hybrid: Custom + SRT)
             const parsed = [];
             const lines = txt.split('\n').map(l => l.trim());
             let i = 0;
 
             function parseSRTTime(timeStr) {
+                // Format: 00:00:03,320
                 const parts = timeStr.split(':');
                 const secondsParts = parts[2].split(',');
                 return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(secondsParts[0]) + parseInt(secondsParts[1]) / 1000;
@@ -608,65 +548,113 @@
 
             while (i < lines.length) {
                 const line = lines[i];
+
+                // SKIP EMPTY LINES
                 if (!line) { i++; continue; }
 
+                // DETECT CUSTOM FORMAT: "Text[0-5]"
                 const customMatch = line.match(/(.*?)\[(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\]/);
                 if (customMatch && !line.includes('-->')) {
                     const rawText = customMatch[1].trim();
                     const start = parseFloat(customMatch[2]);
                     const end = parseFloat(customMatch[3]);
+                    
                     let caption = rawText;
                     let visualContext = "";
                     let showSubtitle = true;
+
                     const visualMatch = rawText.match(/\((.*?)\)/);
                     if (visualMatch) {
                         visualContext = visualMatch[1].trim();
                         caption = rawText.replace(visualMatch[0], "").trim();
-                    } else { visualContext = caption; }
-                    if (rawText.startsWith('(') && rawText.endsWith(')')) { showSubtitle = false; caption = ""; }
-                    parsed.push({ id: parsed.length, caption: caption, visualContext: visualContext, start: start, end: end, showSubtitle: showSubtitle && caption.length > 0 });
+                    } else {
+                        visualContext = caption;
+                    }
+
+                    if (rawText.startsWith('(') && rawText.endsWith(')')) {
+                        showSubtitle = false;
+                        caption = "";
+                    }
+
+                    parsed.push({
+                        id: parsed.length,
+                        caption: caption,
+                        visualContext: visualContext,
+                        start: start,
+                        end: end,
+                        showSubtitle: showSubtitle && caption.length > 0
+                    });
                     i++;
                     continue;
                 }
 
+                // DETECT SRT TIMELINE: "00:00:03,320 --> 00:00:05,400"
                 const srtMatch = line.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
                 if (srtMatch) {
                     const start = parseSRTTime(srtMatch[1]);
                     let end = parseSRTTime(srtMatch[2]);
+                    
                     let textLines = [];
                     i++; 
+                    
                     while (i < lines.length) {
                         const nextLine = lines[i];
                         if (nextLine === "") { break; }
                         if (/^\d+$/.test(nextLine) && (i + 1 < lines.length && lines[i+1].includes('-->'))) { break; }
                         if (nextLine.includes('-->')) { break; }
                         if (/\[\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\]/.test(nextLine)) { break; }
+                        
                         textLines.push(nextLine);
                         i++;
                     }
+
                     const rawText = textLines.join(' ').trim();
                     let caption = rawText;
                     let visualContext = "";
                     let showSubtitle = true;
+
                     const visualMatch = rawText.match(/\((.*?)\)/);
                     if (visualMatch) {
                         visualContext = visualMatch[1].trim();
                         caption = rawText.replace(visualMatch[0], "").trim();
-                    } else { visualContext = rawText || "Cinematic scene"; }
-                    if (rawText.startsWith('(') && rawText.endsWith(')')) { showSubtitle = false; caption = ""; }
+                    } else {
+                        visualContext = rawText || "Cinematic scene"; 
+                    }
+                    
+                    if (rawText.startsWith('(') && rawText.endsWith(')')) {
+                        showSubtitle = false;
+                        caption = "";
+                    }
+                    
                     if (!rawText) showSubtitle = false;
-                    parsed.push({ id: parsed.length, caption: caption, visualContext: visualContext, start: start, end: end, showSubtitle: showSubtitle && caption.length > 0 });
+
+                    parsed.push({
+                        id: parsed.length,
+                        caption: caption,
+                        visualContext: visualContext,
+                        start: start,
+                        end: end,
+                        showSubtitle: showSubtitle && caption.length > 0
+                    });
                     continue; 
                 }
-                if (/^\d+$/.test(line)) { i++; continue; }
+
+                if (/^\d+$/.test(line)) {
+                    i++;
+                    continue;
+                }
+
                 i++;
             }
 
-            // AUTO-EXTEND DURATION (GAP FILLING)
+            // 3. AUTO-EXTEND DURATION (GAP FILLING)
             parsed.sort((a, b) => a.start - b.start);
+
             for (let k = 0; k < parsed.length - 1; k++) {
                 const current = parsed[k];
                 const next = parsed[k+1];
+                
+                // If current ends before next starts, extend it to close the gap
                 if (current.end < next.start) {
                     log(`Sahne ${k+1} süresi uzatıldı: ${fmt(current.end)} -> ${fmt(next.start)} (Gap Filling)`, 'info');
                     current.end = next.start;
@@ -674,6 +662,7 @@
             }
 
             try {
+                // Modified System Prompt to include Master Prompt logic and Character Description
                 const systemPrompt = `Sen bir klip yönetmenisin. Her satır için 5-6 CÜMLELİK edebi bir PARAGRAF PROMPT oluştur.
 KURALLAR:
 1. KAMERA AÇISI: ASLA portre veya yakın çekim (close-up) yazma. HER SAHNE için "Extreme wide angle shot, establishing shot, camera far away, full body visible" ifadelerini kullan.
@@ -685,6 +674,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
 
 ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
 
+                // Prepare input for Gemini: ID + Visual Instruction
                 const inputList = parsed.map(p => `ID ${p.id}: Visual Instruction: "${p.visualContext}"`).join(' | ');
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
@@ -696,6 +686,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 const jsonStr = data.candidates[0].content.parts[0].text;
                 const result = JSON.parse(jsonStr);
 
+                // Merge AI prompts with parsed data
                 scenes = parsed.map(p => ({
                     ...p,
                     prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}, ${characterDesc}`,
@@ -719,6 +710,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 const card = document.createElement('div');
                 card.className = 'scene-card glass rounded-2xl overflow-hidden relative group';
                 
+                // Content
                 let mediaHtml = scene.image 
                     ? `<img src="${scene.image}" class="w-full h-32 object-cover">`
                     : `<div class="w-full h-32 bg-slate-900 flex items-center justify-center text-slate-600 text-[10px] font-black uppercase tracking-widest">Sahne ${idx+1}</div>`;
@@ -745,8 +737,11 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             el.modal.classList.add('open');
             el.modalPrompt.value = scene.prompt;
             
-            el.modalDimensions.innerText = `${currentRatio.label} • ${currentRatio.width}x${currentRatio.height}px • ${selectedStyle.name}`;
+            // Set dimensions
+            const w = 1280, h = 720; // 16:9 standard
+            el.modalDimensions.innerText = `16:9 • ${w}x${h}px • ${selectedStyle.name}`;
             
+            // Show current image if exists
             if (scene.image) {
                 if (scene.image.startsWith('data:video')) {
                      el.modalPreview.innerHTML = `<video src="${scene.image}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>`;
@@ -759,8 +754,10 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 el.modalRegenImageOnlyBtn.classList.add('hidden');
             }
 
+            // Button handlers
             el.modalRunPromptBtn.onclick = () => generateSceneImage(idx, el.modalPrompt.value);
             el.modalRegenBtn.onclick = async () => {
+                // Re-dream prompt with AI
                 el.modalPreview.innerHTML = `<div class="loader-ring"></div>`;
                 try {
                      const promptRes = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
@@ -812,23 +809,28 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
         async function generateSceneImage(idx, promptText, isImageToImage = false) {
             const box = document.getElementById('modalPreviewBox');
             if(currentModalSceneId === idx) box.innerHTML = `<div class="loader-ring"></div>`;
-            log(`Sahne ${idx+1} üretiliyor (${currentRatio.label})...`);
+            log(`Sahne ${idx+1} üretiliyor...`);
 
             try {
                 let imageUrl;
                 
-                // --- FORCE REFERENCE IMAGE USAGE ---
+                // --- MAJOR UPDATE: FORCE REFERENCE IMAGE USAGE ---
+                // If a reference image exists, we ignore the mode and force multimodal generation
+                // to preserve the EXACT character identity using Gemini 2.5 Vision.
                 if (referenceImageBase64) {
+                     // Using Gemini 2.5 Flash for Image Generation (via Multimodal Prompt)
+                     // Note: We use the 'gemini-2.5-flash-image-preview' model for this specific capability
                      const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
                         contents: [{
                             parts: [
-                                { text: `Cinematic, Extreme Wide Angle, Full Body Shot. Aspect Ratio ${currentRatio.apiRatio}. ${promptText}. The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image.` },
+                                { text: "Cinematic, Extreme Wide Angle, Full Body Shot. " + promptText + " . The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image." },
                                 { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
                             ]
                         }],
                         generationConfig: { responseModalities: ['IMAGE'] }
                     });
                     
+                    // Extract base64 from Gemini response
                     const base64 = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
                     if (base64) {
                         imageUrl = `data:image/jpeg;base64,${base64}`;
@@ -837,17 +839,19 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                     }
 
                 } else {
-                    // --- FALLBACK TO STANDARD IMAGEN ---
+                    // --- FALLBACK TO STANDARD IMAGEN (NO REFERENCE IMAGE) ---
                     if (productionMode === 'videoAI') {
+                        // Video Generation Simulation (High Quality Image + FX)
                         const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
                             instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
-                            parameters: { sampleCount: 1, aspectRatio: currentRatio.apiRatio }
+                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
                         });
                          imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
                     } else if (productionMode === 'video' || productionMode === 'image') {
+                        // Standard Image Gen
                         const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
                             instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
-                            parameters: { sampleCount: 1, aspectRatio: currentRatio.apiRatio }
+                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
                         });
                         imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
                     }
@@ -856,6 +860,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 scenes[idx].image = imageUrl;
                 scenes[idx].prompt = promptText;
                 
+                // Assign random FX if not set
                 if (!scenes[idx].fx) scenes[idx].fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
 
                 renderSceneGrid();
@@ -891,14 +896,20 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             const currentScene = scenes.find(s => now >= s.start && now < s.end);
             
             if (currentScene) {
+                // Background Layer (Image)
                 if (activeIdx !== currentScene.id) {
                     activeIdx = currentScene.id;
+                    
+                    // Clear previous
                     el.layers.innerHTML = '';
+                    
+                    // Create new Slide
                     const slide = document.createElement('img');
                     slide.src = currentScene.image;
                     slide.className = `slide-item active ${currentScene.fx}`;
                     el.layers.appendChild(slide);
                     
+                    // Caption
                     if (currentScene.showSubtitle) {
                         el.subtitle.innerText = currentScene.caption;
                         el.subtitle.style.opacity = 1;
@@ -906,6 +917,9 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                         el.subtitle.style.opacity = 0;
                     }
                 }
+            } else {
+                // No scene matched (gap?) - Should not happen with gap filling logic
+                // But if it does, keep last frame or show black
             }
 
             if (!el.audio.paused && !el.audio.ended) {
@@ -916,45 +930,17 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             }
         }
 
-        // --- EXPORT LOGIC (Dynamic Resolution + Preloading) ---
+        // --- EXPORT LOGIC (Client-Side Recording) ---
         el.exportBtn.onclick = async () => {
-            const w = currentRatio.width;
-            const h = currentRatio.height;
-
-            el.renderStatus.innerText = `Görseller Hazırlanıyor (${w}x${h})...`;
-            
-            // Set canvas size based on selected ratio
-            el.exportCanvas.width = w;
-            el.exportCanvas.height = h;
+            el.renderStatus.innerText = "Render Başlıyor...";
             el.exportCanvas.style.display = 'block';
-            
             el.audio.pause();
             el.audio.currentTime = 0;
             
-            // 1. PRELOAD IMAGES
-            const imageCache = {};
-            for (const s of scenes) {
-                if (s.image) {
-                    try {
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        img.src = s.image;
-                        await new Promise((resolve, reject) => {
-                            img.onload = resolve;
-                            img.onerror = resolve; 
-                        });
-                        imageCache[s.id] = img;
-                    } catch (e) {
-                        console.error("Image load error", e);
-                    }
-                }
-            }
-            log("Görseller önbelleğe alındı, kayıt başlıyor...", "info");
-            el.renderStatus.innerText = "Render Yapılıyor...";
-
             const ctx = el.exportCanvas.getContext('2d');
-            const stream = el.exportCanvas.captureStream(30); 
+            const stream = el.exportCanvas.captureStream(30);
             
+            // Add Audio Track to Stream
             const audioContext = new AudioContext();
             const source = audioContext.createMediaElementSource(el.audio);
             const dest = audioContext.createMediaStreamDestination();
@@ -967,102 +953,72 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
             const chunks = [];
             
-            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-            
+            recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
                 const blob = new Blob(chunks, { type: 'video/webm' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `video_${currentRatio.label.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.webm`;
+                a.download = `music_video_${Date.now()}.webm`;
                 a.click();
                 el.renderStatus.innerText = "Tamamlandı!";
                 el.exportCanvas.style.display = 'none';
                 log("Video indirildi.", "success");
-                
-                source.disconnect();
-                audioContext.close();
             };
             
             recorder.start();
             el.audio.play();
 
-            // Dynamic Image Drawing
-            function drawCoverImage(ctx, img, x, y, width, height) {
-                const imgRatio = img.width / img.height;
-                const winRatio = width / height;
-                let drawW, drawH, drawX, drawY;
+            // Function to load image for canvas
+            const loadImage = (src) => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
 
-                if (imgRatio > winRatio) {
-                    drawH = height;
-                    drawW = height * imgRatio;
-                    drawX = x + (width - drawW) / 2;
-                    drawY = y;
-                } else {
-                    drawW = width;
-                    drawH = width / imgRatio;
-                    drawX = x;
-                    drawY = y + (height - drawH) / 2;
-                }
-                ctx.drawImage(img, drawX, drawY, drawW, drawH);
-            }
-
-            const loop = () => {
+            const loop = async () => {
                 const now = el.audio.currentTime;
-                
-                // Clear Canvas
+                // Draw logic for canvas similar to DOM
                 ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, w, h);
+                ctx.fillRect(0, 0, 1280, 720);
 
                 const scene = scenes.find(s => now >= s.start && now < s.end);
-                
-                if (scene) {
-                    const item = imageCache[scene.id];
-                    if (item) {
-                        // Dynamic Ken Burns Zoom
-                        const duration = scene.end - scene.start;
-                        const elapsed = Math.max(0, now - scene.start);
-                        const progress = Math.min(1, elapsed / duration);
-                        const scale = 1 + (progress * 0.15); 
-                        
-                        ctx.save();
-                        // Dynamic Center Translation
-                        ctx.translate(w / 2, h / 2);
-                        ctx.scale(scale, scale);
-                        ctx.translate(-w / 2, -h / 2);
-                        
-                        drawCoverImage(ctx, item, 0, 0, w, h);
-                        ctx.restore();
-                        
-                        // Dynamic Subtitle Positioning
-                        if (scene.showSubtitle) {
-                            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                            ctx.fillRect(0, h - 120, w, 120); // Always at bottom
-                            
-                            ctx.fillStyle = '#ffffff';
-                            ctx.font = 'bold 36px Outfit, Arial, sans-serif'; 
-                            ctx.textAlign = 'center';
-                            ctx.shadowColor = "black";
-                            ctx.shadowBlur = 7;
-                            ctx.fillText(scene.caption, w / 2, h - 50);
-                        }
+                if (scene && scene.image) {
+                    // We need to simulate the CSS animation in Canvas (Simplified: Zoom In)
+                    // For full fidelity, we'd need complex math. Here we just draw the image.
+                    const img = await loadImage(scene.image);
+                    
+                    // Simple Zoom Effect calculation based on time in scene
+                    const duration = scene.end - scene.start;
+                    const elapsed = now - scene.start;
+                    const progress = elapsed / duration;
+                    const scale = 1 + (progress * 0.1); // 10% zoom
+                    
+                    const w = 1280 * scale;
+                    const h = 720 * scale;
+                    const x = (1280 - w) / 2;
+                    const y = (720 - h) / 2;
+                    
+                    ctx.drawImage(img, x, y, w, h);
+                    
+                    // Subtitles
+                    if (scene.showSubtitle) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                        ctx.fillRect(0, 600, 1280, 120);
+                        ctx.fillStyle = 'white';
+                        ctx.font = 'bold 40px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(scene.caption, 640, 670);
                     }
                 }
                 
-                if (!el.audio.paused && !el.audio.ended && recorder.state === "recording") {
-                    requestAnimationFrame(loop);
-                } else {
-                    if (recorder.state === "recording") recorder.stop();
-                    el.audio.pause();
-                }
+                if (!el.audio.paused && !el.audio.ended) requestAnimationFrame(loop);
+                else recorder.stop();
             };
             loop();
         };
 
         el.reset.onclick = () => { location.reload(); };
 
+        // Ensure initStyles runs after load
         window.addEventListener('load', () => {
-            initUI();
+            initStyles();
             log("Sistem hazır.", "success");
         });
     </script>
