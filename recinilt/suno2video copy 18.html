@@ -326,10 +326,10 @@
     <script src="gemini.js"></script>
     <script src="suno2video.js"></script>
     <script>
-        //gemini.je'ten alınan API anahtarı:
+        //gemini.js'ten alınan API anahtarı:
         //const apiKey = ""; 
 
-        // Missing Constant: Art Styles is in suno2viddeo.js
+        // Missing Constant: Art Styles is in suno2video.js
         
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
@@ -503,27 +503,6 @@
             }
 
             log("Senaryo kurgulanıyor...");
-            
-            // --- NEW: DEEP REFERENCE IMAGE ANALYSIS ---
-            let characterDesc = "";
-            if (referenceImageBase64) {
-                 log("Referans resim DERİNLEMESİNE analiz ediliyor...");
-                 try {
-                     const descRes = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                         contents: [{
-                             parts: [
-                                 { text: "Analyze this image and describe ONLY the character's PHYSICAL ATTRIBUTES (face, eyes, hair, age, ethnicity, body shape, beard/glasses, scars). DO NOT DESCRIBE CLOTHING. I want to change their clothes later. I need a pixel-perfect textual description of their FACE and BODY to recreate this exact person." },
-                                 { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                             ]
-                         }]
-                     });
-                     characterDesc = descRes.candidates[0].content.parts[0].text;
-                     log(`Karakter Analizi Tamam: ${characterDesc.substring(0, 40)}...`);
-                 } catch (e) {
-                     log("Referans resim analizi başarısız oldu, atlanıyor.", "err");
-                 }
-            }
-            // ---------------------------------------------
 
             // 1. EXTRACT MASTER PROMPT {}
             let masterPrompt = "";
@@ -662,15 +641,14 @@
             }
 
             try {
-                // Modified System Prompt to include Master Prompt logic and Character Description
+                // Modified System Prompt to include Master Prompt logic
                 const systemPrompt = `Sen bir klip yönetmenisin. Her satır için 5-6 CÜMLELİK edebi bir PARAGRAF PROMPT oluştur.
 KURALLAR:
-1. KAMERA AÇISI: ASLA portre veya yakın çekim (close-up) yazma. HER SAHNE için "Extreme wide angle shot, establishing shot, camera far away, full body visible" ifadelerini kullan.
+1. GENİŞ AÇI: ASLA yakın çekim yapma. Hep "Extreme wide angle panorama" kurgula.
 2. SEMBOLİZM: Aşağıda verilen "Visual Instruction" kısmını devasa manzaralara dök.
 3. STİL: "${selectedStyle.name}" stilini işle.
 4. MOOD: "${mood || 'Epic'}" ruh halini ekle.
 ${masterPrompt ? `5. GLOBAL KURAL (MASTER PROMPT): "${masterPrompt}". Bu kuralı ve temayı HER sahneye mutlaka uygula.` : ''}
-${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${characterDesc}". Karakterin yüzünü ve vücudunu koru AMA KIYAFETİNİ SENARYOYA GÖRE DEĞİŞTİR.` : ''}
 
 ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
 
@@ -689,7 +667,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 // Merge AI prompts with parsed data
                 scenes = parsed.map(p => ({
                     ...p,
-                    prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}, ${characterDesc}`,
+                    prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}`,
                     image: null
                 }));
 
@@ -814,47 +792,22 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             try {
                 let imageUrl;
                 
-                // --- MAJOR UPDATE: FORCE REFERENCE IMAGE USAGE ---
-                // If a reference image exists, we ignore the mode and force multimodal generation
-                // to preserve the EXACT character identity using Gemini 2.5 Vision.
-                if (referenceImageBase64) {
-                     // Using Gemini 2.5 Flash for Image Generation (via Multimodal Prompt)
-                     // Note: We use the 'gemini-2.5-flash-image-preview' model for this specific capability
-                     const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
-                        contents: [{
-                            parts: [
-                                { text: "Cinematic, Extreme Wide Angle, Full Body Shot. " + promptText + " . The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image." },
-                                { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                            ]
-                        }],
-                        generationConfig: { responseModalities: ['IMAGE'] }
+                if (productionMode === 'videoAI') {
+                    // Video Generation (Simulated with advanced zooming for now as real video gen is heavy)
+                    // In a real app, this would call a video generation endpoint
+                    // For this demo, we generate a high-quality image and apply aggressive motion
+                    const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+                        instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
+                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
                     });
-                    
-                    // Extract base64 from Gemini response
-                    const base64 = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                    if (base64) {
-                        imageUrl = `data:image/jpeg;base64,${base64}`;
-                    } else {
-                        throw new Error("No image generated from reference.");
-                    }
-
-                } else {
-                    // --- FALLBACK TO STANDARD IMAGEN (NO REFERENCE IMAGE) ---
-                    if (productionMode === 'videoAI') {
-                        // Video Generation Simulation (High Quality Image + FX)
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                         imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    } else if (productionMode === 'video' || productionMode === 'image') {
-                        // Standard Image Gen
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                        imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    }
+                     imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
+                } else if (productionMode === 'video' || productionMode === 'image') {
+                    // Standard Image Gen
+                    const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+                        instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
+                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
+                    });
+                    imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
                 }
 
                 scenes[idx].image = imageUrl;

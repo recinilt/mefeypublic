@@ -218,9 +218,8 @@
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">04. Sözler & Zamanlama</label>
                     <textarea id="lyricsInput" rows="5" class="w-full bg-slate-950/50 border border-slate-800 rounded-2xl p-3 text-xs font-mono outline-none text-blue-100" placeholder="{Global Kural: Okyanus}
-1
-00:00:00,000 --> 00:00:05,000
-Örnek (Görsel İçerik)"></textarea>
+Metin(Gizli Görsel)[0-14]
+(Sadece Görsel)[14-20]"></textarea>
                     
                     <div class="flex gap-2">
                         <button id="planBtn" class="flex-1 bg-white text-slate-950 font-black py-3 rounded-xl hover:bg-blue-50 transition-all uppercase text-[10px]">Senaryoyu Yaz</button>
@@ -328,9 +327,15 @@
     <script>
         //gemini.je'ten alınan API anahtarı:
         //const apiKey = ""; 
+        /*
+        //suno2video.js dosyasından alınan değişken örneği:
+        const ART_STYLES = [
+            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
+            { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
+            { id: "sticker", name: "Çıkartma Sanatı", prompt: "Die-cut sticker art, thick white border, vibrant colors, clean pop aesthetic, vector look." }, ...
+        ];
+        */
 
-        // Missing Constant: Art Styles is in suno2viddeo.js
-        
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
         let scenes = [];
@@ -454,7 +459,7 @@
             el.audio.onloadedmetadata = checkAndSetDuration;
             el.audio.oncanplaythrough = checkAndSetDuration;
             el.audio.ondurationchange = checkAndSetDuration;
-
+            
             const url = URL.createObjectURL(f);
             el.audio.src = url;
             el.audio.load();
@@ -470,32 +475,32 @@
             const file = e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = (event) => {
-                referenceImageBase64 = event.target.result.split(',')[1];
-                el.refPreview.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover rounded-lg">`;
+            reader.onload = (event) => { 
+                referenceImageBase64 = event.target.result.split(',')[1]; 
+                el.refPreview.innerHTML = `<img src="${event.target.result}" class="w-full h-full object-cover rounded-lg">`; 
             };
             reader.readAsDataURL(file);
         };
 
-        function fmt(s) {
+        function fmt(s) { 
             if(!s || isNaN(s)) return "00:00";
-            const m = Math.floor(s/60);
-            const sec = Math.floor(s%60);
-            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+            const m = Math.floor(s/60); 
+            const sec = Math.floor(s%60); 
+            return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; 
         }
 
         // --- UPDATED PARSING & PLANNING LOGIC ---
         document.getElementById('planBtn').onclick = async () => {
             let txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
-
+            
             if (el.audioInput.files.length === 0) return log("Lütfen bir ses dosyası (MP3/WAV) seçin!", "err");
             if (!txt) return log("Lütfen şarkı sözlerini ve zamanlamaları girin!", "err");
-            
+
             if (!audioDuration || audioDuration === 0) {
                 if (el.audio.duration && !isNaN(el.audio.duration) && el.audio.duration !== Infinity && el.audio.duration > 0) {
-                     audioDuration = el.audio.duration;
-                     el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
+                    audioDuration = el.audio.duration;
+                    el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
                 } else {
                     log("Bilgi: Ses süresi mobilde 'Oynat'a basınca güncellenecek. İşlem devam ediyor...", "info");
                     audioDuration = 200;
@@ -504,512 +509,477 @@
 
             log("Senaryo kurgulanıyor...");
             
-            // --- NEW: DEEP REFERENCE IMAGE ANALYSIS ---
-            let characterDesc = "";
-            if (referenceImageBase64) {
-                 log("Referans resim DERİNLEMESİNE analiz ediliyor...");
-                 try {
-                     const descRes = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                         contents: [{
-                             parts: [
-                                 { text: "Analyze this image and describe ONLY the character's PHYSICAL ATTRIBUTES (face, eyes, hair, age, ethnicity, body shape, beard/glasses, scars). DO NOT DESCRIBE CLOTHING. I want to change their clothes later. I need a pixel-perfect textual description of their FACE and BODY to recreate this exact person." },
-                                 { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                             ]
-                         }]
-                     });
-                     characterDesc = descRes.candidates[0].content.parts[0].text;
-                     log(`Karakter Analizi Tamam: ${characterDesc.substring(0, 40)}...`);
-                 } catch (e) {
-                     log("Referans resim analizi başarısız oldu, atlanıyor.", "err");
-                 }
-            }
-            // ---------------------------------------------
-
             // 1. EXTRACT MASTER PROMPT {}
             let masterPrompt = "";
             const masterMatch = txt.match(/\{([\s\S]*?)\}/);
             if (masterMatch) {
                 masterPrompt = masterMatch[1].trim();
+                // Remove the master prompt from the text so it doesn't interfere with parsing
                 txt = txt.replace(masterMatch[0], "");
                 log(`Master Prompt Algılandı: ${masterPrompt}`);
             }
 
-            // 2. PARSE LINES (Hybrid: Custom + SRT)
+            // 2. PARSE LINES
+            const lines = txt.split('\n');
             const parsed = [];
-            const lines = txt.split('\n').map(l => l.trim());
-            let i = 0;
 
-            function parseSRTTime(timeStr) {
-                // Format: 00:00:03,320
-                const parts = timeStr.split(':');
-                const secondsParts = parts[2].split(',');
-                return parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(secondsParts[0]) + parseInt(secondsParts[1]) / 1000;
-            }
-
-            while (i < lines.length) {
-                const line = lines[i];
-
-                // SKIP EMPTY LINES
-                if (!line) { i++; continue; }
-
-                // DETECT CUSTOM FORMAT: "Text[0-5]"
-                const customMatch = line.match(/(.*?)\[(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\]/);
-                if (customMatch && !line.includes('-->')) {
-                    const rawText = customMatch[1].trim();
-                    const start = parseFloat(customMatch[2]);
-                    const end = parseFloat(customMatch[3]);
-                    
-                    let caption = rawText;
-                    let visualContext = "";
-                    let showSubtitle = true;
-
-                    const visualMatch = rawText.match(/\((.*?)\)/);
-                    if (visualMatch) {
-                        visualContext = visualMatch[1].trim();
-                        caption = rawText.replace(visualMatch[0], "").trim();
-                    } else {
-                        visualContext = caption;
-                    }
-
-                    if (rawText.startsWith('(') && rawText.endsWith(')')) {
-                        showSubtitle = false;
-                        caption = "";
-                    }
-
-                    parsed.push({
-                        id: parsed.length,
-                        caption: caption,
-                        visualContext: visualContext,
-                        start: start,
-                        end: end,
-                        showSubtitle: showSubtitle && caption.length > 0
-                    });
-                    i++;
-                    continue;
-                }
-
-                // DETECT SRT TIMELINE: "00:00:03,320 --> 00:00:05,400"
-                const srtMatch = line.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
-                if (srtMatch) {
-                    const start = parseSRTTime(srtMatch[1]);
-                    let end = parseSRTTime(srtMatch[2]);
-                    
-                    let textLines = [];
-                    i++; 
-                    
-                    while (i < lines.length) {
-                        const nextLine = lines[i];
-                        if (nextLine === "") { break; }
-                        if (/^\d+$/.test(nextLine) && (i + 1 < lines.length && lines[i+1].includes('-->'))) { break; }
-                        if (nextLine.includes('-->')) { break; }
-                        if (/\[\d+(?:\.\d+)?\s*-\s*\d+(?:\.\d+)?\]/.test(nextLine)) { break; }
-                        
-                        textLines.push(nextLine);
-                        i++;
-                    }
-
-                    const rawText = textLines.join(' ').trim();
-                    let caption = rawText;
-                    let visualContext = "";
-                    let showSubtitle = true;
-
-                    const visualMatch = rawText.match(/\((.*?)\)/);
-                    if (visualMatch) {
-                        visualContext = visualMatch[1].trim();
-                        caption = rawText.replace(visualMatch[0], "").trim();
-                    } else {
-                        visualContext = rawText || "Cinematic scene"; 
-                    }
-                    
-                    if (rawText.startsWith('(') && rawText.endsWith(')')) {
-                        showSubtitle = false;
-                        caption = "";
-                    }
-                    
-                    if (!rawText) showSubtitle = false;
-
-                    parsed.push({
-                        id: parsed.length,
-                        caption: caption,
-                        visualContext: visualContext,
-                        start: start,
-                        end: end,
-                        showSubtitle: showSubtitle && caption.length > 0
-                    });
-                    continue; 
-                }
-
-                if (/^\d+$/.test(line)) {
-                    i++;
-                    continue;
-                }
-
-                i++;
-            }
-
-            // 3. AUTO-EXTEND DURATION (GAP FILLING)
-            parsed.sort((a, b) => a.start - b.start);
-
-            for (let k = 0; k < parsed.length - 1; k++) {
-                const current = parsed[k];
-                const next = parsed[k+1];
+            lines.forEach((l, index) => {
+                // Find timestamp [start-end]
+                const timeMatch = l.match(/\[(\d+)-(\d+)\]/);
                 
-                // If current ends before next starts, extend it to close the gap
-                if (current.end < next.start) {
-                    log(`Sahne ${k+1} süresi uzatıldı: ${fmt(current.end)} -> ${fmt(next.start)} (Gap Filling)`, 'info');
-                    current.end = next.start;
+                if (timeMatch) {
+                    const rawLine = l.replace(timeMatch[0], "").trim(); // Remove timestamp part
+                    let caption = "";
+                    let visualContext = "";
+                    let showSubtitle = true;
+
+                    // Check for specific visual prompt in parenthesis ()
+                    const visualMatch = rawLine.match(/\((.*?)\)/);
+
+                    if (visualMatch) {
+                        // Priority: Content inside () is for the Visual Prompt
+                        visualContext = visualMatch[1].trim();
+                        
+                        // Subtitle is the text WITHOUT the () part
+                        caption = rawLine.replace(visualMatch[0], "").trim();
+                    } else {
+                        // No (), use full text for both
+                        visualContext = rawLine;
+                        caption = rawLine;
+                    }
+
+                    // Special Case: If the ORIGINAL text was JUST (...) e.g. "(Waves)" -> Subtitle should be hidden/empty
+                    if (rawLine.startsWith('(') && rawLine.endsWith(')')) {
+                        showSubtitle = false;
+                        caption = "";
+                    }
+
+                    // Push formatted object
+                    parsed.push({ 
+                        id: index, 
+                        caption: caption, 
+                        visualContext: visualContext, // Send this to Gemini for prompt gen
+                        start: parseFloat(timeMatch[1]), 
+                        end: parseFloat(timeMatch[2]), 
+                        showSubtitle: showSubtitle && caption.length > 0 
+                    });
                 }
-            }
+            });
 
             try {
-                // Modified System Prompt to include Master Prompt logic and Character Description
+                // Modified System Prompt to include Master Prompt logic
                 const systemPrompt = `Sen bir klip yönetmenisin. Her satır için 5-6 CÜMLELİK edebi bir PARAGRAF PROMPT oluştur.
-KURALLAR:
-1. KAMERA AÇISI: ASLA portre veya yakın çekim (close-up) yazma. HER SAHNE için "Extreme wide angle shot, establishing shot, camera far away, full body visible" ifadelerini kullan.
-2. SEMBOLİZM: Aşağıda verilen "Visual Instruction" kısmını devasa manzaralara dök.
-3. STİL: "${selectedStyle.name}" stilini işle.
-4. MOOD: "${mood || 'Epic'}" ruh halini ekle.
-${masterPrompt ? `5. GLOBAL KURAL (MASTER PROMPT): "${masterPrompt}". Bu kuralı ve temayı HER sahneye mutlaka uygula.` : ''}
-${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${characterDesc}". Karakterin yüzünü ve vücudunu koru AMA KIYAFETİNİ SENARYOYA GÖRE DEĞİŞTİR.` : ''}
-
-ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
+                KURALLAR:
+                1. GENİŞ AÇI: ASLA yakın çekim yapma. Hep "Extreme wide angle panorama" kurgula.
+                2. SEMBOLİZM: Aşağıda verilen "Visual Instruction" kısmını devasa manzaralara dök.
+                3. STİL: "${selectedStyle.name}" stilini işle.
+                4. MOOD: "${mood || 'Epic'}" ruh halini ekle.
+                ${masterPrompt ? `5. GLOBAL KURAL (MASTER PROMPT): "${masterPrompt}". Bu kuralı ve temayı HER sahneye mutlaka uygula.` : ''}
+                ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
 
                 // Prepare input for Gemini: ID + Visual Instruction
                 const inputList = parsed.map(p => `ID ${p.id}: Visual Instruction: "${p.visualContext}"`).join(' | ');
 
                 const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
                     contents: [{ parts: [{ text: "Senaryoyu oluştur." }] }],
-                    systemInstruction: { parts: [{ text: systemPrompt + "\nDATA:\n" + inputList }] },
+                    systemInstruction: { parts: [{ text: systemPrompt + "\nLİSTE: " + inputList }] },
                     generationConfig: { responseMimeType: "application/json" }
                 });
 
-                const jsonStr = data.candidates[0].content.parts[0].text;
-                const result = JSON.parse(jsonStr);
-
-                // Merge AI prompts with parsed data
-                scenes = parsed.map(p => ({
-                    ...p,
-                    prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}, ${characterDesc}`,
-                    image: null
+                const prompts = JSON.parse(data.candidates[0].content.parts[0].text);
+                
+                scenes = parsed.map(p => ({ 
+                    ...p, 
+                    v_prompt: prompts[p.id] || p.visualContext, // Use generated prompt or fallback
+                    source: null, 
+                    type: productionMode,
+                    fx: VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)]
                 }));
 
-                log(`Senaryo hazır: ${scenes.length} sahne.`);
-                renderSceneGrid();
-
-            } catch (err) {
-                log("Senaryo hatası: " + err.message, "err");
-            }
+                renderGrid();
+                el.generateAll.classList.remove('hidden');
+                log("Senaryo planlaması tamamlandı.");
+            } catch (e) { log("Planlama hatası: " + e.message, "err"); }
         };
 
-        function renderSceneGrid() {
+        function renderGrid() {
             el.grid.innerHTML = '';
-            el.scCount.innerText = scenes.length;
-            el.generateAll.classList.remove('hidden');
-            
-            scenes.forEach((scene, idx) => {
-                const card = document.createElement('div');
-                card.className = 'scene-card glass rounded-2xl overflow-hidden relative group';
+            el.scCount.innerText = `${scenes.length}`;
+            scenes.forEach((s) => {
+                const c = document.createElement('div');
+                c.className = "scene-card bg-slate-950 rounded-2xl border border-white/5 overflow-hidden";
                 
-                // Content
-                let mediaHtml = scene.image 
-                    ? `<img src="${scene.image}" class="w-full h-32 object-cover">`
-                    : `<div class="w-full h-32 bg-slate-900 flex items-center justify-center text-slate-600 text-[10px] font-black uppercase tracking-widest">Sahne ${idx+1}</div>`;
-
-                card.innerHTML = `
-                    ${mediaHtml}
-                    <div class="p-3">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9px] font-black text-blue-400">#${idx+1}</span>
-                            <span class="text-[9px] font-mono text-slate-500">${fmt(scene.start)} - ${fmt(scene.end)}</span>
-                        </div>
-                        <p class="text-[10px] text-slate-300 line-clamp-2 leading-relaxed">${scene.caption || '(Sadece Görsel)'}</p>
+                c.onclick = () => openSceneModal(s.id);
+                
+                c.innerHTML = `
+                    <div id="thumb-${s.id}" class="aspect-video bg-black flex items-center justify-center text-[8px] text-slate-700 p-2 text-center overflow-hidden">
+                        ${s.source ? (s.type === 'videoAI' ? `<video src="${s.source}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${s.source}" class="w-full h-full object-cover">`) : '🎨 Hazır'}
+                    </div>
+                    <div class="p-3 bg-black/20 text-[9px]">
+                        <div class="font-black ${s.showSubtitle ? 'text-blue-400' : 'text-purple-400'} mb-1">${s.start}-${s.end}s ${!s.showSubtitle ? '(Sözsüz)' : ''}</div>
+                        <div class="text-slate-300 truncate font-semibold">${s.caption || '<span class="italic opacity-50">Sadece Görsel</span>'}</div>
                     </div>
                 `;
-
-                card.onclick = () => openModal(idx);
-                el.grid.appendChild(card);
+                el.grid.appendChild(c);
             });
         }
 
-        async function openModal(idx) {
-            currentModalSceneId = idx;
-            const scene = scenes[idx];
+        function openSceneModal(id) {
+            const scene = scenes.find(s => s.id === id);
+            if(!scene) return;
+            
+            currentModalSceneId = id;
+            el.modalPrompt.value = scene.v_prompt || "";
             el.modal.classList.add('open');
-            el.modalPrompt.value = scene.prompt;
             
-            // Set dimensions
-            const w = 1280, h = 720; // 16:9 standard
-            el.modalDimensions.innerText = `16:9 • ${w}x${h}px • ${selectedStyle.name}`;
-            
-            // Show current image if exists
-            if (scene.image) {
-                if (scene.image.startsWith('data:video')) {
-                     el.modalPreview.innerHTML = `<video src="${scene.image}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>`;
-                } else {
-                     el.modalPreview.innerHTML = `<img src="${scene.image}" class="w-full h-full object-cover">`;
-                }
-                el.modalRegenImageOnlyBtn.classList.remove('hidden');
-            } else {
-                el.modalPreview.innerHTML = `<div class="text-slate-600 text-xs">Görsel Yok</div>`;
-                el.modalRegenImageOnlyBtn.classList.add('hidden');
-            }
-
-            // Button handlers
-            el.modalRunPromptBtn.onclick = () => generateSceneImage(idx, el.modalPrompt.value);
-            el.modalRegenBtn.onclick = async () => {
-                // Re-dream prompt with AI
-                el.modalPreview.innerHTML = `<div class="loader-ring"></div>`;
-                try {
-                     const promptRes = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                        contents: [{ parts: [{ text: `Rewrite this image prompt to be more creative and detailed for a music video scene: "${scene.visualContext}"` }] }]
-                    });
-                    const newPrompt = promptRes.candidates[0].content.parts[0].text;
-                    el.modalPrompt.value = newPrompt;
-                    await generateSceneImage(idx, newPrompt);
-                } catch(e) {
-                    log("Prompt yenileme hatası", "err");
-                }
-            };
-            
-            el.modalUploadBtn.onclick = () => el.modalFileInput.click();
-            el.modalFileInput.onchange = (e) => {
-                 const f = e.target.files[0];
-                 if(f) {
-                     const reader = new FileReader();
-                     reader.onload = (ev) => {
-                         scenes[idx].image = ev.target.result;
-                         renderSceneGrid();
-                         openModal(idx);
-                     };
-                     reader.readAsDataURL(f);
-                 }
-            };
-
-            el.modalRegenImageOnlyBtn.onclick = () => generateSceneImage(idx, el.modalPrompt.value, true);
+            updateModalPreview(scene);
         }
 
-        el.modalClose.onclick = () => el.modal.classList.remove('open');
-
-        el.generateAll.onclick = async () => {
-            el.generateAll.innerText = "Üretiliyor...";
-            el.generateAll.disabled = true;
-            for (let i = 0; i < scenes.length; i++) {
-                if (!scenes[i].image) {
-                    await generateSceneImage(i, scenes[i].prompt);
+        function updateModalPreview(scene) {
+            el.modalPreview.innerHTML = "";
+            el.modalDimensions.innerHTML = "BOYUTLAR HESAPLANIYOR...";
+            
+            if (scene.source) {
+                if (scene.type === 'videoAI') {
+                    const vid = document.createElement('video');
+                    vid.src = scene.source;
+                    vid.className = "w-full h-full object-contain";
+                    vid.controls = true;
+                    vid.autoplay = true;
+                    vid.loop = true;
+                    
+                    vid.onloadedmetadata = () => {
+                        el.modalDimensions.innerHTML = `VIDEO: ${vid.videoWidth} x ${vid.videoHeight}px | SÜRE: ${vid.duration.toFixed(1)}s`;
+                    };
+                    
+                    el.modalPreview.appendChild(vid);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = scene.source;
+                    img.className = "w-full h-full object-contain";
+                    
+                    img.onload = () => {
+                        el.modalDimensions.innerHTML = `RESİM: ${img.naturalWidth} x ${img.naturalHeight}px`;
+                    };
+                    
+                    el.modalPreview.appendChild(img);
                 }
+            } else {
+                el.modalPreview.innerHTML = `<span class="text-slate-600 text-xs font-bold">GÖRÜNTÜ YOK</span>`;
+                el.modalDimensions.innerHTML = "-";
             }
-            el.generateAll.innerText = "Tümünü Yenile";
-            el.generateAll.disabled = false;
-            el.exportBtn.classList.remove('hidden');
-            log("Tüm sahneler hazır! Oynatabilirsin.", "success");
-            el.play.disabled = false;
-            el.play.click();
+        }
+
+        el.modalClose.onclick = () => {
+            el.modal.classList.remove('open');
+            currentModalSceneId = null;
+        };
+        
+        el.modal.onclick = (e) => {
+            if(e.target === el.modal) {
+                el.modal.classList.remove('open');
+                currentModalSceneId = null;
+            }
         };
 
-        async function generateSceneImage(idx, promptText, isImageToImage = false) {
-            const box = document.getElementById('modalPreviewBox');
-            if(currentModalSceneId === idx) box.innerHTML = `<div class="loader-ring"></div>`;
-            log(`Sahne ${idx+1} üretiliyor...`);
+        el.modalRunPromptBtn.onclick = async () => {
+             if (currentModalSceneId === null) return;
+             const scene = scenes.find(s => s.id === currentModalSceneId);
+             
+             const userPrompt = el.modalPrompt.value.trim();
+             if(!userPrompt) return alert("Lütfen bir prompt yazın.");
+             
+             scene.v_prompt = userPrompt;
+             
+             el.modalPreview.innerHTML = '<div class="loader-ring"></div>';
+             el.modalDimensions.innerText = "YENİLENİYOR...";
+             
+             log(`Sahne ${currentModalSceneId} için manuel prompt ile üretim başlatıldı...`);
+             await generateSingleScene(currentModalSceneId);
+        };
 
+        el.modalRegenBtn.onclick = async () => {
+            if (currentModalSceneId === null) return;
+            const scene = scenes.find(s => s.id === currentModalSceneId);
+            
+            el.modalPreview.innerHTML = '<div class="loader-ring"></div>';
+            el.modalDimensions.innerText = "YENİLENİYOR...";
+            
+            log(`Sahne ${currentModalSceneId} için yeni AI prompt üretiliyor...`);
+            
             try {
-                let imageUrl;
+                // Use visualContext instead of caption for better regeneration based on user intent
+                const data = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
+                    contents: [{ parts: [{ text: `Original Visual Intent: ${scene.visualContext}. Öncekinden farklı yeni bir 5-6 cümlelik GENİŞ AÇILI prompt yaz. Stil: ${selectedStyle.name}.` }] }]
+                });
                 
-                // --- MAJOR UPDATE: FORCE REFERENCE IMAGE USAGE ---
-                // If a reference image exists, we ignore the mode and force multimodal generation
-                // to preserve the EXACT character identity using Gemini 2.5 Vision.
-                if (referenceImageBase64) {
-                     // Using Gemini 2.5 Flash for Image Generation (via Multimodal Prompt)
-                     // Note: We use the 'gemini-2.5-flash-image-preview' model for this specific capability
-                     const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
-                        contents: [{
-                            parts: [
-                                { text: "Cinematic, Extreme Wide Angle, Full Body Shot. " + promptText + " . The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image." },
-                                { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                            ]
-                        }],
+                const newPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (newPrompt) {
+                    scene.v_prompt = newPrompt;
+                    el.modalPrompt.value = newPrompt;
+                }
+                
+                await generateSingleScene(currentModalSceneId);
+                
+            } catch (e) {
+                log("Yenileme hatası: " + e.message, "err");
+                updateModalPreview(scene);
+            }
+        };
+
+        el.modalUploadBtn.onclick = () => el.modalFileInput.click();
+        
+        el.modalFileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file || currentModalSceneId === null) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const scene = scenes.find(s => s.id === currentModalSceneId);
+                scene.source = event.target.result;
+                scene.type = 'image';
+                
+                const thumb = document.getElementById(`thumb-${scene.id}`);
+                if(thumb) thumb.innerHTML = `<img src="${scene.source}" class="w-full h-full object-cover">`;
+                
+                updateModalPreview(scene);
+                buildVideoLayers();
+                
+                log("Resim manuel olarak güncellendi.");
+            };
+            reader.readAsDataURL(file);
+            el.modalFileInput.value = '';
+        };
+
+        async function generateSingleScene(id) {
+            const scene = scenes.find(s => s.id === id);
+            const thumb = document.getElementById(`thumb-${id}`);
+            if(thumb) thumb.innerHTML = '<div class="loader-ring"></div>';
+            
+            try {
+                let finalSource;
+                if (scene.type === "videoAI") {
+                    const vPrompt = `MANDATORY: Generate a high quality 5-second cinematic video clip in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama. Scenario: ${scene.v_prompt}`;
+                    const vData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
+                        contents: [{ parts: [
+                            { text: vPrompt }, 
+                            referenceImageBase64 ? { inlineData: { mimeType: "image/png", data: referenceImageBase64 } } : null
+                        ].filter(p => p !== null)}],
+                        generationConfig: { responseModalities: ['VIDEO'] }
+                    });
+                    const vPart = vData.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('video/'));
+                    if (!vPart) throw new Error("Video üretilemedi.");
+                    finalSource = `data:${vPart.inlineData.mimeType};base64,${vPart.inlineData.data}`;
+                } else if (referenceImageBase64) {
+                    const i2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+                        contents: [{ parts: [
+                            { text: `A professional concept art masterpiece in the EXACT STYLE OF ${selectedStyle.name}. Extreme wide angle panorama landscape. The person from the reference image is integrated as a small artistic figure. Paragraf: ${scene.v_prompt}` }, 
+                            { inlineData: { mimeType: "image/png", data: referenceImageBase64 } }
+                        ]}],
                         generationConfig: { responseModalities: ['IMAGE'] }
                     });
-                    
-                    // Extract base64 from Gemini response
-                    const base64 = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                    if (base64) {
-                        imageUrl = `data:image/jpeg;base64,${base64}`;
-                    } else {
-                        throw new Error("No image generated from reference.");
-                    }
-
+                    const imgBase64 = i2iData.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                    finalSource = `data:image/png;base64,${imgBase64}`;
                 } else {
-                    // --- FALLBACK TO STANDARD IMAGEN (NO REFERENCE IMAGE) ---
-                    if (productionMode === 'videoAI') {
-                        // Video Generation Simulation (High Quality Image + FX)
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                         imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    } else if (productionMode === 'video' || productionMode === 'image') {
-                        // Standard Image Gen
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                        imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    }
+                    const t2iData = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict', {
+                        instances: { prompt: `${selectedStyle.prompt}, Extreme wide angle cinematic view, panoramic landscape. ${scene.v_prompt}` },
+                        parameters: { sampleCount: 1 }
+                    });
+                    finalSource = `data:image/png;base64,${t2iData.predictions[0].bytesBase64Encoded}`;
+                }
+                
+                scene.source = finalSource;
+                scene.fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
+                
+                if(thumb) {
+                    thumb.innerHTML = scene.type === 'videoAI' ? `<video src="${finalSource}" class="w-full h-full object-cover" muted loop autoplay></video>` : `<img src="${finalSource}" class="w-full h-full object-cover">`;
+                }
+                
+                if (currentModalSceneId === id) {
+                    updateModalPreview(scene);
                 }
 
-                scenes[idx].image = imageUrl;
-                scenes[idx].prompt = promptText;
-                
-                // Assign random FX if not set
-                if (!scenes[idx].fx) scenes[idx].fx = VIDEO_FX[Math.floor(Math.random() * VIDEO_FX.length)];
-
-                renderSceneGrid();
-                if(currentModalSceneId === idx) openModal(idx);
-                log(`Sahne ${idx+1} tamamlandı.`, "success");
-
-            } catch (err) {
-                log(`Hata (Sahne ${idx+1}): ${err.message}`, "err");
-                if(currentModalSceneId === idx) box.innerHTML = `<span class="text-red-500 text-xs">Hata</span>`;
+                buildVideoLayers();
+            } catch (e) { 
+                if(thumb) thumb.innerHTML = '<span class="text-red-500 font-bold text-[10px]">HATA</span>'; 
+                log("Hata: " + e.message, "err"); 
+                if (currentModalSceneId === id) {
+                    el.modalPreview.innerHTML = '<span class="text-red-500 font-bold">Üretim Hatası</span>';
+                }
             }
         }
 
-        // --- PLAYER LOGIC ---
-        el.play.onclick = () => {
-            if (isPlaying) {
-                el.audio.pause();
-                isPlaying = false;
-                el.play.innerHTML = `<svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-            } else {
-                el.audio.play();
-                isPlaying = true;
-                el.play.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
-                renderLoop();
-            }
+        el.generateAll.onclick = async () => {
+            el.generateAll.disabled = true;
+            for (let i = 0; i < scenes.length; i++) { await generateSingleScene(scenes[i].id); }
+            log("Prodüksiyon tamamlandı!", "success");
+            el.generateAll.disabled = false; el.play.disabled = false; el.exportBtn.classList.remove('hidden');
         };
 
-        function renderLoop() {
-            if (!isPlaying) return;
-            const now = el.audio.currentTime;
-            el.time.innerText = `${fmt(now)} / ${fmt(audioDuration)}`;
-            el.progress.style.width = `${(now / audioDuration) * 100}%`;
-
-            const currentScene = scenes.find(s => now >= s.start && now < s.end);
-            
-            if (currentScene) {
-                // Background Layer (Image)
-                if (activeIdx !== currentScene.id) {
-                    activeIdx = currentScene.id;
-                    
-                    // Clear previous
-                    el.layers.innerHTML = '';
-                    
-                    // Create new Slide
-                    const slide = document.createElement('img');
-                    slide.src = currentScene.image;
-                    slide.className = `slide-item active ${currentScene.fx}`;
-                    el.layers.appendChild(slide);
-                    
-                    // Caption
-                    if (currentScene.showSubtitle) {
-                        el.subtitle.innerText = currentScene.caption;
-                        el.subtitle.style.opacity = 1;
+        function buildVideoLayers() {
+            el.layers.innerHTML = '';
+            scenes.sort((a,b) => a.start - b.start).forEach(s => {
+                if (s.source) {
+                    let element;
+                    if(s.type === 'videoAI') {
+                        element = document.createElement('video');
+                        element.muted = true;
+                        element.loop = true;
+                        element.playsInline = true;
                     } else {
-                        el.subtitle.style.opacity = 0;
+                        element = document.createElement('img');
                     }
+                    element.src = s.source;
+                    element.className = `slide-item ${s.type === 'video' ? s.fx : ''}`;
+                    element.id = `v-item-${s.id}`;
+                    el.layers.appendChild(element);
                 }
-            } else {
-                // No scene matched (gap?) - Should not happen with gap filling logic
-                // But if it does, keep last frame or show black
-            }
-
-            if (!el.audio.paused && !el.audio.ended) {
-                requestAnimationFrame(renderLoop);
-            } else {
-                isPlaying = false;
-                el.play.innerHTML = `<svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-            }
+            });
         }
 
-        // --- EXPORT LOGIC (Client-Side Recording) ---
-        el.exportBtn.onclick = async () => {
-            el.renderStatus.innerText = "Render Başlıyor...";
-            el.exportCanvas.style.display = 'block';
-            el.audio.pause();
-            el.audio.currentTime = 0;
+        el.play.onclick = () => {
+            if (audioDuration === 0 || audioDuration === 200) {
+                if(el.audio.duration && !isNaN(el.audio.duration)) {
+                    audioDuration = el.audio.duration;
+                    el.time.innerText = `00:00 / ${fmt(audioDuration)}`;
+                }
+            }
             
+            if (isPlaying) { el.audio.pause(); document.getElementById('playIcon').innerHTML = '<path d="M8 5v14l11-7z"/>'; }
+            else { el.audio.play(); document.getElementById('playIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'; }
+            isPlaying = !isPlaying;
+        };
+
+        el.audio.ontimeupdate = () => {
+            const now = el.audio.currentTime;
+            el.progress.style.width = `${(now / audioDuration) * 100}%`;
+            el.time.innerText = `${fmt(now)} / ${fmt(audioDuration)}`;
+            const activeScene = scenes.find(s => now >= s.start && now < s.end);
+            if (activeScene && activeIdx !== activeScene.id) { activeIdx = activeScene.id; updateVisuals(activeIdx); }
+        };
+
+        function updateVisuals(id) {
+            scenes.forEach(s => {
+                const item = document.getElementById(`v-item-${s.id}`);
+                if (item) {
+                    if (s.id === id) {
+                        item.classList.add('active');
+                        if(s.type === 'videoAI') {
+                            item.currentTime = (el.audio.currentTime - s.start) % (item.duration || 5);
+                            item.play().catch(() => {});
+                        }
+                    } else {
+                        const sceneId = s.id;
+                        setTimeout(() => {
+                            if (activeIdx !== sceneId) {
+                                item.classList.remove('active');
+                                if(s.type === 'videoAI') item.pause();
+                            }
+                        }, 1500); 
+                    }
+                }
+            });
+            const current = scenes.find(s => s.id === id);
+            if (current && current.showSubtitle) { el.subtitle.innerText = current.caption; el.subtitle.style.opacity = 1; } 
+            else { el.subtitle.style.opacity = 0; }
+        }
+
+        function drawCoverImage(ctx, item, x, y, w, h) {
+            const imgW = item.naturalWidth || item.videoWidth || 1280;
+            const imgH = item.naturalHeight || item.videoHeight || 720;
+            const imgRatio = imgW / imgH;
+            const targetRatio = w / h;
+            
+            let drawW, drawH;
+            
+            if (imgRatio > targetRatio) {
+                drawH = h;
+                drawW = h * imgRatio;
+            } else {
+                drawW = w;
+                drawH = w / imgRatio;
+            }
+            
+            ctx.drawImage(item, -drawW / 2, -drawH / 2, drawW, drawH);
+        }
+
+        el.exportBtn.onclick = async () => {
+            log("Video kaydediliyor... En boy oranı optimize ediliyor.");
             const ctx = el.exportCanvas.getContext('2d');
             const stream = el.exportCanvas.captureStream(30);
-            
-            // Add Audio Track to Stream
-            const audioContext = new AudioContext();
-            const source = audioContext.createMediaElementSource(el.audio);
-            const dest = audioContext.createMediaStreamDestination();
-            source.connect(dest);
-            source.connect(audioContext.destination);
-            
-            const tracks = [...stream.getVideoTracks(), ...dest.stream.getAudioTracks()];
-            const combinedStream = new MediaStream(tracks);
-            
-            const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
+            const audioCtx = new AudioContext();
+            const sourceNode = audioCtx.createMediaElementSource(el.audio);
+            const dest = audioCtx.createMediaStreamDestination();
+            sourceNode.connect(dest); sourceNode.connect(audioCtx.destination);
+            const recorder = new MediaRecorder(new MediaStream([...stream.getVideoTracks(), ...dest.stream.getAudioTracks()]), { mimeType: 'video/webm' });
             const chunks = [];
-            
             recorder.ondataavailable = e => chunks.push(e.data);
             recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
+                const blob = new Blob(chunks, { type: 'video/mp4' });
                 const a = document.createElement('a');
-                a.href = url;
-                a.download = `music_video_${Date.now()}.webm`;
+                a.href = URL.createObjectURL(blob);
+                a.download = `AI_Clip_Pro_HD_${Date.now()}.mp4`;
                 a.click();
-                el.renderStatus.innerText = "Tamamlandı!";
-                el.exportCanvas.style.display = 'none';
-                log("Video indirildi.", "success");
+                log("Video indirildi!");
             };
-            
-            recorder.start();
-            el.audio.play();
-
-            // Function to load image for canvas
-            const loadImage = (src) => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.src = src; });
-
-            const loop = async () => {
+            el.audio.currentTime = 0; recorder.start(); el.audio.play();
+            const loop = () => {
                 const now = el.audio.currentTime;
-                // Draw logic for canvas similar to DOM
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, 1280, 720);
-
                 const scene = scenes.find(s => now >= s.start && now < s.end);
-                if (scene && scene.image) {
-                    // We need to simulate the CSS animation in Canvas (Simplified: Zoom In)
-                    // For full fidelity, we'd need complex math. Here we just draw the image.
-                    const img = await loadImage(scene.image);
-                    
-                    // Simple Zoom Effect calculation based on time in scene
-                    const duration = scene.end - scene.start;
-                    const elapsed = now - scene.start;
-                    const progress = elapsed / duration;
-                    const scale = 1 + (progress * 0.1); // 10% zoom
-                    
-                    const w = 1280 * scale;
-                    const h = 720 * scale;
-                    const x = (1280 - w) / 2;
-                    const y = (720 - h) / 2;
-                    
-                    ctx.drawImage(img, x, y, w, h);
-                    
-                    // Subtitles
-                    if (scene.showSubtitle) {
-                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                        ctx.fillRect(0, 600, 1280, 120);
-                        ctx.fillStyle = 'white';
-                        ctx.font = 'bold 40px Arial';
-                        ctx.textAlign = 'center';
-                        ctx.fillText(scene.caption, 640, 670);
+                
+                ctx.fillStyle = '#000'; 
+                ctx.fillRect(0, 0, 1280, 720);
+                
+                if (scene && scene.source) {
+                    const item = document.getElementById(`v-item-${scene.id}`);
+                    if (item) {
+                        const elapsed = now - scene.start;
+                        const total = scene.end - scene.start;
+                        const progress = elapsed / total;
+                        
+                        ctx.save();
+                        
+                        let scale = 1; let tx = 0; let ty = 0; let rot = 0;
+                        
+                        if (scene.type === 'video') {
+                            if(scene.fx === 'fx-zoom-in') scale = 1 + progress * 0.3;
+                            if(scene.fx === 'fx-zoom-out') scale = 1.3 - progress * 0.3;
+                            if(scene.fx === 'fx-pan-left') { scale = 1.2; tx = 128 - (progress * 256); }
+                            if(scene.fx === 'fx-pan-right') { scale = 1.2; tx = -128 + (progress * 256); }
+                            if(scene.fx === 'fx-tilt-cw') { scale = 1.2; rot = progress * 0.05; }
+                            if(scene.fx === 'fx-tilt-ccw') { scale = 1.2; rot = -progress * 0.05; }
+                            if(scene.fx === 'fx-floating') { scale = 1.1; ty = Math.sin(progress * Math.PI * 2) * 20; }
+                            if(scene.fx === 'fx-pulse') scale = 1.1 + Math.sin(progress * Math.PI * 2) * 0.05;
+                            
+                            ctx.translate(640 + tx, 360 + ty);
+                            ctx.rotate(rot);
+                            ctx.scale(scale, scale);
+                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                        } else if(scene.type === 'videoAI') {
+                            const vDur = item.duration || 5;
+                            item.currentTime = elapsed % vDur;
+                            ctx.translate(640, 360);
+                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                        } else {
+                            ctx.translate(640, 360);
+                            drawCoverImage(ctx, item, 0, 0, 1280, 720);
+                        }
+                        
+                        ctx.restore();
+                        
+                        if (scene.showSubtitle) {
+                            ctx.fillStyle = 'rgba(0,0,0,0.6)'; 
+                            ctx.fillRect(0, 600, 1280, 120);
+                            ctx.fillStyle = '#FFF'; 
+                            ctx.font = 'bold 36px Outfit'; 
+                            ctx.textAlign = 'center';
+                            ctx.fillText(scene.caption, 640, 670);
+                        }
                     }
                 }
                 
-                if (!el.audio.paused && !el.audio.ended) requestAnimationFrame(loop);
-                else recorder.stop();
+                if (now < audioDuration && recorder.state === "recording") requestAnimationFrame(loop);
+                else { if (recorder.state === "recording") recorder.stop(); el.audio.pause(); }
             };
             loop();
         };

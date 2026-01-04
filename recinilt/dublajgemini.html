@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Smart Dubbing Player</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f0f;
+            color: #e5e5e5;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #404040; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ef4444; 
+        }
+
+        .glass-panel {
+            background: rgba(30, 30, 30, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ef4444;
+            cursor: pointer;
+            margin-top: -6px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #4b5563;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="h-16 border-b border-gray-800 bg-black flex items-center justify-between px-6 z-20">
+        <div class="flex items-center gap-3">
+            <i class="fa-solid fa-microphone-lines text-red-600 text-2xl"></i>
+            <h1 class="text-xl font-bold tracking-tight">AI <span class="text-red-600">Dubbing</span> Studio</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <button onclick="loadDemo()" class="text-xs bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded transition">
+                <i class="fa-solid fa-play mr-1"></i> Demo Yükle
+            </button>
+            <div class="text-xs text-gray-500 flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                Sistem Hazır
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- Left: Video Player Area -->
+        <main class="flex-1 flex flex-col relative bg-black">
+            <!-- Video Container -->
+            <div class="relative w-full h-full flex items-center justify-center bg-black" id="video-container">
+                <!-- YouTube Player -->
+                <div id="player" class="w-full h-full"></div>
+                
+                <!-- HTML5 Local Player (Hidden by default) -->
+                <video id="html5-player" class="hidden w-full h-full object-contain bg-black" controls playsinline></video>
+
+                <!-- Placeholder if no video -->
+                <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 bg-black z-10">
+                    <i class="fa-solid fa-film text-6xl mb-4 text-gray-700"></i>
+                    <p>Bir video yüklemek için sağ paneli kullanın.</p>
+                </div>
+                
+                <!-- Overlay Subtitles -->
+                <div id="subtitle-overlay" class="absolute bottom-20 w-full text-center px-4 pointer-events-none transition-opacity duration-300 opacity-0 z-30">
+                    <span id="current-subtitle-text" class="bg-black/80 text-white text-xl md:text-2xl px-6 py-3 rounded-lg leading-relaxed shadow-lg backdrop-blur-sm border border-white/10">
+                        <!-- Subtitles appear here -->
+                    </span>
+                </div>
+            </div>
+
+            <!-- Bottom Control Bar (Log & Status) -->
+            <div class="h-48 bg-[#121212] border-t border-gray-800 flex flex-col shrink-0">
+                <div class="flex items-center justify-between px-4 py-2 bg-[#1a1a1a] border-b border-gray-800">
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Debug & Sync Log</span>
+                    <button onclick="clearLogs()" class="text-xs text-red-400 hover:text-red-300">Temizle</button>
+                </div>
+                <div id="log-container" class="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-1 text-green-400">
+                    <div class="text-gray-500">>> Sistem başlatıldı. TTS motoru bekleniyor...</div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right: Settings & Input Sidebar -->
+        <aside class="w-96 bg-[#0f0f0f] border-l border-gray-800 flex flex-col z-10 shadow-2xl overflow-y-auto shrink-0">
+            
+            <div class="p-6 space-y-6">
+                <!-- 1. Video Source -->
+                <div class="space-y-3 bg-[#161616] p-4 rounded-lg border border-gray-800">
+                    <label class="text-xs font-semibold text-gray-400 uppercase flex items-center gap-2">
+                        <i class="fa-brands fa-youtube"></i> 1. Video Kaynağı
+                    </label>
+                    
+                    <!-- YouTube Input -->
+                    <div class="flex gap-2">
+                        <input type="text" id="youtube-url" placeholder="YouTube Linki (örn: v=...)" 
+                            class="w-full bg-[#1a1a1a] border border-gray-700 rounded p-2 text-sm focus:outline-none focus:border-red-600 transition text-white placeholder-gray-600">
+                        <button onclick="loadVideoFromInput()" class="bg-red-600 hover:bg-red-700 text-white p-2 rounded w-10 flex items-center justify-center transition" title="YouTube Yükle">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center text-[10px] text-gray-600 font-bold">- VEYA -</div>
+
+                    <!-- Local File Input -->
+                    <label class="flex flex-col items-center justify-center w-full h-16 border-2 border-gray-700 border-dashed rounded cursor-pointer hover:bg-gray-800 transition group">
+                        <div class="flex flex-col items-center justify-center pt-2 pb-3">
+                            <p class="text-xs text-gray-400 group-hover:text-white"><i class="fa-solid fa-computer mr-1"></i> Bilgisayardan Video Seç</p>
+                        </div>
+                        <input id="local-video-file" type="file" class="hidden" accept="video/*" onchange="loadLocalVideo(this)" />
+                    </label>
+                </div>
+
+                <!-- 2. AI & Subtitles -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label class="text-xs font-semibold text-gray-400 uppercase">2. Altyazı (SRT)</label>
+                        <span class="text-[10px] text-gray-600 bg-gray-900 px-1 rounded border border-gray-800">API Key (Opsiyonel)</span>
+                    </div>
+                    
+                    <!-- API Simulation Buttons -->
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button onclick="simulateAIFetch()" class="text-xs bg-indigo-600/20 text-indigo-400 border border-indigo-600/50 hover:bg-indigo-600/30 py-2 rounded flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-robot"></i> AI Transkript Çek
+                        </button>
+                        <button onclick="simulateTranslation()" class="text-xs bg-green-600/20 text-green-400 border border-green-600/50 hover:bg-green-600/30 py-2 rounded flex items-center justify-center gap-2 transition">
+                            <i class="fa-solid fa-language"></i> Türkçeye Çevir
+                        </button>
+                    </div>
+
+                    <textarea id="srt-input" rows="6" placeholder="1
+00:00:01,000 --> 00:00:04,000
+Buraya SRT formatında metin yapıştırın..." 
+                        class="w-full bg-[#1a1a1a] border border-gray-700 rounded p-2 text-xs font-mono focus:outline-none focus:border-red-600 transition text-gray-300 resize-none"></textarea>
+                    
+                    <button onclick="parseSRT()" class="w-full bg-gray-800 hover:bg-gray-700 text-white py-2 rounded text-xs font-semibold transition border border-gray-700">
+                        <i class="fa-solid fa-check mr-1"></i> Altyazıları Yükle ve Ayrıştır
+                    </button>
+                </div>
+
+                <!-- 3. Dubbing Settings -->
+                <div class="space-y-4 pt-4 border-t border-gray-800">
+                    <label class="text-xs font-semibold text-gray-400 uppercase">3. Dublaj Ayarları</label>
+                    
+                    <!-- Voice Selection -->
+                    <div>
+                        <label class="text-[10px] text-gray-500 block mb-1">Seslendirmen (Türkçe)</label>
+                        <select id="voice-select" class="w-full bg-[#1a1a1a] border border-gray-700 rounded p-2 text-xs text-white focus:outline-none">
+                            <option value="">Sesler Yükleniyor...</option>
+                        </select>
+                    </div>
+
+                    <!-- Volume Mix -->
+                    <div>
+                        <label class="text-[10px] text-gray-500 block mb-1 flex justify-between">
+                            <span>Orijinal Video Sesi</span>
+                            <span id="video-vol-val">10%</span>
+                        </label>
+                        <input type="range" id="video-volume" min="0" max="100" value="10" oninput="updateVolumeLabel(this.value)" class="w-full">
+                    </div>
+                    
+                    <!-- Global Speed Multiplier (New Feature) -->
+                    <div>
+                        <label class="text-[10px] text-gray-500 block mb-1 flex justify-between">
+                            <span>Genel Hız Çarpanı</span>
+                            <span id="speed-multiplier-val" class="text-red-400 font-bold">1.0x</span>
+                        </label>
+                        <input type="range" id="global-speed-multiplier" min="0.5" max="2.0" step="0.1" value="1.0" 
+                               oninput="document.getElementById('speed-multiplier-val').innerText = this.value + 'x'" class="w-full">
+                    </div>
+
+                    <div class="flex items-center justify-between bg-gray-900 p-2 rounded border border-gray-800">
+                        <span class="text-xs text-gray-400">Adaptif Hızlandırma</span>
+                        <div class="relative inline-block w-8 h-4 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" name="toggle" id="adaptive-toggle" checked class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label for="adaptive-toggle" class="toggle-label block overflow-hidden h-4 rounded-full bg-red-600 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Action -->
+                <div class="pt-4 mt-auto">
+                    <button id="start-dubbing-btn" onclick="toggleDubbing()" class="w-full bg-red-600 hover:bg-red-700 text-white py-4 rounded font-bold text-sm shadow-lg shadow-red-900/20 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-play"></i> DUBLAJI BAŞLAT
+                    </button>
+                    <p class="text-[10px] text-center text-gray-600 mt-2">Tarayıcı sesi kullanır. İlk tıklama gereklidir.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        // --- GLOBAL DEĞİŞKENLER ---
+        let player; // YouTube Player Object
+        let html5Player; // HTML5 Video Element
+        let activePlayerType = 'none'; // 'youtube' | 'local' | 'none'
+        
+        let subtitles = [];
+        let isDubbingActive = false;
+        let synth = window.speechSynthesis;
+        let voices = [];
+        let checkInterval;
+        let lastSpokenIndex = -1;
+        
+        // --- 1. SETUP & VIDEO MANAGEMENT ---
+        
+        window.onload = function() {
+            populateVoices();
+            html5Player = document.getElementById('html5-player');
+            
+            // HTML5 Player Events
+            html5Player.addEventListener('play', () => {
+                if (isDubbingActive) startSyncLoop();
+                log("Yerel video başlatıldı.");
+            });
+            html5Player.addEventListener('pause', () => {
+                stopSyncLoop();
+                if(synth.speaking) synth.cancel();
+                log("Yerel video duraklatıldı.");
+            });
+            html5Player.addEventListener('volumechange', () => {
+               // Volume sync if needed
+            });
+        }
+
+        function onYouTubeIframeAPIReady() {
+            // API Hazır
+        }
+
+        // --- Video Switcher Functions ---
+        
+        function loadVideoFromInput() {
+            const url = document.getElementById('youtube-url').value;
+            const videoId = extractVideoID(url);
+            
+            if (!videoId) {
+                alert("Geçersiz YouTube Linki!");
+                return;
+            }
+
+            activePlayerType = 'youtube';
+            showPlayer('youtube');
+
+            if (player) {
+                player.loadVideoById(videoId);
+            } else {
+                player = new YT.Player('player', {
+                    height: '100%',
+                    width: '100%',
+                    videoId: videoId,
+                    playerVars: { 'playsinline': 1, 'controls': 1, 'rel': 0 },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+            log(`YouTube Video Yüklendi: ${videoId}`);
+        }
+
+        function loadLocalVideo(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const fileURL = URL.createObjectURL(file);
+            activePlayerType = 'local';
+            showPlayer('local');
+
+            html5Player.src = fileURL;
+            html5Player.load();
+            
+            // YouTube durdur eğer çalıyorsa
+            if (player && player.pauseVideo) player.pauseVideo();
+            
+            log(`Yerel dosya yüklendi: ${file.name}`);
+        }
+
+        function showPlayer(type) {
+            document.getElementById('video-placeholder').style.display = 'none';
+            const ytContainer = document.getElementById('player'); // YouTube iframe replaces this div usually
+            const ytIframe = document.querySelector('#video-container iframe');
+            
+            if (type === 'youtube') {
+                if (ytIframe) ytIframe.style.display = 'block';
+                else ytContainer.style.display = 'block';
+                html5Player.classList.add('hidden');
+            } else {
+                if (ytIframe) ytIframe.style.display = 'none';
+                else ytContainer.style.display = 'none';
+                html5Player.classList.remove('hidden');
+            }
+            
+            // Ses ayarını uygula
+            applyVolume();
+        }
+
+        // --- Common Player Interface ---
+
+        function getCurrentTimeWrapper() {
+            if (activePlayerType === 'youtube' && player && player.getCurrentTime) {
+                return player.getCurrentTime();
+            } else if (activePlayerType === 'local' && html5Player) {
+                return html5Player.currentTime;
+            }
+            return 0;
+        }
+
+        function playVideoWrapper() {
+            if (activePlayerType === 'youtube' && player) {
+                player.playVideo();
+            } else if (activePlayerType === 'local' && html5Player) {
+                html5Player.play();
+            }
+        }
+
+        function pauseVideoWrapper() {
+            if (activePlayerType === 'youtube' && player) {
+                player.pauseVideo();
+            } else if (activePlayerType === 'local' && html5Player) {
+                html5Player.pause();
+            }
+        }
+
+        function applyVolume() {
+            const vol = document.getElementById('video-volume').value;
+            if (activePlayerType === 'youtube' && player && player.setVolume) {
+                player.setVolume(vol);
+            } else if (activePlayerType === 'local' && html5Player) {
+                html5Player.volume = vol / 100;
+            }
+        }
+
+        // --- YouTube Specific Helpers ---
+        function extractVideoID(url) {
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length == 11) ? match[7] : false;
+        }
+
+        function onPlayerReady(event) {
+            log("YouTube Oynatıcı hazır.");
+            applyVolume();
+        }
+
+        function onPlayerStateChange(event) {
+            if (activePlayerType !== 'youtube') return;
+            
+            if (event.data == YT.PlayerState.PLAYING) {
+                if (isDubbingActive) startSyncLoop();
+            } else {
+                stopSyncLoop();
+                if(synth.speaking) synth.cancel();
+            }
+        }
+
+        // --- 2. SRT PARSER & DATA HANDLER ---
+        function parseSRT() {
+            const rawText = document.getElementById('srt-input').value;
+            if (!rawText.trim()) {
+                alert("Lütfen SRT metni girin veya demo yükleyin.");
+                return;
+            }
+
+            subtitles = [];
+            
+            // --- REGEX FIX: BLOKLARA BÖLME YÖNTEMİ ---
+            // Eski regex VS Code ve bazı parserlarda hata verebiliyordu.
+            // Bunun yerine metni boş satırlara göre bloklara ayırıyoruz. Daha güvenli.
+            
+            // Windows (\r\n) satır sonlarını \n'e çevir
+            const normalizedText = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            
+            // Çift yeni satıra göre bloklara ayır
+            const blocks = normalizedText.split(/\n\s*\n/);
+
+            blocks.forEach(block => {
+                const lines = block.trim().split('\n');
+                if (lines.length >= 3) {
+                    // Satır 1: ID, Satır 2: Zaman, Satır 3+: Metin
+                    // Zaman satırındaki ok işaretini (-->) kontrol et
+                    const timeLineIndex = lines.findIndex(l => l.includes('-->'));
+                    
+                    if (timeLineIndex !== -1 && lines[timeLineIndex + 1]) {
+                        const timeLine = lines[timeLineIndex];
+                        const textLines = lines.slice(timeLineIndex + 1).join(' ');
+                        const [startStr, endStr] = timeLine.split('-->').map(s => s.trim());
+                        
+                        // ID'yi almayı dene, yoksa index kullan
+                        const id = lines[0].trim();
+
+                        if (startStr && endStr) {
+                             subtitles.push({
+                                id: id,
+                                start: timeToSeconds(startStr),
+                                end: timeToSeconds(endStr),
+                                text: textLines.trim()
+                            });
+                        }
+                    }
+                }
+            });
+
+            log(`${subtitles.length} adet altyazı bloğu ayrıştırıldı.`);
+            alert(`${subtitles.length} satır altyazı başarıyla işlendi!`);
+        }
+
+        function timeToSeconds(timeString) {
+            // 00:00:00,000 formatını parse et
+            if (!timeString) return 0;
+            const parts = timeString.split(':');
+            if (parts.length < 3) return 0;
+            
+            const secondsParts = parts[2].split(',');
+            const h = parseInt(parts[0]);
+            const m = parseInt(parts[1]);
+            const s = parseInt(secondsParts[0]);
+            const ms = secondsParts.length > 1 ? parseInt(secondsParts[1]) : 0;
+            
+            return (h * 3600) + (m * 60) + s + (ms / 1000);
+        }
+
+        // --- 3. TTS ENGINE & ADAPTIVE SPEED ---
+        
+        function populateVoices() {
+            voices = synth.getVoices().sort(function (a, b) {
+                const aname = a.name.toUpperCase();
+                const bname = b.name.toUpperCase();
+                if (aname < bname) return -1;
+                else if (aname == bname) return 0;
+                return +1;
+            });
+            
+            const select = document.getElementById('voice-select');
+            select.innerHTML = '';
+            
+            const trVoices = voices.filter(v => v.lang.includes('tr'));
+            const otherVoices = voices.filter(v => !v.lang.includes('tr'));
+            const allToList = [...trVoices, ...otherVoices];
+
+            allToList.forEach(voice => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name} (${voice.lang})`;
+                option.value = voice.name;
+                if (voice.lang.includes('tr') && voice.name.includes('Google')) {
+                    option.selected = true;
+                }
+                select.appendChild(option);
+            });
+        }
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoices;
+        }
+
+        function speak(text, durationAvailable) {
+            if (synth.speaking) synth.cancel();
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const selectedVoiceName = document.getElementById('voice-select').value;
+            const selectedVoice = voices.find(v => v.name === selectedVoiceName);
+            if (selectedVoice) utterance.voice = selectedVoice;
+
+            // --- HIZ ALGORİTMASI ---
+            const baseCharPerSec = 16; 
+            const estimatedDuration = text.length / baseCharPerSec;
+            
+            let rate = 1.0;
+            const isAdaptive = document.getElementById('adaptive-toggle').checked;
+
+            if (isAdaptive && durationAvailable > 0) {
+                // Adaptif hız hesapla
+                rate = estimatedDuration / durationAvailable;
+                
+                // --- İSTEK 1: MİNİMUM HIZ 1.0x OLSUN ---
+                // Eğer hesaplanan hız 1.0'dan azsa (yani çok zaman varsa), yavaşlatma, normal hızda (1.0) oku.
+                // Araya sessizlik girecektir, bu da doğaldır.
+                rate = Math.max(rate, 1.0);
+            }
+
+            // --- İSTEK 2: GLOBAL HIZ ÇARPANI ---
+            const globalMultiplier = parseFloat(document.getElementById('global-speed-multiplier').value) || 1.0;
+            rate = rate * globalMultiplier;
+
+            // Browser limiti (Çok aşırı hızlanmayı önle, 3x üzeri genelde anlaşılmaz)
+            rate = Math.min(rate, 3.0);
+
+            utterance.rate = rate;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            log(`🗣️ Konuşuluyor: "${text.substring(0, 15)}..." | Hız: ${rate.toFixed(2)}x (Çarpan: ${globalMultiplier}x)`);
+
+            // Ensure volume is synced before speaking (optional but safer)
+            applyVolume();
+
+            synth.speak(utterance);
+        }
+
+        // --- 4. SYNC LOOP ---
+        function startSyncLoop() {
+            if (checkInterval) clearInterval(checkInterval);
+            
+            checkInterval = setInterval(() => {
+                const currentTime = getCurrentTimeWrapper();
+                if (currentTime === 0 && activePlayerType === 'none') return;
+                
+                // O anki saniyeye uygun altyazıyı bul
+                const activeSubIndex = subtitles.findIndex(sub => currentTime >= sub.start && currentTime <= sub.end);
+
+                if (activeSubIndex !== -1) {
+                    const activeSub = subtitles[activeSubIndex];
+                    document.getElementById('current-subtitle-text').innerText = activeSub.text;
+                    document.getElementById('subtitle-overlay').style.opacity = '1';
+
+                    if (activeSubIndex !== lastSpokenIndex) {
+                        const duration = activeSub.end - activeSub.start;
+                        speak(activeSub.text, duration);
+                        lastSpokenIndex = activeSubIndex;
+                    }
+                } else {
+                    document.getElementById('subtitle-overlay').style.opacity = '0';
+                }
+
+            }, 100);
+        }
+
+        function stopSyncLoop() {
+            if (checkInterval) clearInterval(checkInterval);
+        }
+
+        function toggleDubbing() {
+            const btn = document.getElementById('start-dubbing-btn');
+            
+            if (!isDubbingActive) {
+                // Başlat
+                if (activePlayerType === 'none') { alert("Önce video yükleyin!"); return; }
+                if (subtitles.length === 0) { alert("Altyazı verisi yok!"); return; }
+
+                isDubbingActive = true;
+                btn.innerHTML = '<i class="fa-solid fa-pause"></i> DUBLAJI DURDUR';
+                btn.classList.replace('bg-red-600', 'bg-gray-600');
+                btn.classList.replace('hover:bg-red-700', 'hover:bg-gray-700');
+                
+                synth.cancel();
+                playVideoWrapper();
+                log("Dublaj Modu Aktif.");
+            } else {
+                // Durdur
+                isDubbingActive = false;
+                btn.innerHTML = '<i class="fa-solid fa-play"></i> DUBLAJI BAŞLAT';
+                btn.classList.replace('bg-gray-600', 'bg-red-600');
+                btn.classList.replace('hover:bg-gray-700', 'hover:bg-red-700');
+                
+                pauseVideoWrapper();
+                synth.cancel();
+                stopSyncLoop();
+                log("Dublaj Durduruldu.");
+            }
+        }
+
+        // --- 5. UI HELPERS ---
+
+        function updateVolumeLabel(val) {
+            document.getElementById('video-vol-val').textContent = val + "%";
+            applyVolume();
+        }
+
+        function log(msg) {
+            const container = document.getElementById('log-container');
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-gray-600">[${time}]</span> ${msg}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+
+        // Demo Verileri
+        function loadDemo() {
+            document.getElementById('youtube-url').value = "https://www.youtube.com/watch?v=LXb3EKWsInQ";
+            
+            const demoSRT = `1
+00:00:01,000 --> 00:00:05,000
+Kosta Rika'nın vahşi doğasına hoş geldiniz, burası yeryüzündeki cennet.
+
+2
+00:00:06,000 --> 00:00:10,000
+Bu ormanlarda yaşam döngüsü hiç durmadan devam ediyor ve her canlının bir rolü var.
+
+3
+00:00:10,500 --> 00:00:12,500
+Süre çok kısa ama anlatacak çok şey var o yüzden hızlı konuşmalıyım!
+
+4
+00:00:13,000 --> 00:00:18,000
+Ağaçların tepesinden nehirlerin derinliklerine kadar, doğanın müthiş dengesine şahit olacağız.`;
+
+            document.getElementById('srt-input').value = demoSRT;
+            loadVideoFromInput();
+            setTimeout(() => {
+                parseSRT();
+                log("Demo verileri yüklendi.");
+            }, 1000);
+        }
+
+        function simulateAIFetch() {
+            log("⏳ AI API Simülasyonu başlatıldı...");
+            setTimeout(() => {
+                log("✅ Veri alındı.");
+                alert("Simülasyon: Veri çekildi.");
+            }, 1000);
+        }
+
+        function simulateTranslation() {
+            const currentText = document.getElementById('srt-input').value;
+            if(!currentText.includes('-->')) return;
+            log("⏳ Çeviri simülasyonu...");
+            setTimeout(() => {
+                let translated = currentText.replace("Welcome", "Hoşgeldiniz").replace("Hello", "Merhaba");
+                if (currentText.includes("1931")) {
+                     translated = `1
+00:00:54,090 --> 00:00:58,590
+Çeviri: AI Assistant
+
+2
+00:01:07,568 --> 00:01:09,904
+1931 yılındayız.
+
+3
+00:01:09,987 --> 00:01:14,487
+İngiltere ve koca İmparatorluk şu anda Büyük Buhran'ın soğuk pençesinde kıvranıyor.`;
+                }
+                document.getElementById('srt-input').value = translated;
+                parseSRT();
+                log("✅ Çeviri Tamamlandı.");
+            }, 1000);
+        }
+
+        // Checkbox Style Fix
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .toggle-checkbox:checked { right: 0; border-color: #ef4444; }
+            .toggle-checkbox:checked + .toggle-label { background-color: #ef4444; }
+            .toggle-checkbox { right: auto; left: 0; transition: all 0.3s; z-index: 1; border-color: #ccc; top: 0; }
+            .toggle-checkbox:checked { left: auto; right: 0; }
+        `;
+        document.head.appendChild(style);
+
+    </script>
+</body>
+</html>

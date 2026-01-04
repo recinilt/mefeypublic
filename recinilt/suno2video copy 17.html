@@ -324,12 +324,69 @@
 
     <canvas id="exportCanvas" width="1280" height="720"></canvas>
     <script src="gemini.js"></script>
-    <script src="suno2video.js"></script>
+    
     <script>
         //gemini.je'ten alınan API anahtarı:
         //const apiKey = ""; 
 
-        // Missing Constant: Art Styles is in suno2viddeo.js
+        const ART_STYLES = [
+            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
+            { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
+            { id: "hyperrealistic", name: "Hiperrealistik", prompt: "8k ultra-high resolution photography, hyper-detailed textures, lifelike surfaces, ray-tracing, masterpiece lighting, extreme realism." },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich textures." },
+            { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
+            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
+            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching." },
+            { id: "anime", name: "Anime", prompt: "High-quality modern anime art, vibrant, crisp lines, cinematic background." },
+            { id: "manga", name: "Manga", prompt: "Classic black and white manga ink style, professional screentone patterns, dynamic action lines, high contrast." },
+            { id: "pixel", name: "Piksel Sanatı", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels, vibrant color palette." },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic shadows, Victorian horror elements." },
+            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative landscapes, Dalí inspired." },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork, copper textures." },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi, aesthetic statues." },
+            { id: "synthwave", name: "Synthwave", prompt: "Retro 80s aesthetic, glowing neon grids, sunset chrome, purple and pink horizons, futuristic retro." },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures, high impact." },
+            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette, lots of negative space." },
+            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture, handcrafted look." },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, elegant brush strokes, zen atmosphere." },
+            { id: "lowpoly", name: "Düşük Poligon", prompt: "Geometric low poly design, modern digital faceted look, stylized 3D." },
+            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic, atomic age design." },
+            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background, engineering draft." },
+            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery, monochrome cinematic." },
+            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow, mythical landscapes." },
+            { id: "dark_fantasy", name: "Karanlık Fantazi", prompt: "Grim dark fantasy art, moody lighting, ancient ruins, mysterious and ominous atmosphere, sharp detail." },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate patterns." },
+            { id: "graffiti", name: "Grafiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style, dripping paint." },
+            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts, data corruption aesthetic." },
+            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, delicate paper texture." },
+            { id: "paper_cutout", name: "Kağıt Kesme", prompt: "Layered paper cutout art, 3D depth effect, clean edges, handcrafted paper texture, shadows." },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style, flat wood-pressed colors." },
+            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern composition." },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic, chiaroscuro lighting." },
+            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor, vibrant lights." },
+            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void, minimalist glowing lines." },
+            { id: "style3d", name: "3D", prompt: "Advanced 3D render, Octane render, Unreal Engine 5 style, volumetric lighting, high fidelity." },
+            { id: "style2d", name: "2D", prompt: "Clean 2D vector-style illustration, professional graphic design, flat colors with subtle shading." },
+            { id: "isometric", name: "İzometrik", prompt: "Isometric 3D projection, tilt-shift photography effect, detailed miniature world, clean aesthetic." },
+            { id: "vector", name: "Vektör Sanatı", prompt: "High-quality vector art, Adobe Illustrator style, clean paths, vibrant gradients." },
+            { id: "charcoal", name: "Kömür Çizimi", prompt: "Rough charcoal drawing, heavy texture, smudge effects, high contrast monochrome." },
+            { id: "pastel", name: "Pastel Çizimi", prompt: "Soft pastel chalk drawing, blended colors, powdery texture, dreamlike hazy atmosphere." },
+            { id: "acrylic", name: "Akrilik Boyama", prompt: "Modern acrylic painting, vibrant colors, visible palette knife strokes, textured canvas." },
+            { id: "digital_painting", name: "Dijital Boyama", prompt: "Professional digital painting, smooth blending, concept art quality, epic scale and detail." },
+            { id: "concept_art", name: "Konsept Sanatı", prompt: "Epic movie concept art, sweeping scale, cinematic mood, detailed world-building visuals." },
+            { id: "matte_painting", name: "Mat Boyama", prompt: "Professional film matte painting, photorealistic landscape extensions, epic horizon, seamless detail." },
+            { id: "photobash", name: "Fotoğraf Birleştirme", prompt: "Detailed photobash concept art, kit-bashing elements, realistic textures merged with artistic painting." },
+            { id: "collage", name: "Kolaj", prompt: "Artistic mixed media collage, layered paper textures, vintage clippings, eclectic composition." },
+            { id: "scifi", name: "Bilimkurgu", prompt: "Futuristic sci-fi environment, advanced technology, interstellar scale, high-tech details, sleek design." },
+            { id: "art_nouveau", name: "Art Nouveau", prompt: "Elegant Art Nouveau style, flowing organic lines, floral motifs, Alphonse Mucha aesthetic, intricate gold details." },
+            { id: "impressionism", name: "İzlenimcilik", prompt: "Impressionist oil painting, small thin brushstrokes, emphasis on light and its changing qualities, airy." },
+            { id: "expressionism", name: "Dışavurumculuk", prompt: "Emotional expressionist art, distorted forms, bold colors, intense brushwork, high emotion." },
+            { id: "cubism", name: "Kübizm", prompt: "Classic cubist painting, fragmented objects, multiple viewpoints, geometric shapes, avant-garde." },
+            { id: "storybook", name: "Hikaye Kitabı", prompt: "Classic storybook illustration, whimsical atmosphere, detailed hand-drawn charm, magical feeling." },
+            { id: "kids_book", name: "Çocuk Kitabı", prompt: "Cute children's book style, friendly characters, vibrant colors, simple shapes, joyful mood." },
+            { id: "sticker", name: "Çıkartma Sanatı", prompt: "Die-cut sticker art, thick white border, vibrant colors, clean pop aesthetic, vector look." }
+        ];
+
         
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
@@ -503,27 +560,6 @@
             }
 
             log("Senaryo kurgulanıyor...");
-            
-            // --- NEW: DEEP REFERENCE IMAGE ANALYSIS ---
-            let characterDesc = "";
-            if (referenceImageBase64) {
-                 log("Referans resim DERİNLEMESİNE analiz ediliyor...");
-                 try {
-                     const descRes = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent', {
-                         contents: [{
-                             parts: [
-                                 { text: "Analyze this image and describe ONLY the character's PHYSICAL ATTRIBUTES (face, eyes, hair, age, ethnicity, body shape, beard/glasses, scars). DO NOT DESCRIBE CLOTHING. I want to change their clothes later. I need a pixel-perfect textual description of their FACE and BODY to recreate this exact person." },
-                                 { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                             ]
-                         }]
-                     });
-                     characterDesc = descRes.candidates[0].content.parts[0].text;
-                     log(`Karakter Analizi Tamam: ${characterDesc.substring(0, 40)}...`);
-                 } catch (e) {
-                     log("Referans resim analizi başarısız oldu, atlanıyor.", "err");
-                 }
-            }
-            // ---------------------------------------------
 
             // 1. EXTRACT MASTER PROMPT {}
             let masterPrompt = "";
@@ -662,15 +698,14 @@
             }
 
             try {
-                // Modified System Prompt to include Master Prompt logic and Character Description
+                // Modified System Prompt to include Master Prompt logic
                 const systemPrompt = `Sen bir klip yönetmenisin. Her satır için 5-6 CÜMLELİK edebi bir PARAGRAF PROMPT oluştur.
 KURALLAR:
-1. KAMERA AÇISI: ASLA portre veya yakın çekim (close-up) yazma. HER SAHNE için "Extreme wide angle shot, establishing shot, camera far away, full body visible" ifadelerini kullan.
+1. GENİŞ AÇI: ASLA yakın çekim yapma. Hep "Extreme wide angle panorama" kurgula.
 2. SEMBOLİZM: Aşağıda verilen "Visual Instruction" kısmını devasa manzaralara dök.
 3. STİL: "${selectedStyle.name}" stilini işle.
 4. MOOD: "${mood || 'Epic'}" ruh halini ekle.
 ${masterPrompt ? `5. GLOBAL KURAL (MASTER PROMPT): "${masterPrompt}". Bu kuralı ve temayı HER sahneye mutlaka uygula.` : ''}
-${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${characterDesc}". Karakterin yüzünü ve vücudunu koru AMA KIYAFETİNİ SENARYOYA GÖRE DEĞİŞTİR.` : ''}
 
 ÇIKTI: JSON objesi döndür. Key: index, Value: 5-6 cümlelik İngilizce prompt.`;
 
@@ -689,7 +724,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 // Merge AI prompts with parsed data
                 scenes = parsed.map(p => ({
                     ...p,
-                    prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}, ${characterDesc}`,
+                    prompt: result[p.id] || result[String(p.id)] || `${selectedStyle.prompt}, ${p.visualContext}, ${mood}`,
                     image: null
                 }));
 
@@ -790,16 +825,16 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
 
         el.modalClose.onclick = () => el.modal.classList.remove('open');
 
-        el.generateAll.onclick = async () => {
-            el.generateAll.innerText = "Üretiliyor...";
-            el.generateAll.disabled = true;
+        el.generateAllBtn.onclick = async () => {
+            el.generateAllBtn.innerText = "Üretiliyor...";
+            el.generateAllBtn.disabled = true;
             for (let i = 0; i < scenes.length; i++) {
                 if (!scenes[i].image) {
                     await generateSceneImage(i, scenes[i].prompt);
                 }
             }
-            el.generateAll.innerText = "Tümünü Yenile";
-            el.generateAll.disabled = false;
+            el.generateAllBtn.innerText = "Tümünü Yenile";
+            el.generateAllBtn.disabled = false;
             el.exportBtn.classList.remove('hidden');
             log("Tüm sahneler hazır! Oynatabilirsin.", "success");
             el.play.disabled = false;
@@ -814,47 +849,22 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             try {
                 let imageUrl;
                 
-                // --- MAJOR UPDATE: FORCE REFERENCE IMAGE USAGE ---
-                // If a reference image exists, we ignore the mode and force multimodal generation
-                // to preserve the EXACT character identity using Gemini 2.5 Vision.
-                if (referenceImageBase64) {
-                     // Using Gemini 2.5 Flash for Image Generation (via Multimodal Prompt)
-                     // Note: We use the 'gemini-2.5-flash-image-preview' model for this specific capability
-                     const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
-                        contents: [{
-                            parts: [
-                                { text: "Cinematic, Extreme Wide Angle, Full Body Shot. " + promptText + " . The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image." },
-                                { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
-                            ]
-                        }],
-                        generationConfig: { responseModalities: ['IMAGE'] }
+                if (productionMode === 'videoAI') {
+                    // Video Generation (Simulated with advanced zooming for now as real video gen is heavy)
+                    // In a real app, this would call a video generation endpoint
+                    // For this demo, we generate a high-quality image and apply aggressive motion
+                    const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+                        instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
+                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
                     });
-                    
-                    // Extract base64 from Gemini response
-                    const base64 = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-                    if (base64) {
-                        imageUrl = `data:image/jpeg;base64,${base64}`;
-                    } else {
-                        throw new Error("No image generated from reference.");
-                    }
-
-                } else {
-                    // --- FALLBACK TO STANDARD IMAGEN (NO REFERENCE IMAGE) ---
-                    if (productionMode === 'videoAI') {
-                        // Video Generation Simulation (High Quality Image + FX)
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                         imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    } else if (productionMode === 'video' || productionMode === 'image') {
-                        // Standard Image Gen
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
-                            parameters: { sampleCount: 1, aspectRatio: "16:9" }
-                        });
-                        imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    }
+                     imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
+                } else if (productionMode === 'video' || productionMode === 'image') {
+                    // Standard Image Gen
+                    const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+                        instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
+                        parameters: { sampleCount: 1, aspectRatio: "16:9" }
+                    });
+                    imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
                 }
 
                 scenes[idx].image = imageUrl;
