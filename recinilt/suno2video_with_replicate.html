@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Music Video Studio Pro - Cinematic Masterpiece</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #020617;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .video-canvas-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background: #000;
+            border-radius: 2rem;
+            box-shadow: 0 0 100px -20px rgba(59, 130, 246, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .video-canvas {
+            aspect-ratio: 16 / 9;
+            width: 100%;
+            max-height: 70vh;
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-item {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            transform-origin: center center;
+        }
+
+        .slide-item.active { opacity: 1; }
+        
+        .fx-zoom-in.active { animation: zoomIn 20s linear forwards; }
+        .fx-zoom-out.active { animation: zoomOut 20s linear forwards; }
+        .fx-pan-left.active { animation: panLeft 20s linear forwards; }
+        .fx-pan-right.active { animation: panRight 20s linear forwards; }
+        .fx-tilt-cw.active { animation: tiltCW 20s linear forwards; }
+        .fx-tilt-ccw.active { animation: tiltCCW 20s linear forwards; }
+        .fx-floating.active { animation: floating 20s ease-in-out infinite; }
+        .fx-pulse.active { animation: pulse 20s ease-in-out infinite; }
+
+        @keyframes zoomIn { 0% { transform: scale(1); } 100% { transform: scale(1.3); } }
+        @keyframes zoomOut { 0% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes panLeft { 0% { transform: scale(1.2) translateX(5%); } 100% { transform: scale(1.2) translateX(-5%); } }
+        @keyframes panRight { 0% { transform: scale(1.2) translateX(-5%); } 100% { transform: scale(1.2) translateX(5%); } }
+        @keyframes tiltCW { 0% { transform: scale(1.2) rotate(0deg); } 100% { transform: scale(1.2) rotate(3deg); } }
+        @keyframes tiltCCW { 0% { transform: scale(1.2) rotate(0deg); } 100% { transform: scale(1.2) rotate(-3deg); } }
+        @keyframes floating { 0% { transform: scale(1.1) translateY(0); } 50% { transform: scale(1.1) translateY(-2%); } 100% { transform: scale(1.1) translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1.05); } 50% { transform: scale(1.15); } 100% { transform: scale(1.05); } }
+
+        .style-btn, .ratio-btn {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(255,255,255,0.02);
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .style-btn.selected, .ratio-btn.selected {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+        }
+
+        .loader-ring {
+            border: 3px solid #1e293b;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .progress-bar {
+            height: 6px;
+            background: #1e293b;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #a855f7);
+            width: 0%;
+        }
+
+        .subtitle-box {
+            text-shadow: 0 4px 15px rgba(0,0,0,1);
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
+        }
+
+        .scene-card {
+            cursor: pointer;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .scene-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+
+        #exportCanvas { display: none; }
+        
+        .mode-toggle {
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+        }
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 9px;
+            font-weight: 800;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-backdrop.open .modal-content {
+            transform: scale(1);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+
+        /* AI Video Generation Styles */
+        .ai-video-status {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        
+        .replicate-config {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 lg:p-12">
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-black tracking-tight bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 bg-clip-text text-transparent">
+                    Music Video Studio Pro
+                </h1>
+                <p class="text-slate-400 mt-2 font-medium italic uppercase tracking-widest text-[10px]">Geniş Açı, FX, Loop & Senaryolu Prodüksiyon + AI Video</p>
+            </div>
+            <div id="apiStatus" class="glass px-6 py-3 rounded-full flex items-center gap-3 border-blue-500/20">
+                <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></div>
+                <span class="text-xs font-bold uppercase tracking-widest text-blue-400">Sinematik Motor Hazır</span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- PANEL 1: PROMPT & AUDIO -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-black uppercase tracking-widest mb-4 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zm0 8.5l-8-4v6.5l8 4 8-4V6.5l-8 4z"/></svg>
+                        01. Prompt & Müzik
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Sahne Senaryosu</label>
+                            <textarea id="promptInput" placeholder="Bir hikaye, ruh hali veya görsel konsept yaz..." class="w-full h-32 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Müzik Dosyası (.mp3/.wav)</label>
+                            <input type="file" id="audioInput" accept="audio/*" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-500 file:text-white file:cursor-pointer hover:file:bg-blue-600">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-black uppercase tracking-widest mb-4 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-purple-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        02. Senkronizasyon & Şarkı Sözü
+                    </h2>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Sahne Zamanlaması</label>
+                            <input type="text" id="timingInput" placeholder="0-8, 8-16, 16-24..." class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500">
+                            <p class="text-[10px] text-slate-500 mt-2 italic">Her sahne için başlangıç-bitiş saniye aralıkları (virgül ile ayır)</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Şarkı Sözleri (Opsiyonel)</label>
+                            <textarea id="lyricsInput" placeholder="Her satır için şarkı sözü yaz..." class="w-full h-32 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"></textarea>
+                            <p class="text-[10px] text-slate-500 mt-2 italic">Her satır bir sahneye karşılık gelir</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-black uppercase tracking-widest mb-4 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-indigo-400" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                        03. Üretim Modu & Stil
+                    </h2>
+
+                    <div class="mode-toggle mb-4">
+                        <button class="mode-btn active" data-mode="gemini">🌟 GEMINI</button>
+                        <button class="mode-btn" data-mode="video">🎬 VIDEO(AI)</button>
+                    </div>
+
+                    <!-- Gemini Mode -->
+                    <div id="geminiMode" class="mode-content">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Görsel Stil</label>
+                                <div class="grid grid-cols-4 gap-2" id="styleGrid">
+                                    <div class="style-btn p-3 rounded-xl selected" data-style="cinematic">SİNEMATİK</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="anime">ANİME</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="abstract">SOYUT</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="vintage">VİNTAGE</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="surreal">SÜRREALİST</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="neon">NEON</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="pixel">PİKSEL</div>
+                                    <div class="style-btn p-3 rounded-xl" data-style="cartoon">ÇOCUK</div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Ruh Hali</label>
+                                <select id="moodSelect" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500">
+                                    <option>Heyecanlı</option>
+                                    <option>Romantik</option>
+                                    <option>Melankolik</option>
+                                    <option>Karanlık</option>
+                                    <option>Şen</option>
+                                    <option>Gizemli</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Video AI Mode -->
+                    <div id="videoMode" class="mode-content" style="display:none;">
+                        <div class="replicate-config">
+                            <h3 class="text-sm font-bold mb-3 text-purple-400 uppercase tracking-wide">⚙️ Replicate API Ayarları</h3>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-bold mb-2 text-slate-400">Proxy URL (Render.com)</label>
+                                    <input type="text" id="proxyUrl" placeholder="https://your-app.onrender.com" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                                    <p class="text-[9px] text-slate-500 mt-1">CORS sorununu önlemek için Render.com proxy URL'inizi girin</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold mb-2 text-slate-400">Replicate API Key</label>
+                                    <input type="password" id="replicateApiKey" placeholder="r8_***" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                                    <p class="text-[9px] text-slate-500 mt-1">replicate.com'dan API key alın</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold mb-2 text-slate-400">Model Seçimi</label>
+                                    <select id="replicateModel" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-500">
+                                        <option value="wan-video/wan-2.5-i2v-fast">🎬 WAN 2.5 Fast (Hızlı)</option>
+                                        <option value="google/veo-3.1">🌟 Google Veo 3.1 (Kaliteli)</option>
+                                        <option value="bytedance/kling-2.6-pro">⚡ Kling 2.6 Pro</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-bold mb-2 text-slate-400">Referans Görsel (Opsiyonel)</label>
+                                    <input type="file" id="referenceImage" accept="image/*" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-3 py-2 text-sm file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-purple-500 file:text-white file:text-xs file:cursor-pointer hover:file:bg-purple-600">
+                                    <p class="text-[9px] text-slate-500 mt-1">Bu görselden hareketle AI video üretecek</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Video Stili</label>
+                                <select id="videoStyleSelect" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500">
+                                    <option>Cinematic</option>
+                                    <option>Realistic</option>
+                                    <option>Anime</option>
+                                    <option>Abstract</option>
+                                    <option>3D Animation</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold mb-2 text-slate-400 uppercase tracking-widest">Hareket Tipi</label>
+                                <select id="motionType" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-purple-500">
+                                    <option>Smooth Pan</option>
+                                    <option>Dynamic Zoom</option>
+                                    <option>Camera Rotation</option>
+                                    <option>Slow Motion</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="aiVideoStatus" class="ai-video-status mt-4" style="display:none;">
+                            <div class="flex items-center gap-3">
+                                <div class="loader-ring"></div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-purple-400">AI Video İşleniyor...</p>
+                                    <p id="aiVideoProgress" class="text-[10px] text-slate-400 mt-1">Sahne hazırlanıyor...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass p-6 rounded-3xl">
+                    <h2 class="text-xl font-black uppercase tracking-widest mb-4 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-cyan-400" fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                        04. Video Format
+                    </h2>
+
+                    <div class="grid grid-cols-3 gap-2" id="ratioGrid">
+                        <div class="ratio-btn p-3 rounded-xl selected" data-ratio="16:9" data-w="1920" data-h="1080">
+                            <div class="text-[10px] font-black">16:9</div>
+                            <div class="text-[8px] text-slate-400">YOUTUBE</div>
+                        </div>
+                        <div class="ratio-btn p-3 rounded-xl" data-ratio="9:16" data-w="1080" data-h="1920">
+                            <div class="text-[10px] font-black">9:16</div>
+                            <div class="text-[8px] text-slate-400">TİKTOK</div>
+                        </div>
+                        <div class="ratio-btn p-3 rounded-xl" data-ratio="1:1" data-w="1080" data-h="1080">
+                            <div class="text-[10px] font-black">1:1</div>
+                            <div class="text-[8px] text-slate-400">INSTAGRAM</div>
+                        </div>
+                        <div class="ratio-btn p-3 rounded-xl" data-ratio="4:3" data-w="1440" data-h="1080">
+                            <div class="text-[10px] font-black">4:3</div>
+                            <div class="text-[8px] text-slate-400">KLASİK</div>
+                        </div>
+                        <div class="ratio-btn p-3 rounded-xl" data-ratio="21:9" data-w="2560" data-h="1080">
+                            <div class="text-[10px] font-black">21:9</div>
+                            <div class="text-[8px] text-slate-400">SİNEMA</div>
+                        </div>
+                        <div class="ratio-btn p-3 rounded-xl" data-ratio="4:5" data-w="1080" data-h="1350">
+                            <div class="text-[10px] font-black">4:5</div>
+                            <div class="text-[8px] text-slate-400">FB/INSTA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="generateBtn" class="w-full py-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-2xl font-black uppercase tracking-widest text-lg shadow-lg shadow-blue-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/40 hover:scale-[1.02]">
+                    🚀 GÖRSEL ÜRET
+                </button>
+            </div>
+
+            <!-- PANEL 2: PLAYER & PREVIEW -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass p-6 rounded-3xl sticky top-8">
+                    <div class="video-canvas-container mb-6">
+                        <div id="videoCanvas" class="video-canvas">
+                            <div id="layersContainer"></div>
+                            <div id="subtitleBox" class="subtitle-box absolute bottom-0 left-0 right-0 p-8 text-center text-white text-2xl font-bold opacity-0 transition-opacity duration-500"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <button id="playBtn" class="w-16 h-16 bg-blue-600 hover:bg-blue-500 rounded-full flex items-center justify-center transition-all shadow-lg shadow-blue-500/30">
+                                <svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                            <div class="flex-1">
+                                <div class="progress-bar">
+                                    <div id="progressFill" class="progress-fill"></div>
+                                </div>
+                                <div id="timeDisplay" class="text-xs text-slate-400 mt-2 font-mono">0:00 / 0:00</div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button id="exportBtn" class="flex-1 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 rounded-xl font-bold uppercase tracking-widest text-sm transition-all shadow-lg">
+                                📥 VİDEOYU İNDİR
+                            </button>
+                            <button id="resetBtn" class="px-6 py-4 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold uppercase tracking-widest text-sm transition-all">
+                                🔄
+                            </button>
+                        </div>
+
+                        <div id="renderStatus" class="text-center text-xs text-slate-400 italic mt-2"></div>
+                    </div>
+                </div>
+
+                <div id="scenesPanel" class="glass p-6 rounded-3xl">
+                    <h3 class="text-lg font-black uppercase tracking-widest mb-4">📋 Sahneler</h3>
+                    <div id="scenesList" class="space-y-3 max-h-[400px] overflow-y-auto"></div>
+                </div>
+
+                <div id="logPanel" class="glass p-6 rounded-3xl">
+                    <h3 class="text-lg font-black uppercase tracking-widest mb-4">📜 Sistem Logu</h3>
+                    <div id="logContainer" class="space-y-2 max-h-[300px] overflow-y-auto text-xs font-mono"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" style="display:none;"></audio>
+    <canvas id="exportCanvas"></canvas>
+
+    <script>
+        const el = {
+            prompt: document.getElementById('promptInput'),
+            audio: document.getElementById('audioPlayer'),
+            audioInput: document.getElementById('audioInput'),
+            timing: document.getElementById('timingInput'),
+            lyrics: document.getElementById('lyricsInput'),
+            mood: document.getElementById('moodSelect'),
+            generate: document.getElementById('generateBtn'),
+            canvas: document.getElementById('videoCanvas'),
+            layers: document.getElementById('layersContainer'),
+            subtitle: document.getElementById('subtitleBox'),
+            play: document.getElementById('playBtn'),
+            time: document.getElementById('timeDisplay'),
+            progress: document.getElementById('progressFill'),
+            exportBtn: document.getElementById('exportBtn'),
+            reset: document.getElementById('resetBtn'),
+            renderStatus: document.getElementById('renderStatus'),
+            scenes: document.getElementById('scenesList'),
+            log: document.getElementById('logContainer'),
+            exportCanvas: document.getElementById('exportCanvas'),
+            // Replicate AI
+            proxyUrl: document.getElementById('proxyUrl'),
+            replicateKey: document.getElementById('replicateApiKey'),
+            replicateModel: document.getElementById('replicateModel'),
+            referenceImage: document.getElementById('referenceImage'),
+            videoStyle: document.getElementById('videoStyleSelect'),
+            motionType: document.getElementById('motionType'),
+            aiStatus: document.getElementById('aiVideoStatus'),
+            aiProgress: document.getElementById('aiVideoProgress')
+        };
+
+        let selectedStyle = 'cinematic';
+        let selectedMood = 'Heyecanlı';
+        let scenes = [];
+        let audioDuration = 0;
+        let isPlaying = false;
+        let activeIdx = -1;
+        let currentRatio = { label: '16:9', width: 1920, height: 1080 };
+        let currentMode = 'gemini';
+        let referenceImageBase64 = null;
+
+        // Mode Toggle
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                
+                if (currentMode === 'gemini') {
+                    document.getElementById('geminiMode').style.display = 'block';
+                    document.getElementById('videoMode').style.display = 'none';
+                } else {
+                    document.getElementById('geminiMode').style.display = 'none';
+                    document.getElementById('videoMode').style.display = 'block';
+                }
+            };
+        });
+
+        // Reference Image Upload
+        el.referenceImage.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    referenceImageBase64 = ev.target.result;
+                    log(`Referans görsel yüklendi: ${file.name}`, "success");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Style Selection
+        document.querySelectorAll('.style-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                selectedStyle = btn.dataset.style;
+            };
+        });
+
+        // Ratio Selection
+        document.querySelectorAll('.ratio-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                currentRatio = {
+                    label: btn.dataset.ratio,
+                    width: parseInt(btn.dataset.w),
+                    height: parseInt(btn.dataset.h)
+                };
+                el.canvas.style.aspectRatio = btn.dataset.ratio.replace(':', ' / ');
+                log(`Format değişti: ${currentRatio.label} (${currentRatio.width}x${currentRatio.height})`, 'info');
+            };
+        });
+
+        el.mood.onchange = () => { selectedMood = el.mood.value; };
+
+        function log(msg, type = 'info') {
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#94a3b8';
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            const div = document.createElement('div');
+            div.style.color = color;
+            div.innerText = `${icon} ${new Date().toLocaleTimeString()} - ${msg}`;
+            el.log.appendChild(div);
+            el.log.scrollTop = el.log.scrollHeight;
+        }
+
+        function fmt(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        el.audioInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            el.audio.src = url;
+            el.audio.onloadedmetadata = () => {
+                audioDuration = el.audio.duration;
+                log(`Müzik yüklendi: ${file.name} (${fmt(audioDuration)})`, 'success');
+            };
+        };
+
+        // REPLICATE API INTEGRATION
+        async function generateAIVideo(prompt, sceneIndex) {
+            const proxyUrl = el.proxyUrl.value.trim();
+            const apiKey = el.replicateKey.value.trim();
+            const model = el.replicateModel.value;
+
+            if (!proxyUrl) {
+                log('HATA: Proxy URL girilmemiş!', 'error');
+                return null;
+            }
+
+            if (!apiKey) {
+                log('HATA: Replicate API Key girilmemiş!', 'error');
+                return null;
+            }
+
+            try {
+                el.aiStatus.style.display = 'block';
+                el.aiProgress.innerText = `Sahne ${sceneIndex + 1} için AI video üretiliyor...`;
+
+                const input = {
+                    prompt: `${prompt}. Style: ${el.videoStyle.value}. Motion: ${el.motionType.value}`,
+                    duration: 5
+                };
+
+                // Add reference image if available
+                if (referenceImageBase64) {
+                    input.image = referenceImageBase64;
+                }
+
+                // Create prediction
+                const response = await fetch(`${proxyUrl}/api/replicate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        apiKey: apiKey,
+                        model: model,
+                        input: input
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.statusText}`);
+                }
+
+                const prediction = await response.json();
+                
+                if (prediction.error) {
+                    throw new Error(prediction.error);
+                }
+
+                // Poll for completion
+                let finalPrediction = prediction;
+                while (finalPrediction.status === 'starting' || finalPrediction.status === 'processing') {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    el.aiProgress.innerText = `Sahne ${sceneIndex + 1} işleniyor... (${finalPrediction.status})`;
+                    
+                    const pollResponse = await fetch(`${proxyUrl}/api/replicate/${finalPrediction.id}?apiKey=${apiKey}`);
+                    finalPrediction = await pollResponse.json();
+                }
+
+                el.aiStatus.style.display = 'none';
+
+                if (finalPrediction.status === 'succeeded') {
+                    log(`AI Video üretildi: Sahne ${sceneIndex + 1}`, 'success');
+                    return finalPrediction.output;
+                } else {
+                    throw new Error(`Video generation failed: ${finalPrediction.status}`);
+                }
+
+            } catch (err) {
+                log(`AI Video hatası: ${err.message}`, 'error');
+                el.aiStatus.style.display = 'none';
+                return null;
+            }
+        }
+
+        // GEMINI IMAGE GENERATION
+        async function generateImageGemini(prompt, sceneIndex, total) {
+            const apiKey = 'AIzaSyBCnrVytnKKVzXMjYxI44fqkH_V4YJIY4k';
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generate?key=${apiKey}`;
+
+            const fullPrompt = `${prompt}. Style: ${selectedStyle}, mood: ${selectedMood}. High quality, cinematic, 8k resolution`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: fullPrompt,
+                        number_of_images: 1,
+                        aspect_ratio: currentRatio.label.replace(':', '_'),
+                        safety_filter_level: 'block_some',
+                        person_generation: 'allow_all'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gemini API Error: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.generated_images && data.generated_images[0]) {
+                    return `data:image/jpeg;base64,${data.generated_images[0].image.image_bytes}`;
+                } else {
+                    throw new Error('No image generated');
+                }
+            } catch (err) {
+                log(`Görsel ${sceneIndex + 1}/${total} üretim hatası: ${err.message}`, 'error');
+                return null;
+            }
+        }
+
+        // MAIN GENERATION
+        el.generate.onclick = async () => {
+            if (!el.audio.src) {
+                log('Lütfen önce bir müzik dosyası yükleyin!', 'error');
+                return;
+            }
+
+            const promptText = el.prompt.value.trim() || 'Abstract cinematic scenes';
+            const timingText = el.timing.value.trim();
+            const lyricsText = el.lyrics.value.trim();
+
+            if (!timingText) {
+                log('Lütfen sahne zamanlamalarını girin!', 'error');
+                return;
+            }
+
+            // Parse timings
+            const timings = timingText.split(',').map(t => {
+                const [start, end] = t.trim().split('-').map(Number);
+                return { start, end };
+            });
+
+            const lyrics = lyricsText ? lyricsText.split('\n').filter(l => l.trim()) : [];
+
+            log(`${timings.length} sahne için üretim başlıyor...`, 'info');
+            el.generate.disabled = true;
+            el.generate.innerText = '⏳ ÜRETİLİYOR...';
+
+            scenes = [];
+
+            for (let i = 0; i < timings.length; i++) {
+                const { start, end } = timings[i];
+                const lyric = lyrics[i] || '';
+                const scenePrompt = `${promptText}. ${lyric}`;
+
+                log(`Sahne ${i + 1}/${timings.length} üretiliyor...`, 'info');
+
+                let imageUrl;
+
+                if (currentMode === 'video') {
+                    // AI Video Generation Mode
+                    imageUrl = await generateAIVideo(scenePrompt, i);
+                } else {
+                    // Gemini Image Generation Mode
+                    imageUrl = await generateImageGemini(scenePrompt, i, timings.length);
+                }
+
+                if (imageUrl) {
+                    scenes.push({
+                        id: i,
+                        start,
+                        end,
+                        caption: lyric,
+                        showSubtitle: !!lyric,
+                        image: imageUrl,
+                        fx: `fx-${['zoom-in', 'zoom-out', 'pan-left', 'pan-right'][Math.floor(Math.random() * 4)]}`
+                    });
+
+                    log(`Sahne ${i + 1} tamamlandı!`, 'success');
+                }
+            }
+
+            el.generate.disabled = false;
+            el.generate.innerText = '🚀 GÖRSEL ÜRET';
+
+            if (scenes.length > 0) {
+                initUI();
+                log('Tüm sahneler hazır! Play butonuna basın.', 'success');
+            } else {
+                log('Hiçbir sahne üretilemedi.', 'error');
+            }
+        };
+
+        function initUI() {
+            el.scenes.innerHTML = '';
+            scenes.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'scene-card glass p-4 rounded-xl border border-slate-700';
+                card.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <img src="${s.image}" class="w-20 h-20 rounded-lg object-cover">
+                        <div class="flex-1">
+                            <div class="text-xs font-bold text-blue-400 mb-1">Sahne ${s.id + 1}</div>
+                            <div class="text-[10px] text-slate-400 mb-1">${fmt(s.start)} - ${fmt(s.end)}</div>
+                            <div class="text-[10px] text-slate-300">${s.caption || 'Altyazı yok'}</div>
+                        </div>
+                    </div>
+                `;
+                el.scenes.appendChild(card);
+            });
+        }
+
+        // --- PLAYER LOGIC ---
+        el.play.onclick = () => {
+            if (isPlaying) {
+                el.audio.pause();
+                isPlaying = false;
+                el.play.innerHTML = `<svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+            } else {
+                el.audio.play();
+                isPlaying = true;
+                el.play.innerHTML = `<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+                renderLoop();
+            }
+        };
+
+        function renderLoop() {
+            if (!isPlaying) return;
+            const now = el.audio.currentTime;
+            el.time.innerText = `${fmt(now)} / ${fmt(audioDuration)}`;
+            el.progress.style.width = `${(now / audioDuration) * 100}%`;
+
+            const currentScene = scenes.find(s => now >= s.start && now < s.end);
+            
+            if (currentScene) {
+                if (activeIdx !== currentScene.id) {
+                    activeIdx = currentScene.id;
+                    el.layers.innerHTML = '';
+                    
+                    if (currentMode === 'video' && currentScene.image.includes('replicate')) {
+                        // AI Video
+                        const video = document.createElement('video');
+                        video.src = currentScene.image;
+                        video.className = `slide-item active ${currentScene.fx}`;
+                        video.autoplay = true;
+                        video.loop = true;
+                        video.muted = true;
+                        el.layers.appendChild(video);
+                    } else {
+                        // Static Image
+                        const slide = document.createElement('img');
+                        slide.src = currentScene.image;
+                        slide.className = `slide-item active ${currentScene.fx}`;
+                        el.layers.appendChild(slide);
+                    }
+                    
+                    if (currentScene.showSubtitle) {
+                        el.subtitle.innerText = currentScene.caption;
+                        el.subtitle.style.opacity = 1;
+                    } else {
+                        el.subtitle.style.opacity = 0;
+                    }
+                }
+            }
+
+            if (!el.audio.paused && !el.audio.ended) {
+                requestAnimationFrame(renderLoop);
+            } else {
+                isPlaying = false;
+                el.play.innerHTML = `<svg class="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+            }
+        }
+
+        // --- EXPORT LOGIC ---
+        el.exportBtn.onclick = async () => {
+            const w = currentRatio.width;
+            const h = currentRatio.height;
+
+            el.renderStatus.innerText = `Görseller Hazırlanıyor (${w}x${h})...`;
+            
+            el.exportCanvas.width = w;
+            el.exportCanvas.height = h;
+            el.exportCanvas.style.display = 'block';
+            
+            el.audio.pause();
+            el.audio.currentTime = 0;
+            
+            // Preload images
+            const imageCache = {};
+            for (const s of scenes) {
+                if (s.image && !s.image.includes('replicate')) {
+                    try {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous";
+                        img.src = s.image;
+                        await new Promise((resolve) => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        });
+                        imageCache[s.id] = img;
+                    } catch (e) {
+                        console.error("Image load error", e);
+                    }
+                }
+            }
+
+            log("Görseller önbelleğe alındı, kayıt başlıyor...", "info");
+            el.renderStatus.innerText = "Render Yapılıyor...";
+
+            const ctx = el.exportCanvas.getContext('2d');
+            const stream = el.exportCanvas.captureStream(30);
+            
+            const audioContext = new AudioContext();
+            const source = audioContext.createMediaElementSource(el.audio);
+            const dest = audioContext.createMediaStreamDestination();
+            source.connect(dest);
+            source.connect(audioContext.destination);
+            
+            const tracks = [...stream.getVideoTracks(), ...dest.stream.getAudioTracks()];
+            const combinedStream = new MediaStream(tracks);
+            
+            const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm; codecs=vp9' });
+            const chunks = [];
+            
+            recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+            
+            recorder.onstop = () => {
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `video_${currentRatio.label.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.webm`;
+                a.click();
+                el.renderStatus.innerText = "Tamamlandı!";
+                el.exportCanvas.style.display = 'none';
+                log("Video indirildi.", "success");
+                
+                source.disconnect();
+                audioContext.close();
+            };
+            
+            recorder.start();
+            el.audio.play();
+
+            function drawCoverImage(ctx, img, x, y, width, height) {
+                const imgRatio = img.width / img.height;
+                const winRatio = width / height;
+                let drawW, drawH, drawX, drawY;
+
+                if (imgRatio > winRatio) {
+                    drawH = height;
+                    drawW = height * imgRatio;
+                    drawX = x + (width - drawW) / 2;
+                    drawY = y;
+                } else {
+                    drawW = width;
+                    drawH = width / imgRatio;
+                    drawX = x;
+                    drawY = y + (height - drawH) / 2;
+                }
+                ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            }
+
+            const loop = () => {
+                const now = el.audio.currentTime;
+                
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, w, h);
+
+                const scene = scenes.find(s => now >= s.start && now < s.end);
+                
+                if (scene) {
+                    const item = imageCache[scene.id];
+                    if (item) {
+                        const duration = scene.end - scene.start;
+                        const elapsed = Math.max(0, now - scene.start);
+                        const progress = Math.min(1, elapsed / duration);
+                        const scale = 1 + (progress * 0.15);
+                        
+                        ctx.save();
+                        ctx.translate(w / 2, h / 2);
+                        ctx.scale(scale, scale);
+                        ctx.translate(-w / 2, -h / 2);
+                        
+                        drawCoverImage(ctx, item, 0, 0, w, h);
+                        ctx.restore();
+                        
+                        if (scene.showSubtitle) {
+                            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                            ctx.fillRect(0, h - 120, w, 120);
+                            
+                            ctx.fillStyle = '#ffffff';
+                            ctx.font = 'bold 36px Outfit, Arial, sans-serif';
+                            ctx.textAlign = 'center';
+                            ctx.shadowColor = "black";
+                            ctx.shadowBlur = 7;
+                            ctx.fillText(scene.caption, w / 2, h - 50);
+                        }
+                    }
+                }
+                
+                if (!el.audio.paused && !el.audio.ended && recorder.state === "recording") {
+                    requestAnimationFrame(loop);
+                } else {
+                    if (recorder.state === "recording") recorder.stop();
+                    el.audio.pause();
+                }
+            };
+            loop();
+        };
+
+        el.reset.onclick = () => { location.reload(); };
+
+        window.addEventListener('load', () => {
+            log("Sistem hazır.", "success");
+        });
+    </script>
+</body>
+</html>

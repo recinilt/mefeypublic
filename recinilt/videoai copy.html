@@ -33,10 +33,9 @@
         }
 
         .video-canvas {
-            /* Default 16/9, changed via JS */
             aspect-ratio: 16 / 9;
             width: 100%;
-            max-height: 70vh; /* Prevent excessive height on mobile for 9:16 */
+            max-height: 70vh;
             background: #000;
             position: relative;
             overflow: hidden;
@@ -53,7 +52,6 @@
             transform-origin: center center;
         }
 
-        /* Video FX Animasyonları */
         .slide-item.active { opacity: 1; }
         
         .fx-zoom-in.active { animation: zoomIn 20s linear forwards; }
@@ -150,7 +148,6 @@
             color: white;
         }
         
-        /* Modal Styles */
         .modal-backdrop {
             position: fixed;
             inset: 0;
@@ -215,12 +212,9 @@
                     </div>
                 </div>
 
-                <!-- Aspect Ratio Selector -->
                 <div class="glass p-5 rounded-[2rem] space-y-4">
                     <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1 block">02. Video Formatı</label>
-                    <div id="ratioGrid" class="grid grid-cols-4 gap-2">
-                        <!-- Filled by JS -->
-                    </div>
+                    <div id="ratioGrid" class="grid grid-cols-4 gap-2"></div>
                 </div>
 
                 <div class="glass p-5 rounded-[2rem] space-y-4">
@@ -230,6 +224,14 @@
                         <button id="modeVideo" class="mode-btn">VİDEO (FX)</button>
                         <button id="modeVideoAI" class="mode-btn">VİDEO (AI)</button>
                     </div>
+                    
+                    <!-- REPLICATE API KEY INPUT -->
+                    <div id="replicateKeySection" class="hidden border border-purple-500/20 rounded-xl p-3 bg-purple-500/5">
+                        <label class="text-[9px] font-bold text-purple-400 uppercase tracking-widest mb-2 block">🔑 Replicate API Key</label>
+                        <input type="password" id="replicateApiKey" placeholder="r8_..." class="w-full bg-slate-950/50 border border-purple-600/30 rounded-lg p-2 text-xs outline-none text-white font-mono" />
+                        <p class="text-[8px] text-purple-300/60 mt-1">Get your key at replicate.com/account/api-tokens</p>
+                    </div>
+                    
                     <div id="styleGrid" class="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-2 custom-scroll mb-2"></div>
                     <input type="text" id="moodInput" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-2.5 text-xs outline-none text-white" placeholder="Ruh Hali: Melankolik, Görkemli..." />
                 </div>
@@ -253,7 +255,6 @@
             </div>
 
             <div class="lg:col-span-8 space-y-6">
-                <!-- Video Area Container -->
                 <div class="video-canvas-container group" id="videoContainer">
                     <div class="video-canvas" id="videoArea">
                         <div id="imageLayer" class="absolute inset-0">
@@ -267,7 +268,6 @@
                         </div>
                     </div>
                     
-                    <!-- Controls Overlay (Absolute to container) -->
                     <div class="absolute bottom-6 left-6 right-6 flex items-center gap-5 opacity-0 group-hover:opacity-100 transition-all duration-300 bg-black/60 backdrop-blur-xl p-4 rounded-3xl border border-white/5 shadow-2xl z-20">
                         <button id="playBtn" disabled class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center hover:scale-105 transition-all">
                             <svg id="playIcon" class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
@@ -298,7 +298,6 @@
         </div>
     </div>
 
-    <!-- Scene Editor Modal -->
     <div id="sceneModal" class="modal-backdrop">
         <div class="modal-content glass w-full max-w-4xl p-6 rounded-3xl m-4 relative flex flex-col gap-6">
             <button id="closeModal" class="absolute top-4 right-4 bg-slate-800/50 hover:bg-red-500/50 text-white p-2 rounded-full transition-all">
@@ -306,22 +305,15 @@
             </button>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Preview Area -->
                 <div class="space-y-2">
-                    <div id="modalPreviewBox" class="bg-black rounded-xl overflow-hidden border border-white/10 flex items-center justify-center relative shadow-2xl" style="aspect-ratio: 16/9;">
-                        <!-- Image/Video will be injected here -->
-                    </div>
-                    <div id="modalDimensions" class="text-center text-[10px] font-mono text-slate-500 tracking-widest uppercase">
-                        <!-- Dimensions will be injected here -->
-                    </div>
+                    <div id="modalPreviewBox" class="bg-black rounded-xl overflow-hidden border border-white/10 flex items-center justify-center relative shadow-2xl" style="aspect-ratio: 16/9;"></div>
+                    <div id="modalDimensions" class="text-center text-[10px] font-mono text-slate-500 tracking-widest uppercase"></div>
                 </div>
 
-                <!-- Controls Area -->
                 <div class="flex flex-col gap-4">
                     <div>
                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Prompt (Senaryo)</h3>
                         <textarea id="modalPrompt" rows="6" class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 outline-none focus:border-blue-500 transition-colors custom-scroll"></textarea>
-                        <!-- NEW BUTTON: Run with Current Prompt -->
                         <button id="modalRunPromptBtn" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-xl text-[10px] font-bold transition-all flex items-center justify-center gap-2 uppercase tracking-wider">
                             <span>⚡</span> Bu Prompt İle Üret
                         </button>
@@ -345,26 +337,77 @@
         </div>
     </div>
 
-    <!-- Canvas is dynamic now, defined in JS -->
     <canvas id="exportCanvas" style="display:none;"></canvas>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="gemini.js"></script>
-    <script src="suno2video.js"></script>
     <script>
-        //gemini.js'ten alınan API anahtarı:
-        //const apiKey = ""; 
-        //art_styles, suno2video.js'ten alınan diğer yardımcı işlevler ve sabitler de dahil edilmiştir.
+        //const apiKey = ""; // Gemini API Key
 
-        
-        // Aspect Ratio Definitions
+        const ART_STYLES = [
+            { id: "watercolor", name: "Suluboya", prompt: "A world-class traditional watercolor masterpiece. Visible heavy paper texture, wet-on-wet paint bleeding effects, artistic color blooms, intricate hand-painted details. Soft brush strokes, elegant paint splatters, atmospheric and conceptual." },
+            { id: "realistic", name: "Gerçekçi", prompt: "Hyper-realistic cinematic film photography, shot on IMAX 70mm, professional color grading, sharp focus, deep panoramic depth." },
+            { id: "hyperrealistic", name: "Hiperrealistik", prompt: "8k ultra-high resolution photography, hyper-detailed textures, lifelike surfaces, ray-tracing, masterpiece lighting, extreme realism." },
+            { id: "oil", name: "Yağlı Boya", prompt: "Classical oil painting masterpiece, heavy impasto, visible thick brushwork, Renaissance lighting, rich textures." },
+            { id: "cyber", name: "Cyberpunk", prompt: "Glitzy cyberpunk world, volumetric neon lighting, rainy futuristic landscapes, extreme detail." },
+            { id: "ghibli", name: "Ghibli", prompt: "Studio Ghibli lush hand-drawn animation, nostalgic pastel landscapes, hand-painted nature." },
+            { id: "sketch", name: "Karakalem", prompt: "Masterful charcoal and graphite sketch, messy artistic lines, heavy cross-hatching." },
+            { id: "anime", name: "Anime", prompt: "High-quality modern anime art, vibrant, crisp lines, cinematic background." },
+            { id: "manga", name: "Manga", prompt: "Classic black and white manga ink style, professional screentone patterns, dynamic action lines, high contrast." },
+            { id: "pixel", name: "Piksel Sanatı", prompt: "Detailed 16-bit pixel art, retro gaming aesthetic, sharp pixels, vibrant color palette." },
+            { id: "gothic", name: "Gotik", prompt: "Dark gothic aesthetic, mysterious atmosphere, high contrast, dramatic shadows, Victorian horror elements." },
+            { id: "surreal", name: "Sürreal", prompt: "Dreamlike surrealist art, abstract floating objects, imaginative landscapes, Dalí inspired." },
+            { id: "steampunk", name: "Steampunk", prompt: "Victorian steampunk machinery, brass gears, steam, vintage clockwork, copper textures." },
+            { id: "vapor", name: "Vaporwave", prompt: "90s digital aesthetic, pink and cyan glitch art, retro lofi, aesthetic statues." },
+            { id: "synthwave", name: "Synthwave", prompt: "Retro 80s aesthetic, glowing neon grids, sunset chrome, purple and pink horizons, futuristic retro." },
+            { id: "pop", name: "Pop Art", prompt: "Bold Andy Warhol style, vibrant flat colors, halftone textures, high impact." },
+            { id: "minimal", name: "Minimalist", prompt: "Clean minimalist design, simple shapes, pastel palette, lots of negative space." },
+            { id: "clay", name: "Kil", prompt: "Tactile claymation style, stop-motion clay texture, handcrafted look." },
+            { id: "ink", name: "Mürekkep", prompt: "Traditional Japanese ink wash painting, elegant brush strokes, zen atmosphere." },
+            { id: "lowpoly", name: "Düşük Poligon", prompt: "Geometric low poly design, modern digital faceted look, stylized 3D." },
+            { id: "retro", name: "Retro", prompt: "1950s space age retro-futurism, vintage sci-fi aesthetic, atomic age design." },
+            { id: "blueprint", name: "Blueprint", prompt: "Architectural blueprint, white technical lines on blue background, engineering draft." },
+            { id: "noir", name: "Noir", prompt: "Classic film noir, high contrast, dramatic shadows, foggy mystery, monochrome cinematic." },
+            { id: "fantasy", name: "Fantasy", prompt: "Epic fantasy, majestic magic, golden hour, ethereal glow, mythical landscapes." },
+            { id: "dark_fantasy", name: "Karanlık Fantazi", prompt: "Grim dark fantasy art, moody lighting, ancient ruins, mysterious and ominous atmosphere, sharp detail." },
+            { id: "mosaic", name: "Mozaik", prompt: "Ancient mosaic tile art, handcrafted texture, intricate patterns." },
+            { id: "graffiti", name: "Grafiti", prompt: "Urban street art graffiti, vibrant spray paint, mural style, dripping paint." },
+            { id: "glitch", name: "Glitch", prompt: "Digital distortion, signal interference, colorful artifacts, data corruption aesthetic." },
+            { id: "origami", name: "Origami", prompt: "Paper folding art style, sharp creases, delicate paper texture." },
+            { id: "paper_cutout", name: "Kağıt Kesme", prompt: "Layered paper cutout art, 3D depth effect, clean edges, handcrafted paper texture, shadows." },
+            { id: "uikiyoe", name: "Ukiyo-e", prompt: "Classical Japanese woodblock print, historical Edo style, flat wood-pressed colors." },
+            { id: "abstract", name: "Soyut", prompt: "Expressive abstract art, emotional color fields, modern composition." },
+            { id: "renaissance", name: "Rönesans", prompt: "Classical Renaissance painting, old master aesthetic, chiaroscuro lighting." },
+            { id: "disco", name: "Disco", prompt: "Retro 70s disco style, glitter, lens flares, dance floor, vibrant lights." },
+            { id: "neon_line", name: "Neon Çizgi", prompt: "Glowing neon outline art, vibrant lights on dark void, minimalist glowing lines." },
+            { id: "style3d", name: "3D", prompt: "Advanced 3D render, Octane render, Unreal Engine 5 style, volumetric lighting, high fidelity." },
+            { id: "style2d", name: "2D", prompt: "Clean 2D vector-style illustration, professional graphic design, flat colors with subtle shading." },
+            { id: "isometric", name: "İzometrik", prompt: "Isometric 3D projection, tilt-shift photography effect, detailed miniature world, clean aesthetic." },
+            { id: "vector", name: "Vektör Sanatı", prompt: "High-quality vector art, Adobe Illustrator style, clean paths, vibrant gradients." },
+            { id: "charcoal", name: "Kömür Çizimi", prompt: "Rough charcoal drawing, heavy texture, smudge effects, high contrast monochrome." },
+            { id: "pastel", name: "Pastel Çizimi", prompt: "Soft pastel chalk drawing, blended colors, powdery texture, dreamlike hazy atmosphere." },
+            { id: "acrylic", name: "Akrilik Boyama", prompt: "Modern acrylic painting, vibrant colors, visible palette knife strokes, textured canvas." },
+            { id: "digital_painting", name: "Dijital Boyama", prompt: "Professional digital painting, smooth blending, concept art quality, epic scale and detail." },
+            { id: "concept_art", name: "Konsept Sanatı", prompt: "Epic movie concept art, sweeping scale, cinematic mood, detailed world-building visuals." },
+            { id: "matte_painting", name: "Mat Boyama", prompt: "Professional film matte painting, photorealistic landscape extensions, epic horizon, seamless detail." },
+            { id: "photobash", name: "Fotoğraf Birleştirme", prompt: "Detailed photobash concept art, kit-bashing elements, realistic textures merged with artistic painting." },
+            { id: "collage", name: "Kolaj", prompt: "Artistic mixed media collage, layered paper textures, vintage clippings, eclectic composition." },
+            { id: "scifi", name: "Bilimkurgu", prompt: "Futuristic sci-fi environment, advanced technology, interstellar scale, high-tech details, sleek design." },
+            { id: "art_nouveau", name: "Art Nouveau", prompt: "Elegant Art Nouveau style, flowing organic lines, floral motifs, Alphonse Mucha aesthetic, intricate gold details." },
+            { id: "impressionism", name: "İzlenimcilik", prompt: "Impressionist oil painting, small thin brushstrokes, emphasis on light and its changing qualities, airy." },
+            { id: "expressionism", name: "Dışavurumculuk", prompt: "Emotional expressionist art, distorted forms, bold colors, intense brushwork, high emotion." },
+            { id: "cubism", name: "Kübizm", prompt: "Classic cubist painting, fragmented objects, multiple viewpoints, geometric shapes, avant-garde." },
+            { id: "storybook", name: "Hikaye Kitabı", prompt: "Classic storybook illustration, whimsical atmosphere, detailed hand-drawn charm, magical feeling." },
+            { id: "kids_book", name: "Çocuk Kitabı", prompt: "Cute children's book style, friendly characters, vibrant colors, simple shapes, joyful mood." },
+            { id: "sticker", name: "Çıkartma Sanatı", prompt: "Die-cut sticker art, thick white border, vibrant colors, clean pop aesthetic, vector look." }
+        ];
+
         const ASPECT_RATIOS = {
             "16:9": { width: 1280, height: 720, label: "16:9", apiRatio: "16:9" },
             "9:16": { width: 720, height: 1280, label: "9:16", apiRatio: "9:16" },
             "1:1": { width: 1080, height: 1080, label: "1:1", apiRatio: "1:1" },
             "4:3": { width: 1024, height: 768, label: "4:3", apiRatio: "4:3" }
         };
-
-        
 
         const VIDEO_FX = ["fx-zoom-in", "fx-zoom-out", "fx-pan-left", "fx-pan-right", "fx-tilt-cw", "fx-tilt-ccw", "fx-floating", "fx-pulse"];
 
@@ -377,6 +420,7 @@
         let activeIdx = -1;
         let referenceImageBase64 = null;
         let currentModalSceneId = null;
+        let replicateApiKey = "";
 
         const el = {
             audio: document.getElementById('audioPlayer'),
@@ -404,8 +448,8 @@
             modeImage: document.getElementById('modeImage'),
             modeVideo: document.getElementById('modeVideo'),
             modeVideoAI: document.getElementById('modeVideoAI'),
-            
-            // Modal Elements
+            replicateKeySection: document.getElementById('replicateKeySection'),
+            replicateApiKey: document.getElementById('replicateApiKey'),
             modal: document.getElementById('sceneModal'),
             modalClose: document.getElementById('closeModal'),
             modalPreview: document.getElementById('modalPreviewBox'),
@@ -419,7 +463,6 @@
         };
 
         function initUI() {
-            // Init Styles
             el.styles.innerHTML = '';
             ART_STYLES.forEach(s => {
                 const b = document.createElement('div');
@@ -433,7 +476,6 @@
                 el.styles.appendChild(b);
             });
 
-            // Init Ratios
             el.ratioGrid.innerHTML = '';
             Object.keys(ASPECT_RATIOS).forEach(key => {
                 const r = ASPECT_RATIOS[key];
@@ -451,9 +493,7 @@
 
         function setAspectRatio(key) {
             currentRatio = ASPECT_RATIOS[key];
-            // Update Preview CSS
             el.videoArea.style.aspectRatio = key.replace(':', '/');
-            // Update Modal Preview CSS
             el.modalPreview.style.aspectRatio = key.replace(':', '/');
             log(`Video Formatı Değişti: ${currentRatio.label} (${currentRatio.width}x${currentRatio.height})`);
         }
@@ -461,15 +501,28 @@
         function setMode(mode) {
             productionMode = mode;
             [el.modeImage, el.modeVideo, el.modeVideoAI].forEach(b => b.classList.remove('active'));
-            if(mode === 'image') el.modeImage.classList.add('active');
-            if(mode === 'video') el.modeVideo.classList.add('active');
-            if(mode === 'videoAI') el.modeVideoAI.classList.add('active');
+            if(mode === 'image') {
+                el.modeImage.classList.add('active');
+                el.replicateKeySection.classList.add('hidden');
+            }
+            if(mode === 'video') {
+                el.modeVideo.classList.add('active');
+                el.replicateKeySection.classList.add('hidden');
+            }
+            if(mode === 'videoAI') {
+                el.modeVideoAI.classList.add('active');
+                el.replicateKeySection.classList.remove('hidden');
+            }
             log(`Mod seçildi: ${mode.toUpperCase()}`);
         }
 
         el.modeImage.onclick = () => setMode('image');
         el.modeVideo.onclick = () => setMode('video');
         el.modeVideoAI.onclick = () => setMode('videoAI');
+        
+        el.replicateApiKey.oninput = (e) => {
+            replicateApiKey = e.target.value.trim();
+        };
 
         function log(msg, type = 'info') {
             document.getElementById('statusConsole').classList.remove('hidden');
@@ -497,6 +550,57 @@
                     if (i === retries - 1) throw e;
                     await new Promise(r => setTimeout(r, delays[i]));
                 }
+            }
+        }
+
+        async function replicateImageToVideo(imageBase64, prompt, duration = 5) {
+            if (!replicateApiKey) {
+                throw new Error("Replicate API Key girilmedi!");
+            }
+
+            log("Replicate: Video üretimi başlatılıyor...");
+
+            const imageUrl = `data:image/jpeg;base64,${imageBase64}`;
+            
+            const prediction = await fetch("https://api.replicate.com/v1/predictions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${replicateApiKey}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    version: "3e3a1b2b57ea5e0f4c88f0c1d1e7a3a3e3a1b2b57ea5e0f4c88f0c1d1e7a3a3",
+                    input: {
+                        image: imageUrl,
+                        prompt: prompt,
+                        duration: duration,
+                        fps: 30,
+                        aspect_ratio: currentRatio.apiRatio
+                    }
+                })
+            });
+
+            if (!prediction.ok) {
+                throw new Error("Replicate API başlatma hatası");
+            }
+
+            let result = await prediction.json();
+            log(`Replicate: Prediction ID ${result.id}`);
+
+            while (result.status === "starting" || result.status === "processing") {
+                await new Promise(r => setTimeout(r, 2000));
+                const statusRes = await fetch(`https://api.replicate.com/v1/predictions/${result.id}`, {
+                    headers: { "Authorization": `Bearer ${replicateApiKey}` }
+                });
+                result = await statusRes.json();
+                log(`Replicate: ${result.status}...`);
+            }
+
+            if (result.status === "succeeded" && result.output) {
+                log("Replicate: Video hazır!");
+                return result.output;
+            } else {
+                throw new Error(`Replicate hatası: ${result.error || result.status}`);
             }
         }
 
@@ -547,7 +651,6 @@
             return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
         }
 
-        // --- PARSING & PLANNING LOGIC ---
         document.getElementById('planBtn').onclick = async () => {
             let txt = el.lyrics.value.trim();
             const mood = el.mood.value.trim();
@@ -567,7 +670,6 @@
 
             log("Senaryo kurgulanıyor...");
             
-            // DEEP REFERENCE IMAGE ANALYSIS
             let characterDesc = "";
             if (referenceImageBase64) {
                  log("Referans resim DERİNLEMESİNE analiz ediliyor...");
@@ -587,7 +689,6 @@
                  }
             }
 
-            // EXTRACT MASTER PROMPT
             let masterPrompt = "";
             const masterMatch = txt.match(/\{([\s\S]*?)\}/);
             if (masterMatch) {
@@ -596,7 +697,6 @@
                 log(`Master Prompt Algılandı: ${masterPrompt}`);
             }
 
-            // PARSE LINES (Hybrid: Custom + SRT)
             const parsed = [];
             const lines = txt.split('\n').map(l => l.trim());
             let i = 0;
@@ -663,7 +763,6 @@
                 i++;
             }
 
-            // AUTO-EXTEND DURATION (GAP FILLING)
             parsed.sort((a, b) => a.start - b.start);
             for (let k = 0; k < parsed.length - 1; k++) {
                 const current = parsed[k];
@@ -749,7 +848,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             el.modalDimensions.innerText = `${currentRatio.label} • ${currentRatio.width}x${currentRatio.height}px • ${selectedStyle.name}`;
             
             if (scene.image) {
-                if (scene.image.startsWith('data:video')) {
+                if (scene.image.startsWith('data:video') || scene.image.startsWith('http')) {
                      el.modalPreview.innerHTML = `<video src="${scene.image}" autoplay loop muted playsinline class="w-full h-full object-cover"></video>`;
                 } else {
                      el.modalPreview.innerHTML = `<img src="${scene.image}" class="w-full h-full object-cover">`;
@@ -818,12 +917,51 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             try {
                 let imageUrl;
                 
-                // --- FORCE REFERENCE IMAGE USAGE ---
-                if (referenceImageBase64) {
-                     const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+                // VIDEO (AI) MODE - REPLICATE API
+                if (productionMode === 'videoAI') {
+                    if (!replicateApiKey) {
+                        log("Replicate API Key girilmedi! Lütfen API anahtarınızı girin.", "err");
+                        if(currentModalSceneId === idx) box.innerHTML = `<span class="text-red-500 text-xs">API Key Gerekli</span>`;
+                        return;
+                    }
+
+                    // First generate image with Gemini
+                    log(`Sahne ${idx+1}: Önce görsel oluşturuluyor...`);
+                    let baseImageB64;
+                    
+                    if (referenceImageBase64) {
+                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
+                            contents: [{
+                                parts: [
+                                    { text: `Cinematic, Extreme Wide Angle, Full Body Shot. Aspect Ratio ${currentRatio.apiRatio}. ${promptText}. The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT. Ignore the clothing in the reference image.` },
+                                    { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
+                                ]
+                            }],
+                            generationConfig: { responseModalities: ['IMAGE'] }
+                        });
+                        
+                        baseImageB64 = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                        if (!baseImageB64) {
+                            throw new Error("Referans görselden üretim başarısız.");
+                        }
+                    } else {
+                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
+                            instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
+                            parameters: { sampleCount: 1, aspectRatio: currentRatio.apiRatio }
+                        });
+                        baseImageB64 = res.predictions[0].bytesBase64Encoded;
+                    }
+
+                    // Now convert to video with Replicate
+                    log(`Sahne ${idx+1}: Video dönüşümü başlatılıyor...`);
+                    const sceneDuration = Math.min(5, scenes[idx].end - scenes[idx].start);
+                    imageUrl = await replicateImageToVideo(baseImageB64, promptText, sceneDuration);
+                    
+                } else if (referenceImageBase64) {
+                    const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent', {
                         contents: [{
                             parts: [
-                                { text: `Cinematic, Extreme Wide Angle, Full Body Shot. Aspect Ratio ${currentRatio.apiRatio}. ${promptText}. The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT (e.g. Leopard Tracksuit). Ignore the clothing in the reference image.` },
+                                { text: `Cinematic, Extreme Wide Angle, Full Body Shot. Aspect Ratio ${currentRatio.apiRatio}. ${promptText}. The character has the physical identity of the reference image (face, hair, body), BUT MUST WEAR THE CLOTHING DESCRIBED IN THE PROMPT. Ignore the clothing in the reference image.` },
                                 { inlineData: { mimeType: "image/jpeg", data: referenceImageBase64 } }
                             ]
                         }],
@@ -838,14 +976,7 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                     }
 
                 } else {
-                    // --- FALLBACK TO STANDARD IMAGEN ---
-                    if (productionMode === 'videoAI') {
-                        const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
-                            instances: [{ prompt: promptText + ", 8k resolution, cinematic lighting, photorealistic" }],
-                            parameters: { sampleCount: 1, aspectRatio: currentRatio.apiRatio }
-                        });
-                         imageUrl = `data:image/jpeg;base64,${res.predictions[0].bytesBase64Encoded}`;
-                    } else if (productionMode === 'video' || productionMode === 'image') {
+                    if (productionMode === 'video' || productionMode === 'image') {
                         const res = await apiCall('https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict', {
                             instances: [{ prompt: promptText + " " + selectedStyle.prompt }],
                             parameters: { sampleCount: 1, aspectRatio: currentRatio.apiRatio }
@@ -865,11 +996,10 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
 
             } catch (err) {
                 log(`Hata (Sahne ${idx+1}): ${err.message}`, "err");
-                if(currentModalSceneId === idx) box.innerHTML = `<span class="text-red-500 text-xs">Hata</span>`;
+                if(currentModalSceneId === idx) box.innerHTML = `<span class="text-red-500 text-xs">Hata: ${err.message}</span>`;
             }
         }
 
-        // --- PLAYER LOGIC ---
         el.play.onclick = () => {
             if (isPlaying) {
                 el.audio.pause();
@@ -895,10 +1025,22 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
                 if (activeIdx !== currentScene.id) {
                     activeIdx = currentScene.id;
                     el.layers.innerHTML = '';
-                    const slide = document.createElement('img');
-                    slide.src = currentScene.image;
-                    slide.className = `slide-item active ${currentScene.fx}`;
-                    el.layers.appendChild(slide);
+                    
+                    if (currentScene.image && (currentScene.image.startsWith('data:video') || currentScene.image.startsWith('http'))) {
+                        const video = document.createElement('video');
+                        video.src = currentScene.image;
+                        video.autoplay = true;
+                        video.muted = true;
+                        video.loop = true;
+                        video.playsInline = true;
+                        video.className = `slide-item active`;
+                        el.layers.appendChild(video);
+                    } else if (currentScene.image) {
+                        const slide = document.createElement('img');
+                        slide.src = currentScene.image;
+                        slide.className = `slide-item active ${currentScene.fx}`;
+                        el.layers.appendChild(slide);
+                    }
                     
                     if (currentScene.showSubtitle) {
                         el.subtitle.innerText = currentScene.caption;
@@ -917,14 +1059,12 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             }
         }
 
-        // --- EXPORT LOGIC (Dynamic Resolution + Preloading) ---
         el.exportBtn.onclick = async () => {
             const w = currentRatio.width;
             const h = currentRatio.height;
 
             el.renderStatus.innerText = `Görseller Hazırlanıyor (${w}x${h})...`;
             
-            // Set canvas size based on selected ratio
             el.exportCanvas.width = w;
             el.exportCanvas.height = h;
             el.exportCanvas.style.display = 'block';
@@ -932,24 +1072,39 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             el.audio.pause();
             el.audio.currentTime = 0;
             
-            // 1. PRELOAD IMAGES
             const imageCache = {};
+            const videoCache = {};
+            
             for (const s of scenes) {
                 if (s.image) {
                     try {
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        img.src = s.image;
-                        await new Promise((resolve, reject) => {
-                            img.onload = resolve;
-                            img.onerror = resolve; 
-                        });
-                        imageCache[s.id] = img;
+                        if (s.image.startsWith('data:video') || s.image.startsWith('http')) {
+                            const video = document.createElement('video');
+                            video.crossOrigin = "anonymous";
+                            video.src = s.image;
+                            video.muted = true;
+                            video.playsInline = true;
+                            await new Promise((resolve) => {
+                                video.onloadeddata = resolve;
+                                video.onerror = resolve;
+                            });
+                            videoCache[s.id] = video;
+                        } else {
+                            const img = new Image();
+                            img.crossOrigin = "anonymous";
+                            img.src = s.image;
+                            await new Promise((resolve, reject) => {
+                                img.onload = resolve;
+                                img.onerror = resolve; 
+                            });
+                            imageCache[s.id] = img;
+                        }
                     } catch (e) {
-                        console.error("Image load error", e);
+                        console.error("Media load error", e);
                     }
                 }
             }
+            
             log("Görseller önbelleğe alındı, kayıt başlıyor...", "info");
             el.renderStatus.innerText = "Render Yapılıyor...";
 
@@ -988,7 +1143,6 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             recorder.start();
             el.audio.play();
 
-            // Dynamic Image Drawing
             function drawCoverImage(ctx, img, x, y, width, height) {
                 const imgRatio = img.width / img.height;
                 const winRatio = width / height;
@@ -1011,42 +1165,43 @@ ${characterDesc ? `6. KARAKTER REFERANSI (FİZİKSEL ÖZELLİKLERİ KORU): "${ch
             const loop = () => {
                 const now = el.audio.currentTime;
                 
-                // Clear Canvas
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, 0, w, h);
 
                 const scene = scenes.find(s => now >= s.start && now < s.end);
                 
                 if (scene) {
-                    const item = imageCache[scene.id];
-                    if (item) {
-                        // Dynamic Ken Burns Zoom
+                    const img = imageCache[scene.id];
+                    const video = videoCache[scene.id];
+                    
+                    if (video) {
+                        if (video.paused) video.play().catch(() => {});
+                        drawCoverImage(ctx, video, 0, 0, w, h);
+                    } else if (img) {
                         const duration = scene.end - scene.start;
                         const elapsed = Math.max(0, now - scene.start);
                         const progress = Math.min(1, elapsed / duration);
                         const scale = 1 + (progress * 0.15); 
                         
                         ctx.save();
-                        // Dynamic Center Translation
                         ctx.translate(w / 2, h / 2);
                         ctx.scale(scale, scale);
                         ctx.translate(-w / 2, -h / 2);
                         
-                        drawCoverImage(ctx, item, 0, 0, w, h);
+                        drawCoverImage(ctx, img, 0, 0, w, h);
                         ctx.restore();
+                    }
+                    
+                    if (scene.showSubtitle) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                        ctx.fillRect(0, h - 120, w, 120);
                         
-                        // Dynamic Subtitle Positioning
-                        if (scene.showSubtitle) {
-                            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                            ctx.fillRect(0, h - 120, w, 120); // Always at bottom
-                            
-                            ctx.fillStyle = '#ffffff';
-                            ctx.font = 'bold 36px Outfit, Arial, sans-serif'; 
-                            ctx.textAlign = 'center';
-                            ctx.shadowColor = "black";
-                            ctx.shadowBlur = 7;
-                            ctx.fillText(scene.caption, w / 2, h - 50);
-                        }
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 36px Outfit, Arial, sans-serif'; 
+                        ctx.textAlign = 'center';
+                        ctx.shadowColor = "black";
+                        ctx.shadowBlur = 7;
+                        ctx.fillText(scene.caption, w / 2, h - 50);
                     }
                 }
                 
