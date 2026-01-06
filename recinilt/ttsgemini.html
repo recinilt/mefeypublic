@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobil Uyumlu Profesyonel Okuyucu</title>
+    <title>Profesyonel Okuyucu + Google Cloud TTS</title>
     <style>
         :root {
             --bg-color: #11111b;
@@ -15,6 +15,7 @@
             --btn-bg: #313244;
             --stop-color: #f38ba8;
             --download-color: #a6e3a1;
+            --warning-color: #fab387;
         }
 
         body {
@@ -48,6 +49,86 @@
             color: var(--accent-color);
             font-size: 1.5rem;
             text-align: center;
+        }
+
+        .api-key-section {
+            background: rgba(250, 179, 135, 0.1);
+            border: 2px solid var(--warning-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .api-key-section h3 {
+            margin: 0 0 10px 0;
+            color: var(--warning-color);
+            font-size: 1.1rem;
+        }
+
+        .api-key-section p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .api-key-section a {
+            color: var(--accent-color);
+            text-decoration: underline;
+        }
+
+        .api-key-input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .api-key-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            background: var(--btn-bg);
+            color: white;
+            border: 1px solid transparent;
+            font-size: 1rem;
+            font-family: monospace;
+        }
+
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn-save-key {
+            background-color: var(--accent-color);
+            color: #11111b;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-save-key:active {
+            transform: scale(0.96);
+        }
+
+        .api-status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .api-status.success {
+            background: rgba(166, 227, 161, 0.2);
+            color: #a6e3a1;
+        }
+
+        .api-status.error {
+            background: rgba(243, 139, 168, 0.2);
+            color: #f38ba8;
         }
 
         .text-wrapper {
@@ -252,6 +333,25 @@
             min-height: 1.2em;
         }
 
+        .info-box {
+            background: rgba(137, 180, 250, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+
+        .info-box li {
+            margin: 5px 0;
+        }
+
         @media (min-width: 600px) {
             .controls-wrapper {
                 flex-direction: row;
@@ -267,25 +367,51 @@
 <body>
 
     <div class="container">
-        <h1>Uzun Metin Okuyucu</h1>
+        <h1>🎙️ Profesyonel Metin Okuyucu</h1>
+
+        <!-- Google Cloud API Key Section -->
+        <div class="api-key-section">
+            <h3>🔑 Google Cloud TTS API Key</h3>
+            <p>
+                <strong>Ücretsiz:</strong> Ayda 4 milyon karakter (Standard) veya 1 milyon karakter (WaveNet)<br>
+                <strong>Yeni kullanıcılara $300 kredi!</strong><br>
+                <a href="https://console.cloud.google.com" target="_blank">👉 API Key almak için tıklayın</a>
+            </p>
+            <div class="api-key-input-group">
+                <input 
+                    type="text" 
+                    id="api-key-input" 
+                    class="api-key-input"
+                    placeholder="API Key'inizi buraya yapıştırın (AIza...)"
+                >
+                <button id="save-key-btn" class="btn-save-key">💾 Kaydet</button>
+            </div>
+            <div id="api-status" class="api-status" style="display: none;"></div>
+        </div>
         
         <div class="text-wrapper">
-            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben okurken ekranın kapanmasını engelleyen yeni sürümüm. Okuma başladığında telefonun uyku moduna geçmez, böylece kesintisiz dinleyebilirsin. Artık metni ses dosyası olarak da indirebilirsin!</textarea>
+            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben Google Cloud TTS ile çalışan profesyonel okuyucu. Metninizi yüksek kalitede MP3 olarak indirebilirsiniz. 380 farklı ses ve 50+ dil desteği ile dünyanın en güçlü metin okuma sistemiyim!</textarea>
             <div id="read-display"></div>
         </div>
         
         <div class="controls-wrapper">
             <div class="voice-section">
                 <select id="voice-select">
-                    <option value="">Sesler yükleniyor...</option>
+                    <option value="">Tarayıcı sesleri yükleniyor...</option>
                 </select>
                 <span id="wake-status" class="status-msg"></span>
+            </div>
+
+            <div class="voice-section">
+                <select id="google-voice-select" disabled>
+                    <option value="">Google TTS sesleri (API Key gerekli)</option>
+                </select>
             </div>
 
             <div class="action-buttons">
                 <button id="play-btn" class="btn-play">▶ Oku</button>
                 <button id="stop-btn" class="btn-stop">⏹ Dur</button>
-                <button id="download-btn" class="btn-download">🎙️ Ses Dosyası Kaydet</button>
+                <button id="download-btn" class="btn-download" disabled>⬇ Google TTS MP3 İndir</button>
             </div>
 
             <div class="speed-controls">
@@ -295,25 +421,35 @@
             </div>
         </div>
 
-        <p class="info">Boşluk: Oynat/Duraklat | ↑↓: Hız Ayarla</p>
+        <div class="info-box">
+            <strong>💎 Google Cloud TTS Özellikleri:</strong>
+            <ul>
+                <li>✅ 4 milyon karakter/ay ücretsiz (Standard)</li>
+                <li>✅ 1 milyon karakter/ay ücretsiz (WaveNet)</li>
+                <li>✅ 380+ profesyonel ses</li>
+                <li>✅ 50+ dil desteği</li>
+                <li>✅ Yüksek kalite MP3/WAV indirme</li>
+                <li>✅ Hız kontrolü ile indirme</li>
+            </ul>
+        </div>
+
+        <p class="info">⌨️ Kısayollar: Boşluk = Oynat/Duraklat | ↑↓ = Hız Ayarla</p>
     </div>
 
     <div id="speed-overlay" class="speed-overlay">1.0x</div>
     <div id="progress-overlay" class="progress-overlay">
-        <div id="progress-title">Ses kaydı başlatılıyor...</div>
+        <div id="progress-title">MP3 oluşturuluyor...</div>
         <div class="progress-bar">
             <div id="progress-fill" class="progress-fill"></div>
         </div>
         <div id="progress-text" style="margin-top: 10px; font-size: 0.9rem;">0%</div>
-        <div style="margin-top: 15px; font-size: 0.85rem; color: #a6adc8;">
-            Ses kayıt sırasında lütfen başka sekmeye geçmeyin
-        </div>
     </div>
 
     <script>
         const textInput = document.getElementById('text-input');
         const readDisplay = document.getElementById('read-display');
         const voiceSelect = document.getElementById('voice-select');
+        const googleVoiceSelect = document.getElementById('google-voice-select');
         const playBtn = document.getElementById('play-btn');
         const stopBtn = document.getElementById('stop-btn');
         const downloadBtn = document.getElementById('download-btn');
@@ -325,22 +461,112 @@
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
         const progressTitle = document.getElementById('progress-title');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const saveKeyBtn = document.getElementById('save-key-btn');
+        const apiStatus = document.getElementById('api-status');
 
         const synth = window.speechSynthesis;
         let voices = [];
+        let googleVoices = [];
         let textChunks = [];
         let currentChunkIndex = 0;
         let isSpeaking = false;
         let isPaused = false;
         let isManualStop = false;
+        let googleApiKey = localStorage.getItem('google_tts_api_key') || '';
 
         let currentRate = parseFloat(localStorage.getItem('tts_speed') || '1.0');
         speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
 
-        // Kayıt değişkenleri
-        let mediaRecorder = null;
-        let audioChunks = [];
-        let isRecording = false;
+        // API Key'i yükle
+        if (googleApiKey) {
+            apiKeyInput.value = googleApiKey;
+            showApiStatus('✅ API Key kayıtlı', 'success');
+            loadGoogleVoices();
+        }
+
+        // API Key kaydetme
+        saveKeyBtn.addEventListener('click', async () => {
+            const key = apiKeyInput.value.trim();
+            if (!key) {
+                showApiStatus('❌ Lütfen API Key girin', 'error');
+                return;
+            }
+
+            if (!key.startsWith('AIza')) {
+                showApiStatus('⚠️ API Key "AIza" ile başlamalı', 'error');
+                return;
+            }
+
+            // API Key'i test et
+            showApiStatus('🔄 Test ediliyor...', 'success');
+            const isValid = await testApiKey(key);
+            
+            if (isValid) {
+                googleApiKey = key;
+                localStorage.setItem('google_tts_api_key', key);
+                showApiStatus('✅ API Key başarıyla kaydedildi!', 'success');
+                loadGoogleVoices();
+            } else {
+                showApiStatus('❌ Geçersiz API Key veya API aktif değil', 'error');
+            }
+        });
+
+        function showApiStatus(message, type) {
+            apiStatus.textContent = message;
+            apiStatus.className = `api-status ${type}`;
+            apiStatus.style.display = 'block';
+        }
+
+        async function testApiKey(key) {
+            try {
+                const response = await fetch(`https://texttospeech.googleapis.com/v1/voices?key=${key}`);
+                return response.ok;
+            } catch (error) {
+                console.error('API test hatası:', error);
+                return false;
+            }
+        }
+
+        async function loadGoogleVoices() {
+            try {
+                const response = await fetch(`https://texttospeech.googleapis.com/v1/voices?key=${googleApiKey}`);
+                if (!response.ok) throw new Error('Sesler yüklenemedi');
+                
+                const data = await response.json();
+                googleVoices = data.voices || [];
+                
+                // Türkçe sesleri filtrele ve sırala
+                const turkishVoices = googleVoices.filter(v => v.languageCodes.includes('tr-TR'));
+                
+                googleVoiceSelect.innerHTML = '<option value="">Google TTS Sesi Seçin</option>';
+                
+                turkishVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    const voiceType = voice.name.includes('Wavenet') ? '💎 WaveNet' : 
+                                     voice.name.includes('Neural2') ? '🧠 Neural2' : 
+                                     '🔊 Standard';
+                    const gender = voice.ssmlGender === 'FEMALE' ? '👩' : '👨';
+                    option.value = voice.name;
+                    option.textContent = `${voiceType} ${gender} ${voice.name}`;
+                    googleVoiceSelect.appendChild(option);
+                });
+
+                // İlk Türkçe sesi varsayılan yap
+                if (turkishVoices.length > 0) {
+                    googleVoiceSelect.value = turkishVoices[0].name;
+                }
+                
+                googleVoiceSelect.disabled = false;
+                downloadBtn.disabled = false;
+                
+                console.log(`${turkishVoices.length} Türkçe Google TTS sesi yüklendi`);
+                
+            } catch (error) {
+                console.error('Google sesler yüklenirken hata:', error);
+                showApiStatus('⚠️ Google sesleri yüklenemedi', 'error');
+            }
+        }
 
         // -------------------------------------
         // EKRAN KİLİDİ (WAKE LOCK)
@@ -376,8 +602,10 @@
                 await requestWakeLock();
             }
         });
-        // -------------------------------------
 
+        // -------------------------------------
+        // SES SENTEZİ FONKSİYONLARI
+        // -------------------------------------
         function populateVoices() {
             voices = synth.getVoices();
             if(voices.length === 0) return;
@@ -477,9 +705,6 @@
 
         function playCurrentChunk() {
             if (currentChunkIndex >= textChunks.length) {
-                if (isRecording) {
-                    stopRecording();
-                }
                 resetView();
                 return;
             }
@@ -508,14 +733,6 @@
             utterance.onend = () => {
                 if (isManualStop) return; 
                 currentChunkIndex++;
-                
-                // Progress güncelle (kayıt modunda)
-                if (isRecording && textChunks.length > 0) {
-                    const progress = Math.round((currentChunkIndex / textChunks.length) * 100);
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = `${progress}% (${currentChunkIndex}/${textChunks.length})`;
-                }
-                
                 playCurrentChunk(); 
             };
 
@@ -572,9 +789,6 @@
         function stopSpeech() {
             isManualStop = true;
             synth.cancel();
-            if (isRecording) {
-                stopRecording();
-            }
             resetView();
         }
 
@@ -599,111 +813,183 @@
         }
 
         // -------------------------------------
-        // SES KAYIT ÖZELLİĞİ
+        // GOOGLE CLOUD TTS MP3 İNDİRME
         // -------------------------------------
-        async function startRecordingAndReading() {
+        async function downloadWithGoogleTTS() {
+            if (!googleApiKey) {
+                alert('Lütfen önce Google Cloud TTS API Key girin!');
+                return;
+            }
+
             const text = textInput.value.trim();
             if (!text) {
                 alert('Lütfen önce metin girin!');
                 return;
             }
 
-            if (voices.length === 0) {
-                populateVoices();
+            const selectedVoice = googleVoiceSelect.value;
+            if (!selectedVoice) {
+                alert('Lütfen bir Google TTS sesi seçin!');
+                return;
             }
 
+            // Progress göster
+            progressOverlay.classList.add('show');
+            progressFill.style.width = '0%';
+            progressText.textContent = 'MP3 oluşturuluyor...';
+            downloadBtn.disabled = true;
+
             try {
-                // Mikrofon erişimi iste
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    audio: {
-                        echoCancellation: false,
-                        noiseSuppression: false,
-                        autoGainControl: false
-                    } 
-                });
+                // Metni parçalara böl (Google TTS 5000 karakter limiti var)
+                const maxChars = 4500;
+                const chunks = [];
+                let currentChunk = '';
+
+                const sentences = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
                 
-                audioChunks = [];
-                mediaRecorder = new MediaRecorder(stream, {
-                    mimeType: 'audio/webm;codecs=opus'
-                });
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) {
-                        audioChunks.push(e.data);
+                for (const sentence of sentences) {
+                    if ((currentChunk + sentence).length > maxChars) {
+                        if (currentChunk) chunks.push(currentChunk);
+                        currentChunk = sentence;
+                    } else {
+                        currentChunk += sentence;
                     }
-                };
+                }
+                if (currentChunk) chunks.push(currentChunk);
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `metin-okuma-${Date.now()}.webm`;
-                    a.click();
-                    URL.revokeObjectURL(url);
+                console.log(`Metin ${chunks.length} parçaya bölündü`);
+
+                // Her parça için ses oluştur
+                const audioChunks = [];
+                for (let i = 0; i < chunks.length; i++) {
+                    progressFill.style.width = ((i / chunks.length) * 100) + '%';
+                    progressText.textContent = `${i + 1}/${chunks.length} parça işleniyor...`;
+
+                    console.log(`Parça ${i + 1}: "${chunks[i].substring(0, 50)}..."`);
                     
-                    // Stream'i kapat
-                    stream.getTracks().forEach(track => track.stop());
-                    
-                    progressOverlay.classList.remove('show');
-                    downloadBtn.disabled = false;
-                    isRecording = false;
-                };
+                    const audioContent = await textToSpeechGoogle(chunks[i], selectedVoice);
+                    if (audioContent) {
+                        audioChunks.push(audioContent);
+                        console.log(`Parça ${i + 1} başarılı: ${audioContent.length} byte`);
+                    }
+                }
 
-                // Progress göster
-                progressOverlay.classList.add('show');
-                progressTitle.textContent = 'Ses kaydediliyor... (Mikrofonu açık tutun)';
-                progressFill.style.width = '0%';
-                progressText.textContent = '0%';
-                downloadBtn.disabled = true;
-                isRecording = true;
+                if (audioChunks.length === 0) {
+                    throw new Error('Hiç ses oluşturulamadı');
+                }
 
-                // Kaydı başlat
-                mediaRecorder.start();
-
-                // Okumayı başlat
-                if (!isSpeaking && !isPaused) {
-                    processText(text);
-                    currentChunkIndex = 0;
+                console.log(`Toplam ${audioChunks.length} ses parçası oluşturuldu`);
+                progressText.textContent = 'MP3 birleştiriliyor...';
+                
+                // Tüm audio parçalarını birleştir
+                const totalLength = audioChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+                const combined = new Uint8Array(totalLength);
+                
+                let offset = 0;
+                for (const chunk of audioChunks) {
+                    combined.set(chunk, offset);
+                    offset += chunk.length;
                 }
                 
-                isManualStop = false;
-                isSpeaking = true;
-                isPaused = false;
+                console.log(`Birleştirilmiş ses: ${combined.length} byte`);
                 
-                requestWakeLock();
-                playCurrentChunk();
+                // İndir
+                const blob = new Blob([combined], { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `google-tts-${Date.now()}.mp3`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                progressOverlay.classList.remove('show');
+                downloadBtn.disabled = false;
 
             } catch (error) {
-                console.error('Mikrofon erişim hatası:', error);
-                alert('Mikrofon erişimi gerekli! Tarayıcınızın mikrofon izni verdiğinden emin olun.\n\nNot: Ses kartınızın çıkışını girişe yönlendirmeniz veya "Stereo Mix" özelliğini aktifleştirmeniz gerekebilir.');
+                console.error('Google TTS hatası:', error);
+                alert('MP3 oluşturulurken hata oluştu: ' + error.message);
+                progressOverlay.classList.remove('show');
                 downloadBtn.disabled = false;
             }
         }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
+        async function textToSpeechGoogle(text, voiceName) {
+            const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`;
+            
+            const requestBody = {
+                input: { text: text },
+                voice: {
+                    languageCode: 'tr-TR',
+                    name: voiceName
+                },
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speakingRate: currentRate,
+                    pitch: 0.0,
+                    volumeGainDb: 0.0,
+                    sampleRateHertz: 24000
+                }
+            };
+
+            console.log('Google TTS isteği:', { text: text.substring(0, 50) + '...', voiceName, rate: currentRate });
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error('Google TTS API hatası:', error);
+                throw new Error(error.error?.message || 'API isteği başarısız');
             }
+
+            const data = await response.json();
+            
+            if (!data.audioContent) {
+                throw new Error('API yanıtında ses verisi yok');
+            }
+            
+            // Base64'ü binary'ye çevir
+            const binaryString = atob(data.audioContent);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            return bytes;
         }
 
+        // Event Listeners
         playBtn.addEventListener('click', () => {
             if(!isSpeaking && !isPaused) startReading();
             else togglePlay();
         });
         
         stopBtn.addEventListener('click', stopSpeech);
-        downloadBtn.addEventListener('click', startRecordingAndReading);
+        downloadBtn.addEventListener('click', downloadWithGoogleTTS);
         speedUpBtn.addEventListener('click', () => changeSpeed(0.1));
         slowDownBtn.addEventListener('click', () => changeSpeed(-0.1));
 
         document.addEventListener('keydown', (e) => {
-            if (document.activeElement === textInput) return;
-            if (e.code === 'Space') { e.preventDefault(); 
-                if(!isSpeaking && !isPaused) startReading(); else togglePlay(); 
+            if (document.activeElement === textInput || document.activeElement === apiKeyInput) return;
+            
+            if (e.code === 'Space') { 
+                e.preventDefault(); 
+                if(!isSpeaking && !isPaused) startReading(); 
+                else togglePlay(); 
             }
-            else if (e.code === 'ArrowUp') { e.preventDefault(); changeSpeed(0.1); }
-            else if (e.code === 'ArrowDown') { e.preventDefault(); changeSpeed(-0.1); }
+            else if (e.code === 'ArrowUp') { 
+                e.preventDefault(); 
+                changeSpeed(0.1); 
+            }
+            else if (e.code === 'ArrowDown') { 
+                e.preventDefault(); 
+                changeSpeed(-0.1); 
+            }
         });
     </script>
 </body>
