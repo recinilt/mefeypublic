@@ -202,7 +202,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             color: var(--accent-color);
             padding: 30px 50px;
             border-radius: 15px;
@@ -213,6 +213,7 @@
             transition: opacity 0.3s;
             backdrop-filter: blur(10px);
             text-align: center;
+            min-width: 300px;
         }
 
         .progress-overlay.show {
@@ -221,10 +222,10 @@
         }
 
         .progress-bar {
-            width: 200px;
-            height: 8px;
+            width: 100%;
+            height: 10px;
             background: #313244;
-            border-radius: 4px;
+            border-radius: 5px;
             margin-top: 15px;
             overflow: hidden;
         }
@@ -269,7 +270,7 @@
         <h1>Uzun Metin Okuyucu</h1>
         
         <div class="text-wrapper">
-            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben okurken ekranın kapanmasını engelleyen yeni sürümüm. Okuma başladığında telefonun uyku moduna geçmez, böylece kesintisiz dinleyebilirsin. Artık metni MP3 olarak da indirebilirsin!</textarea>
+            <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben okurken ekranın kapanmasını engelleyen yeni sürümüm. Okuma başladığında telefonun uyku moduna geçmez, böylece kesintisiz dinleyebilirsin. Artık metni ses dosyası olarak da indirebilirsin!</textarea>
             <div id="read-display"></div>
         </div>
         
@@ -284,7 +285,7 @@
             <div class="action-buttons">
                 <button id="play-btn" class="btn-play">▶ Oku</button>
                 <button id="stop-btn" class="btn-stop">⏹ Dur</button>
-                <button id="download-btn" class="btn-download" disabled>⬇ MP3 İndir</button>
+                <button id="download-btn" class="btn-download">🎙️ Ses Dosyası Kaydet</button>
             </div>
 
             <div class="speed-controls">
@@ -299,11 +300,14 @@
 
     <div id="speed-overlay" class="speed-overlay">1.0x</div>
     <div id="progress-overlay" class="progress-overlay">
-        <div>MP3 oluşturuluyor...</div>
+        <div id="progress-title">Ses kaydı başlatılıyor...</div>
         <div class="progress-bar">
             <div id="progress-fill" class="progress-fill"></div>
         </div>
         <div id="progress-text" style="margin-top: 10px; font-size: 0.9rem;">0%</div>
+        <div style="margin-top: 15px; font-size: 0.85rem; color: #a6adc8;">
+            Ses kayıt sırasında lütfen başka sekmeye geçmeyin
+        </div>
     </div>
 
     <script>
@@ -320,6 +324,7 @@
         const progressOverlay = document.getElementById('progress-overlay');
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
+        const progressTitle = document.getElementById('progress-title');
 
         const synth = window.speechSynthesis;
         let voices = [];
@@ -332,8 +337,13 @@
         let currentRate = parseFloat(localStorage.getItem('tts_speed') || '1.0');
         speedDisplayStatic.textContent = currentRate.toFixed(1) + "x";
 
+        // Kayıt değişkenleri
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
         // -------------------------------------
-        // EKRAN KİLİDİ (WAKE LOCK) - YENİ ÖZELLİK
+        // EKRAN KİLİDİ (WAKE LOCK)
         // -------------------------------------
         let wakeLock = null;
         const wakeStatus = document.getElementById('wake-status');
@@ -361,7 +371,6 @@
             }
         }
 
-        // Sayfa gizlendiğinde/göründüğünde wake lock'u yeniden iste
         document.addEventListener('visibilitychange', async () => {
             if (wakeLock !== null && document.visibilityState === 'visible') {
                 await requestWakeLock();
@@ -442,7 +451,6 @@
             
             textInput.style.display = 'none';
             readDisplay.style.display = 'block';
-            downloadBtn.disabled = false;
         }
 
         function highlightChunk(index) {
@@ -461,7 +469,6 @@
             textInput.style.display = 'block';
             readDisplay.style.display = 'none';
             playBtn.textContent = "▶ Oku";
-            downloadBtn.disabled = true;
             currentChunkIndex = 0;
             isSpeaking = false;
             isPaused = false;
@@ -470,6 +477,9 @@
 
         function playCurrentChunk() {
             if (currentChunkIndex >= textChunks.length) {
+                if (isRecording) {
+                    stopRecording();
+                }
                 resetView();
                 return;
             }
@@ -498,6 +508,14 @@
             utterance.onend = () => {
                 if (isManualStop) return; 
                 currentChunkIndex++;
+                
+                // Progress güncelle (kayıt modunda)
+                if (isRecording && textChunks.length > 0) {
+                    const progress = Math.round((currentChunkIndex / textChunks.length) * 100);
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = `${progress}% (${currentChunkIndex}/${textChunks.length})`;
+                }
+                
                 playCurrentChunk(); 
             };
 
@@ -554,6 +572,9 @@
         function stopSpeech() {
             isManualStop = true;
             synth.cancel();
+            if (isRecording) {
+                stopRecording();
+            }
             resetView();
         }
 
@@ -578,9 +599,9 @@
         }
 
         // -------------------------------------
-        // YENİ ÖZELLİK: MP3 İNDİRME
+        // SES KAYIT ÖZELLİĞİ
         // -------------------------------------
-        async function downloadAsMP3() {
+        async function startRecordingAndReading() {
             const text = textInput.value.trim();
             if (!text) {
                 alert('Lütfen önce metin girin!');
@@ -591,187 +612,79 @@
                 populateVoices();
             }
 
-            // Seçili ses ayarlarını al
-            let selectedVoice = null;
-            let selectedLang = 'tr-TR';
-            if (voiceSelect.selectedOptions.length > 0) {
-                const name = voiceSelect.selectedOptions[0].getAttribute('data-name');
-                const lang = voiceSelect.selectedOptions[0].getAttribute('data-lang');
-                selectedVoice = voices.find(v => v.name === name);
-                if (lang) selectedLang = lang;
-            }
-
-            // Progress overlay'i göster
-            progressOverlay.classList.add('show');
-            progressFill.style.width = '0%';
-            progressText.textContent = '0%';
-            downloadBtn.disabled = true;
-
-            // Metni cümlelere ayır
-            const chunks = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [text];
-            const audioChunks = [];
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
             try {
-                for (let i = 0; i < chunks.length; i++) {
-                    const chunk = chunks[i].trim();
-                    if (!chunk) continue;
-
-                    // Her chunk için ses oluştur
-                    const audioBuffer = await textToAudioBuffer(chunk, selectedVoice, selectedLang, audioContext);
-                    if (audioBuffer) {
-                        audioChunks.push(audioBuffer);
-                    }
-
-                    // Progress güncelle
-                    const progress = Math.round(((i + 1) / chunks.length) * 100);
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = progress + '%';
-                }
-
-                // Tüm audio buffer'ları birleştir
-                const totalLength = audioChunks.reduce((sum, buf) => sum + buf.length, 0);
-                const mergedBuffer = audioContext.createBuffer(
-                    2, // stereo
-                    totalLength,
-                    audioContext.sampleRate
-                );
-
-                let offset = 0;
-                for (const buffer of audioChunks) {
-                    for (let channel = 0; channel < mergedBuffer.numberOfChannels; channel++) {
-                        const sourceData = buffer.getChannelData(Math.min(channel, buffer.numberOfChannels - 1));
-                        mergedBuffer.getChannelData(channel).set(sourceData, offset);
-                    }
-                    offset += buffer.length;
-                }
-
-                // WAV formatına çevir
-                const wavBlob = audioBufferToWav(mergedBuffer);
+                // Mikrofon erişimi iste
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
                 
-                // İndir
-                const url = URL.createObjectURL(wavBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `metin-okuma-${Date.now()}.wav`;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                progressOverlay.classList.remove('show');
-                downloadBtn.disabled = false;
-                
-            } catch (error) {
-                console.error('MP3 oluşturma hatası:', error);
-                alert('MP3 oluşturulurken hata oluştu: ' + error.message);
-                progressOverlay.classList.remove('show');
-                downloadBtn.disabled = false;
-            }
-        }
-
-        function textToAudioBuffer(text, voice, lang, audioContext) {
-            return new Promise((resolve, reject) => {
-                const utterance = new SpeechSynthesisUtterance(text);
-                if (voice) utterance.voice = voice;
-                utterance.lang = lang;
-                utterance.rate = currentRate;
-
-                // MediaStreamDestination oluştur
-                const dest = audioContext.createMediaStreamDestination();
-                const mediaRecorder = new MediaRecorder(dest.stream);
-                const chunks = [];
+                audioChunks = [];
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: 'audio/webm;codecs=opus'
+                });
 
                 mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) chunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = async () => {
-                    if (chunks.length === 0) {
-                        resolve(null);
-                        return;
-                    }
-                    
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    const arrayBuffer = await blob.arrayBuffer();
-                    
-                    try {
-                        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                        resolve(audioBuffer);
-                    } catch (err) {
-                        console.error('Decode hatası:', err);
-                        resolve(null);
+                    if (e.data.size > 0) {
+                        audioChunks.push(e.data);
                     }
                 };
 
-                utterance.onstart = () => {
-                    mediaRecorder.start();
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `metin-okuma-${Date.now()}.webm`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    
+                    // Stream'i kapat
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    progressOverlay.classList.remove('show');
+                    downloadBtn.disabled = false;
+                    isRecording = false;
                 };
 
-                utterance.onend = () => {
-                    setTimeout(() => mediaRecorder.stop(), 100);
-                };
+                // Progress göster
+                progressOverlay.classList.add('show');
+                progressTitle.textContent = 'Ses kaydediliyor... (Mikrofonu açık tutun)';
+                progressFill.style.width = '0%';
+                progressText.textContent = '0%';
+                downloadBtn.disabled = true;
+                isRecording = true;
 
-                utterance.onerror = (e) => {
-                    console.error('Utterance hatası:', e);
-                    mediaRecorder.stop();
-                    resolve(null);
-                };
+                // Kaydı başlat
+                mediaRecorder.start();
 
-                synth.speak(utterance);
-            });
+                // Okumayı başlat
+                if (!isSpeaking && !isPaused) {
+                    processText(text);
+                    currentChunkIndex = 0;
+                }
+                
+                isManualStop = false;
+                isSpeaking = true;
+                isPaused = false;
+                
+                requestWakeLock();
+                playCurrentChunk();
+
+            } catch (error) {
+                console.error('Mikrofon erişim hatası:', error);
+                alert('Mikrofon erişimi gerekli! Tarayıcınızın mikrofon izni verdiğinden emin olun.\n\nNot: Ses kartınızın çıkışını girişe yönlendirmeniz veya "Stereo Mix" özelliğini aktifleştirmeniz gerekebilir.');
+                downloadBtn.disabled = false;
+            }
         }
 
-        function audioBufferToWav(buffer) {
-            const length = buffer.length * buffer.numberOfChannels * 2;
-            const arrayBuffer = new ArrayBuffer(44 + length);
-            const view = new DataView(arrayBuffer);
-            const channels = [];
-            let offset = 0;
-            let pos = 0;
-
-            // WAV header yazma
-            const setUint16 = (data) => {
-                view.setUint16(pos, data, true);
-                pos += 2;
-            };
-            const setUint32 = (data) => {
-                view.setUint32(pos, data, true);
-                pos += 4;
-            };
-
-            // "RIFF" chunk descriptor
-            setUint32(0x46464952); // "RIFF"
-            setUint32(36 + length); // file length - 8
-            setUint32(0x45564157); // "WAVE"
-
-            // "fmt " sub-chunk
-            setUint32(0x20746d66); // "fmt "
-            setUint32(16); // format chunk length
-            setUint16(1); // PCM format
-            setUint16(buffer.numberOfChannels);
-            setUint32(buffer.sampleRate);
-            setUint32(buffer.sampleRate * buffer.numberOfChannels * 2); // byte rate
-            setUint16(buffer.numberOfChannels * 2); // block align
-            setUint16(16); // bits per sample
-
-            // "data" sub-chunk
-            setUint32(0x61746164); // "data"
-            setUint32(length);
-
-            // Ses verilerini yaz
-            for (let i = 0; i < buffer.numberOfChannels; i++) {
-                channels.push(buffer.getChannelData(i));
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
             }
-
-            while (offset < buffer.length) {
-                for (let i = 0; i < buffer.numberOfChannels; i++) {
-                    const sample = Math.max(-1, Math.min(1, channels[i][offset]));
-                    view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
-                    pos += 2;
-                }
-                offset++;
-            }
-
-            return new Blob([arrayBuffer], { type: 'audio/wav' });
         }
 
         playBtn.addEventListener('click', () => {
@@ -780,7 +693,7 @@
         });
         
         stopBtn.addEventListener('click', stopSpeech);
-        downloadBtn.addEventListener('click', downloadAsMP3);
+        downloadBtn.addEventListener('click', startRecordingAndReading);
         speedUpBtn.addEventListener('click', () => changeSpeed(0.1));
         slowDownBtn.addEventListener('click', () => changeSpeed(-0.1));
 
