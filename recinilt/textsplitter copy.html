@@ -535,44 +535,24 @@
         }
 
         function splitByWords(text, maxLength) {
-            // Metni satırlara ayır ve her satırı kelimelerine böl
-            const lines = text.split('\n');
+            const words = text.split(/\s+/);
             const parts = [];
             let currentPart = '';
 
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const words = line.split(/\s+/).filter(w => w.length > 0);
+            for (const word of words) {
+                const testPart = currentPart ? currentPart + ' ' + word : word;
                 
-                for (let j = 0; j < words.length; j++) {
-                    const word = words[j];
-                    const separator = currentPart ? ' ' : '';
-                    const testPart = currentPart + separator + word;
-                    
-                    if (testPart.length <= maxLength) {
-                        currentPart = testPart;
-                    } else {
-                        if (currentPart) {
-                            parts.push(currentPart);
-                        }
-                        currentPart = word;
+                if (testPart.length <= maxLength) {
+                    currentPart = testPart;
+                } else {
+                    if (currentPart) {
+                        parts.push(currentPart);
                     }
-                }
-                
-                // Satır sonu: eğer bir sonraki satır varsa ve mevcut part varsa, \n ekle
-                if (i < lines.length - 1) {
-                    if (currentPart.length + 1 <= maxLength) {
-                        currentPart += '\n';
-                    } else {
-                        if (currentPart) {
-                            parts.push(currentPart);
-                        }
-                        currentPart = '\n';
-                    }
+                    currentPart = word;
                 }
             }
 
-            if (currentPart && currentPart.trim()) {
+            if (currentPart) {
                 parts.push(currentPart);
             }
 
@@ -590,53 +570,31 @@
         }
 
         function splitBySentences(text, maxLength) {
-            // Önce satırlara ayır
-            const lines = text.split('\n');
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
             const parts = [];
             let currentPart = '';
 
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const sentences = line.match(/[^.!?]+[.!?]+/g) || [line];
+            for (const sentence of sentences) {
+                const testPart = currentPart ? currentPart + ' ' + sentence.trim() : sentence.trim();
                 
-                for (let j = 0; j < sentences.length; j++) {
-                    const sentence = sentences[j].trim();
-                    if (!sentence) continue;
-                    
-                    const separator = currentPart && !currentPart.endsWith('\n') ? ' ' : '';
-                    const testPart = currentPart + separator + sentence;
-                    
-                    if (testPart.length <= maxLength) {
-                        currentPart = testPart;
-                    } else {
-                        if (currentPart) {
-                            parts.push(currentPart);
-                        }
-                        // Eğer tek bir cümle max length'ten büyükse, kelimelerle böl
-                        if (sentence.length > maxLength) {
-                            const subParts = splitByWords(sentence, maxLength);
-                            parts.push(...subParts.slice(0, -1));
-                            currentPart = subParts[subParts.length - 1];
-                        } else {
-                            currentPart = sentence;
-                        }
+                if (testPart.length <= maxLength) {
+                    currentPart = testPart;
+                } else {
+                    if (currentPart) {
+                        parts.push(currentPart);
                     }
-                }
-                
-                // Satır sonu ekle (son satır değilse)
-                if (i < lines.length - 1) {
-                    if (currentPart.length + 1 <= maxLength) {
-                        currentPart += '\n';
+                    // Eğer tek bir cümle max length'ten büyükse, kelimelerle böl
+                    if (sentence.trim().length > maxLength) {
+                        const subParts = splitByWords(sentence.trim(), maxLength);
+                        parts.push(...subParts.slice(0, -1));
+                        currentPart = subParts[subParts.length - 1];
                     } else {
-                        if (currentPart) {
-                            parts.push(currentPart);
-                        }
-                        currentPart = '\n';
+                        currentPart = sentence.trim();
                     }
                 }
             }
 
-            if (currentPart && currentPart.trim()) {
+            if (currentPart) {
                 parts.push(currentPart);
             }
 
