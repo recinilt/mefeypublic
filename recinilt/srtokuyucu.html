@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SRT Video Okuyucu - Google Cloud TTS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #15151f;
+            --bg-input: #1a1a28;
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --accent-blue: #4d9fff;
+            --accent-purple: #a855f7;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            --accent-yellow: #fbbf24;
+            --border-color: #2a2a3a;
+            --shadow-lg: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a0a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+
+        /* API Key Section */
+        .api-section {
+            background: rgba(168, 85, 247, 0.1);
+            border: 2px solid var(--accent-purple);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .api-section h3 {
+            color: var(--accent-purple);
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .api-section p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .api-section a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .api-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-input {
+            flex: 1;
+            padding: 14px;
+            background: var(--bg-input);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .api-input:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+        }
+
+        .btn-save-key {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--accent-purple), #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-save-key:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(168, 85, 247, 0.4);
+        }
+
+        .api-status {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .api-status.success {
+            background: rgba(52, 211, 153, 0.2);
+            color: var(--accent-green);
+        }
+
+        .api-status.error {
+            background: rgba(248, 113, 113, 0.2);
+            color: var(--accent-red);
+        }
+
+        /* Voice Selection */
+        .voice-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .voice-section label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* File Upload Section */
+        .upload-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .upload-box {
+            background: var(--bg-card);
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-box:hover {
+            border-color: var(--accent-blue);
+            background: rgba(77, 159, 255, 0.05);
+        }
+
+        .upload-box.has-file {
+            border-style: solid;
+            border-color: var(--accent-green);
+            background: rgba(52, 211, 153, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .upload-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .upload-box p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (min-width: 1024px) {
+            .main-content {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
+
+        /* Video Section */
+        .video-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            max-height: 60vh;
+        }
+
+        .subtitle-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            max-width: 90%;
+            line-height: 1.5;
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle-overlay.show {
+            display: block;
+            animation: fadeIn 0.2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button:not(:disabled):hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+            color: white;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, var(--accent-red), #dc2626);
+            color: white;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, var(--accent-green), #059669);
+            color: white;
+        }
+
+        .btn-subtitle {
+            background: linear-gradient(135deg, var(--accent-yellow), #d97706);
+            color: white;
+        }
+
+        .btn-fullscreen {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            min-width: auto;
+            padding: 14px 20px;
+        }
+
+        /* Volume Controls */
+        .volume-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            background: var(--bg-input);
+            border-radius: 12px;
+        }
+
+        .volume-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .volume-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-value {
+            color: var(--accent-blue);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 10px;
+            background: var(--bg-card);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(77, 159, 255, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Subtitle List */
+        .subtitle-list-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .subtitle-list-container h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            color: var(--accent-blue);
+        }
+
+        .subtitle-list {
+            max-height: 60vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .subtitle-item {
+            padding: 12px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .subtitle-item:hover {
+            background: rgba(77, 159, 255, 0.1);
+            border-left-color: var(--accent-blue);
+        }
+
+        .subtitle-item.active {
+            background: rgba(77, 159, 255, 0.2);
+            border-left-color: var(--accent-blue);
+            box-shadow: 0 4px 15px rgba(77, 159, 255, 0.3);
+        }
+
+        .subtitle-time {
+            color: var(--accent-purple);
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .subtitle-text {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Progress Overlay */
+        .progress-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-overlay.show {
+            display: flex;
+        }
+
+        .progress-content {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            border: 2px solid var(--accent-purple);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .progress-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent-purple);
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: var(--bg-input);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-input);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-blue);
+            border-radius: 10px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+
+            .button-row {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .volume-controls {
+                grid-template-columns: 1fr;
+            }
+
+            .api-input-group {
+                flex-direction: column;
+            }
+
+            .btn-save-key {
+                width: 100%;
+            }
+        }
+
+        /* Fullscreen Mode */
+        .video-container:fullscreen {
+            padding: 0;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        .video-container:fullscreen .video-wrapper {
+            max-height: 100vh;
+            height: 100vh;
+            width: 100%;
+            margin: 0;
+        }
+
+        .video-container:fullscreen video {
+            max-height: 100vh;
+            height: 100vh;
+        }
+
+        .video-container:fullscreen .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 SRT Video Okuyucu</h1>
+            <p class="subtitle">Google Cloud TTS ile Altyazı Seslendirme</p>
+        </header>
+
+        <!-- API Key Section -->
+        <div class="api-section">
+            <h3>🔑 Google Cloud TTS API Anahtarı</h3>
+            <p>Google Cloud Console'dan Text-to-Speech API anahtarınızı edinin: 
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank">API Keys</a>
+            </p>
+            <div class="api-input-group">
+                <input type="text" class="api-input" id="apiKeyInput" placeholder="AIzaSy..." />
+                <button class="btn-save-key" onclick="saveApiKey()">💾 Kaydet</button>
+            </div>
+            <div id="apiStatus"></div>
+        </div>
+
+        <!-- Voice Selection -->
+        <div class="voice-section">
+            <label>🎙️ Google Cloud TTS Sesi Seçin:</label>
+            <select id="voiceSelect">
+                <option value="tr-TR-Wavenet-A">Türkçe - Kadın (Wavenet A)</option>
+                <option value="tr-TR-Wavenet-B">Türkçe - Erkek (Wavenet B)</option>
+                <option value="tr-TR-Wavenet-C">Türkçe - Kadın (Wavenet C)</option>
+                <option value="tr-TR-Wavenet-D">Türkçe - Kadın (Wavenet D)</option>
+                <option value="tr-TR-Wavenet-E">Türkçe - Erkek (Wavenet E)</option>
+                <option value="tr-TR-Standard-A">Türkçe - Kadın (Standard A)</option>
+                <option value="tr-TR-Standard-B">Türkçe - Erkek (Standard B)</option>
+                <option value="tr-TR-Standard-C">Türkçe - Kadın (Standard C)</option>
+                <option value="tr-TR-Standard-D">Türkçe - Kadın (Standard D)</option>
+                <option value="tr-TR-Standard-E">Türkçe - Erkek (Standard E)</option>
+            </select>
+        </div>
+
+        <!-- File Upload -->
+        <div class="upload-section">
+            <div class="upload-box" id="videoUploadBox" onclick="document.getElementById('videoInput').click()">
+                <div class="upload-icon">🎥</div>
+                <h3>Video Yükle</h3>
+                <p id="videoFileName">MP4, WebM, OGG</p>
+                <input type="file" id="videoInput" accept="video/*" onchange="handleVideoUpload(event)">
+            </div>
+            <div class="upload-box" id="srtUploadBox" onclick="document.getElementById('srtInput').click()">
+                <div class="upload-icon">📝</div>
+                <h3>SRT Dosyası Yükle</h3>
+                <p id="srtFileName">Altyazı Dosyası (.srt)</p>
+                <input type="file" id="srtInput" accept=".srt" onchange="handleSrtUpload(event)">
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Video Player -->
+            <div class="video-container" id="videoContainer">
+                <div class="video-wrapper">
+                    <video id="videoPlayer"></video>
+                    <div class="subtitle-overlay" id="subtitleOverlay"></div>
+                </div>
+
+                <div class="controls">
+                    <!-- Progress Bar -->
+                    <div class="progress-container" id="progressContainer">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <div class="time-display">
+                        <span id="currentTime">00:00</span>
+                        <span id="duration">00:00</span>
+                    </div>
+
+                    <!-- Volume Controls -->
+                    <div class="volume-controls">
+                        <div class="volume-group">
+                            <div class="volume-label">
+                                🎥 Video Sesi <span class="volume-value" id="videoVolumeValue">100%</span>
+                            </div>
+                            <input type="range" id="videoVolume" min="0" max="100" value="100" oninput="updateVideoVolume(this.value)">
+                        </div>
+                        <div class="volume-group">
+                            <div class="volume-label">
+                                🎤 TTS Sesi <span class="volume-value" id="ttsVolumeValue">100%</span>
+                            </div>
+                            <input type="range" id="ttsVolume" min="0" max="100" value="100" oninput="updateTtsVolume(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Control Buttons -->
+                    <div class="button-row">
+                        <button class="btn-play" id="playBtn" onclick="togglePlay()" disabled>▶️ Oynat</button>
+                        <button class="btn-stop" onclick="stopPlayback()">⏹️ Durdur</button>
+                        <button class="btn-subtitle" id="subtitleBtn" onclick="toggleSubtitles()">💬 Altyazı: Açık</button>
+                        <button class="btn-fullscreen" onclick="toggleFullscreen()">⛶</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="btn-download" id="downloadBtn" onclick="downloadAudio()" disabled>⬇️ MP3 İndir</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subtitle List -->
+            <div class="subtitle-list-container">
+                <h3>📋 Altyazı Listesi</h3>
+                <div class="subtitle-list" id="subtitleList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Overlay -->
+    <div class="progress-overlay" id="progressOverlay">
+        <div class="progress-content">
+            <h3>⚙️ TTS Sesi Oluşturuluyor...</h3>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            <p class="progress-text" id="progressText">0/0 altyazı işleniyor...</p>
+        </div>
+    </div>
+
+    <script>
+        // Global Variables
+        let googleApiKey = localStorage.getItem('google_tts_api_key') || '';
+        let videoElement = document.getElementById('videoPlayer');
+        let subtitleOverlay = document.getElementById('subtitleOverlay');
+        let subtitleList = document.getElementById('subtitleList');
+        let progressBar = document.getElementById('progressBar');
+        let currentTimeDisplay = document.getElementById('currentTime');
+        let durationDisplay = document.getElementById('duration');
+        let playBtn = document.getElementById('playBtn');
+        let downloadBtn = document.getElementById('downloadBtn');
+        let subtitleBtn = document.getElementById('subtitleBtn');
+        
+        let subtitles = [];
+        let audioContext = null;
+        let audioSource = null;
+        let audioBuffer = null;
+        let startTime = 0;
+        let pauseTime = 0;
+        let isPlaying = false;
+        let isPaused = false;
+        let showSubtitles = true;
+        let videoVolume = 1.0;
+        let ttsVolume = 1.0;
+        let gainNode = null;
+        let currentAudioBlob = null;
+
+        // Initialize
+        if (googleApiKey) {
+            document.getElementById('apiKeyInput').value = googleApiKey;
+            showApiStatus('API anahtarı yüklendi ✓', 'success');
+        }
+
+        // API Key Management
+        function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            if (!apiKey) {
+                showApiStatus('Lütfen API anahtarı girin!', 'error');
+                return;
+            }
+            googleApiKey = apiKey;
+            localStorage.setItem('google_tts_api_key', apiKey);
+            showApiStatus('API anahtarı kaydedildi ✓', 'success');
+        }
+
+        function showApiStatus(message, type) {
+            const statusDiv = document.getElementById('apiStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `api-status ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        // File Upload Handlers
+        function handleVideoUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                videoElement.src = url;
+                document.getElementById('videoFileName').textContent = file.name;
+                document.getElementById('videoUploadBox').classList.add('has-file');
+                checkReadyState();
+            }
+        }
+
+        async function handleSrtUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const text = await file.text();
+                subtitles = parseSRT(text);
+                document.getElementById('srtFileName').textContent = file.name;
+                document.getElementById('srtUploadBox').classList.add('has-file');
+                displaySubtitleList();
+                checkReadyState();
+                
+                // Auto-generate TTS after SRT upload
+                if (googleApiKey && subtitles.length > 0) {
+                    await generateTTS();
+                }
+            }
+        }
+
+        function checkReadyState() {
+            if (videoElement.src && subtitles.length > 0 && audioBuffer) {
+                playBtn.disabled = false;
+                downloadBtn.disabled = false;
+            }
+        }
+
+        // SRT Parser
+        function parseSRT(srtText) {
+            const blocks = srtText.trim().split('\n\n');
+            const parsed = [];
+
+            for (const block of blocks) {
+                const lines = block.split('\n');
+                if (lines.length < 3) continue;
+
+                const timeLine = lines[1];
+                if (!timeLine) continue;
+
+                // Use more compatible regex pattern
+                const timeRegex = new RegExp('([0-9]{2}):([0-9]{2}):([0-9]{2}),([0-9]{3})\\s*-->\\s*([0-9]{2}):([0-9]{2}):([0-9]{2}),([0-9]{3})');
+                const timeMatch = timeLine.match(timeRegex);
+                if (!timeMatch || timeMatch.length < 9) continue;
+
+                const startTime = parseInt(timeMatch[1], 10) * 3600 + parseInt(timeMatch[2], 10) * 60 + 
+                                parseInt(timeMatch[3], 10) + parseInt(timeMatch[4], 10) / 1000;
+                const endTime = parseInt(timeMatch[5], 10) * 3600 + parseInt(timeMatch[6], 10) * 60 + 
+                              parseInt(timeMatch[7], 10) + parseInt(timeMatch[8], 10) / 1000;
+
+                const text = lines.slice(2).join(' ').trim();
+                if (!text) continue;
+
+                parsed.push({
+                    index: parsed.length,
+                    start: startTime,
+                    end: endTime,
+                    text: text
+                });
+            }
+
+            console.log(`Parsed ${parsed.length} subtitles`);
+            return parsed;
+        }
+
+        // Display Subtitle List
+        function displaySubtitleList() {
+            subtitleList.innerHTML = '';
+            subtitles.forEach((sub, index) => {
+                const item = document.createElement('div');
+                item.className = 'subtitle-item';
+                item.dataset.index = index;
+                item.onclick = () => seekToSubtitle(sub.start);
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'subtitle-time';
+                timeDiv.textContent = `${formatTime(sub.start)} → ${formatTime(sub.end)}`;
+                
+                const textDiv = document.createElement('div');
+                textDiv.className = 'subtitle-text';
+                textDiv.textContent = sub.text;
+                
+                item.appendChild(timeDiv);
+                item.appendChild(textDiv);
+                subtitleList.appendChild(item);
+            });
+        }
+
+        // Generate TTS with Google Cloud
+        async function generateTTS() {
+            if (!googleApiKey) {
+                alert('Lütfen önce Google Cloud TTS API anahtarı girin!');
+                return;
+            }
+
+            if (subtitles.length === 0) {
+                alert('Lütfen önce SRT dosyası yükleyin!');
+                return;
+            }
+
+            console.log(`Starting TTS generation for ${subtitles.length} subtitles`);
+
+            // Show progress overlay
+            document.getElementById('progressOverlay').classList.add('show');
+            document.getElementById('progressBarFill').style.width = '0%';
+
+            try {
+                const audioChunks = [];
+                const totalDuration = subtitles[subtitles.length - 1].end;
+                console.log(`Total video duration: ${totalDuration}s`);
+                
+                // Generate TTS for each subtitle
+                for (let i = 0; i < subtitles.length; i++) {
+                    const sub = subtitles[i];
+                    document.getElementById('progressText').textContent = 
+                        `${i + 1}/${subtitles.length} altyazı işleniyor...`;
+                    document.getElementById('progressBarFill').style.width = 
+                        ((i / subtitles.length) * 100) + '%';
+
+                    console.log(`Processing subtitle ${i + 1}: "${sub.text.substring(0, 50)}..." (${sub.start}s - ${sub.end}s)`);
+
+                    // Generate audio for this subtitle
+                    const audioData = await textToSpeechGoogle(sub.text);
+                    console.log(`Generated ${audioData.length} bytes for subtitle ${i + 1}`);
+                    
+                    // Calculate silence duration
+                    const silenceBefore = i === 0 ? sub.start : 
+                        (sub.start - subtitles[i - 1].end);
+                    
+                    console.log(`Silence before subtitle ${i + 1}: ${silenceBefore}s`);
+                    
+                    audioChunks.push({
+                        silence: silenceBefore,
+                        audio: audioData,
+                        duration: sub.end - sub.start
+                    });
+                }
+
+                console.log(`All ${audioChunks.length} audio chunks generated, now combining...`);
+
+                // Create combined audio buffer
+                document.getElementById('progressText').textContent = 'Ses dosyası birleştiriliyor...';
+                document.getElementById('progressBarFill').style.width = '95%';
+                await combineAudioChunks(audioChunks, totalDuration);
+
+                document.getElementById('progressBarFill').style.width = '100%';
+                document.getElementById('progressOverlay').classList.remove('show');
+                checkReadyState();
+                
+                console.log('TTS generation completed successfully!');
+                alert('✓ TTS sesi başarıyla oluşturuldu! Artık oynatabilirsiniz.');
+
+            } catch (error) {
+                console.error('TTS oluşturma hatası:', error);
+                alert('TTS oluşturulurken hata oluştu: ' + error.message);
+                document.getElementById('progressOverlay').classList.remove('show');
+            }
+        }
+
+        async function textToSpeechGoogle(text) {
+            // Check byte length (Google TTS limit is 5000 bytes)
+            const byteLength = new Blob([text]).size;
+            const maxBytes = 4500; // Safe limit below 5000
+
+            // If text is too long, split it
+            if (byteLength > maxBytes) {
+                console.warn(`Text too long (${byteLength} bytes), splitting...`);
+                const chunks = splitTextByBytes(text, maxBytes);
+                const audioChunks = [];
+                
+                for (const chunk of chunks) {
+                    const audio = await textToSpeechGoogle(chunk);
+                    audioChunks.push(audio);
+                }
+                
+                // Combine all audio chunks
+                const totalLength = audioChunks.reduce((sum, arr) => sum + arr.length, 0);
+                const combined = new Uint8Array(totalLength);
+                let offset = 0;
+                for (const chunk of audioChunks) {
+                    combined.set(chunk, offset);
+                    offset += chunk.length;
+                }
+                return combined;
+            }
+
+            const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${googleApiKey}`;
+            
+            const requestBody = {
+                input: { text: text },
+                voice: {
+                    languageCode: 'tr-TR',
+                    name: document.getElementById('voiceSelect').value
+                },
+                audioConfig: {
+                    audioEncoding: 'MP3',
+                    speakingRate: 1.0,
+                    pitch: 0.0,
+                    volumeGainDb: 0.0,
+                    sampleRateHertz: 24000
+                }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API isteği başarısız');
+            }
+
+            const data = await response.json();
+            if (!data.audioContent) {
+                throw new Error('API yanıtında ses verisi yok');
+            }
+
+            // Convert base64 to binary
+            const binaryString = atob(data.audioContent);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            
+            return bytes;
+        }
+
+        function splitTextByBytes(text, maxBytes) {
+            const chunks = [];
+            let currentChunk = '';
+            const sentences = text.split(/([.!?]\s+)/); // Split by sentence endings but keep delimiters
+            
+            for (let i = 0; i < sentences.length; i++) {
+                const part = sentences[i];
+                const testChunk = currentChunk + part;
+                const byteLength = new Blob([testChunk]).size;
+                
+                if (byteLength > maxBytes && currentChunk) {
+                    chunks.push(currentChunk.trim());
+                    currentChunk = part;
+                } else {
+                    currentChunk = testChunk;
+                }
+            }
+            
+            if (currentChunk.trim()) {
+                chunks.push(currentChunk.trim());
+            }
+            
+            return chunks;
+        }
+
+        async function combineAudioChunks(chunks, totalDuration) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            console.log(`Combining ${chunks.length} audio chunks for ${totalDuration}s duration`);
+
+            // First, decode all audio chunks and store them
+            const decodedChunks = [];
+            for (let i = 0; i < chunks.length; i++) {
+                const chunk = chunks[i];
+                try {
+                    const audioBlob = new Blob([chunk.audio], { type: 'audio/mp3' });
+                    const arrayBuffer = await audioBlob.arrayBuffer();
+                    const decodedBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    
+                    decodedChunks.push({
+                        buffer: decodedBuffer,
+                        silence: chunk.silence,
+                        originalAudio: chunk.audio
+                    });
+                    console.log(`Decoded chunk ${i + 1}: ${decodedBuffer.duration}s audio, ${chunk.silence}s silence before`);
+                } catch (error) {
+                    console.error(`Error decoding chunk ${i + 1}:`, error);
+                }
+            }
+
+            // Create combined buffer with proper timing
+            const sampleRate = 24000;
+            const totalSamples = Math.ceil(totalDuration * sampleRate);
+            const combinedBuffer = audioContext.createBuffer(1, totalSamples, sampleRate);
+            const channelData = combinedBuffer.getChannelData(0);
+
+            let currentSample = 0;
+            for (const decoded of decodedChunks) {
+                // Add silence
+                const silenceSamples = Math.floor(decoded.silence * sampleRate);
+                currentSample += silenceSamples;
+
+                // Add audio
+                const sourceData = decoded.buffer.getChannelData(0);
+                for (let i = 0; i < sourceData.length && currentSample < totalSamples; i++) {
+                    channelData[currentSample++] = sourceData[i];
+                }
+            }
+
+            audioBuffer = combinedBuffer;
+            console.log(`Combined audio buffer created: ${audioBuffer.duration}s`);
+
+            // Create downloadable MP3 by simply concatenating all MP3 data
+            // Note: This creates a valid playable file, though not perfectly optimized
+            const allMp3Data = [];
+            for (const decoded of decodedChunks) {
+                allMp3Data.push(decoded.originalAudio);
+            }
+            
+            // Calculate total size
+            const totalLength = allMp3Data.reduce((sum, arr) => sum + arr.length, 0);
+            const combined = new Uint8Array(totalLength);
+            let offset = 0;
+            for (const arr of allMp3Data) {
+                combined.set(arr, offset);
+                offset += arr.length;
+            }
+            
+            // Create blob with proper MP3 mime type
+            currentAudioBlob = new Blob([combined], { type: 'audio/mpeg' });
+            console.log(`Download MP3 created: ${(currentAudioBlob.size / 1024).toFixed(2)} KB`);
+        }
+
+        // Playback Controls
+        async function togglePlay() {
+            if (!audioBuffer) {
+                alert('Önce TTS sesi oluşturulmalı!');
+                return;
+            }
+
+            if (isPlaying && !isPaused) {
+                // Pause
+                pausePlayback();
+            } else {
+                // Play
+                await startPlayback();
+            }
+        }
+
+        async function startPlayback() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+
+            // Stop any existing playback
+            if (audioSource) {
+                audioSource.stop();
+            }
+
+            // Create new audio source
+            audioSource = audioContext.createBufferSource();
+            audioSource.buffer = audioBuffer;
+            
+            // Create gain node for volume control
+            gainNode = audioContext.createGain();
+            gainNode.gain.value = ttsVolume;
+            
+            audioSource.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // Start video and audio together
+            const offset = isPaused ? pauseTime : 0;
+            startTime = audioContext.currentTime - offset;
+            
+            audioSource.start(0, offset);
+            videoElement.currentTime = offset;
+            videoElement.play();
+
+            isPlaying = true;
+            isPaused = false;
+            playBtn.textContent = '⏸️ Duraklat';
+
+            // Update progress
+            updateProgress();
+
+            audioSource.onended = () => {
+                if (!isPaused) {
+                    stopPlayback();
+                }
+            };
+        }
+
+        function pausePlayback() {
+            if (audioSource) {
+                pauseTime = audioContext.currentTime - startTime;
+                audioSource.stop();
+                audioSource = null;
+            }
+            videoElement.pause();
+            isPlaying = false;
+            isPaused = true;
+            playBtn.textContent = '▶️ Devam Et';
+        }
+
+        function stopPlayback() {
+            if (audioSource) {
+                audioSource.stop();
+                audioSource = null;
+            }
+            videoElement.pause();
+            videoElement.currentTime = 0;
+            pauseTime = 0;
+            isPlaying = false;
+            isPaused = false;
+            playBtn.textContent = '▶️ Oynat';
+            progressBar.style.width = '0%';
+            currentTimeDisplay.textContent = '00:00';
+            subtitleOverlay.classList.remove('show');
+            
+            // Remove active class from all subtitles
+            document.querySelectorAll('.subtitle-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        function updateProgress() {
+            if (!isPlaying || isPaused) return;
+
+            const currentTime = audioContext.currentTime - startTime;
+            const duration = audioBuffer.duration;
+
+            progressBar.style.width = (currentTime / duration * 100) + '%';
+            currentTimeDisplay.textContent = formatTime(currentTime);
+            durationDisplay.textContent = formatTime(duration);
+
+            // Update subtitle overlay
+            if (showSubtitles) {
+                updateSubtitleOverlay(currentTime);
+            }
+
+            if (currentTime < duration) {
+                requestAnimationFrame(updateProgress);
+            }
+        }
+
+        function updateSubtitleOverlay(currentTime) {
+            const currentSub = subtitles.find(sub => 
+                currentTime >= sub.start && currentTime <= sub.end
+            );
+
+            if (currentSub) {
+                subtitleOverlay.textContent = currentSub.text;
+                subtitleOverlay.classList.add('show');
+                
+                // Highlight in list
+                document.querySelectorAll('.subtitle-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const listItem = document.querySelector(`.subtitle-item[data-index="${currentSub.index}"]`);
+                if (listItem) {
+                    listItem.classList.add('active');
+                    listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } else {
+                subtitleOverlay.classList.remove('show');
+            }
+        }
+
+        function seekToSubtitle(time) {
+            if (audioBuffer) {
+                pauseTime = time;
+                if (isPlaying) {
+                    pausePlayback();
+                    startPlayback();
+                } else {
+                    videoElement.currentTime = time;
+                }
+            }
+        }
+
+        // Progress bar click
+        document.getElementById('progressContainer').addEventListener('click', (e) => {
+            if (!audioBuffer) return;
+            
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            const time = percent * audioBuffer.duration;
+            
+            seekToSubtitle(time);
+        });
+
+        // Volume Controls
+        function updateVideoVolume(value) {
+            videoVolume = value / 100;
+            videoElement.volume = videoVolume;
+            document.getElementById('videoVolumeValue').textContent = value + '%';
+        }
+
+        function updateTtsVolume(value) {
+            ttsVolume = value / 100;
+            if (gainNode) {
+                gainNode.gain.value = ttsVolume;
+            }
+            document.getElementById('ttsVolumeValue').textContent = value + '%';
+        }
+
+        // Toggle Subtitles
+        function toggleSubtitles() {
+            showSubtitles = !showSubtitles;
+            subtitleBtn.textContent = showSubtitles ? '💬 Altyazı: Açık' : '💬 Altyazı: Kapalı';
+            if (!showSubtitles) {
+                subtitleOverlay.classList.remove('show');
+            }
+        }
+
+        // Fullscreen
+        function toggleFullscreen() {
+            const container = document.getElementById('videoContainer');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Download Audio
+        function downloadAudio() {
+            if (!currentAudioBlob) {
+                alert('Henüz ses dosyası oluşturulmadı!');
+                return;
+            }
+
+            const url = URL.createObjectURL(currentAudioBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `srt-tts-${Date.now()}.mp3`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Utility Functions
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Video duration loaded
+        videoElement.addEventListener('loadedmetadata', () => {
+            durationDisplay.textContent = formatTime(videoElement.duration);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+            
+            if (e.code === 'Space') {
+                e.preventDefault();
+                togglePlay();
+            } else if (e.code === 'ArrowLeft') {
+                e.preventDefault();
+                seekToSubtitle(Math.max(0, (pauseTime || 0) - 5));
+            } else if (e.code === 'ArrowRight') {
+                e.preventDefault();
+                seekToSubtitle(Math.min(audioBuffer?.duration || 0, (pauseTime || 0) + 5));
+            } else if (e.code === 'KeyF') {
+                e.preventDefault();
+                toggleFullscreen();
+            }
+        });
+    </script>
+</body>
+</html>

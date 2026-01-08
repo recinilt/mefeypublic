@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>SRT → Google TTS (satır senkron + hız)</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 20px auto; }
+    .row { margin-bottom: 10px; }
+    label { display: block; margin-bottom: 4px; font-weight: 600; }
+    input[type="file"] { display: block; }
+    video { width: 100%; max-height: 400px; background: #000; }
+    button { margin-right: 8px; }
+    #status { margin-top: 10px; color: #444; font-size: 0.9rem; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <h1>SRT okuyucu + Google Cloud TTS (satır zamanına göre)</h1>
+
+  <div class="row">
+    <label for="apiKey">Google Cloud TTS API Key (sadece test için; güvenli değil):</label>
+    <input type="text" id="apiKey" placeholder="AIza..." style="width:100%;" />
+  </div>
+
+  <div class="row">
+    <label for="languageCode">Dil kodu (ör. tr-TR, en-US):</label>
+    <input type="text" id="languageCode" value="tr-TR" />
+  </div>
+
+  <div class="row">
+    <label for="voiceName">Voice name (opsiyonel):</label>
+    <input type="text" id="voiceName" placeholder="tr-TR-Standard-A vb." />
+  </div>
+
+  <div class="row">
+    <label for="videoFile">Video dosyası:</label>
+    <input type="file" id="videoFile" accept="video/*" />
+  </div>
+
+  <div class="row">
+    <label for="subtitleFile">Altyazı dosyası (SRT):</label>
+    <input type="file" id="subtitleFile" accept=".srt" />
+  </div>
+
+  <div class="row">
+    <button id="generateBtn">1) Satır satır TTS üret</button>
+    <button id="playBtn" disabled>2) Oynat</button>
+    <button id="pauseBtn" disabled>Duraklat</button>
+  </div>
+
+  <div class="row">
+    <label>Video ses seviyesi:</label>
+    <input type="range" id="videoVolume" min="0" max="1" step="0.01" value="1" />
+  </div>
+
+  <div class="row">
+    <label>TTS ses seviyesi:</label>
+    <input type="range" id="ttsVolume" min="0" max="1" step="0.01" value="1" />
+  </div>
+
+  <div class="row">
+    <label>TTS okuma hızı (0.5x - 2x):</label>
+    <input type="range" id="ttsSpeed" min="0.5" max="2" step="0.1" value="1" />
+    <span id="ttsSpeedLabel">1.0x</span>
+  </div>
+
+  <div id="status"></div>
+
+  <video id="video" controls></video>
+
+<script>
+  const apiEndpoint = 'https://texttospeech.googleapis.com/v1/text:synthesize';
+  const videoEl = document.getElementById('video');
+  const statusEl = document.getElementById('status');
+
+  let subtitles = [];           // { start, end, text, buffer?, scheduled? }
+  let ttsReady = false;
+
+  let audioContext = null;
+  let gainNode = null;
+  let baseVideoTime = 0;
+  let audioBaseTime = 0;
+  const SCHEDULE_AHEAD = 1.0;
+
+  // ÖNEMLİ: Tek tanım
+  let schedulerInterval = null;
+
+  // Hız
+  let ttsSpeed = 1.0;
+
+  function timeToSeconds(t) {
+    const [hms, ms] = t.split(',');
+    const [hh, mm, ss] = hms.split(':').map(Number);
+    const millis = parseInt(ms, 10);
+    return hh * 3600 + mm * 60 + ss + millis / 1000;
+  }
+
+  function parseSrt(srtText) {
+    const blocks = srtText
+      .replace(/\r/g, '')
+      .split('\n\n')
+      .map(b => b.trim())
+      .filter(b => b.length > 0);
+
+    const result = [];
+
+    for (const block of blocks) {
+      const lines = block.split('\n');
+      if (lines.length < 2) continue;
+
+      let timeLineIndex = 0;
+      if (/^\d+$/.test(lines[0].trim())) {
+        timeLineIndex = 1;
+      }
+
+      const timeLine = lines[timeLineIndex];
+      const match = timeLine.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+      if (!match) continue;
+
+      const start = timeToSeconds(match[1]);
+      const end = timeToSeconds(match[2]);
+
+      const textLines = lines.slice(timeLineIndex + 1);
+      const text = textLines.join(' ').trim();
+      if (!text) continue;
+
+      result.push({
+        start,
+        end,
+        text,
+        buffer: null,
+        scheduled: false
+      });
+    }
+
+    return result;
+  }
+
+  async function synthesizeLine(apiKey, languageCode, voiceName, text) {
+    const body = {
+      input: { text },
+      voice: {
+        languageCode: languageCode || 'tr-TR'
+      },
+      audioConfig: {
+        audioEncoding: 'MP3'
+      }
+    };
+    if (voiceName) {
+      body.voice.name = voiceName;
+    }
+
+    const url = apiEndpoint + '?key=' + encodeURIComponent(apiKey);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('TTS hatası: ' + res.status + ' ' + errText);
+    }
+
+    const data = await res.json();
+    if (!data || !data.audioContent) {
+      throw new Error('TTS yanıtında audioContent yok');
+    }
+
+    const audioBytes = data.audioContent;
+    const byteCharacters = atob(audioBytes);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+
+    const arrayBuffer = byteArray.buffer;
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioContext.createGain();
+      gainNode.connect(audioContext.destination);
+    }
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+    return audioBuffer;
+  }
+
+  document.getElementById('generateBtn').addEventListener('click', async () => {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const languageCode = document.getElementById('languageCode').value.trim();
+    const voiceName = document.getElementById('voiceName').value.trim();
+    const subtitleFileInput = document.getElementById('subtitleFile');
+
+    if (!apiKey) {
+      alert('Önce Google Cloud TTS API key gir.');
+      return;
+    }
+    if (!subtitleFileInput.files[0]) {
+      alert('Önce SRT dosyası seç.');
+      return;
+    }
+
+    const file = subtitleFileInput.files[0];
+    statusEl.textContent = 'SRT okunuyor...';
+    ttsReady = false;
+    subtitles = [];
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const srtText = e.target.result;
+        subtitles = parseSrt(srtText);
+
+        if (!subtitles.length) {
+          alert('SRT parse edilemedi veya boş.');
+          statusEl.textContent = 'SRT parse edilemedi veya boş.';
+          return;
+        }
+
+        statusEl.textContent =
+          'Toplam satır: ' + subtitles.length +
+          '\nSatır satır TTS üretiliyor...';
+
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+        }
+
+        for (let i = 0; i < subtitles.length; i++) {
+          const sub = subtitles[i];
+          if (!sub.text || sub.text.trim().length === 0) continue;
+
+          statusEl.textContent =
+            'TTS üretiliyor: ' + (i + 1) + '/' + subtitles.length +
+            '\nMetin: ' + sub.text.slice(0, 60);
+
+          const buffer = await synthesizeLine(apiKey, languageCode, voiceName, sub.text);
+          sub.buffer = buffer;
+        }
+
+        ttsReady = true;
+        statusEl.textContent =
+          'Tüm satırlar için TTS tamponları hazır.\n' +
+          'Şimdi videoyu seçip "Oynat"a basabilirsin.';
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('pauseBtn').disabled = false;
+      } catch (err) {
+        console.error(err);
+        alert('Hata: ' + err.message);
+        statusEl.textContent = 'Hata: ' + err.message;
+      }
+    };
+    reader.onerror = () => {
+      alert('SRT dosyası okunamadı.');
+      statusEl.textContent = 'SRT dosyası okunamadı.';
+    };
+    reader.readAsText(file, 'utf-8');
+  });
+
+  document.getElementById('videoFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    videoEl.src = url;
+    videoEl.load();
+  });
+
+  function resetSchedulingFlags() {
+    subtitles.forEach(sub => {
+      sub.scheduled = false;
+    });
+  }
+
+  function scheduleSubtitles() {
+    if (!audioContext || !ttsReady || !subtitles.length) return;
+
+    const nowVideo = videoEl.currentTime;
+    const windowStart = nowVideo;
+    const windowEnd = nowVideo + SCHEDULE_AHEAD;
+
+    const nowAudio = audioContext.currentTime;
+
+    subtitles.forEach(sub => {
+      if (!sub.buffer) return;
+      if (sub.scheduled) return;
+
+      if (sub.start >= windowStart && sub.start <= windowEnd) {
+        const offsetVideo = sub.start - baseVideoTime;
+        const scheduleTime = audioBaseTime + offsetVideo;
+
+        if (scheduleTime >= nowAudio) {
+          const source = audioContext.createBufferSource();
+          source.buffer = sub.buffer;
+          source.playbackRate.value = ttsSpeed;
+          source.connect(gainNode);
+          source.start(scheduleTime);
+          sub.scheduled = true;
+        }
+      }
+    });
+  }
+
+  function startScheduler() {
+    if (schedulerInterval) clearInterval(schedulerInterval);
+    schedulerInterval = setInterval(scheduleSubtitles, 100);
+  }
+
+  function stopScheduler() {
+    if (schedulerInterval) {
+      clearInterval(schedulerInterval);
+      schedulerInterval = null;
+    }
+    if (audioContext) {
+      audioContext.close();
+      audioContext = null;
+      gainNode = null;
+    }
+  }
+
+  document.getElementById('playBtn').addEventListener('click', async () => {
+    if (!videoEl.src) {
+      alert('Önce video seç.');
+      return;
+    }
+    if (!ttsReady) {
+      alert('Önce satır satır TTS üret.');
+      return;
+    }
+
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioContext.createGain();
+      gainNode.connect(audioContext.destination);
+    }
+
+    await audioContext.resume();
+
+    baseVideoTime = videoEl.currentTime;
+    audioBaseTime = audioContext.currentTime;
+
+    resetSchedulingFlags();
+    startScheduler();
+
+    videoEl.play();
+  });
+
+  document.getElementById('pauseBtn').addEventListener('click', () => {
+    videoEl.pause();
+    if (audioContext && audioContext.state === 'running') {
+      audioContext.suspend();
+    }
+  });
+
+  videoEl.addEventListener('play', async () => {
+    if (!ttsReady) return;
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      gainNode = audioContext.createGain();
+      gainNode.connect(audioContext.destination);
+    }
+    await audioContext.resume();
+    baseVideoTime = videoEl.currentTime;
+    audioBaseTime = audioContext.currentTime;
+    resetSchedulingFlags();
+    startScheduler();
+  });
+
+  videoEl.addEventListener('pause', () => {
+    if (audioContext && audioContext.state === 'running') {
+      audioContext.suspend();
+    }
+  });
+
+  videoEl.addEventListener('seeking', () => {
+    if (!ttsReady || !audioContext) return;
+    baseVideoTime = videoEl.currentTime;
+    audioBaseTime = audioContext.currentTime;
+    resetSchedulingFlags();
+  });
+
+  videoEl.addEventListener('ended', () => {
+    stopScheduler();
+  });
+
+  document.getElementById('videoVolume').addEventListener('input', (e) => {
+    videoEl.volume = parseFloat(e.target.value);
+  });
+
+  document.getElementById('ttsVolume').addEventListener('input', (e) => {
+    if (gainNode) {
+      gainNode.gain.value = parseFloat(e.target.value);
+    }
+  });
+
+  const ttsSpeedInput = document.getElementById('ttsSpeed');
+  const ttsSpeedLabel = document.getElementById('ttsSpeedLabel');
+
+  ttsSpeedInput.addEventListener('input', (e) => {
+    ttsSpeed = parseFloat(e.target.value);
+    ttsSpeedLabel.textContent = ttsSpeed.toFixed(1) + 'x';
+  });
+</script>
+</body>
+</html>

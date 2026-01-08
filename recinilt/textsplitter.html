@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Splitter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            resize: vertical;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .presets-section {
+            margin-bottom: 25px;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .preset-btn {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .preset-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .preset-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .preset-btn .char-limit {
+            display: block;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 2px;
+        }
+
+        .custom-preset {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .custom-preset input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .custom-preset input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .split-options {
+            margin-bottom: 25px;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .radio-label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .radio-label input[type="radio"] {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .radio-label input[type="radio"]:checked + span {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .results-count {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-item {
+            background: #f8f9ff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .result-number {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 14px;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .result-text {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            color: #333;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .delete-preset-btn {
+            padding: 6px 12px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .delete-preset-btn:hover {
+            background: #dc2626;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .presets-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+
+            .custom-preset {
+                flex-direction: column;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #78350f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 Text Splitter</h1>
+        <p class="subtitle">Uzun metinleri sosyal medya platformları için otomatik böler</p>
+
+        <div class="input-section">
+            <label for="inputText">Metninizi Buraya Yapıştırın:</label>
+            <textarea id="inputText" placeholder="Bölmek istediğiniz metni buraya yapıştırın..."></textarea>
+        </div>
+
+        <div class="presets-section">
+            <label>Platform Seçin:</label>
+            <div class="presets-grid" id="presetsGrid">
+                <button class="preset-btn active" data-limit="1000">
+                    Instagram
+                    <span class="char-limit">1000 karakter</span>
+                </button>
+                <button class="preset-btn" data-limit="280">
+                    Twitter/X
+                    <span class="char-limit">280 karakter</span>
+                </button>
+                <button class="preset-btn" data-limit="2000">
+                    Facebook
+                    <span class="char-limit">2000 karakter</span>
+                </button>
+                <button class="preset-btn" data-limit="500">
+                    WhatsApp
+                    <span class="char-limit">500 karakter</span>
+                </button>
+            </div>
+
+            <div class="custom-preset">
+                <input type="text" id="customName" placeholder="Özel preset adı (örn: LinkedIn)">
+                <input type="number" id="customLimit" placeholder="Karakter limiti" min="10" max="100000">
+                <button class="btn btn-primary" onclick="addCustomPreset()">Ekle</button>
+            </div>
+        </div>
+
+        <div class="split-options">
+            <label>Bölme Yöntemi:</label>
+            <div class="radio-group">
+                <label class="radio-label">
+                    <input type="radio" name="splitMethod" value="word" checked>
+                    <span>Kelimelerden</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="splitMethod" value="char">
+                    <span>Karakterlerden</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="splitMethod" value="sentence">
+                    <span>Cümlelerden</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="splitMethod" value="paragraph">
+                    <span>Paragraflardan</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="splitText()">🔪 Metni Böl</button>
+            <button class="btn btn-secondary" onclick="clearAll()">🗑️ Temizle</button>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <div class="results-count" id="resultsCount"></div>
+                <button class="btn btn-secondary" onclick="copyAllParts()">Tümünü Kopyala</button>
+            </div>
+            <div id="resultsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLimit = 1000;
+        let customPresets = JSON.parse(localStorage.getItem('customPresets') || '[]');
+
+        // Özel presetleri yükle
+        function loadCustomPresets() {
+            customPresets.forEach(preset => {
+                addPresetButton(preset.name, preset.limit, true);
+            });
+        }
+
+        // Preset butonlarına tıklama
+        document.getElementById('presetsGrid').addEventListener('click', (e) => {
+            const btn = e.target.closest('.preset-btn');
+            if (btn) {
+                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentLimit = parseInt(btn.dataset.limit);
+            }
+        });
+
+        // Delete butonuna tıklama
+        document.getElementById('presetsGrid').addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-preset-btn')) {
+                e.stopPropagation();
+                const presetName = e.target.dataset.name;
+                deleteCustomPreset(presetName);
+            }
+        });
+
+        function addCustomPreset() {
+            const name = document.getElementById('customName').value.trim();
+            const limit = parseInt(document.getElementById('customLimit').value);
+
+            if (!name || !limit || limit < 10) {
+                alert('Lütfen geçerli bir ad ve karakter limiti girin (minimum 10)');
+                return;
+            }
+
+            // Aynı isimde preset var mı kontrol et
+            if (customPresets.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert('Bu isimde bir preset zaten mevcut!');
+                return;
+            }
+
+            const preset = { name, limit };
+            customPresets.push(preset);
+            localStorage.setItem('customPresets', JSON.stringify(customPresets));
+
+            addPresetButton(name, limit, true);
+
+            // Inputları temizle
+            document.getElementById('customName').value = '';
+            document.getElementById('customLimit').value = '';
+        }
+
+        function addPresetButton(name, limit, isCustom) {
+            const presetsGrid = document.getElementById('presetsGrid');
+            const btn = document.createElement('button');
+            btn.className = 'preset-btn';
+            btn.dataset.limit = limit;
+            
+            btn.innerHTML = `
+                ${name}
+                <span class="char-limit">${limit} karakter</span>
+            `;
+
+            if (isCustom) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-preset-btn';
+                deleteBtn.textContent = '✕';
+                deleteBtn.dataset.name = name;
+                btn.appendChild(deleteBtn);
+            }
+
+            presetsGrid.appendChild(btn);
+        }
+
+        function deleteCustomPreset(name) {
+            if (!confirm(`"${name}" presetini silmek istediğinizden emin misiniz?`)) {
+                return;
+            }
+
+            customPresets = customPresets.filter(p => p.name !== name);
+            localStorage.setItem('customPresets', JSON.stringify(customPresets));
+
+            // Butonu DOM'dan kaldır
+            const buttons = document.querySelectorAll('.preset-btn');
+            buttons.forEach(btn => {
+                const deleteBtn = btn.querySelector('.delete-preset-btn');
+                if (deleteBtn && deleteBtn.dataset.name === name) {
+                    btn.remove();
+                }
+            });
+        }
+
+        function splitText() {
+            const text = document.getElementById('inputText').value.trim();
+            
+            if (!text) {
+                alert('Lütfen bölmek için bir metin girin!');
+                return;
+            }
+
+            const method = document.querySelector('input[name="splitMethod"]:checked').value;
+            const prefixLength = 10; // "(001/070) " formatı
+            const availableLength = currentLimit - prefixLength;
+
+            let parts = [];
+
+            switch (method) {
+                case 'word':
+                    parts = splitByWords(text, availableLength);
+                    break;
+                case 'char':
+                    parts = splitByChars(text, availableLength);
+                    break;
+                case 'sentence':
+                    parts = splitBySentences(text, availableLength);
+                    break;
+                case 'paragraph':
+                    parts = splitByParagraphs(text, availableLength);
+                    break;
+            }
+
+            displayResults(parts);
+        }
+
+        function splitByWords(text, maxLength) {
+            const words = text.split(/\s+/);
+            const parts = [];
+            let currentPart = '';
+
+            for (const word of words) {
+                const testPart = currentPart ? currentPart + ' ' + word : word;
+                
+                if (testPart.length <= maxLength) {
+                    currentPart = testPart;
+                } else {
+                    if (currentPart) {
+                        parts.push(currentPart);
+                    }
+                    currentPart = word;
+                }
+            }
+
+            if (currentPart) {
+                parts.push(currentPart);
+            }
+
+            return parts;
+        }
+
+        function splitByChars(text, maxLength) {
+            const parts = [];
+            
+            for (let i = 0; i < text.length; i += maxLength) {
+                parts.push(text.slice(i, i + maxLength));
+            }
+
+            return parts;
+        }
+
+        function splitBySentences(text, maxLength) {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            const parts = [];
+            let currentPart = '';
+
+            for (const sentence of sentences) {
+                const testPart = currentPart ? currentPart + ' ' + sentence.trim() : sentence.trim();
+                
+                if (testPart.length <= maxLength) {
+                    currentPart = testPart;
+                } else {
+                    if (currentPart) {
+                        parts.push(currentPart);
+                    }
+                    // Eğer tek bir cümle max length'ten büyükse, kelimelerle böl
+                    if (sentence.trim().length > maxLength) {
+                        const subParts = splitByWords(sentence.trim(), maxLength);
+                        parts.push(...subParts.slice(0, -1));
+                        currentPart = subParts[subParts.length - 1];
+                    } else {
+                        currentPart = sentence.trim();
+                    }
+                }
+            }
+
+            if (currentPart) {
+                parts.push(currentPart);
+            }
+
+            return parts;
+        }
+
+        function splitByParagraphs(text, maxLength) {
+            const paragraphs = text.split(/\n\n+/);
+            const parts = [];
+            let currentPart = '';
+
+            for (const paragraph of paragraphs) {
+                const trimmedPara = paragraph.trim();
+                const testPart = currentPart ? currentPart + '\n\n' + trimmedPara : trimmedPara;
+                
+                if (testPart.length <= maxLength) {
+                    currentPart = testPart;
+                } else {
+                    if (currentPart) {
+                        parts.push(currentPart);
+                    }
+                    // Eğer tek bir paragraf max length'ten büyükse, cümlelere böl
+                    if (trimmedPara.length > maxLength) {
+                        const subParts = splitBySentences(trimmedPara, maxLength);
+                        parts.push(...subParts.slice(0, -1));
+                        currentPart = subParts[subParts.length - 1];
+                    } else {
+                        currentPart = trimmedPara;
+                    }
+                }
+            }
+
+            if (currentPart) {
+                parts.push(currentPart);
+            }
+
+            return parts;
+        }
+
+        function displayResults(parts) {
+            const resultsSection = document.getElementById('resultsSection');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const resultsCount = document.getElementById('resultsCount');
+
+            resultsCount.textContent = `Toplam ${parts.length} Parça`;
+            resultsContainer.innerHTML = '';
+
+            const totalParts = parts.length.toString().padStart(3, '0');
+
+            parts.forEach((part, index) => {
+                const partNumber = (index + 1).toString().padStart(3, '0');
+                const prefix = `(${partNumber}/${totalParts}) `;
+                const fullText = prefix + part;
+
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    <div class="result-header">
+                        <div class="result-number">${prefix}(${fullText.length} karakter)</div>
+                        <button class="copy-btn" onclick="copyPart(this, ${index})">Kopyala</button>
+                    </div>
+                    <div class="result-text">${fullText}</div>
+                `;
+
+                resultsContainer.appendChild(resultItem);
+            });
+
+            resultsSection.classList.add('show');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyPart(button, index) {
+            const resultItem = button.closest('.result-item');
+            const text = resultItem.querySelector('.result-text').textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '✓ Kopyalandı';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Kopyalama başarısız oldu!');
+            });
+        }
+
+        function copyAllParts() {
+            const texts = Array.from(document.querySelectorAll('.result-text'))
+                .map(el => el.textContent)
+                .join('\n\n---\n\n');
+
+            navigator.clipboard.writeText(texts).then(() => {
+                alert('Tüm parçalar kopyalandı!');
+            }).catch(err => {
+                alert('Kopyalama başarısız oldu!');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('resultsSection').classList.remove('show');
+        }
+
+        // Sayfa yüklendiğinde özel presetleri yükle
+        loadCustomPresets();
+    </script>
+</body>
+</html>
