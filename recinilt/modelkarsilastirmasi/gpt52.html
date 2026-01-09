@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Text Splitter</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 16px; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    textarea { width: 100%; min-height: 180px; resize: vertical; padding: 10px; box-sizing: border-box; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; margin: 10px 0; }
+    .card { border: 1px solid #7774; border-radius: 10px; padding: 12px; }
+    label { font-size: 12px; opacity: .85; display: block; margin-bottom: 6px; }
+    input[type="number"], input[type="text"], select {
+      padding: 8px; border-radius: 8px; border: 1px solid #7776; background: transparent; width: 220px;
+    }
+    button {
+      padding: 10px 12px; border-radius: 10px; border: 1px solid #7776; background: transparent; cursor: pointer;
+    }
+    button.primary { border-color: #4a90e2; }
+    .small { font-size: 12px; opacity: .85; }
+    .parts { display: grid; gap: 10px; margin-top: 12px; }
+    .part { border: 1px solid #7774; border-radius: 10px; overflow: hidden; }
+    .partHead { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #7773; }
+    .partBody { padding: 10px; }
+    .partBody textarea { min-height: 110px; }
+    .pill { font-size: 12px; opacity: .85; }
+    .danger { color: #ff5a5a; }
+    .ok { color: #2fbf71; }
+    .footerRow { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+  </style>
+</head>
+<body>
+  <h1>Text Splitter (prefix: "(001/070) " = 10 karakter)</h1>
+
+  <div class="card">
+    <label for="inputText">Metin</label>
+    <textarea id="inputText" placeholder="Uzun metni buraya yapıştır..."></textarea>
+    <div class="small">Not: Parçaların başına otomatik olarak sıra bilgisi eklenir ve toplam karakter limitine dahil edilir.</div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <label>Preset</label>
+      <select id="presetSelect"></select>
+      <div class="row" style="margin:10px 0 0">
+        <div>
+          <label>Limit (karakter)</label>
+          <input id="limitInput" type="number" min="20" step="1" />
+        </div>
+      </div>
+      <div class="small">
+        X/Twitter standart gönderi: 280 karakter [web:2][web:12] · Instagram DM: 1000 karakter olarak yaygınca raporlanır [web:7][web:10]
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Bölme yöntemi</label>
+      <select id="modeSelect">
+        <option value="words">Kelimelere göre (boşlukları korur)</option>
+        <option value="chars">Karakterlere göre</option>
+        <option value="sentences">Cümlelere göre (basit)</option>
+        <option value="paragraphs">Paragraflara göre</option>
+      </select>
+      <div class="small">“Kelimelere göre” seçeneği, kelimeyi ortadan bölmemeye çalışır.</div>
+    </div>
+
+    <div class="card">
+      <label>Özel preset kaydet</label>
+      <div class="row" style="margin:0">
+        <div>
+          <label>İsim</label>
+          <input id="customName" type="text" placeholder="Örn: WhatsApp 4096" />
+        </div>
+        <div>
+          <label>Limit</label>
+          <input id="customLimit" type="number" min="20" step="1" placeholder="4096" />
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="savePresetBtn">Preset Kaydet</button>
+        <button id="deletePresetBtn">Seçili Preseti Sil</button>
+      </div>
+      <div class="small">Kaydetme localStorage ile cihazında tutulur.</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <button class="primary" id="splitBtn">Böl</button>
+    <button id="copyAllBtn">Hepsini sırayla kopyalanacak tek metin yap</button>
+    <span id="status" class="small"></span>
+  </div>
+
+  <div id="parts" class="parts"></div>
+
+<script>
+(() => {
+  // ---- Presetler ----
+  // Not: Twitter/X post limiti 280 (standart) kabul edilmiştir. (Premium ayrı)
+  const BUILTIN_PRESETS = [
+    { id: "x_post_280", name: "X / Twitter Post", limit: 280 },
+    { id: "ig_dm_1000", name: "Instagram DM", limit: 1000 },
+    { id: "custom", name: "Özel", limit: 1000 },
+  ];
+
+  const LS_KEY = "text_splitter_presets_v1";
+
+  const el = (id) => document.getElementById(id);
+  const presetSelect = el("presetSelect");
+  const limitInput = el("limitInput");
+  const modeSelect = el("modeSelect");
+  const inputText = el("inputText");
+  const partsWrap = el("parts");
+  const statusEl = el("status");
+
+  const customName = el("customName");
+  const customLimit = el("customLimit");
+  const savePresetBtn = el("savePresetBtn");
+  const deletePresetBtn = el("deletePresetBtn");
+
+  const splitBtn = el("splitBtn");
+  const copyAllBtn = el("copyAllBtn");
+
+  function loadUserPresets() {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      // normalize
+      return arr
+        .filter(p => p && typeof p.id === "string" && typeof p.name === "string" && Number.isFinite(p.limit))
+        .map(p => ({ id: p.id, name: p.name, limit: Math.max(20, Math.floor(p.limit)) }));
+    } catch {
+      return [];
+    }
+  }
+
+  function saveUserPresets(presets) {
+    localStorage.setItem(LS_KEY, JSON.stringify(presets));
+  }
+
+  function getAllPresets() {
+    const user = loadUserPresets();
+    return [...BUILTIN_PRESETS.filter(p => p.id !== "custom"), ...user, BUILTIN_PRESETS.find(p => p.id === "custom")];
+  }
+
+  function refreshPresetSelect(keepId = null) {
+    const all = getAllPresets();
+    presetSelect.innerHTML = "";
+    for (const p of all) {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `${p.name} (${p.limit})`;
+      presetSelect.appendChild(opt);
+    }
+    const target = keepId && all.some(p => p.id === keepId) ? keepId : all[0]?.id;
+    presetSelect.value = target;
+    applyPresetToLimit();
+  }
+
+  function applyPresetToLimit() {
+    const all = getAllPresets();
+    const p = all.find(x => x.id === presetSelect.value);
+    if (!p) return;
+    limitInput.value = p.limit;
+  }
+
+  presetSelect.addEventListener("change", applyPresetToLimit);
+
+  // ---- Prefix hesabı ----
+  // İstenen format: "(001/070) " => 10 karakter varsayımı.
+  // Bu uzunluk toplam parçaya dahil edilir.
+  function makePrefix(i, total) {
+    const pad = (n) => String(n).padStart(3, "0");
+    return `(${pad(i)}/${pad(total)}) `; // 10 chars when total < 1000; UI bunu hedefliyor.
+  }
+
+  function prefixLenAssumption() {
+    // Kullanıcı şartı: 10 karakter.
+    // Gerçekte total 1000+ olursa prefix uzayabilir; ama burada 3 haneli sabit tutuyoruz.
+    return 10;
+  }
+
+  // ---- Bölme yardımcıları ----
+  function tokenize(text, mode) {
+    // Her token "eklenebilir bir parça" mantığında.
+    if (mode === "chars") {
+      return Array.from(text); // surrogate pair güvenli
+    }
+
+    if (mode === "paragraphs") {
+      // Paragraf sonlarını koru
+      const parts = text.split(/\n{2,}/);
+      // araya iki newline ekleyerek birleştirilebilir kıl
+      const out = [];
+      for (let i = 0; i < parts.length; i++) {
+        const t = parts[i];
+        out.push(t);
+        if (i !== parts.length - 1) out.push("\n\n");
+      }
+      return out.filter(x => x !== "");
+    }
+
+    if (mode === "sentences") {
+      // Basit cümle bölme: nokta/ünlem/soru sonrası boşluklar
+      // Ayırıcıları kaybetmemek için regex ile yakala.
+      const re = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
+      const m = text.match(re);
+      return m ? m : [text];
+    }
+
+    // words (default): boşlukları kaybetme, ama kelimeyi ortadan bölmemeye çalış.
+    // "(\s+)" ayırıcılarını token olarak tutar.
+    const tokens = text.split(/(\s+)/);
+    return tokens.filter(t => t.length > 0);
+  }
+
+  function buildChunks(text, limit, mode) {
+    const tokens = tokenize(text, mode);
+
+    const prefLen = prefixLenAssumption();
+    const usable = limit - prefLen;
+    if (usable <= 0) {
+      throw new Error(`Limit çok düşük: Prefix(10) sonrası usable <= 0`);
+    }
+
+    const chunks = [];
+    let cur = "";
+
+    const pushCur = () => {
+      if (cur.length > 0) chunks.push(cur);
+      cur = "";
+    };
+
+    for (const tok of tokens) {
+      if (tok.length > usable) {
+        // Token tek başına sığmıyorsa: chars gibi parça parça böl
+        pushCur();
+        let s = tok;
+        while (s.length > 0) {
+          chunks.push(s.slice(0, usable));
+          s = s.slice(usable);
+        }
+        continue;
+      }
+
+      if ((cur.length + tok.length) <= usable) {
+        cur += tok;
+      } else {
+        pushCur();
+        cur = tok;
+      }
+    }
+    pushCur();
+
+    // Trim: özellikle words modunda başta/sonda aşırı boşluk olabilir; kullanıcı metnine sadık kalmak için dokunmuyoruz.
+    return chunks;
+  }
+
+  function assembleWithPrefixes(chunks) {
+    const total = chunks.length;
+    return chunks.map((c, idx) => makePrefix(idx + 1, total) + c);
+  }
+
+  // ---- UI render ----
+  function setStatus(msg, kind = "") {
+    statusEl.textContent = msg || "";
+    statusEl.className = "small " + (kind || "");
+  }
+
+  async function copyText(text) {
+    await navigator.clipboard.writeText(text);
+  }
+
+  function renderParts(prefixedParts, limit) {
+    partsWrap.innerHTML = "";
+    const frag = document.createDocumentFragment();
+
+    prefixedParts.forEach((p, i) => {
+      const wrap = document.createElement("div");
+      wrap.className = "part";
+
+      const head = document.createElement("div");
+      head.className = "partHead";
+
+      const left = document.createElement("div");
+      left.className = "pill mono";
+      left.textContent = `Parça ${i + 1}/${prefixedParts.length} — ${p.length}/${limit}`;
+
+      const right = document.createElement("div");
+      const btn = document.createElement("button");
+      btn.textContent = "Kopyala";
+      btn.addEventListener("click", async () => {
+        try {
+          await copyText(p);
+          btn.textContent = "Kopyalandı";
+          setTimeout(() => (btn.textContent = "Kopyala"), 800);
+        } catch (e) {
+          alert("Kopyalama başarısız. Tarayıcı izinlerini kontrol et.");
+        }
+      });
+
+      right.appendChild(btn);
+      head.appendChild(left);
+      head.appendChild(right);
+
+      const body = document.createElement("div");
+      body.className = "partBody";
+      const ta = document.createElement("textarea");
+      ta.value = p;
+      body.appendChild(ta);
+
+      wrap.appendChild(head);
+      wrap.appendChild(body);
+
+      frag.appendChild(wrap);
+    });
+
+    partsWrap.appendChild(frag);
+  }
+
+  // ---- Actions ----
+  splitBtn.addEventListener("click", () => {
+    const text = inputText.value ?? "";
+    const limit = Math.max(20, Math.floor(Number(limitInput.value || 0)));
+    const mode = modeSelect.value;
+
+    if (!text.trim()) {
+      setStatus("Metin boş görünüyor.", "danger");
+      partsWrap.innerHTML = "";
+      return;
+    }
+    if (!Number.isFinite(limit) || limit < 20) {
+      setStatus("Geçerli bir limit gir.", "danger");
+      return;
+    }
+
+    try {
+      const chunks = buildChunks(text, limit, mode);
+      const prefixed = assembleWithPrefixes(chunks);
+
+      // Safety: limit aşımı var mı?
+      const overflow = prefixed.find(x => x.length > limit);
+      if (overflow) {
+        setStatus("Uyarı: Bazı parçalar limiti aşıyor (prefix formatından dolayı olabilir).", "danger");
+      } else {
+        setStatus(`OK: ${prefixed.length} parça üretildi.`, "ok");
+      }
+      renderParts(prefixed, limit);
+    } catch (e) {
+      setStatus(String(e.message || e), "danger");
+    }
+  });
+
+  copyAllBtn.addEventListener("click", async () => {
+    const areas = partsWrap.querySelectorAll("textarea");
+    if (!areas.length) {
+      setStatus("Önce böl.", "danger");
+      return;
+    }
+    const all = Array.from(areas).map(a => a.value).join("\n\n");
+    try {
+      await copyText(all);
+      setStatus("Tüm parçalar tek metin olarak kopyalandı.", "ok");
+    } catch {
+      setStatus("Kopyalama başarısız.", "danger");
+    }
+  });
+
+  savePresetBtn.addEventListener("click", () => {
+    const name = (customName.value || "").trim();
+    const limit = Math.floor(Number(customLimit.value || 0));
+    if (!name) return setStatus("Preset adı boş olamaz.", "danger");
+    if (!Number.isFinite(limit) || limit < 20) return setStatus("Preset limiti geçersiz.", "danger");
+
+    const user = loadUserPresets();
+    const id = "u_" + name.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_ğüşöçıİĞÜŞÖÇ]+/gi, "");
+    const existingIdx = user.findIndex(p => p.id === id);
+
+    const item = { id, name, limit };
+    if (existingIdx >= 0) user[existingIdx] = item;
+    else user.push(item);
+
+    saveUserPresets(user);
+    refreshPresetSelect(id);
+    setStatus(`Kaydedildi: ${name} (${limit})`, "ok");
+  });
+
+  deletePresetBtn.addEventListener("click", () => {
+    const id = presetSelect.value;
+    if (!id.startsWith("u_")) {
+      return setStatus("Sadece kullanıcı presetleri silinebilir.", "danger");
+    }
+    const user = loadUserPresets().filter(p => p.id !== id);
+    saveUserPresets(user);
+    refreshPresetSelect();
+    setStatus("Preset silindi.", "ok");
+  });
+
+  // init
+  refreshPresetSelect();
+  limitInput.value = 280;
+})();
+</script>
+</body>
+</html>

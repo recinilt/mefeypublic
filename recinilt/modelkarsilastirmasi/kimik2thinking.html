@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Metin Bölücü – Sosyal Medya</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #111827;
+      --bg-softer: #020617;
+      --accent: #3b82f6;
+      --accent-soft: #1d4ed8;
+      --text: #e5e7eb;
+      --text-soft: #9ca3af;
+      --border: #1f2937;
+      --danger: #ef4444;
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 50%, #000 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1200px;
+      background: linear-gradient(135deg, rgba(15,23,42,.95), rgba(15,23,42,.98));
+      border-radius: 16px;
+      border: 1px solid rgba(148,163,184,.3);
+      box-shadow:
+        0 18px 60px rgba(15,23,42,.9),
+        0 0 0 1px rgba(148,163,184,.1);
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      border-bottom: 1px solid rgba(31,41,55,.8);
+      padding-bottom: 10px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    header h1 span.logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #e5e7eb, #22c55e);
+      box-shadow: 0 0 12px rgba(34,197,94,.8);
+    }
+
+    header .subtitle {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-soft);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left,
+        rgba(30,64,175,.18),
+        rgba(15,23,42,.92));
+      border-radius: var(--radius);
+      border: 1px solid rgba(51,65,85,.9);
+      padding: 12px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.08), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(129,140,248,.08), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .card-meta {
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border-radius: 10px;
+      border: 1px solid rgba(55,65,81,.9);
+      background: radial-gradient(circle at top, #020617, #020617 60%, #020617 100%);
+      padding: 10px 11px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59,130,246,.8);
+      background: radial-gradient(circle at top, #020617, #020617 60%, #020617 100%);
+    }
+
+    label {
+      font-size: 11px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      background: rgba(15,23,42,.9);
+      border-radius: 8px;
+      border: 1px solid rgba(55,65,81,.9);
+      padding: 6px 8px;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      outline: none;
+      min-height: 32px;
+      transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(59,130,246,.7);
+      background: rgba(15,23,42,1);
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      align-items: flex-end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .field-grow {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .field-small {
+      flex: 0 0 auto;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 7px 14px;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+      color: #e5f2ff;
+      box-shadow:
+        0 10px 30px rgba(37,99,235,.55),
+        0 0 0 1px rgba(191,219,254,.3);
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #60a5fa, #2563eb);
+      box-shadow:
+        0 12px 35px rgba(37,99,235,.7),
+        0 0 0 1px rgba(191,219,254,.5);
+    }
+
+    .btn-ghost {
+      background: rgba(15,23,42,.8);
+      color: var(--text-soft);
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,.85);
+      padding-inline: 10px;
+      white-space: nowrap;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(31,41,55,.95);
+      color: #e5e7eb;
+      box-shadow: 0 0 0 1px rgba(75,85,99,.9);
+    }
+
+    .btn-danger {
+      background: rgba(127,29,29,.9);
+      color: #fee2e2;
+      border-radius: 999px;
+      border: 1px solid rgba(248,113,113,.7);
+      padding-inline: 10px;
+    }
+
+    .btn-danger:hover {
+      background: rgba(185,28,28,.98);
+      box-shadow: 0 0 0 1px rgba(254,202,202,.7);
+    }
+
+    .info-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      font-size: 11px;
+      color: var(--text-soft);
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,.9);
+      background: rgba(15,23,42,.85);
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #f9fafb, #22c55e);
+      box-shadow: 0 0 8px rgba(34,197,94,.8);
+    }
+
+    .pill-warn {
+      border-color: rgba(248,113,113,.7);
+      color: #fecaca;
+      background: rgba(30,64,175,.3);
+    }
+
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .segments {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 420px;
+      overflow: auto;
+      padding-right: 2px;
+      margin-top: 6px;
+    }
+
+    .segment {
+      border-radius: 10px;
+      border: 1px solid rgba(55,65,81,.9);
+      background: radial-gradient(circle at top left,
+        rgba(30,64,175,.25),
+        rgba(15,23,42,.96));
+      padding: 8px 9px 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .segment-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-soft);
+    }
+
+    .segment-header-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .segment-index {
+      font-weight: 600;
+      color: #e5e7eb;
+      font-size: 11px;
+    }
+
+    .segment-meta {
+      font-size: 10px;
+      color: var(--text-soft);
+    }
+
+    .segment textarea {
+      min-height: 80px;
+      font-size: 12px;
+      background: rgba(15,23,42,.98);
+      border-radius: 8px;
+    }
+
+    .badge {
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,.9);
+      background: rgba(15,23,42,.9);
+      font-size: 10px;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .badge-strong {
+      border-color: rgba(129,140,248,.9);
+      color: #c7d2fe;
+      background: rgba(30,64,175,.7);
+    }
+
+    .text-muted {
+      color: var(--text-soft);
+    }
+
+    .tiny {
+      font-size: 10px;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(148,163,184,.7),
+        transparent
+      );
+      margin: 0;
+      border: none;
+    }
+
+    .grow {
+      flex: 1 1 auto;
+    }
+
+    .nowrap {
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>
+          <span class="logo-dot"></span>
+          METİN BÖLÜCÜ
+        </h1>
+        <p class="subtitle">
+          Uzun metni Instagram, X/Twitter vb. için otomatik olarak (001/070) başlıklı parçalara ayır.
+        </p>
+      </div>
+      <div class="pill">
+        <span class="pill-dot"></span>
+        <span class="tiny">Prefix sabit: <strong>(001/070) </strong> = 10 karakter</span>
+      </div>
+    </header>
+
+    <div class="layout">
+      <!-- SOL TARAF: GİRİŞ + AYARLAR -->
+      <section class="card">
+        <div class="card-content">
+          <div class="card-header">
+            <div>
+              <div class="card-title">1. Metni yapıştır</div>
+              <div class="card-meta">Uzun metnini aşağıya yapıştır, sonra platform ve bölme yöntemini seç.</div>
+            </div>
+          </div>
+
+          <textarea id="inputText" placeholder="Uzun metni buraya yapıştır veya yaz..."></textarea>
+
+          <div class="info-line">
+            <div class="pill" id="inputStats">
+              Toplam karakter: 0 • Kelime: 0
+            </div>
+            <button type="button" class="btn-ghost tiny" id="btnClear">
+              Temizle
+            </button>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="card-header">
+            <div class="card-title">2. Platform & yöntem</div>
+            <div class="card-meta">Platform karakter limiti + bölme mantığını belirle.</div>
+          </div>
+
+          <div class="row">
+            <div class="field field-grow">
+              <label for="presetSelect">Platform / Preset</label>
+              <select id="presetSelect"></select>
+            </div>
+
+            <div class="field field-small">
+              <label for="splitMode">Bölme yöntemi</label>
+              <select id="splitMode">
+                <option value="words">Kelimelerden</option>
+                <option value="chars">Karakterlerden</option>
+                <option value="sentences">Cümlelerden</option>
+                <option value="paragraphs">Paragraflardan</option>
+              </select>
+            </div>
+
+            <div class="field field-small">
+              <label for="prefixPreview">Prefix</label>
+              <div class="badge badge-strong" id="prefixPreview">(001/070) </div>
+            </div>
+          </div>
+
+          <div class="info-line">
+            <span class="tiny">
+              Her parça: <strong>platform limiti − 10</strong> karakter (başlık için).
+            </span>
+            <span class="tiny text-muted">
+              Örn: Instagram DM 1000 ⇒ içerik 990 + "(001/070) ".
+            </span>
+          </div>
+
+          <div class="row">
+            <div class="grow"></div>
+            <button type="button" class="btn-primary" id="btnSplit">
+              Böl ve parçaları üret
+            </button>
+          </div>
+
+          <hr class="divider" />
+
+          <div class="card-header">
+            <div class="card-title">3. Özel preset oluştur</div>
+            <div class="card-meta">Sık kullandığın platformlar için kendi limitini kaydet.</div>
+          </div>
+
+          <div class="row">
+            <div class="field field-grow">
+              <label for="customName">Preset adı</label>
+              <input type="text" id="customName" placeholder="Örn: WhatsApp Grup, E-posta, SMS" />
+            </div>
+            <div class="field field-small">
+              <label for="customLimit">Karakter limiti</label>
+              <input type="number" id="customLimit" min="20" step="10" placeholder="Örn: 500" />
+            </div>
+            <div class="field field-small">
+              <label>&nbsp;</label>
+              <button type="button" class="btn-ghost" id="btnAddPreset">
+                Preset ekle
+              </button>
+            </div>
+          </div>
+
+          <div class="info-line">
+            <span class="tiny text-muted">
+              Özel preset’ler tarayıcıda <strong>localStorage</strong> ile saklanır.
+            </span>
+            <button type="button" class="btn-danger tiny" id="btnResetPresets">
+              Özel preset’leri sil
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- SAĞ TARAF: SONUÇLAR -->
+      <section class="card">
+        <div class="card-content">
+          <div class="card-header results-header">
+            <div>
+              <div class="card-title">Parçalar</div>
+              <div class="card-meta">
+                Üretilen parçaları buradan kopyalayıp Instagram, X/Twitter vb. yerlere yapıştır.
+              </div>
+            </div>
+            <div class="pill pill-warn tiny" id="resultSummary">
+              Henüz parça yok.
+            </div>
+          </div>
+
+          <div class="info-line">
+            <span class="tiny nowrap" id="activePresetInfo">
+              Seçili preset: —
+            </span>
+            <span class="tiny text-muted">
+              Kopyala butonu her parçayı panoya gönderir.
+            </span>
+          </div>
+
+          <div class="segments" id="segmentsContainer">
+            <!-- Dinamik olarak doldurulacak -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ----------------------
+    // Sabitler & yardımcılar
+    // ----------------------
+    const PREFIX_TEMPLATE = "(001/070) "; // 10 karakter
+    const PREFIX_LENGTH = PREFIX_TEMPLATE.length;
+
+    const BUILTIN_PRESETS = [
+      { id: "instagram-dm", name: "Instagram DM (1000)", limit: 1000 },
+      { id: "twitter-post", name: "X / Twitter Gönderi (280)", limit: 280 },
+      { id: "generic-500", name: "Genel (500)", limit: 500 },
+    ];
+
+    const CUSTOM_STORAGE_KEY = "textSplitterCustomPresets_v1";
+
+    const elInput = document.getElementById("inputText");
+    const elInputStats = document.getElementById("inputStats");
+    const elBtnClear = document.getElementById("btnClear");
+
+    const elPresetSelect = document.getElementById("presetSelect");
+    const elSplitMode = document.getElementById("splitMode");
+    const elPrefixPreview = document.getElementById("prefixPreview");
+    const elBtnSplit = document.getElementById("btnSplit");
+
+    const elCustomName = document.getElementById("customName");
+    const elCustomLimit = document.getElementById("customLimit");
+    const elBtnAddPreset = document.getElementById("btnAddPreset");
+    const elBtnResetPresets = document.getElementById("btnResetPresets");
+
+    const elSegmentsContainer = document.getElementById("segmentsContainer");
+    const elResultSummary = document.getElementById("resultSummary");
+    const elActivePresetInfo = document.getElementById("activePresetInfo");
+
+    // Basit yardım fonksiyonları
+    function countWords(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return 0;
+      return trimmed.split(/\s+/).length;
+    }
+
+    function showToastLike(text) {
+      elResultSummary.textContent = text;
+    }
+
+    function loadCustomPresets() {
+      try {
+        const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return [];
+        return arr.filter(p => typeof p.limit === "number" && p.limit > 0 && typeof p.name === "string");
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCustomPresets(list) {
+      localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function renderPresetSelect() {
+      const customPresets = loadCustomPresets();
+      elPresetSelect.innerHTML = "";
+
+      const group1 = document.createElement("optgroup");
+      group1.label = "Hazır preset’ler";
+      BUILTIN_PRESETS.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = `builtin:${p.id}`;
+        opt.dataset.limit = String(p.limit);
+        opt.textContent = `${p.name} – ${p.limit} karakter`;
+        group1.appendChild(opt);
+      });
+      elPresetSelect.appendChild(group1);
+
+      if (customPresets.length) {
+        const group2 = document.createElement("optgroup");
+        group2.label = "Özel preset’ler";
+        customPresets.forEach((p, idx) => {
+          const opt = document.createElement("option");
+          opt.value = `custom:${idx}`;
+          opt.dataset.limit = String(p.limit);
+          opt.textContent = `${p.name} – ${p.limit} karakter`;
+          group2.appendChild(opt);
+        });
+        elPresetSelect.appendChild(group2);
+      }
+
+      // Varsayılan: ilk built‑in
+      elPresetSelect.selectedIndex = 0;
+      updateActivePresetInfo();
+    }
+
+    function getSelectedLimit() {
+      const option = elPresetSelect.selectedOptions[0];
+      if (!option) return null;
+      const limit = Number(option.dataset.limit || "0");
+      return isNaN(limit) || limit <= PREFIX_LENGTH ? null : limit;
+    }
+
+    function updateActivePresetInfo() {
+      const option = elPresetSelect.selectedOptions[0];
+      if (!option) {
+        elActivePresetInfo.textContent = "Seçili preset: —";
+        return;
+      }
+      const limit = getSelectedLimit();
+      if (!limit) {
+        elActivePresetInfo.textContent = "Seçili preset geçersiz.";
+        return;
+      }
+      const contentLimit = limit - PREFIX_LENGTH;
+      elActivePresetInfo.textContent =
+        `Seçili preset: ${option.textContent} | Prefix: "${PREFIX_TEMPLATE}" (${PREFIX_LENGTH}) | İçerik limiti: ${contentLimit}`;
+    }
+
+    // ----------------------
+    // Bölme algoritmaları
+    // ----------------------
+    function splitByChars(text, contentLimit) {
+      const parts = [];
+      let i = 0;
+      while (i < text.length) {
+        parts.push(text.slice(i, i + contentLimit));
+        i += contentLimit;
+      }
+      return parts;
+    }
+
+    function splitByWords(text, contentLimit) {
+      const words = text.split(/\s+/);
+      const parts = [];
+      let current = "";
+
+      for (const word of words) {
+        if (!word) continue;
+        const candidate = current ? current + " " + word : word;
+
+        if (candidate.length <= contentLimit) {
+          current = candidate;
+        } else {
+          if (current) {
+            parts.push(current);
+          }
+          // Eğer tek kelime bile contentLimit'ten uzunsa, zorunlu parçala
+          if (word.length > contentLimit) {
+            let start = 0;
+            while (start < word.length) {
+              parts.push(word.slice(start, start + contentLimit));
+              start += contentLimit;
+            }
+            current = "";
+          } else {
+            current = word;
+          }
+        }
+      }
+
+      if (current) parts.push(current);
+      return parts;
+    }
+
+    function splitBySentences(text, contentLimit) {
+      // Nokta, ünlem, soru vb. temel işaretlere göre kaba cümle bölme
+      const rawSentences = text.split(/(?<=[\.!\?…])\s+/);
+      const parts = [];
+      let current = "";
+
+      for (const s of rawSentences) {
+        if (!s) continue;
+        const trimmed = s.trim();
+        if (!trimmed) continue;
+
+        if ((current + " " + trimmed).trim().length <= contentLimit) {
+          current = (current ? current + " " : "") + trimmed;
+        } else {
+          if (current) parts.push(current);
+          if (trimmed.length <= contentLimit) {
+            current = trimmed;
+          } else {
+            // Tek cümle bile sığıyorsa zorunlu karakter bazlı böl
+            const forced = splitByChars(trimmed, contentLimit);
+            parts.push(...forced.slice(0, forced.length - 1));
+            current = forced[forced.length - 1];
+          }
+        }
+      }
+
+      if (current) parts.push(current);
+      return parts;
+    }
+
+    function splitByParagraphs(text, contentLimit) {
+      // Boş satıra göre paragrafları ayır
+      const rawParagraphs = text.split(/\n\s*\n/);
+      const parts = [];
+      let current = "";
+
+      for (let p of rawParagraphs) {
+        if (!p) continue;
+        // Paragraf sonlarında ekstra newline'ları koru
+        p = p.replace(/\s+$/g, "");
+
+        const sep = current ? "\n\n" : "";
+        if ((current + sep + p).length <= contentLimit) {
+          current = current + sep + p;
+        } else {
+          if (current) parts.push(current);
+          if (p.length <= contentLimit) {
+            current = p;
+          } else {
+            // Paragraf çok uzunsa cümle, o da olmazsa karakter bazlı böl
+            const sentenceParts = splitBySentences(p, contentLimit);
+            if (sentenceParts.length === 1 && sentenceParts[0].length > contentLimit) {
+              const forced = splitByChars(p, contentLimit);
+              parts.push(...forced);
+              current = "";
+            } else {
+              parts.push(...sentenceParts.slice(0, sentenceParts.length - 1));
+              current = sentenceParts[sentenceParts.length - 1];
+            }
+          }
+        }
+      }
+
+      if (current) parts.push(current);
+      return parts;
+    }
+
+    function splitTextWithMode(text, totalLimit, mode) {
+      const contentLimit = totalLimit - PREFIX_LENGTH;
+      if (contentLimit <= 0) {
+        throw new Error("Karakter limiti, prefix uzunluğundan büyük olmalı.");
+      }
+
+      switch (mode) {
+        case "chars":
+          return splitByChars(text, contentLimit);
+        case "words":
+          return splitByWords(text, contentLimit);
+        case "sentences":
+          return splitBySentences(text, contentLimit);
+        case "paragraphs":
+          return splitByParagraphs(text, contentLimit);
+        default:
+          return splitByWords(text, contentLimit);
+      }
+    }
+
+    function applyPrefixes(chunks, totalLimit) {
+      const total = chunks.length;
+      const totalStr = String(total).padStart(3, "0"); // 070 gibi
+      const result = [];
+
+      for (let i = 0; i < total; i++) {
+        const indexStr = String(i + 1).padStart(3, "0"); // 001 gibi
+        const prefix = `(${indexStr}/${totalStr}) `;
+        // Not: PREFIX_LENGTH ile varsayılan 10 karakter hesaplanıyor.
+        const full = prefix + chunks[i];
+        result.push({ text: full, prefix, index: i + 1, total });
+      }
+
+      return result;
+    }
+
+    // ----------------------
+    // UI – Etkileşimler
+    // ----------------------
+    function refreshInputStats() {
+      const text = elInput.value;
+      const chars = text.length;
+      const words = countWords(text);
+      elInputStats.textContent = `Toplam karakter: ${chars} • Kelime: ${words}`;
+    }
+
+    function clearResults() {
+      elSegmentsContainer.innerHTML = "";
+      elResultSummary.textContent = "Henüz parça yok.";
+    }
+
+    function renderSegments(segments, totalLimit) {
+      elSegmentsContainer.innerHTML = "";
+
+      if (!segments.length) {
+        elResultSummary.textContent = "Parça üretilemedi. Metni ve limiti kontrol et.";
+        return;
+      }
+
+      const totalChars = segments.reduce((sum, s) => sum + s.text.length, 0);
+      elResultSummary.textContent =
+        `Toplam ${segments.length} parça üretildi. Ortalama uzunluk: ${Math.round(totalChars / segments.length)} karakter.`;
+
+      segments.forEach((segment, idx) => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "segment";
+
+        const header = document.createElement("div");
+        header.className = "segment-header";
+
+        const left = document.createElement("div");
+        left.className = "segment-header-left";
+
+        const spanIdx = document.createElement("span");
+        spanIdx.className = "segment-index";
+        spanIdx.textContent = `Bölüm ${idx + 1}/${segments.length}`;
+
+        const spanMeta = document.createElement("span");
+        spanMeta.className = "segment-meta";
+        spanMeta.textContent = `Uzunluk: ${segment.text.length}/${totalLimit} karakter`;
+
+        left.appendChild(spanIdx);
+        left.appendChild(spanMeta);
+
+        const btnCopy = document.createElement("button");
+        btnCopy.type = "button";
+        btnCopy.className = "btn-ghost tiny";
+        btnCopy.textContent = "Kopyala";
+
+        btnCopy.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(segment.text);
+            showToastLike(`Bölüm ${idx + 1} panoya kopyalandı.`);
+          } catch (e) {
+            // Eski tarayıcılar için fallback
+            const tmp = document.createElement("textarea");
+            tmp.value = segment.text;
+            document.body.appendChild(tmp);
+            tmp.select();
+            document.execCommand("copy");
+            document.body.removeChild(tmp);
+            showToastLike(`Bölüm ${idx + 1} panoya kopyalandı (fallback).`);
+          }
+        });
+
+        header.appendChild(left);
+        header.appendChild(btnCopy);
+
+        const ta = document.createElement("textarea");
+        ta.readOnly = true;
+        ta.value = segment.text;
+
+        wrapper.appendChild(header);
+        wrapper.appendChild(ta);
+
+        elSegmentsContainer.appendChild(wrapper);
+      });
+    }
+
+    // ----------------------
+    // Olay bağlama
+    // ----------------------
+    elInput.addEventListener("input", refreshInputStats);
+
+    elBtnClear.addEventListener("click", () => {
+      elInput.value = "";
+      refreshInputStats();
+      clearResults();
+    });
+
+    elPresetSelect.addEventListener("change", updateActivePresetInfo);
+
+    elBtnSplit.addEventListener("click", () => {
+      const rawText = elInput.value;
+      if (!rawText.trim()) {
+        showToastLike("Önce bölmek istediğin metni gir.");
+        return;
+      }
+
+      const limit = getSelectedLimit();
+      if (!limit) {
+        showToastLike("Geçerli bir preset / karakter limiti seç.");
+        return;
+      }
+
+      const mode = elSplitMode.value;
+
+      try {
+        const chunks = splitTextWithMode(rawText, limit, mode);
+        const segments = applyPrefixes(chunks, limit);
+        renderSegments(segments, limit);
+      } catch (err) {
+        console.error(err);
+        showToastLike("Bölme sırasında bir hata oluştu. Limiti kontrol et.");
+      }
+    });
+
+    elBtnAddPreset.addEventListener("click", () => {
+      const name = (elCustomName.value || "").trim();
+      const limit = Number(elCustomLimit.value);
+
+      if (!name) {
+        showToastLike("Preset adı boş olamaz.");
+        return;
+      }
+      if (!limit || limit <= PREFIX_LENGTH) {
+        showToastLike(`Karakter limiti ${PREFIX_LENGTH} karakterden büyük olmalı.`);
+        return;
+      }
+
+      const list = loadCustomPresets();
+      list.push({ name, limit });
+      saveCustomPresets(list);
+
+      renderPresetSelect();
+      showToastLike(`"${name}" adlı preset eklendi.`);
+      elCustomName.value = "";
+      elCustomLimit.value = "";
+    });
+
+    elBtnResetPresets.addEventListener("click", () => {
+      if (!confirm("Tüm özel preset’ler silinsin mi?")) return;
+      saveCustomPresets([]);
+      renderPresetSelect();
+      showToastLike("Özel preset’ler temizlendi.");
+    });
+
+    // İlk yükleme
+    (function init() {
+      elPrefixPreview.textContent = PREFIX_TEMPLATE;
+      renderPresetSelect();
+      refreshInputStats();
+      clearResults();
+    })();
+  </script>
+</body>
+</html>

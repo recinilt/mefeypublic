@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metin Bölücü</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        textarea, input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .preset-section { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+        .custom-preset { display: flex; gap: 5px; align-items: center; }
+        .sections { margin-top: 20px; }
+        .section { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin-bottom: 10px; position: relative; }
+        .section-header { font-weight: bold; margin-bottom: 10px; cursor: pointer; }
+        .section-content { word-break: break-word; }
+        .copy-btn { position: absolute; top: 15px; right: 15px; background: #28a745; padding: 5px 10px; font-size: 12px; }
+        .preset-list { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+        .preset-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+        .delete-preset { background: #dc3545; color: white; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; font-size: 12px; }
+        .options { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+        label { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Metin Bölücü (Text Splitter)</h1>
+    <p>Uzun metni yapıştırın, platform seçin ve bölün. Her parça kopyalanabilir.</p>
+
+    <textarea id="inputText" rows="10" placeholder="Uzun metninizi buraya yapıştırın..."></textarea>
+
+    <div class="preset-section">
+        <select id="presetSelect">
+            <option value="1000:Instagram">Instagram (1000 karakter) [web:6][web:9][web:15]</option>
+            <option value="280:Twitter">Twitter (280 karakter) [web:1][web:3][web:5]</option>
+            <option value="10000:Twitter DM">Twitter DM (10000 karakter) [web:1][web:17]</option>
+        </select>
+        <div class="custom-preset">
+            <input type="number" id="customLimit" placeholder="Limit" min="1">
+            <input type="text" id="customName" placeholder="İsim">
+            <button onclick="addCustomPreset()">Ekle</button>
+        </div>
+    </div>
+
+    <div class="options">
+        <label>Split Mode:</label>
+        <select id="splitMode">
+            <option value="word">Kelimelerden</option>
+            <option value="char">Karakterlerden</option>
+            <option value="sentence">Cümlelerden</option>
+            <option value="paragraph">Paragraflardan</option>
+        </select>
+        <button onclick="splitText()">Böl</button>
+        <button onclick="clearAll()">Temizle</button>
+    </div>
+
+    <div id="customPresets">
+        <h3>Özel Presetler</h3>
+        <div id="presetList" class="preset-list"></div>
+    </div>
+
+    <div id="sections" class="sections"></div>
+
+    <script>
+        const HEADER_LEN = 13; // "(001/070)  " ~13 chars + space
+        const EXTRA_SPACE = 10;
+
+        function loadPresets() {
+            const presets = JSON.parse(localStorage.getItem('customPresets') || '[]');
+            const list = document.getElementById('presetList');
+            list.innerHTML = '';
+            presets.forEach((preset, index) => {
+                const div = document.createElement('div');
+                div.className = 'preset-item';
+                div.innerHTML = `
+                    <span onclick="selectPreset('${preset.name}', ${preset.limit})" style="cursor: pointer;">${preset.name} (${preset.limit})</span>
+                    <button class="delete-preset" onclick="deletePreset(${index})">Sil</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function addCustomPreset() {
+            const name = document.getElementById('customName').value.trim();
+            const limit = parseInt(document.getElementById('customLimit').value);
+            if (name && limit) {
+                const presets = JSON.parse(localStorage.getItem('customPresets') || '[]');
+                presets.push({name, limit});
+                localStorage.setItem('customPresets', JSON.stringify(presets));
+                loadPresets();
+                document.getElementById('customName').value = '';
+                document.getElementById('customLimit').value = '';
+            }
+        }
+
+        function deletePreset(index) {
+            const presets = JSON.parse(localStorage.getItem('customPresets') || '[]');
+            presets.splice(index, 1);
+            localStorage.setItem('customPresets', JSON.stringify(presets));
+            loadPresets();
+        }
+
+        function selectPreset(name, limit) {
+            document.getElementById('presetSelect').value = `${limit}:${name}`;
+        }
+
+        function getMaxLength() {
+            const selected = document.getElementById('presetSelect').value.split(':');
+            const limit = parseInt(selected[0]);
+            return limit - HEADER_LEN - EXTRA_SPACE;
+        }
+
+        function splitText() {
+            const text = document.getElementById('inputText').value;
+            if (!text) return;
+
+            const mode = document.getElementById('splitMode').value;
+            const maxLen = getMaxLength();
+            const parts = splitByMode(text, mode, maxLen);
+            displayParts(parts);
+        }
+
+        function splitByMode(text, mode, maxLen) {
+            let parts = [];
+            let remaining = text;
+
+            while (remaining.length > 0) {
+                let part;
+                if (mode === 'char') {
+                    part = remaining.slice(0, maxLen);
+                    remaining = remaining.slice(maxLen);
+                } else if (mode === 'word') {
+                    const words = remaining.split(/\s+/);
+                    part = words.slice(0, findWordsToFit(words, maxLen)).join(' ');
+                    remaining = words.slice(findWordsToFit(words, maxLen)).join(' ');
+                    if (remaining) remaining = ' ' + remaining;
+                } else if (mode === 'sentence') {
+                    const sentences = remaining.split(/(?<=[.!?])\s+/);
+                    part = sentences.slice(0, findWordsToFit(sentences, maxLen)).join('');
+                    remaining = sentences.slice(findWordsToFit(sentences, maxLen)).join('');
+                } else if (mode === 'paragraph') {
+                    const paras = remaining.split(/\n\n+/);
+                    part = paras.slice(0, findWordsToFit(paras, maxLen)).join('\n\n');
+                    remaining = paras.slice(findWordsToFit(paras, maxLen)).join('\n\n');
+                }
+                if (part.length > 0) parts.push(part.trim());
+            }
+            return parts;
+        }
+
+        function findWordsToFit(items, maxLen) {
+            let len = 0;
+            let count = 0;
+            for (let item of items) {
+                const testLen = len + item.length + (len > 0 ? 1 : 0);
+                if (testLen > maxLen) break;
+                len = testLen;
+                count++;
+            }
+            return count || 1;
+        }
+
+        function displayParts(parts) {
+            const container = document.getElementById('sections');
+            container.innerHTML = '';
+            const total = parts.length;
+            parts.forEach((part, index) => {
+                const num = String(index + 1).padStart(3, '0');
+                const header = `(${num}/${total.toString().padStart(3, '0')})          `;
+                const fullText = header + part;
+                const div = document.createElement('div');
+                div.className = 'section';
+                div.innerHTML = `
+                    <div class="copy-btn" onclick="copyToClipboard('${fullText.replace(/'/g, "\\'")}')">Kopyala</div>
+                    <div class="section-header">${header}</div>
+                    <div class="section-content">${part}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Kopyalandı!');
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('sections').innerHTML = '';
+        }
+
+        // Init
+        loadPresets();
+        document.getElementById('presetSelect').addEventListener('change', () => {
+            document.getElementById('sections').innerHTML = '';
+        });
+    </script>
+</body>
+</html>

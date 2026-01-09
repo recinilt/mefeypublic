@@ -19,7 +19,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -47,7 +47,7 @@
 
         textarea {
             width: 100%;
-            min-height: 200px;
+            min-height: 150px;
             padding: 15px;
             border: 2px solid #ddd;
             border-radius: 10px;
@@ -55,7 +55,6 @@
             font-family: inherit;
             resize: vertical;
             transition: border-color 0.3s;
-            line-height: 1.6;
         }
 
         textarea:focus {
@@ -67,29 +66,15 @@
             margin-bottom: 25px;
         }
 
-        .category-title {
-            font-size: 16px;
-            color: #667eea;
-            font-weight: 700;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .category-title:first-child {
-            margin-top: 0;
-        }
-
         .presets-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             gap: 10px;
             margin-bottom: 15px;
         }
 
         .preset-btn {
-            padding: 12px 16px;
+            padding: 12px 20px;
             border: 2px solid #667eea;
             background: white;
             color: #667eea;
@@ -98,27 +83,16 @@
             font-weight: 600;
             transition: all 0.3s;
             position: relative;
-            font-size: 13px;
-            text-align: center;
         }
 
         .preset-btn:hover {
             background: #667eea;
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .preset-btn.active {
             background: #667eea;
             color: white;
-        }
-
-        .preset-btn small {
-            display: block;
-            font-size: 11px;
-            margin-top: 4px;
-            opacity: 0.8;
         }
 
         .preset-btn .delete-preset {
@@ -129,36 +103,25 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 12px;
             display: none;
-            line-height: 22px;
-            z-index: 10;
         }
 
-        .preset-btn.custom:hover .delete-preset {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .preset-btn .delete-preset:hover {
-            background: #c0392b;
-            transform: scale(1.1);
+        .preset-btn:hover .delete-preset {
+            display: block;
         }
 
         .custom-preset {
             display: flex;
             gap: 10px;
             margin-top: 15px;
-            flex-wrap: wrap;
         }
 
         .custom-preset input {
             flex: 1;
-            min-width: 150px;
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 8px;
@@ -280,7 +243,6 @@
             font-size: 14px;
             line-height: 1.6;
             color: #333;
-            white-space: pre-wrap;
         }
 
         .copy-btn {
@@ -313,30 +275,6 @@
             color: #2c3e50;
         }
 
-        .search-box {
-            margin-bottom: 15px;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .search-box input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .empty-custom {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-            font-style: italic;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -347,15 +285,11 @@
             }
 
             .presets-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                grid-template-columns: 1fr;
             }
 
             .custom-preset {
                 flex-direction: column;
-            }
-
-            .custom-preset input {
-                min-width: 100%;
             }
         }
     </style>
@@ -365,140 +299,34 @@
         <h1>📝 Text Splitter</h1>
 
         <div class="info-box">
-            <strong>Nasıl Kullanılır?</strong> Uzun metninizi yapıştırın (paragraflar korunur), bir preset seçin veya özel karakter limiti belirleyin, bölme yöntemini seçip "Böl" butonuna tıklayın. Her bölüm otomatik olarak (001/XXX) formatında numaralandırılacak ve 10 karakter ayrılacaktır.
+            <strong>Nasıl Kullanılır?</strong> Uzun metninizi yapıştırın, bir preset seçin veya özel karakter limiti belirleyin, bölme yöntemini seçip "Böl" butonuna tıklayın. Her bölüm otomatik olarak (001/XXX) formatında numaralandırılacak ve 10 karakter ayrılacaktır.
         </div>
 
         <div class="input-section">
             <label for="textInput">Metninizi Buraya Yapıştırın:</label>
-            <textarea id="textInput" placeholder="Uzun metninizi buraya yapıştırın... (Paragraflar ve satır atlamaları korunur)"></textarea>
+            <textarea id="textInput" placeholder="Uzun metninizi buraya yapıştırın..."></textarea>
         </div>
 
         <div class="presets-section">
             <label>Platform Presetleri:</label>
-            
-            <div class="search-box">
-                <input type="text" id="searchPreset" placeholder="🔍 Preset ara (ör: Instagram, Twitter, WhatsApp)..." onkeyup="filterPresets()">
-            </div>
-
-            <div class="category-title">📸 Instagram</div>
-            <div class="presets-grid">
+            <div class="presets-grid" id="presetsGrid">
                 <button class="preset-btn" data-limit="1000" data-name="Instagram DM">
                     Instagram DM<br><small>(1000 karakter)</small>
                 </button>
-                <button class="preset-btn" data-limit="2200" data-name="Instagram Post">
-                    Instagram Post<br><small>(2200 karakter)</small>
+                <button class="preset-btn" data-limit="280" data-name="Twitter/X">
+                    Twitter/X<br><small>(280 karakter)</small>
                 </button>
-                <button class="preset-btn" data-limit="2200" data-name="Instagram Reels">
-                    Instagram Reels<br><small>(2200 karakter)</small>
+                <button class="preset-btn" data-limit="2200" data-name="Instagram Caption">
+                    Instagram Caption<br><small>(2200 karakter)</small>
                 </button>
-                <button class="preset-btn" data-limit="2200" data-name="Instagram Comment">
-                    Instagram Comment<br><small>(2200 karakter)</small>
+                <button class="preset-btn" data-limit="500" data-name="Özel (500)">
+                    Özel (500)<br><small>(500 karakter)</small>
                 </button>
-            </div>
-
-            <div class="category-title">🐦 Twitter / X</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="280" data-name="Twitter Post">
-                    Twitter Post<br><small>(280 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="25000" data-name="Twitter Premium">
-                    Twitter Premium<br><small>(25000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="10000" data-name="Twitter DM">
-                    Twitter DM<br><small>(10000 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">📘 Facebook</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="63206" data-name="Facebook Post">
-                    Facebook Post<br><small>(63206 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="8000" data-name="Facebook Comment">
-                    Facebook Comment<br><small>(8000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="2000" data-name="Facebook Messenger">
-                    Messenger<br><small>(2000 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">💼 LinkedIn</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="3000" data-name="LinkedIn Post">
-                    LinkedIn Post<br><small>(3000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="125000" data-name="LinkedIn Article">
-                    LinkedIn Article<br><small>(125000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="3000" data-name="LinkedIn Comment">
-                    LinkedIn Comment<br><small>(3000 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">🎵 TikTok</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="4000" data-name="TikTok Caption">
-                    TikTok Caption<br><small>(4000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="150" data-name="TikTok Comment">
-                    TikTok Comment<br><small>(150 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">💬 Messaging Apps</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="4096" data-name="Telegram">
-                    Telegram<br><small>(4096 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="65536" data-name="WhatsApp">
-                    WhatsApp<br><small>(65536 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="2000" data-name="Discord">
-                    Discord<br><small>(2000 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">🧵 Threads & Reddit</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="500" data-name="Threads Post">
-                    Threads Post<br><small>(500 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="40000" data-name="Reddit Post">
-                    Reddit Post<br><small>(40000 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="10000" data-name="Reddit Comment">
-                    Reddit Comment<br><small>(10000 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">📌 Pinterest & Snapchat</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="500" data-name="Pinterest Description">
-                    Pinterest Pin<br><small>(500 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="250" data-name="Snapchat">
-                    Snapchat<br><small>(250 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">📱 SMS</div>
-            <div class="presets-grid">
-                <button class="preset-btn" data-limit="160" data-name="SMS Standard">
-                    SMS Standard<br><small>(160 karakter)</small>
-                </button>
-                <button class="preset-btn" data-limit="70" data-name="SMS Unicode">
-                    SMS Unicode<br><small>(70 karakter)</small>
-                </button>
-            </div>
-
-            <div class="category-title">➕ Özel Presetler</div>
-            <div class="presets-grid" id="customPresetsGrid">
-                <div class="empty-custom">Henüz özel preset eklemediniz</div>
             </div>
 
             <div class="custom-preset">
                 <input type="number" id="customLimit" placeholder="Karakter limiti (ör: 500)" min="10" max="100000">
-                <input type="text" id="customName" placeholder="Preset adı (ör: WhatsApp Business)">
+                <input type="text" id="customName" placeholder="Preset adı (ör: WhatsApp)">
                 <button onclick="addCustomPreset()">➕ Özel Ekle</button>
             </div>
         </div>
@@ -537,58 +365,25 @@
         let selectedLimit = 1000;
         let customPresets = JSON.parse(localStorage.getItem('customPresets') || '[]');
 
+        // Load custom presets on page load
         window.addEventListener('DOMContentLoaded', () => {
             loadCustomPresets();
         });
 
-        // Event delegation for all preset buttons
-        document.addEventListener('click', (e) => {
-            // Handle preset button clicks
+        // Preset selection
+        document.getElementById('presetsGrid').addEventListener('click', (e) => {
             const btn = e.target.closest('.preset-btn');
-            if (btn && !e.target.classList.contains('delete-preset')) {
-                document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                selectedLimit = parseInt(btn.dataset.limit);
-            }
+            if (!btn) return;
 
-            // Handle delete button clicks
             if (e.target.classList.contains('delete-preset')) {
-                e.stopPropagation();
-                e.preventDefault();
-                const presetBtn = e.target.closest('.preset-btn');
-                if (presetBtn) {
-                    deleteCustomPreset(presetBtn);
-                }
+                deleteCustomPreset(btn);
+                return;
             }
+
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedLimit = parseInt(btn.dataset.limit);
         });
-
-        function filterPresets() {
-            const searchTerm = document.getElementById('searchPreset').value.toLowerCase();
-            const allButtons = document.querySelectorAll('.preset-btn');
-            const allCategories = document.querySelectorAll('.category-title');
-
-            allButtons.forEach(btn => {
-                const name = btn.dataset.name.toLowerCase();
-                if (name.includes(searchTerm)) {
-                    btn.style.display = 'block';
-                } else {
-                    btn.style.display = 'none';
-                }
-            });
-
-            allCategories.forEach(category => {
-                const nextGrid = category.nextElementSibling;
-                if (nextGrid && nextGrid.classList.contains('presets-grid')) {
-                    const visibleButtons = Array.from(nextGrid.querySelectorAll('.preset-btn')).filter(btn => btn.style.display !== 'none');
-                    
-                    if (visibleButtons.length === 0 && nextGrid.id !== 'customPresetsGrid') {
-                        category.style.display = 'none';
-                    } else {
-                        category.style.display = 'block';
-                    }
-                }
-            });
-        }
 
         function addCustomPreset() {
             const limit = parseInt(document.getElementById('customLimit').value);
@@ -604,12 +399,6 @@
                 return;
             }
 
-            // Check if preset with same name already exists
-            if (customPresets.some(p => p.name === name)) {
-                alert('Bu isimde bir preset zaten mevcut!');
-                return;
-            }
-
             const preset = { limit, name, custom: true };
             customPresets.push(preset);
             localStorage.setItem('customPresets', JSON.stringify(customPresets));
@@ -621,23 +410,21 @@
         }
 
         function loadCustomPresets() {
-            const grid = document.getElementById('customPresetsGrid');
-            grid.innerHTML = '';
+            const grid = document.getElementById('presetsGrid');
+            
+            // Remove old custom presets
+            grid.querySelectorAll('[data-custom="true"]').forEach(el => el.remove());
 
-            if (customPresets.length === 0) {
-                grid.innerHTML = '<div class="empty-custom">Henüz özel preset eklemediniz</div>';
-                return;
-            }
-
+            // Add custom presets
             customPresets.forEach((preset, index) => {
                 const btn = document.createElement('button');
-                btn.className = 'preset-btn custom';
+                btn.className = 'preset-btn';
                 btn.dataset.limit = preset.limit;
                 btn.dataset.name = preset.name;
                 btn.dataset.custom = 'true';
                 btn.innerHTML = `
-                    ${escapeHtml(preset.name)}<br><small>(${preset.limit} karakter)</small>
-                    <span class="delete-preset">×</span>
+                    ${preset.name}<br><small>(${preset.limit} karakter)</small>
+                    <span class="delete-preset" onclick="event.stopPropagation()">×</span>
                 `;
                 grid.appendChild(btn);
             });
@@ -645,34 +432,21 @@
 
         function deleteCustomPreset(btn) {
             const name = btn.dataset.name;
-            
-            if (confirm(`"${name}" presetini silmek istediğinize emin misiniz?`)) {
-                customPresets = customPresets.filter(p => p.name !== name);
-                localStorage.setItem('customPresets', JSON.stringify(customPresets));
-                
-                // If this preset was active, select first preset
-                if (btn.classList.contains('active')) {
-                    const firstPreset = document.querySelector('.preset-btn:not(.custom)');
-                    if (firstPreset) {
-                        firstPreset.classList.add('active');
-                        selectedLimit = parseInt(firstPreset.dataset.limit);
-                    }
-                }
-                
-                loadCustomPresets();
-            }
+            customPresets = customPresets.filter(p => p.name !== name);
+            localStorage.setItem('customPresets', JSON.stringify(customPresets));
+            btn.remove();
         }
 
         function splitText() {
-            const text = document.getElementById('textInput').value;
+            const text = document.getElementById('textInput').value.trim();
             
-            if (!text.trim()) {
+            if (!text) {
                 alert('Lütfen bir metin girin');
                 return;
             }
 
             const method = document.querySelector('input[name="splitMethod"]:checked').value;
-            const maxChars = selectedLimit - 10;
+            const maxChars = selectedLimit - 10; // Reserve 10 chars for numbering
 
             let chunks = [];
 
@@ -695,37 +469,30 @@
         }
 
         function splitByWords(text, maxChars) {
+            const words = text.split(/\s+/);
             const chunks = [];
             let currentChunk = '';
 
-            const parts = text.split(/(\s+)/);
-
-            for (const part of parts) {
-                const testChunk = currentChunk + part;
+            for (const word of words) {
+                const testChunk = currentChunk ? currentChunk + ' ' + word : word;
                 
                 if (testChunk.length <= maxChars) {
                     currentChunk = testChunk;
                 } else {
-                    if (currentChunk.trim()) {
+                    if (currentChunk) {
                         chunks.push(currentChunk);
                     }
+                    currentChunk = word;
                     
-                    if (part.length > maxChars) {
-                        for (let i = 0; i < part.length; i += maxChars) {
-                            const subPart = part.substring(i, i + maxChars);
-                            if (i + maxChars < part.length) {
-                                chunks.push(subPart);
-                            } else {
-                                currentChunk = subPart;
-                            }
-                        }
-                    } else {
-                        currentChunk = part;
+                    // If single word exceeds limit, force split
+                    if (word.length > maxChars) {
+                        chunks.push(word.substring(0, maxChars));
+                        currentChunk = word.substring(maxChars);
                     }
                 }
             }
 
-            if (currentChunk.trim()) {
+            if (currentChunk) {
                 chunks.push(currentChunk);
             }
 
@@ -741,20 +508,21 @@
         }
 
         function splitBySentences(text, maxChars) {
-            const sentences = text.match(/[^.!?]+[.!?]+[\s\n]*|[^.!?]+$/g) || [text];
+            const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
             const chunks = [];
             let currentChunk = '';
 
             for (const sentence of sentences) {
-                const testChunk = currentChunk ? currentChunk + sentence : sentence;
+                const testChunk = currentChunk ? currentChunk + ' ' + sentence : sentence;
                 
                 if (testChunk.length <= maxChars) {
                     currentChunk = testChunk;
                 } else {
-                    if (currentChunk.trim()) {
+                    if (currentChunk) {
                         chunks.push(currentChunk);
                     }
                     
+                    // If single sentence exceeds limit, split by words
                     if (sentence.length > maxChars) {
                         chunks.push(...splitByWords(sentence, maxChars));
                         currentChunk = '';
@@ -764,7 +532,7 @@
                 }
             }
 
-            if (currentChunk.trim()) {
+            if (currentChunk) {
                 chunks.push(currentChunk);
             }
 
@@ -776,18 +544,17 @@
             const chunks = [];
             let currentChunk = '';
 
-            for (let i = 0; i < paragraphs.length; i++) {
-                const para = paragraphs[i];
-                const separator = currentChunk ? '\n\n' : '';
-                const testChunk = currentChunk + separator + para;
+            for (const para of paragraphs) {
+                const testChunk = currentChunk ? currentChunk + '\n\n' + para : para;
                 
                 if (testChunk.length <= maxChars) {
                     currentChunk = testChunk;
                 } else {
-                    if (currentChunk.trim()) {
+                    if (currentChunk) {
                         chunks.push(currentChunk);
                     }
                     
+                    // If single paragraph exceeds limit, split by sentences
                     if (para.length > maxChars) {
                         chunks.push(...splitBySentences(para, maxChars));
                         currentChunk = '';
@@ -797,7 +564,7 @@
                 }
             }
 
-            if (currentChunk.trim()) {
+            if (currentChunk) {
                 chunks.push(currentChunk);
             }
 
@@ -826,38 +593,32 @@
                         <span class="result-number">${prefix}</span>
                         <span class="result-stats">${fullText.length} karakter</span>
                     </div>
-                    <div class="result-text">${escapeHtml(fullText)}</div>
-                    <button class="copy-btn" data-text="${escapeHtml(fullText)}">📋 Kopyala</button>
+                    <div class="result-text">${fullText}</div>
+                    <button class="copy-btn" onclick="copyToClipboard(this, '${escapeHtml(fullText)}')">📋 Kopyala</button>
                 `;
                 container.appendChild(item);
             });
 
-            container.querySelectorAll('.copy-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const text = this.dataset.text
-                        .replace(/&lt;/g, '<')
-                        .replace(/&gt;/g, '>')
-                        .replace(/&amp;/g, '&')
-                        .replace(/&quot;/g, '"')
-                        .replace(/&#039;/g, "'");
-                    
-                    navigator.clipboard.writeText(text).then(() => {
-                        const originalText = this.textContent;
-                        this.textContent = '✅ Kopyalandı!';
-                        this.classList.add('copied');
-                        
-                        setTimeout(() => {
-                            this.textContent = originalText;
-                            this.classList.remove('copied');
-                        }, 2000);
-                    }).catch(err => {
-                        alert('Kopyalama başarısız oldu');
-                    });
-                });
-            });
-
             resultsSection.classList.add('show');
             resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function copyToClipboard(btn, text) {
+            // Unescape the text
+            text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#039;/g, "'");
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Kopyalandı!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                alert('Kopyalama başarısız oldu');
+            });
         }
 
         function escapeHtml(text) {
@@ -869,6 +630,7 @@
                 .replace(/'/g, "&#039;");
         }
 
+        // Set first preset as active by default
         document.querySelector('.preset-btn').classList.add('active');
     </script>
 </body>

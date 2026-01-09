@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Metin Bölücü (Text Splitter)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --border: #e2e8f0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { margin-top: 0; color: var(--primary); }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; }
+        
+        textarea, select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        textarea { min-height: 150px; resize: vertical; }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+
+        .custom-preset-group {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none; /* JS ile açılacak */
+        }
+
+        .custom-preset-group.active { display: block; }
+
+        .btn-group { display: flex; gap: 10px; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+        button.secondary { background-color: #64748b; }
+        button.delete { background-color: #ef4444; margin-left: auto; }
+
+        .output-area { margin-top: 30px; border-top: 2px solid var(--border); padding-top: 20px; }
+        
+        .chunk-card {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .chunk-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: #64748b;
+        }
+
+        .chunk-text {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: monospace;
+            font-size: 0.95em;
+        }
+
+        .copy-btn {
+            background-color: #10b981;
+            padding: 5px 12px;
+            font-size: 0.8em;
+        }
+        .copy-btn:hover { background-color: #059669; }
+
+        .info-tag {
+            font-size: 0.8em;
+            color: #64748b;
+            margin-top: -10px;
+            margin-bottom: 15px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Metin Bölücü & Numaralandırıcı</h1>
+    
+    <label for="inputText">Bölünecek Metin:</label>
+    <textarea id="inputText" placeholder="Uzun metni buraya yapıştırın..."></textarea>
+    <div style="text-align: right; font-size: 0.8em; color: #666; margin-top: -10px; margin-bottom: 15px;">
+        Karakter Sayısı: <span id="charCount">0</span>
+    </div>
+
+    <div class="controls">
+        <div>
+            <label for="presetSelect">Platform / Limit Seçimi:</label>
+            <select id="presetSelect" onchange="handlePresetChange()">
+                <!-- JS ile doldurulacak -->
+            </select>
+            <span class="info-tag" id="limitInfo"></span>
+        </div>
+
+        <div>
+            <label for="splitMethod">Bölme Yöntemi:</label>
+            <select id="splitMethod">
+                <option value="word" selected>Kelimelerden Böl (Tavsiye Edilen)</option>
+                <option value="sentence">Cümlelerden Böl (. ! ?)</option>
+                <option value="paragraph">Paragraflardan Böl (Satır sonu)</option>
+                <option value="char">Karakterden Böl (Kesin)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Özel Preset Ekleme Alanı -->
+    <div id="customPresetArea" class="custom-preset-group">
+        <h4 style="margin-top:0">Yeni Özel Limit Ekle</h4>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="newPresetName" placeholder="Örn: Benim Blog Sitem" style="flex: 2;">
+            <input type="number" id="newPresetLimit" placeholder="Limit (örn: 500)" style="flex: 1;">
+        </div>
+        <div style="margin-top: 10px; display: flex;">
+            <button onclick="saveCustomPreset()" class="secondary">Kaydet</button>
+            <button id="deletePresetBtn" onclick="deleteCustomPreset()" class="delete" style="display:none;">Bu Preseti Sil</button>
+        </div>
+    </div>
+
+    <button onclick="processText()" style="width: 100%; font-size: 1.1em;">METNİ BÖL</button>
+
+    <div id="outputArea" class="output-area"></div>
+</div>
+
+<script>
+    // --- Veri ve Ayarlar ---
+    const defaultPresets = [
+        { name: "Instagram DM (Mesaj)", limit: 1000 },
+        { name: "Instagram Caption (Post)", limit: 2200 },
+        { name: "Twitter / X (Standart)", limit: 280 },
+        { name: "Twitter / X (Premium)", limit: 25000 },
+        { name: "Threads", limit: 500 },
+        { name: "BlueSky", limit: 300 },
+        { name: "SMS (Standart)", limit: 160 },
+        { name: "+ Yeni Özel Limit Ekle...", limit: -1 } // Kontrol değeri
+    ];
+
+    let allPresets = [];
+
+    // --- Başlangıç ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPresets();
+        
+        // Karakter sayacı
+        document.getElementById('inputText').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+    });
+
+    // --- Preset Yönetimi ---
+    function loadPresets() {
+        const stored = localStorage.getItem('userPresets');
+        const userPresets = stored ? JSON.parse(stored) : [];
+        allPresets = [...defaultPresets.filter(p => p.limit !== -1), ...userPresets, defaultPresets.find(p => p.limit === -1)];
+        
+        const select = document.getElementById('presetSelect');
+        const currentVal = select.value; // Varsa eski seçimi koru
+        select.innerHTML = '';
+
+        allPresets.forEach((p, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = p.limit > 0 ? `${p.name} (${p.limit} krk)` : p.name;
+            select.appendChild(opt);
+        });
+
+        // Eğer daha önce seçim yapıldıysa korumaya çalış, yoksa Instagram DM seçili gelsin
+        if (currentVal && currentVal < allPresets.length - 1) {
+            select.value = currentVal;
+        } else {
+            select.value = 0; 
+        }
+        handlePresetChange();
+    }
+
+    function handlePresetChange() {
+        const index = document.getElementById('presetSelect').value;
+        const selected = allPresets[index];
+        const customArea = document.getElementById('customPresetArea');
+        const deleteBtn = document.getElementById('deletePresetBtn');
+        const limitInfo = document.getElementById('limitInfo');
+
+        if (selected.limit === -1) {
+            // Yeni Ekleme Modu
+            customArea.classList.add('active');
+            deleteBtn.style.display = 'none';
+            document.getElementById('newPresetName').value = "";
+            document.getElementById('newPresetLimit').value = "";
+            limitInfo.textContent = "Kendi limitinizi oluşturun.";
+        } else {
+            // Standart veya Kayıtlı Seçim
+            limitInfo.textContent = `Limit: ${selected.limit} karakter. (Başlık için ayrılan pay hariç)`;
+            
+            // Kullanıcı tarafından eklenen bir preset mi? (Default listesinde yoksa kullanıcı eklemiştir)
+            const isDefault = defaultPresets.some(d => d.name === selected.name && d.limit === selected.limit);
+            
+            if (!isDefault) {
+                customArea.classList.add('active');
+                deleteBtn.style.display = 'block';
+                document.getElementById('newPresetName').value = selected.name;
+                document.getElementById('newPresetLimit').value = selected.limit;
+            } else {
+                customArea.classList.remove('active');
+            }
+        }
+    }
+
+    function saveCustomPreset() {
+        const name = document.getElementById('newPresetName').value.trim();
+        const limit = parseInt(document.getElementById('newPresetLimit').value);
+
+        if (!name || isNaN(limit) || limit < 20) {
+            alert("Lütfen geçerli bir isim ve en az 20 karakterlik bir limit girin.");
+            return;
+        }
+
+        const stored = localStorage.getItem('userPresets');
+        let userPresets = stored ? JSON.parse(stored) : [];
+
+        // Aynı isimde varsa güncelle, yoksa ekle
+        const existingIdx = userPresets.findIndex(p => p.name === name);
+        if (existingIdx > -1) {
+            userPresets[existingIdx].limit = limit;
+        } else {
+            userPresets.push({ name, limit });
+        }
+
+        localStorage.setItem('userPresets', JSON.stringify(userPresets));
+        
+        // Listeyi yenile ve yeni ekleneni seç
+        loadPresets();
+        // Yeni ekleneni bulmak için index hesapla
+        // Defaultlar (minus "Yeni Ekle") + User Presets içindeki yeri
+        const defaultCount = defaultPresets.length - 1;
+        const newIndex = defaultCount + (existingIdx > -1 ? existingIdx : userPresets.length - 1);
+        document.getElementById('presetSelect').value = newIndex;
+        handlePresetChange();
+        
+        alert("Preset kaydedildi!");
+    }
+
+    function deleteCustomPreset() {
+        if(!confirm("Bu özel ayarı silmek istediğine emin misin?")) return;
+
+        const index = document.getElementById('presetSelect').value;
+        const selected = allPresets[index];
+        
+        const stored = localStorage.getItem('userPresets');
+        let userPresets = stored ? JSON.parse(stored) : [];
+        
+        userPresets = userPresets.filter(p => p.name !== selected.name);
+        localStorage.setItem('userPresets', JSON.stringify(userPresets));
+        
+        loadPresets();
+        alert("Silindi.");
+    }
+
+    // --- Ana Bölme Mantığı ---
+    function processText() {
+        const text = document.getElementById('inputText').value.trim();
+        const presetIndex = document.getElementById('presetSelect').value;
+        const limit = allPresets[presetIndex].limit;
+        const method = document.getElementById('splitMethod').value;
+        const outputArea = document.getElementById('outputArea');
+
+        if (!text) {
+            alert("Lütfen bir metin girin.");
+            return;
+        }
+        if (limit === -1) {
+            alert("Lütfen geçerli bir preset seçin.");
+            return;
+        }
+
+        // 1. Hesaplama: Başlık payı (001/099) -> 10 karakter (boşluk dahil)
+        // Eğer toplam parça sayısı 1000'i geçerse (0001/1000) -> 12 karakter olur.
+        // Güvenli tarafta kalmak için dinamik hesaplayacağız ama önce 10 karakter varsayalım.
+        const HEADER_RESERVE = 10; 
+        const maxContentLen = limit - HEADER_RESERVE;
+
+        if (maxContentLen < 10) {
+            alert("Limit çok düşük, başlık eklenemez.");
+            return;
+        }
+
+        let chunks = [];
+        
+        // 2. Parçalama Algoritması
+        if (method === 'char') {
+            // Basit karakter bölme
+            for (let i = 0; i < text.length; i += maxContentLen) {
+                chunks.push(text.substring(i, i + maxContentLen));
+            }
+        } else {
+            // Kelime, Cümle, Paragraf
+            let separator;
+            let regex = false;
+
+            if (method === 'word') separator = ' ';
+            else if (method === 'paragraph') separator = '\n';
+            else if (method === 'sentence') {
+                // Cümle bitişleri: . ! ? sonrasında boşluk varsa
+                // Split regex kullanmak yerine basit bir yöntem kullanalım:
+                // Match ile cümleleri alalım.
+                const matches = text.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g);
+                if (matches) {
+                    processChunks(matches, maxContentLen, chunks);
+                } else {
+                    // Eşleşme yoksa tek parça
+                    processChunks([text], maxContentLen, chunks);
+                }
+            }
+
+            if (method !== 'sentence') {
+                const parts = text.split(separator);
+                processChunks(parts, maxContentLen, chunks, separator);
+            }
+        }
+
+        // 3. Çıktı Üretme
+        outputArea.innerHTML = '';
+        const totalChunks = chunks.length;
+        
+        // Padding hesapla (örn: 70 parça varsa 001, 002... 3 hane. 5 parça varsa 001... 3 hane standart iyidir)
+        // İsteğe göre (001/070) formatı 3 hane gerektirir.
+        const padLen = Math.max(3, totalChunks.toString().length); 
+
+        chunks.forEach((chunkContent, idx) => {
+            const currentNum = (idx + 1).toString().padStart(padLen, '0');
+            const totalNum = totalChunks.toString().padStart(padLen, '0');
+            
+            const header = `(${currentNum}/${totalNum}) `;
+            const fullText = header + chunkContent;
+
+            // HTML Oluştur
+            const card = document.createElement('div');
+            card.className = 'chunk-card';
+            card.innerHTML = `
+                <div class="chunk-header">
+                    <span>Parça ${idx + 1} / ${totalChunks} (${fullText.length} krk)</span>
+                    <button class="copy-btn" onclick="copyText(this)">Kopyala</button>
+                </div>
+                <div class="chunk-text">${escapeHtml(fullText)}</div>
+            `;
+            outputArea.appendChild(card);
+        });
+    }
+
+    // Yardımcı: Parçaları birleştirip limite göre ayırma
+    function processChunks(parts, maxLen, resultRef, separator = '') {
+        let currentChunk = "";
+
+        parts.forEach(part => {
+            // Eğer separator ' ' ise ve bu kelimeyi ekleyince taşıyorsak:
+            let nextPart = currentChunk.length === 0 ? part : (separator + part);
+            
+            // Özel Durum: Tek başına kelime bile limitten büyükse? (Örn: çok uzun link)
+            if (part.length > maxLen) {
+                // Mevcutu kapat
+                if (currentChunk) {
+                    resultRef.push(currentChunk);
+                    currentChunk = "";
+                }
+                // Uzun parçayı hard-split (karakter bazlı) yapıp ekle
+                for (let i = 0; i < part.length; i += maxLen) {
+                    const sub = part.substring(i, i + maxLen);
+                    // Son parça tam dolmadıysa currentChunk yap, yoksa pushla
+                    if (sub.length < maxLen && (i + maxLen >= part.length)) {
+                        currentChunk = sub;
+                    } else {
+                        resultRef.push(sub);
+                    }
+                }
+                return; // Döngünün bu adımını bitir
+            }
+
+            // Normal Durum: Sığdığı sürece ekle
+            // Ayrıştırıcıyı (separator) cümlenin başına eklemeyi kontrol etmeliyiz.
+            // Word modunda boşluk başa gelir, Sentence modunda gelmez vs.
+            // Yukarıda nextPart içinde separator logic'i basitçe kurduk.
+            
+            let candidate = currentChunk.length > 0 ? (currentChunk + separator + part) : part;
+
+            if (candidate.length <= maxLen) {
+                currentChunk = candidate;
+            } else {
+                // Sığmadı, mevcutu paketle, yeniye başla
+                resultRef.push(currentChunk);
+                currentChunk = part;
+            }
+        });
+
+        if (currentChunk) {
+            resultRef.push(currentChunk);
+        }
+    }
+
+    function copyText(btn) {
+        const text = btn.parentElement.nextElementSibling.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = "Kopyalandı!";
+            btn.style.backgroundColor = "#059669";
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.backgroundColor = ""; // Reset
+            }, 1500);
+        });
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+</script>
+
+</body>
+</html>

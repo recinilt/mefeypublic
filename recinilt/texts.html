@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Splitter - Mobil Uyumlu</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; padding: 10px; max-width: 100%; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden; }
+        h1 { text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin: 0; font-size: 1.4em; }
+        .section { padding: 20px; border-bottom: 1px solid #eee; }
+        .section:last-child { border-bottom: none; }
+        textarea, input, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; resize: vertical; }
+        textarea { min-height: 120px; font-family: inherit; }
+        button { background: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; width: 100%; margin: 5px 0; transition: background 0.3s; }
+        button:hover { background: #0056b3; }
+        button.secondary { background: #6c757d; }
+        button.success { background: #28a745; }
+        button.danger { background: #dc3545; }
+        .preset-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 10px 0; }
+        .preset-btn { padding: 10px; background: #e9ecef; border: 2px solid transparent; border-radius: 8px; cursor: pointer; text-align: center; font-size: 14px; }
+        .preset-btn.active, .preset-btn:hover { border-color: #007bff; background: #f8f9fa; }
+        .split-mode { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin: 10px 0; }
+        .radio-group { display: flex; align-items: center; }
+        .radio-group input { width: auto; margin-right: 5px; }
+        .parts { max-height: 60vh; overflow-y: auto; }
+        .part { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 10px 0; position: relative; }
+        .part-header { font-weight: bold; color: #495057; margin-bottom: 8px; font-size: 14px; }
+        .part-text { white-space: pre-wrap; word-break: break-word; margin-bottom: 10px; font-size: 15px; line-height: 1.5; }
+        .copy-btn { position: absolute; top: 15px; right: 15px; padding: 8px 12px; font-size: 14px; width: auto; }
+        .stats { display: flex; justify-content: space-between; font-size: 14px; color: #6c757d; margin-top: 10px; }
+        .custom-preset { display: flex; gap: 10px; align-items: end; }
+        .custom-preset input { flex: 1; }
+        @media (max-width: 600px) { body { padding: 5px; } .section { padding: 15px; } h1 { font-size: 1.2em; padding: 15px; } .preset-grid { grid-template-columns: repeat(2, 1fr); } .split-mode { grid-template-columns: 1fr; } }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Text Splitter</h1>
+        
+        <div class="section">
+            <label>Uzun Metin:</label>
+            <textarea id="inputText" placeholder="Buraya uzun metni yapıştırın..."></textarea>
+        </div>
+
+        <div class="section">
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+                <div>
+                    <label>Karakter Limiti:</label>
+                    <div class="preset-grid" id="presets"></div>
+                </div>
+                <button onclick="addCustomPreset()">➕ Özel</button>
+            </div>
+            <div class="custom-preset hidden" id="customPreset">
+                <input type="number" id="customLimit" placeholder="Limit (örn: 1000)" min="10" max="50000">
+                <input type="text" id="customName" placeholder="İsim (örn: Telegram)">
+                <button onclick="saveCustomPreset()" class="secondary">💾 Kaydet</button>
+            </div>
+            
+            <label>Bölme Modu:</label>
+            <div class="split-mode">
+                <label class="radio-group"><input type="radio" name="splitMode" value="char" checked> Karakter</label>
+                <label class="radio-group"><input type="radio" name="splitMode" value="word"> Kelime</label>
+                <label class="radio-group"><input type="radio" name="splitMode" value="sentence"> Cümle</label>
+                <label class="radio-group"><input type="radio" name="splitMode" value="paragraph"> Paragraf</label>
+            </div>
+            
+            <button onclick="splitText()" style="margin-top: 15px;">✂️ Böl!</button>
+        </div>
+
+        <div class="section parts" id="parts"></div>
+        
+        <div class="section" style="text-align: center; font-size: 12px; color: #6c757d;">
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <script>
+        const presets = {
+            instagram: { name: 'Instagram DM', limit: 1000 },
+            twitter: { name: 'X/Twitter', limit: 280 },
+            facebook: { name: 'Facebook', limit: 2200 },
+            telegram: { name: 'Telegram', limit: 4096 },
+            discord: { name: 'Discord', limit: 2000 }
+        };
+
+        let customPresets = JSON.parse(localStorage.getItem('customPresets')) || [];
+        let currentLimit = 1000;
+        let totalParts = 0;
+
+        function init() {
+            renderPresets();
+            loadCurrentPreset();
+        }
+
+        function renderPresets() {
+            const container = document.getElementById('presets');
+            container.innerHTML = '';
+            
+            Object.entries(presets).forEach(([key, preset]) => {
+                const btn = document.createElement('div');
+                btn.className = 'preset-btn';
+                btn.textContent = `${preset.name} (${preset.limit})`;
+                btn.onclick = () => selectPreset(key, preset.limit);
+                container.appendChild(btn);
+            });
+
+            customPresets.forEach((preset, index) => {
+                const btn = document.createElement('div');
+                btn.className = 'preset-btn';
+                btn.textContent = `${preset.name} (${preset.limit})`;
+                btn.onclick = () => selectPreset('custom', preset.limit);
+                btn.title = 'Silmek için uzun bas';
+                btn.ontouchstart = btn.onmousedown = (e) => {
+                    if (e.touches && e.touches.length > 1) return;
+                    let timer = setTimeout(() => {
+                        if (confirm(`${preset.name} silinsin mi?`)) {
+                            customPresets.splice(index, 1);
+                            localStorage.setItem('customPresets', JSON.stringify(customPresets));
+                            renderPresets();
+                        }
+                    }, 500);
+                    btn.ontouchend = btn.onmouseup = () => clearTimeout(timer);
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function selectPreset(key, limit) {
+            currentLimit = limit;
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('inputText').focus();
+        }
+
+        function addCustomPreset() {
+            document.getElementById('customPreset').classList.toggle('hidden');
+        }
+
+        function saveCustomPreset() {
+            const limit = parseInt(document.getElementById('customLimit').value);
+            const name = document.getElementById('customName').value.trim();
+            if (limit && name && limit > 0) {
+                customPresets.push({ name, limit });
+                localStorage.setItem('customPresets', JSON.stringify(customPresets));
+                renderPresets();
+                document.getElementById('customPreset').classList.add('hidden');
+                document.getElementById('customLimit').value = '';
+                document.getElementById('customName').value = '';
+                selectPreset('custom', limit);
+            }
+        }
+
+        function splitText() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) return alert('Metin girin!');
+
+            const mode = document.querySelector('input[name="splitMode"]:checked').value;
+            const maxLen = currentLimit - 20; // (001/070) + 10 boşluk için rezerv
+
+            let parts = [];
+            let remaining = text;
+
+            switch (mode) {
+                case 'word':
+                    parts = splitByWords(remaining, maxLen);
+                    break;
+                case 'sentence':
+                    parts = splitBySentences(remaining, maxLen);
+                    break;
+                case 'paragraph':
+                    parts = splitByParagraphs(remaining, maxLen);
+                    break;
+                default:
+                    parts = splitByChars(remaining, maxLen);
+            }
+
+            totalParts = parts.length;
+            renderParts(parts);
+            updateStats(text.length, parts.length);
+        }
+
+        function splitByChars(text, maxLen) {
+            const parts = [];
+            for (let i = 0; i < text.length; i += maxLen) {
+                parts.push(text.slice(i, i + maxLen));
+            }
+            return parts;
+        }
+
+        function splitByWords(text, maxLen) {
+            const words = text.split(/\s+/);
+            const parts = [];
+            let current = [];
+            let currentLen = 0;
+
+            for (let word of words) {
+                const testLen = currentLen + word.length + (current.length ? 1 : 0);
+                if (testLen > maxLen && current.length) {
+                    parts.push(current.join(' '));
+                    current = [word];
+                    currentLen = word.length;
+                } else {
+                    current.push(word);
+                    currentLen = testLen;
+                }
+            }
+            if (current.length) parts.push(current.join(' '));
+            return parts;
+        }
+
+        function splitBySentences(text, maxLen) {
+            const sentences = text.match(/[^.!?]+[.!?]+/gs) || [text];
+            return splitByWords(text, maxLen); // Cümle tam ayrımı zor, kelimeye fallback
+        }
+
+        function splitByParagraphs(text, maxLen) {
+            const paras = text.split(/\n\s*\n/);
+            return splitByWords(text, maxLen); // Paragraf tam ayrımı zor
+        }
+
+        function renderParts(parts) {
+            const container = document.getElementById('parts');
+            container.innerHTML = '';
+
+            parts.forEach((part, index) => {
+                const div = document.createElement('div');
+                div.className = 'part';
+                const num = String(index + 1).padStart(3, '0');
+                const header = `(${num}/${totalParts.toString().padStart(3, '0')})          `;
+                const fullText = header + part;
+                
+                div.innerHTML = `
+                    <div class="part-header">${header.trim()} (${part.length}/${currentLimit})</div>
+                    <div class="part-text">${part}</div>
+                    <button class="copy-btn success" onclick="copyToClipboard('${fullText.replace(/'/g, "\\'")}')">📋 Kopyala</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = '✅ Kopyalandı!';
+                btn.style.background = '#28a745';
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.style.background = '';
+                }, 2000);
+            });
+        }
+
+        function updateStats(totalChars, partsCount) {
+            document.getElementById('stats').innerHTML = `
+                Toplam: ${totalChars} karakter | ${partsCount} parça | Limit: ${currentLimit}
+            `;
+        }
+
+        function loadCurrentPreset() {
+            const saved = localStorage.getItem('lastPreset');
+            if (saved) {
+                const preset = JSON.parse(saved);
+                currentLimit = preset.limit;
+                // Preset butonunu active yap
+                setTimeout(() => {
+                    document.querySelectorAll('.preset-btn').forEach(btn => {
+                        if (btn.textContent.includes(preset.name)) btn.classList.add('active');
+                    });
+                }, 100);
+            }
+        }
+
+        // Enter ile split
+        document.getElementById('inputText').addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') splitText();
+        });
+
+        init();
+    </script>
+</body>
+</html>

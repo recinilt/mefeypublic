@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metin Bölücü</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        textarea, input, select, button { width: 100%; margin-bottom: 10px; padding: 10px; box-sizing: border-box; }
+        #parts { margin-top: 20px; }
+        .part { background: #f0f0f0; padding: 10px; margin-bottom: 10px; border-radius: 5px; }
+        .copy-btn { background: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-left: 10px; }
+        .copy-btn:hover { background: #0056b3; }
+        #presets { display: flex; flex-wrap: wrap; gap: 10px; }
+        .preset { padding: 5px 10px; background: #e0e0e0; cursor: pointer; border-radius: 3px; }
+        .preset.selected { background: #007bff; color: white; }
+        .preset-group { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Metin Bölücü (Text Splitter)</h1>
+    <p>Uzun metni yapıştırın, platform seçin veya özel limit belirleyin. Bölünmüş parçaları kopyalayın.</p>
+
+    <textarea id="inputText" placeholder="Uzun metninizi buraya yapıştırın..." rows="10"></textarea>
+
+    <div class="preset-group">
+        <label>Presetler:</label>
+        <div id="presets"></div>
+    </div>
+
+    <div>
+        <input type="number" id="customLimit" placeholder="Özel karakter sınırı (örn: 990)" min="10">
+        <input type="text" id="customName" placeholder="Özel preset adı (kaydedilecek)">
+        <button onclick="saveCustomPreset()">Kaydet</button>
+        <button onclick="loadCustomPreset()">Yükle</button>
+    </div>
+
+    <div>
+        <label>Parçalama Modu:</label>
+        <select id="splitMode">
+            <option value="char">Karakterlerden</option>
+            <option value="word">Kelimelerden</option>
+            <option value="sentence">Cümlelerden</option>
+            <option value="paragraph">Paragraflardan</option>
+        </select>
+    </div>
+
+    <button onclick="splitText()">Böl</button>
+
+    <div id="parts"></div>
+
+    <script>
+        const PRESET_HEADER_LEN = 10; // "(001/070) " ~10 char
+        const presets = {
+            instagram: { name: 'Instagram DM', limit: 990 }, // 1000-10 [web:3][web:6][web:19]
+            twitter: { name: 'Twitter/X Post', limit: 270 }, // 280-10 [web:1][web:7]
+            facebook: { name: 'Facebook Post', limit: 62000 },
+            telegram: { name: 'Telegram', limit: 4086 } // 4096-10
+        };
+
+        let customPresets = JSON.parse(localStorage.getItem('customPresets') || '[]');
+
+        function updatePresets() {
+            const presetsDiv = document.getElementById('presets');
+            presetsDiv.innerHTML = '';
+            Object.entries(presets).forEach(([key, p]) => {
+                const btn = document.createElement('div');
+                btn.className = 'preset';
+                btn.textContent = p.name + ' (' + p.limit + ')';
+                btn.onclick = () => selectPreset(key, p.limit, p.name);
+                presetsDiv.appendChild(btn);
+            });
+            customPresets.forEach((p, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'preset';
+                btn.textContent = p.name + ' (' + p.limit + ')';
+                btn.onclick = () => selectPreset('custom' + i, p.limit, p.name);
+                presetsDiv.appendChild(btn);
+            });
+        }
+
+        function selectPreset(key, limit, name) {
+            document.getElementById('customLimit').value = limit;
+            document.getElementById('customName').value = name;
+            document.querySelectorAll('.preset').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function saveCustomPreset() {
+            const limit = parseInt(document.getElementById('customLimit').value);
+            const name = document.getElementById('customName').value;
+            if (limit && name) {
+                customPresets.push({ name, limit });
+                localStorage.setItem('customPresets', JSON.stringify(customPresets));
+                updatePresets();
+            }
+        }
+
+        function loadCustomPreset() {
+            // Already shown in presets
+        }
+
+        function splitText() {
+            const text = document.getElementById('inputText').value;
+            const maxLen = parseInt(document.getElementById('customLimit').value) || 280;
+            const mode = document.getElementById('splitMode').value;
+            const parts = splitByMode(text, maxLen - PRESET_HEADER_LEN, mode);
+            displayParts(parts, maxLen);
+        }
+
+        function splitByMode(text, maxChunkLen, mode) {
+            let chunks = [];
+            if (mode === 'char') {
+                for (let i = 0; i < text.length; i += maxChunkLen) {
+                    chunks.push(text.slice(i, i + maxChunkLen));
+                }
+            } else if (mode === 'word') {
+                let words = text.split(/\s+/);
+                let current = [];
+                let currentLen = 0;
+                for (let word of words) {
+                    if (currentLen + word.length + 1 > maxChunkLen && current.length > 0) {
+                        chunks.push(current.join(' '));
+                        current = [word];
+                        currentLen = word.length;
+                    } else {
+                        current.push(word);
+                        currentLen += word.length + 1;
+                    }
+                }
+                if (current.length) chunks.push(current.join(' '));
+            } else if (mode === 'sentence') {
+                let sentences = text.split(/(?<=[.!?])\s+/);
+                let current = [];
+                let currentLen = 0;
+                for (let sent of sentences) {
+                    if (currentLen + sent.length + 1 > maxChunkLen && current.length > 0) {
+                        chunks.push(current.join('. '));
+                        current = [sent];
+                        currentLen = sent.length;
+                    } else {
+                        current.push(sent);
+                        currentLen += sent.length + (current.length > 1 ? 2 : 0);
+                    }
+                }
+                if (current.length) chunks.push(current.join('. '));
+            } else if (mode === 'paragraph') {
+                let paras = text.split(/\n\n+/);
+                let current = [];
+                let currentLen = 0;
+                for (let para of paras) {
+                    if (currentLen + para.length + 2 > maxChunkLen && current.length > 0) {
+                        chunks.push(current.join('\n\n'));
+                        current = [para];
+                        currentLen = para.length;
+                    } else {
+                        current.push(para);
+                        currentLen += para.length + 2;
+                    }
+                }
+                if (current.length) chunks.push(current.join('\n\n'));
+            }
+            return chunks;
+        }
+
+        function displayParts(parts, maxLen) {
+            const container = document.getElementById('parts');
+            container.innerHTML = '';
+            parts.forEach((part, index) => {
+                const total = parts.length;
+                const header = `(${String(index + 1).padStart(3, '0')}/${String(total).padStart(3, '0')})          `.slice(0, PRESET_HEADER_LEN);
+                const fullPart = header + part;
+                const div = document.createElement('div');
+                div.className = 'part';
+                div.innerHTML = `
+                    <div>${fullPart}</div>
+                    <button class="copy-btn" onclick="copyToClipboard('${fullPart.replace(/'/g, "\\'")}')">Kopyala</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Kopyalandı!');
+            });
+        }
+
+        // Init
+        updatePresets();
+    </script>
+</body>
+</html>

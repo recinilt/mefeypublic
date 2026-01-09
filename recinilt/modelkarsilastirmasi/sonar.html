@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Metin Bölücü</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        textarea { width: 100%; height: 150px; margin-bottom: 10px; }
+        .preset { margin-bottom: 10px; }
+        .preset input[type="radio"] { margin-right: 5px; }
+        .preset input[type="text"] { margin-right: 5px; width: 100px; }
+        .custom-preset { margin-top: 10px; }
+        .custom-preset input[type="text"] { width: 120px; margin-right: 5px; }
+        .split-options { margin: 10px 0; }
+        .split-options label { margin-right: 10px; }
+        .result { margin-top: 20px; }
+        .result-item { margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; }
+        .result-item button { margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <h2>Metin Bölücü</h2>
+    <textarea id="textInput" placeholder="Uzun metni buraya yapıştırın..."></textarea>
+    <div class="preset">
+        <label><input type="radio" name="preset" value="instagram" checked> Instagram (1000 karakter)</label>
+        <label><input type="radio" name="preset" value="twitter"> Twitter (280 karakter)</label>
+        <label><input type="radio" name="preset" value="custom"> Özel: <input type="number" id="customLimit" value="1000"></label>
+    </div>
+    <div class="custom-preset">
+        <input type="text" id="customName" placeholder="Özel isim">
+        <button onclick="savePreset()">Kaydet</button>
+        <span id="savedPresets"></span>
+    </div>
+    <div class="split-options">
+        <label><input type="radio" name="splitType" value="word" checked> Kelimeler</label>
+        <label><input type="radio" name="splitType" value="char"> Karakterler</label>
+        <label><input type="radio" name="splitType" value="sentence"> Cümleler</label>
+        <label><input type="radio" name="splitType" value="paragraph"> Paragraflar</label>
+    </div>
+    <button onclick="splitText()">Böl</button>
+    <div class="result" id="result"></div>
+
+    <script>
+        let presets = [
+            { name: "instagram", limit: 1000 },
+            { name: "twitter", limit: 280 }
+        ];
+
+        function savePreset() {
+            const name = document.getElementById("customName").value;
+            const limit = parseInt(document.getElementById("customLimit").value);
+            if (name && limit) {
+                presets.push({ name, limit });
+                updatePresets();
+            }
+        }
+
+        function updatePresets() {
+            const container = document.getElementById("savedPresets");
+            container.innerHTML = "";
+            presets.forEach(p => {
+                if (p.name !== "instagram" && p.name !== "twitter") {
+                    container.innerHTML += `<label><input type="radio" name="preset" value="${p.name}"> ${p.name} (${p.limit})</label>`;
+                }
+            });
+        }
+
+        function getLimit() {
+            const selected = document.querySelector('input[name="preset"]:checked').value;
+            if (selected === "custom") {
+                return parseInt(document.getElementById("customLimit").value);
+            } else {
+                const preset = presets.find(p => p.name === selected);
+                return preset ? preset.limit : 1000;
+            }
+        }
+
+        function splitText() {
+            const text = document.getElementById("textInput").value;
+            const limit = getLimit();
+            const splitType = document.querySelector('input[name="splitType"]:checked').value;
+            let parts = [];
+            let part = "";
+
+            if (splitType === "word") {
+                const words = text.split(" ");
+                for (let word of words) {
+                    if ((part + word).length + 10 <= limit) {
+                        part += (part ? " " : "") + word;
+                    } else {
+                        if (part) parts.push(part);
+                        part = word;
+                    }
+                }
+                if (part) parts.push(part);
+            } else if (splitType === "char") {
+                for (let i = 0; i < text.length; i += limit - 10) {
+                    parts.push(text.slice(i, i + limit - 10));
+                }
+            } else if (splitType === "sentence") {
+                const sentences = text.split(/[.!?]/);
+                for (let sentence of sentences) {
+                    if ((part + sentence).length + 10 <= limit) {
+                        part += (part ? " " : "") + sentence;
+                    } else {
+                        if (part) parts.push(part);
+                        part = sentence;
+                    }
+                }
+                if (part) parts.push(part);
+            } else if (splitType === "paragraph") {
+                const paragraphs = text.split(/\n\s*\n/);
+                for (let paragraph of paragraphs) {
+                    if ((part + paragraph).length + 10 <= limit) {
+                        part += (part ? "\n\n" : "") + paragraph;
+                    } else {
+                        if (part) parts.push(part);
+                        part = paragraph;
+                    }
+                }
+                if (part) parts.push(part);
+            }
+
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "";
+            parts.forEach((p, i) => {
+                const item = document.createElement("div");
+                item.className = "result-item";
+                item.innerHTML = `<span>(${String(i + 1).padStart(3, '0')}/${String(parts.length).padStart(3, '0')})          ${p}</span>
+                                  <button onclick="copyText('${p}')">Kopyala</button>`;
+                resultDiv.appendChild(item);
+            });
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Kopyalandı!");
+            });
+        }
+
+        updatePresets();
+    </script>
+</body>
+</html>

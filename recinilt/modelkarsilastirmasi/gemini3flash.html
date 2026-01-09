@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Splitter Pro 2026</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background: #f4f4f9; }
+        textarea { width: 100%; height: 200px; margin-bottom: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .presets, .custom-save { margin-bottom: 10px; }
+        button { cursor: pointer; padding: 8px 15px; border: none; border-radius: 4px; background: #007bff; color: white; transition: 0.2s; }
+        button:hover { background: #0056b3; }
+        .result-item { background: white; margin-bottom: 10px; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; position: relative; }
+        .copy-btn { position: absolute; right: 10px; top: 10px; background: #28a745; font-size: 12px; }
+        .meta-info { color: #666; font-size: 12px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>Metin Bölücü (Text Splitter)</h2>
+<textarea id="inputText" placeholder="Bölünecek uzun metni buraya yapıştırın..."></textarea>
+
+<div class="controls">
+    <div>
+        <label>Hazır Limitler:</label><br>
+        <select id="presetSelect" onchange="updateLimit(this.value)">
+            <option value="1000">Instagram DM (1000)</option>
+            <option value="280">Twitter/X Post (280)</option>
+            <option value="4096">Telegram (4096)</option>
+            <option value="2200">Instagram Caption (2200)</option>
+        </select>
+    </div>
+    <div>
+        <label>Bölme Yöntemi:</label><br>
+        <select id="splitMethod">
+            <option value="word">Kelimelerden Böl</option>
+            <option value="sentence">Cümlelerden Böl</option>
+            <option value="paragraph">Paragraflardan Böl</option>
+            <option value="char">Karakterden Böl (Zorunlu)</option>
+        </select>
+    </div>
+    <div class="custom-save">
+        <label>Özel Limit:</label><br>
+        <input type="number" id="customLimit" placeholder="Sınır" style="width: 60px;">
+        <input type="text" id="customName" placeholder="İsim" style="width: 80px;">
+        <button onclick="saveCustom()">Kaydet</button>
+    </div>
+    <div style="text-align: right; align-self: end;">
+        <button onclick="processSplit()" style="padding: 12px 25px; font-weight: bold; background: #ff4757;">METNİ BÖL</button>
+    </div>
+</div>
+
+<div id="savedPresets"></div>
+<div id="results"></div>
+
+<script>
+    // Başlık formatı (001/070) + 1 boşluk = 10 karakter sabit düşer
+    const HEADER_RESERVE = 10;
+
+    function updateLimit(val) {
+        document.getElementById('customLimit').value = val;
+    }
+
+    function saveCustom() {
+        const limit = document.getElementById('customLimit').value;
+        const name = document.getElementById('customName').value;
+        if(!limit || !name) return alert("İsim ve limit girin!");
+        
+        let saved = JSON.parse(localStorage.getItem('myPresets') || '[]');
+        saved.push({name, limit});
+        localStorage.setItem('myPresets', JSON.stringify(saved));
+        loadSaved();
+    }
+
+    function loadSaved() {
+        const container = document.getElementById('savedPresets');
+        let saved = JSON.parse(localStorage.getItem('myPresets') || '[]');
+        container.innerHTML = 'Kayıtlılarım: ' + saved.map((p, i) => 
+            `<button onclick="updateLimit(${p.limit})" style="background:#6c757d; margin:2px; font-size:11px;">${p.name} (${p.limit})</button>`
+        ).join('');
+    }
+
+    function processSplit() {
+        const text = document.getElementById('inputText').value;
+        const limit = parseInt(document.getElementById('customLimit').value) - HEADER_RESERVE;
+        const method = document.getElementById('splitMethod').value;
+        const resultsDiv = document.getElementById('results');
+        
+        if(!text) return;
+        resultsDiv.innerHTML = '';
+
+        let chunks = [];
+        let currentText = text;
+
+        // Bölme mantığı
+        let regex;
+        if(method === 'word') regex = /[ \n]/;
+        else if(method === 'sentence') regex = /[.!?]\s+/;
+        else if(method === 'paragraph') regex = /\n\n+/;
+
+        if(method === 'char' || !regex) {
+            for (let i = 0; i < text.length; i += limit) {
+                chunks.push(text.substring(i, i + limit));
+            }
+        } else {
+            let tempText = text;
+            while(tempText.length > 0) {
+                if(tempText.length <= limit) {
+                    chunks.push(tempText);
+                    break;
+                }
+                let splitAt = tempText.lastIndexOfAny(regex, limit);
+                if(splitAt === -1) splitAt = limit; // Eğer o aralıkta ayraç yoksa mecburen karakterden böl
+                chunks.push(tempText.substring(0, splitAt).trim());
+                tempText = tempText.substring(splitAt).trim();
+            }
+        }
+
+        const total = chunks.length;
+        chunks.forEach((chunk, index) => {
+            const header = `(${String(index + 1).padStart(3, '0')}/${String(total).padStart(3, '0')}) `;
+            const finalMsg = header + chunk;
+            
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+                <strong>Bölüm ${index + 1}</strong>
+                <button class="copy-btn" onclick="copyText(this, \`${finalMsg.replace(/`/g, '\\`')}\`)">Kopyala</button>
+                <p style="white-space: pre-wrap; margin-top:10px;">${finalMsg}</p>
+                <div class="meta-info">Karakter Sayısı: ${finalMsg.length} / ${limit + HEADER_RESERVE}</div>
+            `;
+            resultsDiv.appendChild(div);
+        });
+    }
+
+    // Helper: Last index of any character in a regex
+    String.prototype.lastIndexOfAny = function(regex, start) {
+        const sub = this.substring(0, start);
+        const matches = [...sub.matchAll(new RegExp(regex, 'g'))];
+        return matches.length > 0 ? matches[matches.length - 1].index + (matches[matches.length - 1][0].length) : -1;
+    }
+
+    function copyText(btn, text) {
+        navigator.clipboard.writeText(text);
+        const originalText = btn.innerText;
+        btn.innerText = "Kopyalandı!";
+        btn.style.background = "#000";
+        setTimeout(() => {
+            btn.innerText = originalText;
+            btn.style.background = "#28a745";
+        }, 1000);
+    }
+
+    loadSaved();
+</script>
+</body>
+</html>
