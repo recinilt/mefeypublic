@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Parametrik Boru Tasarımcısı v2.1</title>
+    <title>3D Parametrik Boru Tasarımcısı v2.2 (Manifold Fixed)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
@@ -195,8 +195,8 @@
     </div>
 
     <button onclick="exportSTL()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        STL İndir
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        STL İndir (Onarılmış)
     </button>
 </div>
 
@@ -267,7 +267,6 @@
         window.addEventListener('resize', onResize);
         document.querySelectorAll('input').forEach(input => {
             input.addEventListener('input', () => {
-                // validateInput artık agresif değil, sadece hesaplamayı koruyacak
                 updateParams();
             });
         });
@@ -286,16 +285,15 @@
         // Eğer kullanıcı sildiyse veya geçersizse varsayılanı döndür
         if (isNaN(val) || val === "" || val < 0) return def;
         
-        // Çok küçük değerleri (0 gibi) engelle, matematik hatası vermesin
+        // Çok küçük değerleri (0 gibi) engelle
         if (val === 0) return 0.001;
         
         return val;
     }
 
     function updateParams() {
-        // Parametreleri güvenli şekilde al (Varsayılanlar hata durumunda kullanılır)
         params.id = getSafeFloat('inp_id', 20);
-        params.minWall = getSafeFloat('inp_minWall', 2); // Dip Et Kalınlığı
+        params.minWall = getSafeFloat('inp_minWall', 2);
         params.totalLen = getSafeFloat('inp_len', 80);
         params.threadDepth = getSafeFloat('inp_depth', 0.8);
         params.pitch = getSafeFloat('inp_pitch', 2.0);
@@ -306,40 +304,16 @@
         if (params.res < 30) params.res = 30;
 
         // --- GEOMETRİK HESAPLAMA (STACK-UP) ---
-        // Kullanıcının "Dip Et Kalınlığı" isteğine uygun "Flush Joint" mantığı.
-        // Amaç: Hem erkek parçada hem de dişi parçada "Dip Et Kalınlığı" kadar sağlam duvar kalsın.
-        
-        // 1. İç Yarıçap (Sabit)
         params.r0 = params.id / 2;
-
-        // 2. Erkek Diş Dibi (Root)
-        // İç delikten "Dip Et Kalınlığı" kadar dışarıda başlar.
-        params.r1 = params.r0 + params.minWall;
-
-        // 3. Erkek Diş Tepesi (Crest)
-        // Diş derinliği eklenir.
-        params.r2 = params.r1 + params.threadDepth;
-
-        // 4. Dişi Diş Tepesi (Hole Diameter)
-        // Erkek diş tepesinden "Tolerans" kadar geniş olmalı ki rahat dönsün.
-        // FDM baskılarda tolerans genellikle çapsal düşünülür ama burada radyal ekliyoruz (güvenli taraf).
-        params.r3 = params.r1 + params.tol; 
+        params.r1 = params.r0 + params.minWall; // Erkek Diş Dibi
+        params.r2 = params.r1 + params.threadDepth; // Erkek Diş Tepesi
+        params.r3 = params.r1 + params.tol; // Dişi Diş Tepesi (Dar yer)
+        params.r4 = params.r2 + params.tol; // Dişi Diş Dibi (Geniş yer)
+        params.r5 = params.r4 + params.minWall; // Dış Çap
         
-        // 5. Dişi Diş Dibi (Root / En Derin Kesik)
-        // Erkek tepe (r2) buraya girecek. Tolerans payı ile.
-        params.r4 = params.r2 + params.tol;
-
-        // 6. Dış Yarıçap (OD)
-        // BURASI KRİTİK: Dişi parçanın da dışarı patlamaması için,
-        // Dişi diş dibinden (r4) sonra tekrar "Dip Et Kalınlığı" kadar pay bırakıyoruz.
-        // Kullanıcının şikayet ettiği "dişi kısmın dip eti" burasıdır.
-        params.r5 = params.r4 + params.minWall;
-
-        // Sonuçları Hesapla
         params.od = params.r5 * 2;
-        params.bodyWallThickness = params.r5 - params.r0; // Toplam et kalınlığı
+        params.bodyWallThickness = params.r5 - params.r0;
 
-        // UI Güncelle
         document.getElementById('disp_od').innerText = params.od.toFixed(2) + " mm";
         document.getElementById('disp_body_wall').innerText = params.bodyWallThickness.toFixed(2) + " mm";
 
@@ -347,51 +321,31 @@
         drawCrossSection();
     }
 
-    // Yarıçap Fonksiyonu (Yüksekliğe ve Açıya göre)
     function getRadius(y, angle, isInnerSurface) {
-        // isInnerSurface:
-        // TRUE -> Borunun içinden geçen sıvının gördüğü yüzey (r0) veya Dişi vidanın iç yüzeyi
-        // FALSE -> Borunun dış yüzeyi (r5) veya Erkek vidanın dış yüzeyi
-
-        // Y EKSENİ: 0 (Erkek Uç) -> totalLen (Dişi Uç)
-        
-        // --- İÇ YÜZEY MANTIĞI ---
         if (isInnerSurface) {
-            // Normal gövde içi (Düz)
+            // İç Yüzey
             if (y < params.totalLen - params.threadLen) {
-                return params.r0; // Standart İç Çap
-            } 
-            // Dişi Vida Kısmı (Üst taraf)
-            else {
+                return params.r0; // Düz iç
+            } else {
+                // Dişi Vida
                 const localY = y - (params.totalLen - params.threadLen);
-                
-                // Helis Dalgası
                 const phase = (localY / params.pitch) - (angle / (Math.PI * 2));
-                // Trapezoidal / Üçgen dalga
                 let wave = (phase % 1);
                 if(wave < 0) wave += 1;
                 wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
-                
-                // Dişi dişler r3 (tepe) ile r4 (dip) arasında
                 return params.r3 + (params.r4 - params.r3) * wave;
             }
-        }
-        
-        // --- DIŞ YÜZEY MANTIĞI ---
-        else {
-            // Erkek Vida Kısmı (Alt taraf)
+        } else {
+            // Dış Yüzey
             if (y < params.threadLen) {
+                // Erkek Vida
                 const phase = (y / params.pitch) - (angle / (Math.PI * 2));
                 let wave = (phase % 1);
                 if(wave < 0) wave += 1;
                 wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
-                
-                // Erkek dişler r1 (dip) ile r2 (tepe) arasında
                 return params.r1 + (params.r2 - params.r1) * wave;
-            }
-            // Normal Gövde Dışı
-            else {
-                return params.r5; // Standart Dış Çap
+            } else {
+                return params.r5; // Düz dış
             }
         }
     }
@@ -400,85 +354,107 @@
         if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
 
         const rSegs = params.res;
-        const hSegs = Math.max(50, Math.floor(params.totalLen * 2));
-        
         const vertices = [];
         const indices = [];
 
-        // Mesh Yüzey Segmentasyonu (Geçiş noktalarını keskinleştirmek için)
+        // Y Levels calculation
         let yLevels = [];
-        
-        // Alt (Erkek) Bölge
         for(let i=0; i<=params.threadLen; i+=0.2) yLevels.push(i);
-        // Orta (Gövde) - Daha seyrek
         for(let i=params.threadLen+0.5; i<params.totalLen-params.threadLen; i+=1) yLevels.push(i);
-        // Üst (Dişi)
         for(let i=params.totalLen-params.threadLen; i<=params.totalLen; i+=0.2) yLevels.push(i);
-        
-        // Kritik noktaları ekle
         yLevels.push(params.threadLen); 
         yLevels.push(params.totalLen - params.threadLen);
         yLevels.push(params.totalLen);
         yLevels = [...new Set(yLevels)].sort((a,b)=>a-b);
 
-        // Vertices
+        // --- MANIFOLD FIX ---
+        // 1. Vertices Generation:
+        // Her satırda (Out, In) çiftleri saklanır.
+        // Dikiş yeri için (360 derece = 0 derece) vertex TEKRAR EDİLMEZ.
+        // İndekslerde MODULO işlemi kullanılır.
+        // Her bir i (row) için: rSegs adet (Out, In) çifti.
+        
         for (let i = 0; i < yLevels.length; i++) {
             const y = yLevels[i];
-            
-            for (let j = 0; j <= rSegs; j++) {
+            for (let j = 0; j < rSegs; j++) {
+                // j = 0..rSegs-1. (360 dereceyi tamamlayan son vertex yok)
                 const angle = (j / rSegs) * Math.PI * 2;
                 
-                // Dış Nokta
+                // Out Vertex
                 const rOut = getRadius(y, angle, false);
                 vertices.push(rOut * Math.cos(angle), y, rOut * Math.sin(angle));
                 
-                // İç Nokta
+                // In Vertex
                 const rIn = getRadius(y, angle, true);
                 vertices.push(rIn * Math.cos(angle), y, rIn * Math.sin(angle));
             }
         }
 
-        // Indices (Faces)
-        const stride = (rSegs + 1) * 2;
+        // 2. Indices Generation (Watertight)
+        const stride = 2 * rSegs; // Bir satırdaki toplam vertex sayısı (Out + In)
+        
         for (let i = 0; i < yLevels.length - 1; i++) {
-            for (let j = 0; j < rSegs; j++) {
-                const base = i * stride + (j * 2);
-                const next = (i + 1) * stride + (j * 2);
-                
-                const out = base, inn = base + 1;
-                const outN = next, innN = next + 1;
-                const out2 = base + 2, inn2 = base + 3;
-                const outN2 = next + 2, innN2 = next + 3;
+            const rowOffset = i * stride;
+            const nextRowOffset = (i + 1) * stride;
 
-                // Dış Yüzey
-                indices.push(out, outN, out2);
-                indices.push(out2, outN, outN2);
+            for (let j = 0; j < rSegs; j++) {
+                // Modulo ile dikişsiz geçiş
+                const nextJ = (j + 1) % rSegs; 
                 
-                // İç Yüzey (Normal yönü ters)
-                indices.push(inn, outN2, outN);
-                indices.push(inn, inn2, innN);
-                indices.push(inn2, innN2, innN);
+                // İndeksler
+                // Mevcut Satır
+                const vOut = rowOffset + 2 * j;
+                const vIn = rowOffset + 2 * j + 1;
+                const vOutNext = rowOffset + 2 * nextJ;
+                const vInNext = rowOffset + 2 * nextJ + 1;
+                
+                // Sonraki Satır
+                const nvOut = nextRowOffset + 2 * j;
+                const nvIn = nextRowOffset + 2 * j + 1;
+                const nvOutNext = nextRowOffset + 2 * nextJ;
+                const nvInNext = nextRowOffset + 2 * nextJ + 1;
+
+                // --- Dış Kabuk (Outer Shell) ---
+                // Saat yönünün tersi (CCW) -> Normaller dışarı
+                indices.push(vOut, vOutNext, nvOut);
+                indices.push(vOutNext, nvOutNext, nvOut);
+
+                // --- İç Kabuk (Inner Shell) ---
+                // STL için normaller malzeme içinden BOŞLUĞA bakmalı.
+                // Yani dış kabuğa göre TERS (CW) örülmeli.
+                // vIn, nvIn, vInNext (Saat yönü)
+                indices.push(vIn, nvIn, vInNext);
+                indices.push(vInNext, nvIn, nvInNext);
             }
         }
 
-        // Alt Rim (y=0) - Kapalı
-        for(let j=0; j<rSegs; j++) {
-            const base = 0 + (j*2);
-            const out = base, inn = base+1;
-            const out2 = base+2, inn2 = base+3;
-            indices.push(out, inn, out2);
-            indices.push(inn, inn2, out2);
+        // --- Alt Kapak (Bottom Rim) ---
+        // i=0. Normaller aşağı (-Y) bakmalı.
+        for (let j = 0; j < rSegs; j++) {
+            const nextJ = (j + 1) % rSegs;
+            const vOut = 2 * j;
+            const vIn = 2 * j + 1;
+            const vOutNext = 2 * nextJ;
+            const vInNext = 2 * nextJ + 1;
+            
+            // vIn -> vOut -> vOutNext -> vInNext
+            indices.push(vIn, vOut, vOutNext);
+            indices.push(vIn, vOutNext, vInNext);
         }
 
-        // Üst Rim (y=total) - Kapalı
-        const lastRowStart = (yLevels.length - 1) * stride;
-        for(let j=0; j<rSegs; j++) {
-            const base = lastRowStart + (j*2);
-            const out = base, inn = base+1;
-            const out2 = base+2, inn2 = base+3;
-            // Normaller yukarı
-            indices.push(out, out2, inn);
-            indices.push(out2, inn2, inn);
+        // --- Üst Kapak (Top Rim) ---
+        // i=son. Normaller yukarı (+Y) bakmalı.
+        const lastRowOffset = (yLevels.length - 1) * stride;
+        for (let j = 0; j < rSegs; j++) {
+            const nextJ = (j + 1) % rSegs;
+            const vOut = lastRowOffset + 2 * j;
+            const vIn = lastRowOffset + 2 * j + 1;
+            const vOutNext = lastRowOffset + 2 * nextJ;
+            const vInNext = lastRowOffset + 2 * nextJ + 1;
+            
+            // vOut -> vIn -> vInNext -> vOutNext
+            indices.push(vOut, vIn, vInNext);
+            indices.push(vOut, vInNext, vOutNext);
         }
 
         const geo = new THREE.BufferGeometry();
@@ -515,10 +491,6 @@
         const centerX = w/2;
         const bottomY = h - margin;
 
-        function toScreen(r, y) {
-            return { x: centerX + (r * scale), y: bottomY - (y * scale) };
-        }
-
         const step = 0.2;
         
         // --- ERKEK PARÇA (Mavi) ---
@@ -534,7 +506,7 @@
         // Dış hat (Dişli)
         for(let y=params.threadLen + 5; y>=0; y-=step) {
             let r;
-            if (y > params.threadLen) r = params.r5; // Gövde (Hayali devamı)
+            if (y > params.threadLen) r = params.r5;
             else {
                 const phase = (y / params.pitch); 
                 let wave = Math.abs((phase % 1) * 2 - 1);
@@ -554,7 +526,7 @@
         
         const topVisY = params.threadLen + 15; 
         ctx.moveTo(centerX + params.r5*scale, bottomY - topVisY*scale);
-        ctx.lineTo(centerX + params.r5*scale, bottomY); // Aşağı kadar iniyor
+        ctx.lineTo(centerX + params.r5*scale, bottomY); 
         
         for(let y=0; y<=topVisY; y+=step) {
             let r;
@@ -582,14 +554,6 @@
         ctx.textAlign = "right";
         const xID = centerX + params.r0*scale - 10;
         ctx.fillText(`ID: ${params.id.toFixed(1)}mm`, xID, bottomY - params.threadLen*scale/2);
-
-        // Dip Et Göstergesi
-        ctx.fillStyle = "#aaa";
-        ctx.font = "10px sans-serif";
-        ctx.textAlign = "center";
-        const r1Screen = centerX + params.r1*scale;
-        const r0Screen = centerX + params.r0*scale;
-        // ctx.fillText("Dip Et", (r1Screen+r0Screen)/2, bottomY + 15);
     }
 
     // --- STL EXPORT ---
@@ -650,7 +614,7 @@
         const blob = new Blob([buffer], {type: 'application/octet-stream'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Pipe_ID${params.id}_Dip${params.minWall}.stl`;
+        link.download = `Pipe_ID${params.id}_Dip${params.minWall}_Watertight.stl`;
         link.click();
     }
 
