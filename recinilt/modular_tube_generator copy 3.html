@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modüler Tüp STL Oluşturucu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            min-height: 100vh;
+            padding: 15px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1em;
+            opacity: 0.95;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .panel h2 {
+            color: #11998e;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 3px solid #11998e;
+            padding-bottom: 10px;
+        }
+        
+        .sections-container {
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        .section-card {
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .section-card:hover {
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.2);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .section-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #11998e;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+        
+        .remove-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+        
+        .section-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+        
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #11998e;
+            box-shadow: 0 0 0 3px rgba(17, 153, 142, 0.1);
+        }
+        
+        .unit {
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+        
+        .subsection {
+            background: #f1f3f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .subsection-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        
+        .thread-params {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e7f5ff;
+            border-left: 4px solid #1c7ed6;
+            border-radius: 5px;
+        }
+        
+        .thread-params.show {
+            display: block;
+        }
+        
+        .preset-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+        }
+        
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .preset-item {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .preset-item:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .preset-item.custom {
+            background: #38ef7d;
+        }
+        
+        .preset-item.custom:hover {
+            background: #11998e;
+        }
+        
+        .preset-delete {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 0.7em;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .preset-item.custom:hover .preset-delete {
+            display: block;
+        }
+        
+        .btn-small {
+            background: #38ef7d;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .btn-small:hover {
+            background: #11998e;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-bottom: 20px;
+        }
+        
+        .btn-add:hover {
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .preview {
+            text-align: center;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #f1f3f5;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        #canvas3d {
+            width: 100%;
+            max-width: 600px;
+            height: 500px;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .preview-info {
+            margin-top: 15px;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .info-box ul {
+            margin-left: 20px;
+        }
+        
+        .info-box li {
+            margin: 5px 0;
+            color: #495057;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-row {
+                grid-template-columns: 1fr;
+            }
+            
+            #canvas3d {
+                height: 400px;
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Modüler Tüp STL Oluşturucu</h1>
+            <p>Bölüm bölüm özelleştirilebilir tüp tasarlayın</p>
+        </div>
+        
+        <div class="content">
+            <div class="panel">
+                <h2>⚙️ Tüp Bölümleri</h2>
+                
+                <button class="btn btn-add" onclick="addSection()">➕ Bölüm Ekle</button>
+                
+                <div class="sections-container" id="sectionsContainer">
+                    <!-- Sections will be added here dynamically -->
+                </div>
+                
+                <button class="btn" onclick="generateSTL()">📥 STL Dosyası Oluştur ve İndir</button>
+            </div>
+            
+            <div class="panel">
+                <h2>📊 Önizleme</h2>
+                
+                <div class="preview">
+                    <canvas id="canvas3d"></canvas>
+                    <div class="preview-info">
+                        <strong>🔄 3D Kesit Önizleme</strong><br>
+                        <small>Parametreleri değiştirdiğinizde otomatik güncellenir</small>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <h3>💡 Kullanım İpuçları</h3>
+                    <ul>
+                        <li><strong>Konik geçiş:</strong> Tavan ve taban çaplarını farklı yapın</li>
+                        <li><strong>Bölüm ekleme:</strong> Üstteki taban, alttaki tavan olur</li>
+                        <li><strong>Vida türleri:</strong> Dış vidalı = dışarıda diş, İç vidalı = içeride diş</li>
+                        <li><strong>Test:</strong> İlk önce küçük bir parça yazdırıp test edin</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let sections = [];
+        let sectionCounter = 0;
+        let canvas, ctx;
+        
+        // Default thread presets
+        const defaultPresets = [
+            { name: 'M8', pitch: 1.25, depth: 0.8, length: 10 },
+            { name: 'M10', pitch: 1.5, depth: 0.9, length: 12 },
+            { name: 'M12', pitch: 1.75, depth: 1.0, length: 12 },
+            { name: 'M16', pitch: 2.0, depth: 1.0, length: 15 },
+            { name: 'M20', pitch: 2.5, depth: 1.2, length: 15 },
+            { name: 'M24', pitch: 3.0, depth: 1.5, length: 20 }
+        ];
+        
+        // Load custom presets from localStorage
+        function getCustomPresets() {
+            const stored = localStorage.getItem('threadPresets');
+            return stored ? JSON.parse(stored) : [];
+        }
+        
+        function saveCustomPresets(presets) {
+            localStorage.setItem('threadPresets', JSON.stringify(presets));
+        }
+        
+        function loadPresets(sectionId, position) {
+            const container = document.getElementById(`preset-${position}-${sectionId}`);
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Add default presets
+            defaultPresets.forEach(preset => {
+                const btn = document.createElement('button');
+                btn.className = 'preset-item';
+                btn.textContent = preset.name;
+                btn.onclick = () => applyPreset(sectionId, position, preset);
+                container.appendChild(btn);
+            });
+            
+            // Add custom presets
+            const customPresets = getCustomPresets();
+            customPresets.forEach((preset, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'preset-item custom';
+                btn.innerHTML = `
+                    ${preset.name}
+                    <span class="preset-delete" onclick="event.stopPropagation(); deletePreset(${index}, ${sectionId}, '${position}')">×</span>
+                `;
+                btn.onclick = () => applyPreset(sectionId, position, preset);
+                container.appendChild(btn);
+            });
+        }
+        
+        function applyPreset(sectionId, position, preset) {
+            const section = sections.find(s => s.id === sectionId);
+            if (!section) return;
+            
+            const prefix = position === 'top' ? 'top' : 'bottom';
+            section[`${prefix}ThreadPitch`] = preset.pitch;
+            section[`${prefix}ThreadDepth`] = preset.depth;
+            section[`${prefix}ThreadLength`] = preset.length;
+            
+            // Update input fields
+            const card = document.getElementById(`section-${sectionId}`);
+            const threadDiv = document.getElementById(`thread-${position}-${sectionId}`);
+            const inputs = threadDiv.querySelectorAll('input[type="number"]');
+            inputs[0].value = preset.pitch;
+            inputs[1].value = preset.depth;
+            inputs[2].value = preset.length;
+            
+            updatePreview();
+        }
+        
+        function addCustomPreset(position) {
+            const name = prompt('Preset adı:');
+            if (!name) return;
+            
+            const pitch = parseFloat(prompt('Vida adımı (mm):', '2.5'));
+            if (isNaN(pitch)) return;
+            
+            const depth = parseFloat(prompt('Vida diş derinliği (mm):', '1.2'));
+            if (isNaN(depth)) return;
+            
+            const length = parseFloat(prompt('Vida uzunluğu (mm):', '15'));
+            if (isNaN(length)) return;
+            
+            const customPresets = getCustomPresets();
+            customPresets.push({ name, pitch, depth, length });
+            saveCustomPresets(customPresets);
+            
+            // Reload all preset displays
+            sections.forEach(section => {
+                loadPresets(section.id, 'top');
+                loadPresets(section.id, 'bottom');
+            });
+            
+            alert(`✅ Preset "${name}" kaydedildi!`);
+        }
+        
+        function deletePreset(index, sectionId, position) {
+            if (!confirm('Bu preset\'i silmek istediğinizden emin misiniz?')) return;
+            
+            const customPresets = getCustomPresets();
+            customPresets.splice(index, 1);
+            saveCustomPresets(customPresets);
+            
+            loadPresets(sectionId, position);
+        }
+        
+        window.addEventListener('load', () => {
+            canvas = document.getElementById('canvas3d');
+            ctx = canvas.getContext('2d');
+            
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * window.devicePixelRatio;
+            canvas.height = rect.height * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            // Add first section by default
+            addSection();
+        });
+        
+        function addSection() {
+            sectionCounter++;
+            
+            // Get previous section's bottom values
+            let prevBottom = null;
+            if (sections.length > 0) {
+                const lastSection = sections[sections.length - 1];
+                prevBottom = {
+                    outerDiameter: lastSection.bottomOuterDiameter,
+                    innerDiameter: lastSection.bottomInnerDiameter
+                };
+            }
+            
+            const section = {
+                id: sectionCounter,
+                height: 30,
+                topOuterDiameter: prevBottom ? prevBottom.outerDiameter : 20,
+                topInnerDiameter: prevBottom ? prevBottom.innerDiameter : 16,
+                topType: 'smooth',
+                topThreadPitch: 2.5,
+                topThreadDepth: 1.2,
+                topThreadLength: 15,
+                bottomOuterDiameter: prevBottom ? prevBottom.outerDiameter : 20,
+                bottomInnerDiameter: prevBottom ? prevBottom.innerDiameter : 16,
+                bottomType: 'smooth',
+                bottomThreadPitch: 2.5,
+                bottomThreadDepth: 1.2,
+                bottomThreadLength: 15
+            };
+            
+            sections.push(section);
+            renderSectionCard(section);
+            updatePreview();
+        }
+        
+        function renderSectionCard(section) {
+            const container = document.getElementById('sectionsContainer');
+            const isFirst = sections.length === 1;
+            
+            const card = document.createElement('div');
+            card.className = 'section-card';
+            card.id = `section-${section.id}`;
+            
+            card.innerHTML = `
+                <div class="section-header">
+                    <div class="section-title">📦 Bölüm ${section.id}</div>
+                    ${!isFirst ? `<button class="remove-btn" onclick="removeSection(${section.id})">🗑️ Sil</button>` : ''}
+                </div>
+                
+                <div class="form-group">
+                    <label>📏 Bölüm Yüksekliği <span class="unit">(mm)</span></label>
+                    <input type="number" value="${section.height}" step="1"
+                        onchange="updateSection(${section.id}, 'height', this.value)">
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">⬆️ Tavan Tarafı</div>
+                    <div class="section-row">
+                        <div class="form-group">
+                            <label>Dış Çap <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.topOuterDiameter}" step="0.5" 
+                                onchange="updateSection(${section.id}, 'topOuterDiameter', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>İç Çap <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.topInnerDiameter}" step="0.5"
+                                onchange="updateSection(${section.id}, 'topInnerDiameter', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tip</label>
+                        <select onchange="updateSection(${section.id}, 'topType', this.value); toggleThreadParams(${section.id}, 'top')">
+                            <option value="smooth" ${section.topType === 'smooth' ? 'selected' : ''}>Düz</option>
+                            <option value="external_thread" ${section.topType === 'external_thread' ? 'selected' : ''}>Dış Vidalı</option>
+                            <option value="internal_thread" ${section.topType === 'internal_thread' ? 'selected' : ''}>İç Vidalı</option>
+                        </select>
+                    </div>
+                    <div class="thread-params" id="thread-top-${section.id}">
+                        <div class="preset-section">
+                            <div class="subsection-title">⚡ Preset Seç</div>
+                            <div class="preset-grid" id="preset-top-${section.id}"></div>
+                            <button class="btn-small" onclick="addCustomPreset('top')">➕ Yeni Preset Ekle</button>
+                        </div>
+                        <div class="subsection-title">🔩 Vida Parametreleri</div>
+                        <div class="section-row">
+                            <div class="form-group">
+                                <label>Vida Adımı <span class="unit">(mm)</span></label>
+                                <input type="number" value="${section.topThreadPitch}" step="0.5"
+                                    onchange="updateSection(${section.id}, 'topThreadPitch', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Vida Diş Derinliği <span class="unit">(mm)</span></label>
+                                <input type="number" value="${section.topThreadDepth}" step="0.1"
+                                    onchange="updateSection(${section.id}, 'topThreadDepth', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Vida Uzunluğu <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.topThreadLength}" step="1"
+                                onchange="updateSection(${section.id}, 'topThreadLength', this.value)">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subsection">
+                    <div class="subsection-title">⬇️ Taban Tarafı</div>
+                    <div class="section-row">
+                        <div class="form-group">
+                            <label>Dış Çap <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.bottomOuterDiameter}" step="0.5"
+                                onchange="updateSection(${section.id}, 'bottomOuterDiameter', this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>İç Çap <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.bottomInnerDiameter}" step="0.5"
+                                onchange="updateSection(${section.id}, 'bottomInnerDiameter', this.value)">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Tip</label>
+                        <select onchange="updateSection(${section.id}, 'bottomType', this.value); toggleThreadParams(${section.id}, 'bottom')">
+                            <option value="smooth" ${section.bottomType === 'smooth' ? 'selected' : ''}>Düz</option>
+                            <option value="external_thread" ${section.bottomType === 'external_thread' ? 'selected' : ''}>Dış Vidalı</option>
+                            <option value="internal_thread" ${section.bottomType === 'internal_thread' ? 'selected' : ''}>İç Vidalı</option>
+                        </select>
+                    </div>
+                    <div class="thread-params" id="thread-bottom-${section.id}">
+                        <div class="preset-section">
+                            <div class="subsection-title">⚡ Preset Seç</div>
+                            <div class="preset-grid" id="preset-bottom-${section.id}"></div>
+                            <button class="btn-small" onclick="addCustomPreset('bottom')">➕ Yeni Preset Ekle</button>
+                        </div>
+                        <div class="subsection-title">🔩 Vida Parametreleri</div>
+                        <div class="section-row">
+                            <div class="form-group">
+                                <label>Vida Adımı <span class="unit">(mm)</span></label>
+                                <input type="number" value="${section.bottomThreadPitch}" step="0.5"
+                                    onchange="updateSection(${section.id}, 'bottomThreadPitch', this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Vida Diş Derinliği <span class="unit">(mm)</span></label>
+                                <input type="number" value="${section.bottomThreadDepth}" step="0.1"
+                                    onchange="updateSection(${section.id}, 'bottomThreadDepth', this.value)">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Vida Uzunluğu <span class="unit">(mm)</span></label>
+                            <input type="number" value="${section.bottomThreadLength}" step="1"
+                                onchange="updateSection(${section.id}, 'bottomThreadLength', this.value)">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(card);
+            
+            // Load presets after card is added
+            loadPresets(section.id, 'top');
+            loadPresets(section.id, 'bottom');
+            toggleThreadParams(section.id, 'top');
+            toggleThreadParams(section.id, 'bottom');
+        }
+        
+        function toggleThreadParams(sectionId, position) {
+            const section = sections.find(s => s.id === sectionId);
+            const threadDiv = document.getElementById(`thread-${position}-${sectionId}`);
+            
+            if (!section || !threadDiv) return;
+            
+            const type = position === 'top' ? section.topType : section.bottomType;
+            
+            if (type !== 'smooth') {
+                threadDiv.classList.add('show');
+            } else {
+                threadDiv.classList.remove('show');
+            }
+            
+            updatePreview();
+        }
+        
+        function updateSection(sectionId, field, value) {
+            const section = sections.find(s => s.id === sectionId);
+            if (section) {
+                section[field] = field === 'type' ? value : parseFloat(value);
+                updatePreview();
+            }
+        }
+        
+        function removeSection(sectionId) {
+            const index = sections.findIndex(s => s.id === sectionId);
+            if (index > -1) {
+                sections.splice(index, 1);
+                document.getElementById(`section-${sectionId}`).remove();
+                updatePreview();
+            }
+        }
+        
+        function updatePreview() {
+            if (!canvas || !ctx) return;
+            
+            const w = canvas.width / window.devicePixelRatio;
+            const h = canvas.height / window.devicePixelRatio;
+            
+            // Clear
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+            
+            if (sections.length === 0) {
+                ctx.fillStyle = '#6c757d';
+                ctx.font = '16px Segoe UI';
+                ctx.textAlign = 'center';
+                ctx.fillText('Bölüm eklemek için "Bölüm Ekle" butonuna tıklayın', w/2, h/2);
+                return;
+            }
+            
+            // Calculate total height and max diameter
+            let totalHeight = 0;
+            let maxDiameter = 0;
+            
+            sections.forEach(s => {
+                totalHeight += s.height;
+                maxDiameter = Math.max(maxDiameter, s.topOuterDiameter, s.bottomOuterDiameter);
+            });
+            
+            // Calculate scale
+            const scaleY = (h - 120) / maxDiameter;
+            const scaleX = Math.min(scaleY, (w - 80) / totalHeight);
+            
+            const offsetX = w / 2;
+            const offsetY = h / 2;
+            
+            // Draw all sections
+            drawTubeSections(ctx, sections, offsetX, offsetY, scaleX, scaleY);
+            
+            // Add title
+            ctx.fillStyle = '#495057';
+            ctx.font = '14px Segoe UI';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Toplam ${sections.length} Bölüm - ${totalHeight.toFixed(1)}mm`, w / 2, 25);
+        }
+        
+        function drawTubeSections(ctx, sections, cx, cy, scaleX, scaleY) {
+            let currentZ = 0;
+            
+            // Calculate total height for centering
+            const totalHeight = sections.reduce((sum, s) => sum + s.height, 0);
+            const startY = cy - (totalHeight * scaleX) / 2;
+            
+            sections.forEach((section, index) => {
+                const segments = Math.max(50, Math.floor(section.height * 2));
+                const sectionStartY = startY + currentZ * scaleX;
+                
+                // Draw outer contour
+                ctx.strokeStyle = '#2c3e50';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                // Top to bottom - outer surface
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const z = t * section.height;
+                    const y = sectionStartY + z * scaleX;
+                    
+                    // Interpolate diameter
+                    const outerD = section.topOuterDiameter + (section.bottomOuterDiameter - section.topOuterDiameter) * t;
+                    let r = (outerD / 2) * scaleY;
+                    
+                    // Apply thread effects - check both top and bottom types
+                    if (t < 0.5 && section.topType === 'external_thread' && z < section.topThreadLength) {
+                        const threadAngle = (z / section.topThreadPitch) * Math.PI * 2;
+                        const variation = section.topThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((outerD / 2) - section.topThreadDepth + variation) * scaleY;
+                    } else if (t >= 0.5 && section.bottomType === 'external_thread' && (section.height - z) < section.bottomThreadLength) {
+                        const threadAngle = ((section.height - z) / section.bottomThreadPitch) * Math.PI * 2;
+                        const variation = section.bottomThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((outerD / 2) - section.bottomThreadDepth + variation) * scaleY;
+                    }
+                    
+                    if (i === 0) {
+                        ctx.moveTo(cx - r, y);
+                    } else {
+                        ctx.lineTo(cx - r, y);
+                    }
+                }
+                
+                // Bottom to top - outer surface (right side)
+                for (let i = segments; i >= 0; i--) {
+                    const t = i / segments;
+                    const z = t * section.height;
+                    const y = sectionStartY + z * scaleX;
+                    
+                    const outerD = section.topOuterDiameter + (section.bottomOuterDiameter - section.topOuterDiameter) * t;
+                    let r = (outerD / 2) * scaleY;
+                    
+                    if (t < 0.5 && section.topType === 'external_thread' && z < section.topThreadLength) {
+                        const threadAngle = (z / section.topThreadPitch) * Math.PI * 2;
+                        const variation = section.topThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((outerD / 2) - section.topThreadDepth + variation) * scaleY;
+                    } else if (t >= 0.5 && section.bottomType === 'external_thread' && (section.height - z) < section.bottomThreadLength) {
+                        const threadAngle = ((section.height - z) / section.bottomThreadPitch) * Math.PI * 2;
+                        const variation = section.bottomThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((outerD / 2) - section.bottomThreadDepth + variation) * scaleY;
+                    }
+                    
+                    ctx.lineTo(cx + r, y);
+                }
+                
+                ctx.closePath();
+                
+                // Color based on types
+                if (section.topType === 'external_thread' || section.bottomType === 'external_thread') {
+                    ctx.fillStyle = '#85c1e9';
+                } else if (section.topType === 'internal_thread' || section.bottomType === 'internal_thread') {
+                    ctx.fillStyle = '#f8b4d9';
+                } else {
+                    ctx.fillStyle = '#8b9dc3';
+                }
+                
+                ctx.fill();
+                ctx.stroke();
+                
+                // Draw inner contour (hollow)
+                ctx.beginPath();
+                
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const z = t * section.height;
+                    const y = sectionStartY + z * scaleX;
+                    
+                    const innerD = section.topInnerDiameter + (section.bottomInnerDiameter - section.topInnerDiameter) * t;
+                    let r = (innerD / 2) * scaleY;
+                    
+                    // Apply internal thread effects
+                    if (t < 0.5 && section.topType === 'internal_thread' && z < section.topThreadLength) {
+                        const threadAngle = (z / section.topThreadPitch) * Math.PI * 2;
+                        const variation = section.topThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((innerD / 2) + variation) * scaleY;
+                    } else if (t >= 0.5 && section.bottomType === 'internal_thread' && (section.height - z) < section.bottomThreadLength) {
+                        const threadAngle = ((section.height - z) / section.bottomThreadPitch) * Math.PI * 2;
+                        const variation = section.bottomThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((innerD / 2) + variation) * scaleY;
+                    }
+                    
+                    if (i === 0) {
+                        ctx.moveTo(cx - r, y);
+                    } else {
+                        ctx.lineTo(cx - r, y);
+                    }
+                }
+                
+                for (let i = segments; i >= 0; i--) {
+                    const t = i / segments;
+                    const z = t * section.height;
+                    const y = sectionStartY + z * scaleX;
+                    
+                    const innerD = section.topInnerDiameter + (section.bottomInnerDiameter - section.topInnerDiameter) * t;
+                    let r = (innerD / 2) * scaleY;
+                    
+                    if (t < 0.5 && section.topType === 'internal_thread' && z < section.topThreadLength) {
+                        const threadAngle = (z / section.topThreadPitch) * Math.PI * 2;
+                        const variation = section.topThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((innerD / 2) + variation) * scaleY;
+                    } else if (t >= 0.5 && section.bottomType === 'internal_thread' && (section.height - z) < section.bottomThreadLength) {
+                        const threadAngle = ((section.height - z) / section.bottomThreadPitch) * Math.PI * 2;
+                        const variation = section.bottomThreadDepth * (Math.sin(threadAngle * 8) + 1) / 2;
+                        r = ((innerD / 2) + variation) * scaleY;
+                    }
+                    
+                    ctx.lineTo(cx + r, y);
+                }
+                
+                ctx.closePath();
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.stroke();
+                
+                // Draw section label
+                ctx.fillStyle = '#495057';
+                ctx.font = 'bold 11px Segoe UI';
+                ctx.textAlign = 'center';
+                const labelY = sectionStartY + (section.height * scaleX) / 2;
+                
+                let topText = section.topType === 'external_thread' ? 'DışV' : (section.topType === 'internal_thread' ? 'İçV' : 'Düz');
+                let bottomText = section.bottomType === 'external_thread' ? 'DışV' : (section.bottomType === 'internal_thread' ? 'İçV' : 'Düz');
+                
+                ctx.fillText(`#${index + 1}: ${topText}|${bottomText}`, cx, labelY);
+                
+                currentZ += section.height;
+            });
+        }
+        
+        function generateSTL() {
+            if (sections.length === 0) {
+                alert('❌ En az bir bölüm eklemelisiniz!');
+                return;
+            }
+            
+            // Validate sections
+            for (let i = 0; i < sections.length; i++) {
+                const s = sections[i];
+                if (s.topInnerDiameter >= s.topOuterDiameter || s.bottomInnerDiameter >= s.bottomOuterDiameter) {
+                    alert(`❌ Bölüm ${i + 1}: İç çap, dış çaptan küçük olmalıdır!`);
+                    return;
+                }
+            }
+            
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="loading"></span> Oluşturuluyor...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                const stlData = createModularTubeSTL(sections);
+                
+                const blob = new Blob([stlData], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                const totalHeight = sections.reduce((sum, s) => sum + s.height, 0);
+                a.download = `modular_tube_${sections.length}section_${totalHeight.toFixed(0)}mm.stl`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                btn.innerHTML = '✅ İndirildi!';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 2000);
+            }, 100);
+        }
+        
+        function createModularTubeSTL(sections) {
+            const resolution = 48;
+            const vertices = [];
+            const faces = [];
+            
+            let currentZ = 0;
+            
+            sections.forEach((section, sectionIndex) => {
+                const segments = Math.floor(section.height * 2);
+                const startVertexIndex = vertices.length / 2;
+                
+                // Generate vertices for this section
+                for (let i = 0; i <= segments; i++) {
+                    const t = i / segments;
+                    const z = currentZ + t * section.height;
+                    const localZ = t * section.height;
+                    
+                    // Interpolate diameters
+                    const outerD = section.topOuterDiameter + (section.bottomOuterDiameter - section.topOuterDiameter) * t;
+                    const innerD = section.topInnerDiameter + (section.bottomInnerDiameter - section.topInnerDiameter) * t;
+                    
+                    // Outer surface vertices
+                    for (let j = 0; j < resolution; j++) {
+                        const angle = (j / resolution) * 2 * Math.PI;
+                        let r = outerD / 2;
+                        
+                        // Apply thread effects
+                        if (t < 0.5 && section.topType === 'external_thread' && localZ < section.topThreadLength) {
+                            const threadAngle = (localZ / section.topThreadPitch) * 2 * Math.PI;
+                            const radiusVar = section.topThreadDepth * (Math.sin(threadAngle) + 1) / 2;
+                            r = (outerD / 2) - section.topThreadDepth + radiusVar;
+                        } else if (t >= 0.5 && section.bottomType === 'external_thread' && (section.height - localZ) < section.bottomThreadLength) {
+                            const threadAngle = ((section.height - localZ) / section.bottomThreadPitch) * 2 * Math.PI;
+                            const radiusVar = section.bottomThreadDepth * (Math.sin(threadAngle) + 1) / 2;
+                            r = (outerD / 2) - section.bottomThreadDepth + radiusVar;
+                        }
+                        
+                        const x = r * Math.cos(angle);
+                        const y = r * Math.sin(angle);
+                        vertices.push({x, y, z});
+                    }
+                    
+                    // Inner surface vertices
+                    for (let j = 0; j < resolution; j++) {
+                        const angle = (j / resolution) * 2 * Math.PI;
+                        let r = innerD / 2;
+                        
+                        if (t < 0.5 && section.topType === 'internal_thread' && localZ < section.topThreadLength) {
+                            const threadAngle = (localZ / section.topThreadPitch) * 2 * Math.PI;
+                            const radiusVar = section.topThreadDepth * (Math.sin(threadAngle) + 1) / 2;
+                            r = (innerD / 2) + radiusVar;
+                        } else if (t >= 0.5 && section.bottomType === 'internal_thread' && (section.height - localZ) < section.bottomThreadLength) {
+                            const threadAngle = ((section.height - localZ) / section.bottomThreadPitch) * 2 * Math.PI;
+                            const radiusVar = section.bottomThreadDepth * (Math.sin(threadAngle) + 1) / 2;
+                            r = (innerD / 2) + radiusVar;
+                        }
+                        
+                        const x = r * Math.cos(angle);
+                        const y = r * Math.sin(angle);
+                        vertices.push({x, y, z});
+                    }
+                }
+                
+                // Generate faces for this section
+                const vertexOffset = startVertexIndex * resolution * 2;
+                
+                for (let i = 0; i < segments; i++) {
+                    // Outer surface faces
+                    for (let j = 0; j < resolution; j++) {
+                        const v1 = vertexOffset + i * resolution * 2 + j;
+                        const v2 = vertexOffset + i * resolution * 2 + (j + 1) % resolution;
+                        const v3 = vertexOffset + (i + 1) * resolution * 2 + j;
+                        const v4 = vertexOffset + (i + 1) * resolution * 2 + (j + 1) % resolution;
+                        
+                        faces.push([v1, v2, v4]);
+                        faces.push([v1, v4, v3]);
+                    }
+                    
+                    // Inner surface faces
+                    for (let j = 0; j < resolution; j++) {
+                        const v1 = vertexOffset + i * resolution * 2 + resolution + j;
+                        const v2 = vertexOffset + i * resolution * 2 + resolution + (j + 1) % resolution;
+                        const v3 = vertexOffset + (i + 1) * resolution * 2 + resolution + j;
+                        const v4 = vertexOffset + (i + 1) * resolution * 2 + resolution + (j + 1) % resolution;
+                        
+                        faces.push([v1, v4, v2]);
+                        faces.push([v1, v3, v4]);
+                    }
+                }
+                
+                // Top cap (only for first section)
+                if (sectionIndex === 0) {
+                    for (let j = 0; j < resolution; j++) {
+                        const v1 = vertexOffset + j;
+                        const v2 = vertexOffset + (j + 1) % resolution;
+                        const v3 = vertexOffset + resolution + j;
+                        const v4 = vertexOffset + resolution + (j + 1) % resolution;
+                        
+                        faces.push([v1, v3, v2]);
+                        faces.push([v2, v3, v4]);
+                    }
+                }
+                
+                // Bottom cap (only for last section)
+                if (sectionIndex === sections.length - 1) {
+                    const bottomOffset = vertexOffset + segments * resolution * 2;
+                    for (let j = 0; j < resolution; j++) {
+                        const v1 = bottomOffset + j;
+                        const v2 = bottomOffset + (j + 1) % resolution;
+                        const v3 = bottomOffset + resolution + j;
+                        const v4 = bottomOffset + resolution + (j + 1) % resolution;
+                        
+                        faces.push([v1, v2, v3]);
+                        faces.push([v2, v4, v3]);
+                    }
+                }
+                
+                currentZ += section.height;
+            });
+            
+            return createBinarySTL(vertices, faces);
+        }
+        
+        function createBinarySTL(vertices, faces) {
+            const buffer = new ArrayBuffer(84 + faces.length * 50);
+            const view = new DataView(buffer);
+            
+            const header = 'Modular Tube STL';
+            for (let i = 0; i < 80; i++) {
+                view.setUint8(i, i < header.length ? header.charCodeAt(i) : 0);
+            }
+            
+            view.setUint32(80, faces.length, true);
+            
+            let offset = 84;
+            for (const face of faces) {
+                const v1 = vertices[face[0]];
+                const v2 = vertices[face[1]];
+                const v3 = vertices[face[2]];
+                
+                const u = {
+                    x: v2.x - v1.x,
+                    y: v2.y - v1.y,
+                    z: v2.z - v1.z
+                };
+                const v = {
+                    x: v3.x - v1.x,
+                    y: v3.y - v1.y,
+                    z: v3.z - v1.z
+                };
+                const normal = {
+                    x: u.y * v.z - u.z * v.y,
+                    y: u.z * v.x - u.x * v.z,
+                    z: u.x * v.y - u.y * v.x
+                };
+                const len = Math.sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z);
+                if (len > 0) {
+                    normal.x /= len;
+                    normal.y /= len;
+                    normal.z /= len;
+                }
+                
+                view.setFloat32(offset, normal.x, true); offset += 4;
+                view.setFloat32(offset, normal.y, true); offset += 4;
+                view.setFloat32(offset, normal.z, true); offset += 4;
+                
+                view.setFloat32(offset, v1.x, true); offset += 4;
+                view.setFloat32(offset, v1.y, true); offset += 4;
+                view.setFloat32(offset, v1.z, true); offset += 4;
+                
+                view.setFloat32(offset, v2.x, true); offset += 4;
+                view.setFloat32(offset, v2.y, true); offset += 4;
+                view.setFloat32(offset, v2.z, true); offset += 4;
+                
+                view.setFloat32(offset, v3.x, true); offset += 4;
+                view.setFloat32(offset, v3.y, true); offset += 4;
+                view.setFloat32(offset, v3.z, true); offset += 4;
+                
+                view.setUint16(offset, 0, true); offset += 2;
+            }
+            
+            return buffer;
+        }
+        
+        window.addEventListener('resize', () => {
+            if (canvas && ctx) {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * window.devicePixelRatio;
+                canvas.height = rect.height * window.devicePixelRatio;
+                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                updatePreview();
+            }
+        });
+    </script>
+</body>
+</html>

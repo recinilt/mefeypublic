@@ -383,7 +383,7 @@
                         İç Çap <span class="unit">(mm)</span>
                         <span class="info-icon" data-info="inner">i</span>
                     </label>
-                    <input type="number" id="innerDiameter" value="14" min="3" max="95" step="0.5" oninput="updatePreview()">
+                    <input type="number" id="innerDiameter" value="16" min="3" max="95" step="0.5" oninput="updatePreview()">
                 </div>
                 
                 <div class="form-group">
@@ -417,13 +417,14 @@
                     </label>
                     <input type="number" id="threadLength" value="15" min="5" max="50" step="1" oninput="updatePreview()">
                 </div>
-
+                
                 <div class="form-group">
-                    <label>Tolerans (mm): <span class="info-icon">i</span></label>
-                    <input type="number" id="tolerance" value="0.3" step="0.05" min="0.1" max="0.5">
-                    <small>FDM 3D yazıcı için 0.2-0.4mm önerilir</small>
+                    <label>
+                        Vida Toleransı <span class="unit">(mm)</span>
+                        <span class="info-icon" data-info="tolerance">i</span>
+                    </label>
+                    <input type="number" id="tolerance" value="0.25" min="0.1" max="1.0" step="0.05" oninput="updatePreview()">
                 </div>
-
                 
                 <button class="btn" onclick="generateSTL()">📥 STL Dosyası Oluştur ve İndir</button>
             </div>
@@ -553,7 +554,24 @@ Her bir uçtaki vida bölgesinin uzunluğu.
 • Uzun (18-25mm): Kalıcı bağlantılar
 
 <strong>Kural:</strong> Min 3 tam tur için:
-Vida uzunluğu ≥ 3 × Vida adımı`
+Vida uzunluğu ≥ 3 × Vida adımı`,
+
+            tolerance: `<strong>Vida Toleransı</strong>
+3D yazıcıda vidalı parçaların birbirine oturması için gerekli boşluk.
+
+<strong>ÇOK ÖNEMLİ:</strong> Bu değer doğru ayarlanmazsa parçalar birbirine vidalanmaz!
+
+<strong>Nasıl Çalışır:</strong>
+• Erkek parça → Tolerans kadar KÜÇÜLTÜLÜR
+• Dişi parça → Tolerans kadar BÜYÜTÜLÜR
+• Böylece aralarında boşluk oluşur
+
+<strong>Önerilen Değerler:</strong>
+• Budget 3D Printer: 0.25-0.30mm
+• Kaliteli Printer: 0.20-0.25mm
+• Hassas Printer: 0.15-0.20mm
+
+<strong>Test:</strong> İlk baskıyı küçük yapın ve toleransı ayarlayın!`
         };
 
         // Canvas and 3D preview
@@ -733,7 +751,7 @@ Vida uzunluğu ≥ 3 × Vida adımı`
                 tolerance: parseFloat(document.getElementById('tolerance').value)
             };
         }
-
+        
         // Tooltip functionality
         let currentTooltip = null;
         const tooltip = document.getElementById('tooltip');
@@ -823,140 +841,129 @@ Vida uzunluğu ≥ 3 × Vida adımı`
         }
         
         function createThreadedPipeSTL(params) {
-    const resolution = 48;
-    const zSegments = Math.floor(params.totalLength * 2);
-    
-    const vertices = [];
-    const faces = [];
-    
-    // ============================================================
-    // DÜZELTME: Pürüzsüz geçiş ve doğru vida hesaplamaları
-    // ============================================================
-    const middleOuter = params.outerDiameter;
-    const middleInner = params.innerDiameter;
-    
-    // ERKEK (Male - Sağ taraf) - Dış vida
-    const maleOuterMax = middleOuter - params.tolerance;
-    const maleInnerDia = middleInner;  // İç çap orta ile aynı
-    
-    // DİŞİ (Female - Sol taraf) - İç vida  
-    const femaleOuterDia = middleOuter;  // Dış çap orta ile aynı
-    const femaleInnerMax = maleOuterMax + params.tolerance;  // Diş dibi (geniş)
-    // İç vida DARALTIR (tıpkı erkek gibi)
-    
-    // Geçiş bölgesi uzunluğu
-    const transitionLength = 5;  // 5mm yumuşak geçiş
-    // ============================================================
-    
-    // Generate vertices
-    for (let i = 0; i <= zSegments; i++) {
-        const z = (i / zSegments) * params.totalLength;
-        
-        // Outer surface vertices
-        for (let j = 0; j < resolution; j++) {
-            const angle = (j / resolution) * 2 * Math.PI;
-            let r;
+            const resolution = 48;
+            const zSegments = Math.floor(params.totalLength * 2);
             
-            if (z < params.threadLength) {
-                // SAĞ: MALE THREAD - external threads
-                const threadAngle = (z / params.threadPitch) * 2 * Math.PI;
-                const radiusVar = params.threadDepth * (Math.sin(threadAngle) + 1) / 2;
-                r = (maleOuterMax / 2) - params.threadDepth + radiusVar;
-            } else {
-                // ORTA ve SOL: Dış yüzey sabit (pürüzsüz)
-                r = middleOuter / 2;
+            const vertices = [];
+            const faces = [];
+            
+            // Calculate wall thickness and proper diameters with tolerance
+            const wallThickness = (params.outerDiameter - params.innerDiameter) / 2;
+            
+            // SPLIT TOLERANCE IN HALF - apply half to male, half to female
+            const halfTolerance = params.tolerance / 2;
+            
+            // MALE (external threads) - should fit INSIDE female
+            // Male outer diameter = inner + wall - halfTolerance (slightly smaller)
+            const maleOuterDiameter = params.innerDiameter + wallThickness - halfTolerance;
+            const maleInnerDiameter = params.innerDiameter;
+            
+            // FEMALE (internal threads) - should accept male
+            // Female outer diameter = original outer (unchanged)
+            // Female inner diameter for threads = inner + wall + halfTolerance (slightly larger)
+            const femaleOuterDiameter = params.outerDiameter;
+            const femaleInnerDiameter = params.innerDiameter + wallThickness + halfTolerance;
+            
+            // Total clearance = halfTolerance + halfTolerance = full tolerance
+            
+            // Generate vertices - CORRECTED for male/female with split tolerance
+            for (let i = 0; i <= zSegments; i++) {
+                const z = (i / zSegments) * params.totalLength;
+                
+                // Outer surface vertices
+                for (let j = 0; j < resolution; j++) {
+                    const angle = (j / resolution) * 2 * Math.PI;
+                    let r;
+                    
+                    if (z < params.threadLength) {
+                        // MALE THREAD - external threads, SMALLER diameter
+                        const threadAngle = (z / params.threadPitch) * 2 * Math.PI;
+                        const radiusVar = params.threadDepth * (Math.sin(threadAngle) + 1) / 2;
+                        r = (maleOuterDiameter / 2) - params.threadDepth + radiusVar;
+                    } else {
+                        // SMOOTH outer surface (including female end)
+                        r = femaleOuterDiameter / 2;
+                    }
+                    
+                    const x = r * Math.cos(angle);
+                    const y = r * Math.sin(angle);
+                    vertices.push({x, y, z});
+                }
+                
+                // Inner surface vertices
+                for (let j = 0; j < resolution; j++) {
+                    const angle = (j / resolution) * 2 * Math.PI;
+                    let r;
+                    
+                    if (z > params.totalLength - params.threadLength) {
+                        // FEMALE THREAD - internal threads, LARGER inner diameter
+                        const zFromEnd = params.totalLength - z;
+                        const threadAngle = (zFromEnd / params.threadPitch) * 2 * Math.PI;
+                        const radiusVar = params.threadDepth * (Math.sin(threadAngle) + 1) / 2;
+                        r = (femaleInnerDiameter / 2) + radiusVar;
+                    } else {
+                        // SMOOTH inner surface (male end uses normal inner diameter)
+                        r = maleInnerDiameter / 2;
+                    }
+                    
+                    const x = r * Math.cos(angle);
+                    const y = r * Math.sin(angle);
+                    vertices.push({x, y, z});
+                }
             }
             
-            const x = r * Math.cos(angle);
-            const y = r * Math.sin(angle);
-            vertices.push({x, y, z});
-        }
-        
-        // Inner surface vertices
-        for (let j = 0; j < resolution; j++) {
-            const angle = (j / resolution) * 2 * Math.PI;
-            let r;
-            
-            const femaleStart = params.totalLength - params.threadLength;
-            
-            if (z > femaleStart) {
-                // SOL: FEMALE THREAD - internal threads
-                const zFromEnd = params.totalLength - z;
-                const threadAngle = (zFromEnd / params.threadPitch) * 2 * Math.PI;
-                const radiusVar = params.threadDepth * (Math.sin(threadAngle) + 1) / 2;
-                // DÜZELTME: Vida DARALTIR (- kullan)
-                r = (femaleInnerMax / 2) - params.threadDepth + radiusVar;
-            } else if (z > femaleStart - transitionLength) {
-                // GEÇİŞ BÖLGESİ: Orta → Dişi (smooth taper)
-                const t = (z - (femaleStart - transitionLength)) / transitionLength;
-                const rStart = middleInner / 2;
-                const rEnd = femaleInnerMax / 2;
-                r = rStart + (rEnd - rStart) * t;  // Linear interpolation
-            } else {
-                // SAĞ ve ORTA: İç yüzey sabit
-                r = middleInner / 2;
+            // Generate faces - Outer surface
+            for (let i = 0; i < zSegments; i++) {
+                for (let j = 0; j < resolution; j++) {
+                    const v1 = i * resolution * 2 + j;
+                    const v2 = i * resolution * 2 + (j + 1) % resolution;
+                    const v3 = (i + 1) * resolution * 2 + j;
+                    const v4 = (i + 1) * resolution * 2 + (j + 1) % resolution;
+                    
+                    faces.push([v1, v2, v4]);
+                    faces.push([v1, v4, v3]);
+                }
             }
             
-            const x = r * Math.cos(angle);
-            const y = r * Math.sin(angle);
-            vertices.push({x, y, z});
-        }
-    }
-    
-    // Generate faces - Outer surface
-    for (let i = 0; i < zSegments; i++) {
-        for (let j = 0; j < resolution; j++) {
-            const v1 = i * resolution * 2 + j;
-            const v2 = i * resolution * 2 + (j + 1) % resolution;
-            const v3 = (i + 1) * resolution * 2 + j;
-            const v4 = (i + 1) * resolution * 2 + (j + 1) % resolution;
+            // Generate faces - Inner surface
+            for (let i = 0; i < zSegments; i++) {
+                for (let j = 0; j < resolution; j++) {
+                    const v1 = i * resolution * 2 + resolution + j;
+                    const v2 = i * resolution * 2 + resolution + (j + 1) % resolution;
+                    const v3 = (i + 1) * resolution * 2 + resolution + j;
+                    const v4 = (i + 1) * resolution * 2 + resolution + (j + 1) % resolution;
+                    
+                    faces.push([v1, v4, v2]);
+                    faces.push([v1, v3, v4]);
+                }
+            }
             
-            faces.push([v1, v2, v4]);
-            faces.push([v1, v4, v3]);
-        }
-    }
-    
-    // Generate faces - Inner surface
-    for (let i = 0; i < zSegments; i++) {
-        for (let j = 0; j < resolution; j++) {
-            const v1 = i * resolution * 2 + resolution + j;
-            const v2 = i * resolution * 2 + resolution + (j + 1) % resolution;
-            const v3 = (i + 1) * resolution * 2 + resolution + j;
-            const v4 = (i + 1) * resolution * 2 + resolution + (j + 1) % resolution;
+            // Bottom end cap (ring)
+            for (let j = 0; j < resolution; j++) {
+                const v1 = j;
+                const v2 = (j + 1) % resolution;
+                const v3 = resolution + j;
+                const v4 = resolution + (j + 1) % resolution;
+                
+                faces.push([v1, v3, v2]);
+                faces.push([v2, v3, v4]);
+            }
             
-            faces.push([v1, v4, v2]);
-            faces.push([v1, v3, v4]);
+            // Top end cap (ring)
+            const baseIdx = zSegments * resolution * 2;
+            for (let j = 0; j < resolution; j++) {
+                const v1 = baseIdx + j;
+                const v2 = baseIdx + (j + 1) % resolution;
+                const v3 = baseIdx + resolution + j;
+                const v4 = baseIdx + resolution + (j + 1) % resolution;
+                
+                faces.push([v1, v2, v3]);
+                faces.push([v2, v4, v3]);
+            }
+            
+            return createBinarySTL(vertices, faces);
         }
-    }
-    
-    // Bottom end cap (ring)
-    for (let j = 0; j < resolution; j++) {
-        const v1 = j;
-        const v2 = (j + 1) % resolution;
-        const v3 = resolution + j;
-        const v4 = resolution + (j + 1) % resolution;
         
-        faces.push([v1, v3, v2]);
-        faces.push([v2, v3, v4]);
-    }
-    
-    // Top end cap (ring)
-    const baseIdx = zSegments * resolution * 2;
-    for (let j = 0; j < resolution; j++) {
-        const v1 = baseIdx + j;
-        const v2 = baseIdx + (j + 1) % resolution;
-        const v3 = baseIdx + resolution + j;
-        const v4 = baseIdx + resolution + (j + 1) % resolution;
-        
-        faces.push([v1, v2, v3]);
-        faces.push([v2, v4, v3]);
-    }
-    
-    return createBinarySTL(vertices, faces);
-}
-
-
-
         function createBinarySTL(vertices, faces) {
             const buffer = new ArrayBuffer(84 + faces.length * 50);
             const view = new DataView(buffer);
