@@ -240,7 +240,7 @@
             color: white;
             font-size: 50px;
             cursor: pointer;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.5);
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -249,22 +249,19 @@
             justify-content: center;
             transition: all 0.3s ease;
             user-select: none;
-            z-index: 1001;
-            border: 2px solid rgba(255, 255, 255, 0.3);
         }
 
         .lightbox-nav:hover {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
             transform: translateY(-50%) scale(1.1);
-            border-color: rgba(255, 255, 255, 0.6);
         }
 
         .lightbox-prev {
-            left: 10px;
+            left: 20px;
         }
 
         .lightbox-next {
-            right: 10px;
+            right: 20px;
         }
 
         /* Responsive */
@@ -283,56 +280,15 @@
             }
 
             .lightbox-nav {
-                width: 55px;
-                height: 55px;
-                font-size: 40px;
-                background: rgba(0, 0, 0, 0.8);
-                border: 3px solid rgba(255, 255, 255, 0.5);
-            }
-
-            .lightbox-prev {
-                left: 5px;
-            }
-
-            .lightbox-next {
-                right: 5px;
-            }
-
-            .lightbox-close {
-                width: 45px;
-                height: 45px;
-                font-size: 35px;
-                top: 10px;
-                right: 10px;
-                border: 2px solid rgba(255, 255, 255, 0.3);
-            }
-        }
-
-        /* Ekstra küçük ekranlar için (dikey telefon) */
-        @media (max-width: 480px) and (orientation: portrait) {
-            .lightbox-nav {
                 width: 50px;
                 height: 50px;
                 font-size: 35px;
-                background: rgba(0, 0, 0, 0.85);
-                border: 3px solid rgba(255, 255, 255, 0.6);
             }
 
-            .lightbox-prev {
-                left: 3px;
-            }
-
-            .lightbox-next {
-                right: 3px;
-            }
-
-            .lightbox-image {
-                max-height: 70vh;
-            }
-
-            .lightbox-info {
-                font-size: 1em;
-                margin-top: 15px;
+            .lightbox-close {
+                width: 40px;
+                height: 40px;
+                font-size: 30px;
             }
         }
     </style>
