@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Parametrik Boru Tasarımcısı v2.3 (Sağ Diş / Standart)</title>
+    <title>3D Parametrik Boru Tasarımcısı v2.2 (Manifold Fixed)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <style>
@@ -196,7 +196,7 @@
 
     <button onclick="exportSTL()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        STL İndir (Sağ Diş)
+        STL İndir (Onarılmış)
     </button>
 </div>
 
@@ -329,10 +329,7 @@
             } else {
                 // Dişi Vida
                 const localY = y - (params.totalLen - params.threadLen);
-                
-                // GÜNCELLEME: Vida Yönü (Right Hand Thread için işaret + yapıldı)
-                const phase = (localY / params.pitch) + (angle / (Math.PI * 2));
-                
+                const phase = (localY / params.pitch) - (angle / (Math.PI * 2));
                 let wave = (phase % 1);
                 if(wave < 0) wave += 1;
                 wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
@@ -342,9 +339,7 @@
             // Dış Yüzey
             if (y < params.threadLen) {
                 // Erkek Vida
-                // GÜNCELLEME: Vida Yönü (Right Hand Thread için işaret + yapıldı)
-                const phase = (y / params.pitch) + (angle / (Math.PI * 2));
-                
+                const phase = (y / params.pitch) - (angle / (Math.PI * 2));
                 let wave = (phase % 1);
                 if(wave < 0) wave += 1;
                 wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
@@ -374,9 +369,15 @@
 
         // --- MANIFOLD FIX ---
         // 1. Vertices Generation:
+        // Her satırda (Out, In) çiftleri saklanır.
+        // Dikiş yeri için (360 derece = 0 derece) vertex TEKRAR EDİLMEZ.
+        // İndekslerde MODULO işlemi kullanılır.
+        // Her bir i (row) için: rSegs adet (Out, In) çifti.
+        
         for (let i = 0; i < yLevels.length; i++) {
             const y = yLevels[i];
             for (let j = 0; j < rSegs; j++) {
+                // j = 0..rSegs-1. (360 dereceyi tamamlayan son vertex yok)
                 const angle = (j / rSegs) * Math.PI * 2;
                 
                 // Out Vertex
@@ -390,7 +391,7 @@
         }
 
         // 2. Indices Generation (Watertight)
-        const stride = 2 * rSegs; 
+        const stride = 2 * rSegs; // Bir satırdaki toplam vertex sayısı (Out + In)
         
         for (let i = 0; i < yLevels.length - 1; i++) {
             const rowOffset = i * stride;
@@ -401,27 +402,34 @@
                 const nextJ = (j + 1) % rSegs; 
                 
                 // İndeksler
+                // Mevcut Satır
                 const vOut = rowOffset + 2 * j;
                 const vIn = rowOffset + 2 * j + 1;
                 const vOutNext = rowOffset + 2 * nextJ;
                 const vInNext = rowOffset + 2 * nextJ + 1;
                 
+                // Sonraki Satır
                 const nvOut = nextRowOffset + 2 * j;
                 const nvIn = nextRowOffset + 2 * j + 1;
                 const nvOutNext = nextRowOffset + 2 * nextJ;
                 const nvInNext = nextRowOffset + 2 * nextJ + 1;
 
                 // --- Dış Kabuk (Outer Shell) ---
+                // Saat yönünün tersi (CCW) -> Normaller dışarı
                 indices.push(vOut, vOutNext, nvOut);
                 indices.push(vOutNext, nvOutNext, nvOut);
 
                 // --- İç Kabuk (Inner Shell) ---
+                // STL için normaller malzeme içinden BOŞLUĞA bakmalı.
+                // Yani dış kabuğa göre TERS (CW) örülmeli.
+                // vIn, nvIn, vInNext (Saat yönü)
                 indices.push(vIn, nvIn, vInNext);
                 indices.push(vInNext, nvIn, nvInNext);
             }
         }
 
         // --- Alt Kapak (Bottom Rim) ---
+        // i=0. Normaller aşağı (-Y) bakmalı.
         for (let j = 0; j < rSegs; j++) {
             const nextJ = (j + 1) % rSegs;
             const vOut = 2 * j;
@@ -429,11 +437,13 @@
             const vOutNext = 2 * nextJ;
             const vInNext = 2 * nextJ + 1;
             
+            // vIn -> vOut -> vOutNext -> vInNext
             indices.push(vIn, vOut, vOutNext);
             indices.push(vIn, vOutNext, vInNext);
         }
 
         // --- Üst Kapak (Top Rim) ---
+        // i=son. Normaller yukarı (+Y) bakmalı.
         const lastRowOffset = (yLevels.length - 1) * stride;
         for (let j = 0; j < rSegs; j++) {
             const nextJ = (j + 1) % rSegs;
@@ -442,6 +452,7 @@
             const vOutNext = lastRowOffset + 2 * nextJ;
             const vInNext = lastRowOffset + 2 * nextJ + 1;
             
+            // vOut -> vIn -> vInNext -> vOutNext
             indices.push(vOut, vIn, vInNext);
             indices.push(vOut, vInNext, vOutNext);
         }
@@ -603,7 +614,7 @@
         const blob = new Blob([buffer], {type: 'application/octet-stream'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = `Pipe_RightHand_ID${params.id}_Dip${params.minWall}.stl`;
+        link.download = `Pipe_ID${params.id}_Dip${params.minWall}_Watertight.stl`;
         link.click();
     }
 
