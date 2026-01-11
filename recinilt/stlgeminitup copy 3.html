@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Modüler 3D Tüp Tasarımcısı Pro (Fix: Vida Yönü & Genlik)</title>
+    <title>Modüler 3D Tüp Tasarımcısı Pro (Kayıt Özellikli)</title>
     <!-- Three.js Kütüphaneleri -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
@@ -298,10 +298,6 @@
             background: var(--accent);
             color: white;
             font-weight: bold;
-        }
-        
-        .ref-option.active:hover {
-            background: var(--accent-hover);
         }
         
         .ref-option:hover:not(.active) {
@@ -1193,14 +1189,10 @@
             let baseR_out = t.solid_or + (b.solid_or - t.solid_or) * ratio;
 
             if (seg.type !== 'plain') {
-                // Vida Yönü: Sağ (Right-Hand) -> Eksi (-)
+                // Vida Yönü Değişikliği: 
+                // Eksi işareti (-) = Sağ Yönlü (Sağa çevirince sıkışan)
                 const phase = (y / seg.pitch) - (angle / (Math.PI * 2));
-                
-                // BUG FIX: JS'de negatif sayıların modulosu negatiftir. 
-                // Bunu 0..1 arasına zorlamamız lazım.
-                let fract = (phase % 1 + 1) % 1; 
-                
-                let wave = Math.abs(fract * 2 - 1); 
+                let wave = Math.abs((phase % 1) * 2 - 1); 
                 
                 const threadH = seg.depth;
 
