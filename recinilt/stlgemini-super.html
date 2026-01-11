@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Parametrik Boru Tasarımcısı v2.4 (Mobil Uyumlu)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --accent: #0078d4;
+            --accent-hover: #0063b1;
+            --input-bg: #2d2d2d;
+            --border: #333;
+            --success: #107c10;
+        }
+
+        body { margin: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; display: flex; height: 100vh; }
+        
+        /* Sol Panel (Masaüstünde Sol, Mobilde Alt) */
+        #sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+            box-shadow: 4px 0 12px rgba(0,0,0,0.3);
+            z-index: 10;
+            flex-shrink: 0;
+            /* Scrollbar styling */
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent) var(--panel-bg);
+        }
+
+        h2 { margin: 0 0 10px 0; font-size: 1.1rem; color: #fff; border-bottom: 2px solid var(--accent); padding-bottom: 8px; }
+        h3 { margin: 15px 0 5px 0; font-size: 0.85rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+
+        .param-group { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+
+        .param-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .param-row:last-child { margin-bottom: 0; }
+        
+        label { font-size: 0.85rem; flex: 1; color: #ccc; }
+        
+        input[type="number"] {
+            width: 70px;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 6px 8px; /* Mobilde dokunmak kolay olsun diye padding arttı */
+            border-radius: 4px;
+            text-align: right;
+            font-family: monospace;
+            font-size: 0.95rem; /* iOS zoom engellemek için biraz büyütüldü */
+        }
+        input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+        input.error { border-color: #ff4d4d; background: #3a1a1a; }
+
+        .result-box {
+            background: rgba(0, 120, 212, 0.15);
+            border-left: 4px solid var(--accent);
+            padding: 10px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 5px;
+        }
+        .result-row { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 4px; }
+        .result-val { font-weight: bold; color: #61dafb; font-family: monospace; }
+        .info-icon { cursor: help; color: #888; font-size: 0.8rem; margin-left: 5px; }
+
+        button {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 1rem;
+            min-height: 48px; /* Mobil tap hedefi */
+        }
+        button:hover { background: #0c5d0c; transform: translateY(-1px); }
+        button:active { transform: translateY(0); }
+
+        /* Sağ Alan (Masaüstünde Sağ, Mobilde Üst) */
+        #viewport { flex: 1; display: flex; flex-direction: column; position: relative; min-width: 0; }
+        #canvas-3d { flex: 1; position: relative; background: radial-gradient(circle at center, #2a2a2a 0%, #111 100%); }
+        #canvas-2d-container { 
+            height: 250px; 
+            background: #161616; 
+            border-top: 1px solid var(--border);
+            position: relative;
+            flex-shrink: 0;
+            transition: height 0.3s;
+        }
+        canvas { display: block; width: 100%; height: 100%; outline: none; }
+
+        .overlay-badge {
+            position: absolute;
+            top: 10px; left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #eee;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .legend {
+            position: absolute;
+            bottom: 10px; right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid #333;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .color-box { width: 10px; height: 10px; border-radius: 2px; }
+
+        /* --- MOBİL UYUMLULUK (Responsive) --- */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column; /* Alt alta diz */
+            }
+
+            #sidebar {
+                width: 100%; /* Tam genişlik */
+                height: 45%; /* Ekranın %45'i kontrollere ayrılsın */
+                border-right: none;
+                border-top: 2px solid var(--border);
+                box-shadow: 0 -4px 12px rgba(0,0,0,0.3);
+                order: 2; /* Sidebar altta görünsün */
+                padding: 15px;
+                box-sizing: border-box;
+            }
+
+            #viewport {
+                width: 100%;
+                height: 55%; /* Ekranın %55'i görsele ayrılsın */
+                order: 1; /* Görsel üstte görünsün */
+            }
+
+            #canvas-2d-container {
+                height: 120px; /* Mobilde 2D alanı biraz küçültelim */
+            }
+            
+            .overlay-badge {
+                font-size: 0.65rem;
+                padding: 2px 6px;
+            }
+            
+            h2 { font-size: 1rem; }
+            button { margin-bottom: 20px; } /* En altta boşluk */
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h2>🛠️ 3D Boru Configurator</h2>
+
+    <div class="result-box">
+        <div class="result-row">
+            <span>Hesaplanan Dış Çap:</span>
+            <span class="result-val" id="disp_od">-- mm</span>
+        </div>
+        <div class="result-row">
+            <span>Toplam Et Kalınlığı:</span>
+            <span class="result-val" id="disp_body_wall">-- mm</span>
+        </div>
+        <div style="margin-top:5px; font-size: 0.75rem; color:#aaa; line-height:1.2;">
+            Dış çap; dişi parçanın da erkek parça kadar et kalınlığına sahip olmasını sağlayacak şekilde otomatik hesaplanır.
+        </div>
+    </div>
+
+    <h3>📏 Temel Ölçüler</h3>
+    <div class="param-group">
+        <div class="param-row">
+            <label title="Borunun içindeki boşluğun çapı">İç Çap (mm)</label>
+            <input type="number" id="inp_id" value="20.0" step="0.5" min="1">
+        </div>
+        <div class="param-row">
+            <label title="Diş dibinde kalan net malzeme kalınlığı">Dip Et Kalınlığı (mm)</label>
+            <input type="number" id="inp_minWall" value="2.0" step="0.1" min="0.4">
+        </div>
+        <div class="param-row">
+            <label>Toplam Uzunluk (mm)</label>
+            <input type="number" id="inp_len" value="80" step="1" min="10">
+        </div>
+    </div>
+
+    <h3>🔩 Vida / Diş Ayarları</h3>
+    <div class="param-group">
+        <div class="param-row">
+            <label>Diş Derinliği (mm)</label>
+            <input type="number" id="inp_depth" value="0.8" step="0.1" min="0.1">
+        </div>
+        <div class="param-row">
+            <label>Vida Adımı (Pitch)</label>
+            <input type="number" id="inp_pitch" value="2.0" step="0.1" min="0.5">
+        </div>
+        <div class="param-row">
+            <label>Vida Uzunluğu (mm)</label>
+            <input type="number" id="inp_threadLen" value="15" step="1" min="5">
+        </div>
+        <div class="param-row">
+            <label title="Erkek ve dişi parça arasındaki radyal boşluk">Tolerans (mm)</label>
+            <input type="number" id="inp_tol" value="0.4" step="0.05" min="0">
+        </div>
+    </div>
+
+    <h3>⚙️ Kalite</h3>
+    <div class="param-group">
+        <div class="param-row">
+            <label>Çözünürlük (Seg)</label>
+            <input type="number" id="inp_res" value="100" step="10" min="30" max="360">
+        </div>
+    </div>
+
+    <button onclick="exportSTL()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        STL İndir (Sağ Diş)
+    </button>
+</div>
+
+<div id="viewport">
+    <div id="canvas-3d">
+        <div class="overlay-badge">3D Önizleme (Döndür/Taşı)</div>
+    </div>
+    <div id="canvas-2d-container">
+        <div class="overlay-badge">Teknik Kesit (Erkek-Dişi Birleşimi)</div>
+        <canvas id="canvas-2d"></canvas>
+        <div class="legend">
+            <div class="legend-item"><div class="color-box" style="background:#4488ff"></div><span>Erkek</span></div>
+            <div class="legend-item"><div class="color-box" style="background:#ff4444"></div><span>Dişi</span></div>
+            <div class="legend-item"><div class="color-box" style="background:#ffff00"></div><span>Tol.</span></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- THREE.JS KURULUMU ---
+    let scene, camera, renderer, mesh, controls;
+    let material;
+    
+    // Parametre Saklama
+    const params = {};
+
+    function init3D() {
+        const container = document.getElementById('canvas-3d');
+        scene = new THREE.Scene();
+        // Hafif ızgara zemini
+        const gridHelper = new THREE.GridHelper(200, 50, 0x444444, 0x222222);
+        gridHelper.position.y = -40; 
+        scene.add(gridHelper);
+
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(50, 40, 70);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Işıklandırma
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        dirLight.position.set(10, 20, 10);
+        scene.add(dirLight);
+
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.3);
+        backLight.position.set(-10, -5, -10);
+        scene.add(backLight);
+
+        material = new THREE.MeshStandardMaterial({
+            color: 0x0078d4,
+            roughness: 0.4,
+            metalness: 0.3,
+            flatShading: false,
+            side: THREE.DoubleSide
+        });
+
+        // Event Listeners
+        window.addEventListener('resize', onResize);
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                updateParams();
+            });
+        });
+
+        updateParams();
+        animate();
+    }
+
+    // Güvenli Float Dönüştürücü (Sıfır Bölme ve NaN Koruması)
+    function getSafeFloat(id, def) {
+        const el = document.getElementById(id);
+        if (!el) return def;
+        
+        let val = parseFloat(el.value);
+        
+        // Eğer kullanıcı sildiyse veya geçersizse varsayılanı döndür
+        if (isNaN(val) || val === "" || val < 0) return def;
+        
+        // Çok küçük değerleri (0 gibi) engelle
+        if (val === 0) return 0.001;
+        
+        return val;
+    }
+
+    function updateParams() {
+        params.id = getSafeFloat('inp_id', 20);
+        params.minWall = getSafeFloat('inp_minWall', 2);
+        params.totalLen = getSafeFloat('inp_len', 80);
+        params.threadDepth = getSafeFloat('inp_depth', 0.8);
+        params.pitch = getSafeFloat('inp_pitch', 2.0);
+        params.threadLen = getSafeFloat('inp_threadLen', 15);
+        params.tol = getSafeFloat('inp_tol', 0.4);
+        
+        params.res = parseInt(document.getElementById('inp_res').value) || 100;
+        if (params.res < 30) params.res = 30;
+
+        // --- GEOMETRİK HESAPLAMA (STACK-UP) ---
+        params.r0 = params.id / 2;
+        params.r1 = params.r0 + params.minWall; // Erkek Diş Dibi
+        params.r2 = params.r1 + params.threadDepth; // Erkek Diş Tepesi
+        params.r3 = params.r1 + params.tol; // Dişi Diş Tepesi (Dar yer)
+        params.r4 = params.r2 + params.tol; // Dişi Diş Dibi (Geniş yer)
+        params.r5 = params.r4 + params.minWall; // Dış Çap
+        
+        params.od = params.r5 * 2;
+        params.bodyWallThickness = params.r5 - params.r0;
+
+        document.getElementById('disp_od').innerText = params.od.toFixed(2) + " mm";
+        document.getElementById('disp_body_wall').innerText = params.bodyWallThickness.toFixed(2) + " mm";
+
+        generateGeometry();
+        drawCrossSection();
+    }
+
+    function getRadius(y, angle, isInnerSurface) {
+        if (isInnerSurface) {
+            // İç Yüzey
+            if (y < params.totalLen - params.threadLen) {
+                return params.r0; // Düz iç
+            } else {
+                // Dişi Vida
+                const localY = y - (params.totalLen - params.threadLen);
+                
+                // GÜNCELLEME: Vida Yönü (Right Hand Thread için işaret + yapıldı)
+                const phase = (localY / params.pitch) + (angle / (Math.PI * 2));
+                
+                let wave = (phase % 1);
+                if(wave < 0) wave += 1;
+                wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
+                return params.r3 + (params.r4 - params.r3) * wave;
+            }
+        } else {
+            // Dış Yüzey
+            if (y < params.threadLen) {
+                // Erkek Vida
+                // GÜNCELLEME: Vida Yönü (Right Hand Thread için işaret + yapıldı)
+                const phase = (y / params.pitch) + (angle / (Math.PI * 2));
+                
+                let wave = (phase % 1);
+                if(wave < 0) wave += 1;
+                wave = wave < 0.5 ? wave * 2 : (1 - wave) * 2;
+                return params.r1 + (params.r2 - params.r1) * wave;
+            } else {
+                return params.r5; // Düz dış
+            }
+        }
+    }
+
+    function generateGeometry() {
+        if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+
+        const rSegs = params.res;
+        const vertices = [];
+        const indices = [];
+
+        // Y Levels calculation
+        let yLevels = [];
+        for(let i=0; i<=params.threadLen; i+=0.2) yLevels.push(i);
+        for(let i=params.threadLen+0.5; i<params.totalLen-params.threadLen; i+=1) yLevels.push(i);
+        for(let i=params.totalLen-params.threadLen; i<=params.totalLen; i+=0.2) yLevels.push(i);
+        yLevels.push(params.threadLen); 
+        yLevels.push(params.totalLen - params.threadLen);
+        yLevels.push(params.totalLen);
+        yLevels = [...new Set(yLevels)].sort((a,b)=>a-b);
+
+        // --- MANIFOLD FIX ---
+        // 1. Vertices Generation:
+        for (let i = 0; i < yLevels.length; i++) {
+            const y = yLevels[i];
+            for (let j = 0; j < rSegs; j++) {
+                const angle = (j / rSegs) * Math.PI * 2;
+                
+                // Out Vertex
+                const rOut = getRadius(y, angle, false);
+                vertices.push(rOut * Math.cos(angle), y, rOut * Math.sin(angle));
+                
+                // In Vertex
+                const rIn = getRadius(y, angle, true);
+                vertices.push(rIn * Math.cos(angle), y, rIn * Math.sin(angle));
+            }
+        }
+
+        // 2. Indices Generation (Watertight)
+        const stride = 2 * rSegs; 
+        
+        for (let i = 0; i < yLevels.length - 1; i++) {
+            const rowOffset = i * stride;
+            const nextRowOffset = (i + 1) * stride;
+
+            for (let j = 0; j < rSegs; j++) {
+                // Modulo ile dikişsiz geçiş
+                const nextJ = (j + 1) % rSegs; 
+                
+                // İndeksler
+                const vOut = rowOffset + 2 * j;
+                const vIn = rowOffset + 2 * j + 1;
+                const vOutNext = rowOffset + 2 * nextJ;
+                const vInNext = rowOffset + 2 * nextJ + 1;
+                
+                const nvOut = nextRowOffset + 2 * j;
+                const nvIn = nextRowOffset + 2 * j + 1;
+                const nvOutNext = nextRowOffset + 2 * nextJ;
+                const nvInNext = nextRowOffset + 2 * nextJ + 1;
+
+                // --- Dış Kabuk (Outer Shell) ---
+                indices.push(vOut, vOutNext, nvOut);
+                indices.push(vOutNext, nvOutNext, nvOut);
+
+                // --- İç Kabuk (Inner Shell) ---
+                indices.push(vIn, nvIn, vInNext);
+                indices.push(vInNext, nvIn, nvInNext);
+            }
+        }
+
+        // --- Alt Kapak (Bottom Rim) ---
+        for (let j = 0; j < rSegs; j++) {
+            const nextJ = (j + 1) % rSegs;
+            const vOut = 2 * j;
+            const vIn = 2 * j + 1;
+            const vOutNext = 2 * nextJ;
+            const vInNext = 2 * nextJ + 1;
+            
+            indices.push(vIn, vOut, vOutNext);
+            indices.push(vIn, vOutNext, vInNext);
+        }
+
+        // --- Üst Kapak (Top Rim) ---
+        const lastRowOffset = (yLevels.length - 1) * stride;
+        for (let j = 0; j < rSegs; j++) {
+            const nextJ = (j + 1) % rSegs;
+            const vOut = lastRowOffset + 2 * j;
+            const vIn = lastRowOffset + 2 * j + 1;
+            const vOutNext = lastRowOffset + 2 * nextJ;
+            const vInNext = lastRowOffset + 2 * nextJ + 1;
+            
+            indices.push(vOut, vIn, vInNext);
+            indices.push(vOut, vInNext, vOutNext);
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geo.setIndex(indices);
+        geo.computeVertexNormals();
+
+        mesh = new THREE.Mesh(geo, material);
+        mesh.position.y = -params.totalLen / 2;
+        scene.add(mesh);
+    }
+
+    // --- 2D KESİT ÇİZİMİ ---
+    function drawCrossSection() {
+        const cvs = document.getElementById('canvas-2d');
+        const ctx = cvs.getContext('2d');
+        const w = cvs.parentElement.clientWidth;
+        const h = cvs.parentElement.clientHeight;
+        cvs.width = w; cvs.height = h;
+
+        // Arka Plan
+        ctx.fillStyle = "#161616";
+        ctx.fillRect(0,0,w,h);
+
+        const margin = 30;
+        const availH = h - 2*margin;
+        const availW = w - 2*margin;
+        
+        // Ölçeklendirme
+        const scaleY = availH / params.totalLen;
+        const scaleX = availW / (params.od * 2.2); 
+        const scale = Math.min(scaleX, scaleY);
+
+        const centerX = w/2;
+        const bottomY = h - margin;
+
+        const step = 0.2;
+        
+        // --- ERKEK PARÇA (Mavi) ---
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(68, 136, 255, 0.3)";
+        ctx.strokeStyle = "#4488ff";
+        ctx.lineWidth = 2;
+        
+        // İç hat
+        ctx.moveTo(centerX + params.r0*scale, bottomY);
+        ctx.lineTo(centerX + params.r0*scale, bottomY - params.threadLen*scale - 20);
+        
+        // Dış hat (Dişli)
+        for(let y=params.threadLen + 5; y>=0; y-=step) {
+            let r;
+            if (y > params.threadLen) r = params.r5;
+            else {
+                const phase = (y / params.pitch); 
+                let wave = Math.abs((phase % 1) * 2 - 1);
+                if(wave > 0.8) wave=1; if(wave < 0.2) wave=0;
+                r = params.r1 + (params.r2 - params.r1) * wave;
+            }
+            ctx.lineTo(centerX + r*scale, bottomY - y*scale);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // --- DİŞİ PARÇA (Kırmızı - Üstten inen) ---
+        ctx.beginPath();
+        ctx.fillStyle = "rgba(255, 68, 68, 0.3)";
+        ctx.strokeStyle = "#ff4444";
+        
+        const topVisY = params.threadLen + 15; 
+        ctx.moveTo(centerX + params.r5*scale, bottomY - topVisY*scale);
+        ctx.lineTo(centerX + params.r5*scale, bottomY); 
+        
+        for(let y=0; y<=topVisY; y+=step) {
+            let r;
+            if (y > params.threadLen) r = params.r0;
+            else {
+                const phase = (y / params.pitch);
+                let wave = Math.abs((phase % 1) * 2 - 1);
+                if(wave > 0.8) wave=1; if(wave < 0.2) wave=0;
+                r = params.r3 + (params.r4 - params.r3) * wave;
+            }
+            ctx.lineTo(centerX + r*scale, bottomY - y*scale);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        // Etiketler
+        ctx.fillStyle = "#fff";
+        ctx.font = "12px monospace";
+        ctx.textAlign = "left";
+        
+        const xOD = centerX + params.r5*scale + 10;
+        ctx.fillText(`OD: ${params.od.toFixed(1)}mm`, xOD, bottomY - params.threadLen*scale/2);
+        
+        ctx.textAlign = "right";
+        const xID = centerX + params.r0*scale - 10;
+        ctx.fillText(`ID: ${params.id.toFixed(1)}mm`, xID, bottomY - params.threadLen*scale/2);
+    }
+
+    // --- STL EXPORT ---
+    function exportSTL() {
+        if(!mesh) return;
+        
+        const geom = mesh.geometry;
+        const pos = geom.attributes.position.array;
+        const indices = geom.index.array;
+        const triCount = indices.length / 3;
+        
+        const bufferLen = 84 + (triCount * 50);
+        const buffer = new ArrayBuffer(bufferLen);
+        const view = new DataView(buffer);
+        
+        view.setUint32(80, triCount, true);
+        
+        let offset = 84;
+        
+        for (let i = 0; i < indices.length; i+=3) {
+            const idx1 = indices[i];
+            const idx2 = indices[i+1];
+            const idx3 = indices[i+2];
+            
+            const ax = pos[idx1*3], ay = pos[idx1*3+1], az = pos[idx1*3+2];
+            const bx = pos[idx2*3], by = pos[idx2*3+1], bz = pos[idx2*3+2];
+            const cx = pos[idx3*3], cy = pos[idx3*3+1], cz = pos[idx3*3+2];
+            
+            // Normal
+            const ux = bx - ax, uy = by - ay, uz = bz - az;
+            const vx = cx - ax, vy = cy - ay, vz = cz - az;
+            
+            let nx = uy * vz - uz * vy;
+            let ny = uz * vx - ux * vz;
+            let nz = ux * vy - uy * vx;
+            const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+            if (len > 0) { nx/=len; ny/=len; nz/=len; }
+            
+            view.setFloat32(offset, nx, true); offset+=4;
+            view.setFloat32(offset, ny, true); offset+=4;
+            view.setFloat32(offset, nz, true); offset+=4;
+            
+            view.setFloat32(offset, ax, true); offset+=4;
+            view.setFloat32(offset, ay, true); offset+=4;
+            view.setFloat32(offset, az, true); offset+=4;
+            
+            view.setFloat32(offset, bx, true); offset+=4;
+            view.setFloat32(offset, by, true); offset+=4;
+            view.setFloat32(offset, bz, true); offset+=4;
+            
+            view.setFloat32(offset, cx, true); offset+=4;
+            view.setFloat32(offset, cy, true); offset+=4;
+            view.setFloat32(offset, cz, true); offset+=4;
+            
+            view.setUint16(offset, 0, true); offset+=2;
+        }
+        
+        const blob = new Blob([buffer], {type: 'application/octet-stream'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Pipe_RightHand_ID${params.id}_Dip${params.minWall}.stl`;
+        link.click();
+    }
+
+    function onResize() {
+        const c3d = document.getElementById('canvas-3d');
+        if(!c3d) return;
+        camera.aspect = c3d.clientWidth / c3d.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(c3d.clientWidth, c3d.clientHeight);
+        drawCrossSection();
+    }
+    
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    
+    // Init çağrısı
+    init3D();
+
+</script>
+
+</body>
+</html>

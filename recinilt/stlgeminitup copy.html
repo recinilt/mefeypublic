@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Modüler 3D Tüp Tasarımcısı Pro</title>
+    <!-- Three.js Kütüphaneleri -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <!-- İkonlar için FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --panel-bg: #1e1e1e;
+            --input-bg: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --accent: #3498db;
+            --accent-hover: #2980b9;
+            --danger: #e74c3c;
+            --success: #27ae60;
+            --info-bg: #263238;
+            --info-text: #81d4fa;
+            --info-sub: #b0bec5;
+            --border: #333;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- Sol Panel (Ayarlar) --- */
+        #sidebar {
+            width: 460px; 
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            background: #252525;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        #sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid var(--border);
+            background: #252525;
+            display: flex;
+            gap: 10px;
+        }
+
+        /* --- Segment Kartları --- */
+        .segment-card {
+            background-color: #262626;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 15px;
+            padding: 10px;
+            position: relative;
+            border-left: 4px solid var(--accent);
+        }
+
+        .segment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333;
+            font-weight: bold;
+            color: var(--accent);
+        }
+
+        .segment-section {
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        
+        .segment-section.thread-settings {
+            background: rgba(52, 152, 219, 0.08);
+            border: 1px solid rgba(52, 152, 219, 0.2);
+        }
+
+        .section-title {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- İstatistik Paneli --- */
+        .stats-container {
+            background-color: var(--info-bg);
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #eceff1;
+            border-left: 3px solid var(--info-text);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2px;
+        }
+        .stats-val { font-weight: bold; color: var(--info-text); }
+        
+        .match-info {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255,255,255,0.3);
+            color: var(--info-sub);
+        }
+        
+        .match-header {
+            color: #ffe082;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            border-bottom: 1px solid rgba(255,224,130, 0.3);
+            padding-bottom: 4px;
+        }
+
+        .match-detail {
+            background: rgba(0,0,0,0.2);
+            padding: 6px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+        
+        .match-detail-title {
+            font-size: 0.8rem;
+            color: #b0bec5;
+            margin-bottom: 3px;
+            text-decoration: underline;
+            text-decoration-style: dotted;
+        }
+
+        .calc-logic {
+            display: block;
+            font-size: 0.75rem;
+            color: #80cbc4;
+            font-style: italic;
+            margin-top: 2px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 2px;
+        }
+
+        .match-note {
+            font-size: 0.75rem;
+            color: #ffcc80;
+            margin-top: 4px;
+            font-style: italic;
+            padding: 5px;
+            background: rgba(255, 167, 38, 0.1);
+            border-radius: 3px;
+        }
+
+        /* --- Form Elemanları --- */
+        .control-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .control-full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 5px;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Custom Radio Buttons for Ref Selection */
+        .ref-selector {
+            display: flex;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .ref-option {
+            flex: 1;
+            text-align: center;
+            padding: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: var(--text-muted);
+        }
+        
+        .ref-option.active {
+            background: var(--accent);
+            color: white;
+            font-weight: bold;
+        }
+        
+        .ref-option:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* --- Butonlar --- */
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .btn-primary { background-color: var(--accent); flex: 1; }
+        .btn-primary:hover { background-color: var(--accent-hover); }
+        
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #c0392b; }
+
+        .btn-success { background-color: var(--success); width: 100%; margin-top: 10px; }
+        .btn-success:hover { background-color: #219150; }
+
+        .btn-sm { padding: 4px 8px; font-size: 0.8rem; }
+
+        /* --- Link (Kilit) İkonu --- */
+        .link-connector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 5px;
+            margin: -10px 0 5px 0;
+            position: relative;
+            z-index: 5;
+        }
+        
+        .link-btn {
+            background: #333;
+            border: 1px solid #555;
+            color: #888;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+        }
+        
+        .link-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* --- Sağ Panel (Görselleştirme) --- */
+        #main-view {
+            flex: 1;
+            position: relative;
+            background: #000;
+        }
+
+        #canvas-3d {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        #cross-section-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 30, 30, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            backdrop-filter: blur(5px);
+            max-width: 320px;
+        }
+
+        #canvas-2d {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            display: block;
+        }
+
+        .toggle-unit {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* --- Mobil Uyumluluk --- */
+        @media (max-width: 768px) {
+            body { flex-direction: column-reverse; }
+            #sidebar { width: 100%; height: 50%; border-right: none; border-top: 1px solid var(--border); }
+            #main-view { height: 50%; }
+            #cross-section-container { 
+                top: 10px; 
+                bottom: auto; 
+                right: 10px; 
+                transform: scale(0.8); 
+                transform-origin: top right; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <div id="sidebar-header">
+            <span style="font-size: 1.1rem; font-weight: bold;"><i class="fa-solid fa-layer-group"></i> Tüp Tasarımcısı Pro</span>
+            <div class="toggle-unit">
+                <span>mm</span>
+                <label class="switch">
+                    <input type="checkbox" id="unitToggle">
+                </label>
+                <span>inch</span>
+            </div>
+        </div>
+
+        <div id="sidebar-content">
+            <!-- Segmentler buraya JS ile eklenecek -->
+        </div>
+
+        <div id="sidebar-footer">
+            <button class="btn btn-primary" onclick="addSegment()"><i class="fa-solid fa-plus"></i> Bölüm Ekle</button>
+            <button class="btn btn-success" onclick="exportSTL()"><i class="fa-solid fa-download"></i> STL İndir (Tek Parça)</button>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW -->
+    <div id="main-view">
+        <canvas id="canvas-3d"></canvas>
+        <div id="cross-section-container">
+            <div style="font-size:0.8rem; margin-bottom:5px; color:#aaa;">2D Kesit (Radius)</div>
+            <canvas id="canvas-2d" width="300" height="200"></canvas>
+        </div>
+    </div>
+
+<script>
+    /** * GLOBAL DEĞİŞKENLER VE DURUM YÖNETİMİ */
+    let segments = []; // Tüm tüp parçalarını tutan dizi
+    let isInch = false; // Birim durumu
+    let segmentColors = [0x3498db, 0xe74c3c, 0xf1c40f, 0x9b59b6, 0x2ecc71, 0xe67e22]; 
+    
+    // Three.js Değişkenleri
+    let scene, camera, renderer, controls, meshGroup;
+
+    // Başlangıç
+    function initApp() {
+        initThreeJS();
+        addSegment(true);
+        updateAll();
+        
+        document.getElementById('unitToggle').addEventListener('change', (e) => {
+            isInch = e.target.checked;
+            updateStatsUI(); // Sadece istatistikleri güncelle
+        });
+    }
+
+    /**
+     * SEGMENT YÖNETİMİ
+     */
+    function createDefaultSegment(prevSegment = null) {
+        const id = segments.length;
+        
+        // Varsayılan Değerler
+        let defaults = {
+            height: 40,
+            
+            // Genel Tip
+            type: 'plain', // 'plain', 'male', 'female'
+
+            // --- TAVAN (TOP) AYARLARI ---
+            topRef: 'ir', // 'ir' (Inner Ref) veya 'or' (Outer Ref)
+            topVal: 10,   // Girilen değer (Ref'e göre iç veya dış yarıçap)
+            topWall: 2,   // Et kalınlığı
+            
+            // --- TABAN (BOTTOM) AYARLARI ---
+            bottomRef: 'ir',
+            bottomVal: 10,
+            bottomWall: 2,
+            
+            // --- VİDA AYARLARI (Eğer type != plain ise) ---
+            pitch: 2,
+            depth: 1,
+            tol: 0.2, // Tolerans
+            
+            // UI Durumu
+            locked: true, // Üsttekine bağlı mı?
+            color: segmentColors[id % segmentColors.length]
+        };
+
+        // Kopyalama Mantığı (Akıllı Kilit için Başlangıç Değerleri)
+        if (prevSegment) {
+            // Önceki segmentin TABANININ FİZİKSEL sınırlarını hesapla
+            const prevPhys = calculatePhysicalGeometry(prevSegment, 'bottom');
+            
+            // Yeni segmentin Tavanına aktar
+            // Varsayılan olarak öncekiyle aynı referans tipini koru
+            defaults.topRef = prevSegment.bottomRef; 
+            defaults.topWall = prevSegment.bottomWall;
+            defaults.bottomRef = prevSegment.bottomRef;
+            defaults.bottomWall = prevSegment.bottomWall;
+
+            // Eğer 'ir' referansı kullanıyorsak, önceki parçanın deliğine (Hole) denk gelmeli
+            if (defaults.topRef === 'ir') {
+                defaults.topVal = prevPhys.hole_ir; 
+                defaults.bottomVal = prevPhys.hole_ir;
+            } 
+            // Eğer 'or' referansı kullanıyorsak, önceki parçanın en dışına denk gelmeli
+            else {
+                defaults.topVal = prevPhys.max_or;
+                defaults.bottomVal = prevPhys.max_or;
+            }
+        }
+
+        return defaults;
+    }
+
+    function addSegment(isFirst = false) {
+        const prev = segments.length > 0 ? segments[segments.length - 1] : null;
+        const newSeg = createDefaultSegment(prev);
+        segments.push(newSeg);
+        renderSidebar();
+        updateAll();
+    }
+
+    function removeSegment(index) {
+        if (segments.length <= 1) {
+            alert("En az bir bölüm kalmalıdır.");
+            return;
+        }
+        segments.splice(index, 1);
+        renderSidebar();
+        updateAll();
+    }
+
+    /**
+     * --- KRİTİK HESAPLAMA MOTORU (ÇİFT YÖNLÜ) ---
+     * * Bu fonksiyon, kullanıcının seçimine (İç Ref / Dış Ref) ve 
+     * parça tipine (Düz/Erkek/Dişi) göre gerçek fiziksel sınırları hesaplar.
+     * * Dönüş Değeri:
+     * - solid_ir: Katı duvarın iç sınırı
+     * - solid_or: Katı duvarın dış sınırı
+     * - hole_ir:  Hava boşluğu sınırı (Dişi vida için diş tepesi, diğerleri için solid_ir)
+     * - max_or:   En dış sınır (Erkek vida için diş tepesi, diğerleri için solid_or)
+     */
+    function calculatePhysicalGeometry(seg, side) {
+        // Girdileri al
+        let refType, val, wall;
+        const type = seg.type;
+        const depth = seg.depth; // Diş derinliği
+
+        if (side === 'top') {
+            refType = seg.topRef;
+            val = seg.topVal;
+            wall = seg.topWall;
+        } else {
+            refType = seg.bottomRef;
+            val = seg.bottomVal;
+            wall = seg.bottomWall;
+        }
+
+        let solid_ir, solid_or;
+
+        // --- HESAPLAMA SENARYOLARI ---
+
+        if (type === 'plain') {
+            // Düz Parça
+            if (refType === 'ir') {
+                // İçten Dışa: Giriş = İç R
+                solid_ir = val;
+                solid_or = val + wall;
+            } else {
+                // Dıştan İçe: Giriş = Dış R
+                solid_or = val;
+                solid_ir = val - wall;
+            }
+        } 
+        
+        else if (type === 'male') {
+            // Erkek Vida (Dişler Dışarı Taşar)
+            // Yapı: Delik -> [Duvar] -> Diş Kökü -> Diş Tepesi
+            
+            if (refType === 'ir') {
+                // İçten Dışa: Giriş = İç R (Delik)
+                solid_ir = val;
+                solid_or = val + wall; // Bu "Diş Kökü" (Base OR) olur
+                // Dişler bunun üzerine eklenir
+            } else {
+                // Dıştan İçe: Giriş = En Dış R (Diş Tepesi)
+                // Kullanıcı dış sınırlamayı girmek istiyor (örn: deliğe sığacak)
+                const threadPeak = val; 
+                solid_or = threadPeak - depth; // Diş Kökü (Duvarın bittiği yer)
+                solid_ir = solid_or - wall;
+            }
+        } 
+        
+        else if (type === 'female') {
+            // Dişi Vida (Dişler İçeri Gömülür)
+            // Yapı: Delik (Diş Tepesi) -> Diş Kökü -> [Duvar] -> Dış Sınır
+            
+            if (refType === 'ir') {
+                // İçten Dışa: Giriş = En İç R (Delik / Diş Tepesi)
+                const threadPeak_ID = val; 
+                // Dişler duvarın içine doğru oyulur, yani "Katı Duvar" daha derinden başlar.
+                // Katı duvarın başladığı yer (Diş Kökü)
+                solid_ir = threadPeak_ID + depth; 
+                solid_or = solid_ir + wall;
+            } else {
+                // Dıştan İçe: Giriş = En Dış R
+                solid_or = val;
+                solid_ir = val - wall; // Bu "Diş Kökü" (Base IR) olur
+                // Dişler bunun içine doğru oyulur (Delik daha büyük görünür)
+            }
+        }
+
+        // --- SONUÇLARI TÜRET ---
+        
+        let hole_ir = solid_ir; // Efektif delik yarıçapı
+        let max_or = solid_or;  // Efektif dış yarıçap
+
+        if (type === 'male') {
+            max_or = solid_or + depth; // Diş tepesi dışarıda
+        } else if (type === 'female') {
+            hole_ir = solid_ir - depth; // Diş tepesi içeride (daha dar delik)
+        }
+
+        return {
+            solid_ir,
+            solid_or,
+            hole_ir,
+            max_or,
+            wall,
+            depth,
+            type
+        };
+    }
+
+    // Akıllı Kilit: Üstteki değişirse alttakini güncelle
+    function propogateChanges(changedIndex) {
+        for (let i = changedIndex + 1; i < segments.length; i++) {
+            const current = segments[i];
+            const prev = segments[i-1];
+            
+            if (current.locked) {
+                // Önceki segmentin tabanının FİZİKSEL özelliklerini al
+                const prevPhys = calculatePhysicalGeometry(prev, 'bottom');
+                
+                // Mevcut segmentin referans tipine göre input değerini güncelle
+                if (current.topRef === 'ir') {
+                    // Eğer ben "İç Referanslı" isem, üsttekinin deliğine uymalıyım
+                    current.topVal = prevPhys.hole_ir;
+                } else {
+                    // Eğer ben "Dış Referanslı" isem, üsttekinin dışına uymalıyım
+                    current.topVal = prevPhys.max_or;
+                }
+                
+                // Duvar kalınlığını da aktar (İsteğe bağlı, genelde iyi bir UX)
+                current.topWall = prevPhys.wall;
+            }
+        }
+    }
+
+    /**
+     * UI OLUŞTURMA (Sidebar)
+     */
+    function renderSidebar() {
+        const container = document.getElementById('sidebar-content');
+        container.innerHTML = '';
+
+        segments.forEach((seg, index) => {
+            // Bağlantı İkonu
+            if (index > 0) {
+                const linkDiv = document.createElement('div');
+                linkDiv.className = 'link-connector';
+                linkDiv.innerHTML = `
+                    <button class="link-btn ${seg.locked ? 'active' : ''}" onclick="toggleLock(${index})" title="Üst parçaya bağla">
+                        <i class="fa-solid ${seg.locked ? 'fa-link' : 'fa-link-slash'}"></i>
+                    </button>
+                `;
+                container.appendChild(linkDiv);
+            }
+
+            const card = document.createElement('div');
+            card.className = 'segment-card';
+            card.style.borderLeftColor = '#' + seg.color.toString(16).padStart(6,'0');
+
+            // --- HEADER ---
+            let headerHTML = `
+                <div class="segment-header">
+                    <span>Bölüm ${index + 1}</span>
+                    ${index > 0 ? `<button class="btn btn-danger btn-sm" onclick="removeSegment(${index})"><i class="fa-solid fa-trash"></i></button>` : ''}
+                </div>
+            `;
+
+            // --- TİP SEÇİMİ (EN BAŞTA) ---
+            let typeHTML = `
+                <div class="segment-section">
+                    <div class="section-title">Parça Tipi</div>
+                    <select onchange="updateParam(${index}, 'type', this.value)" style="background:#444; color:#fff; font-weight:bold;">
+                        <option value="plain" ${seg.type === 'plain' ? 'selected' : ''}>Düz Boru</option>
+                        <option value="male" ${seg.type === 'male' ? 'selected' : ''}>Erkek Vida (Dışa Diş)</option>
+                        <option value="female" ${seg.type === 'female' ? 'selected' : ''}>Dişi Vida (İçe Diş)</option>
+                    </select>
+                </div>
+            `;
+
+            // Helper to generate Radius Input Block
+            const renderRadiusBlock = (side, title) => {
+                const ref = side === 'top' ? seg.topRef : seg.bottomRef;
+                const val = side === 'top' ? seg.topVal : seg.bottomVal;
+                const wall = side === 'top' ? seg.topWall : seg.bottomWall;
+                const isLocked = (side === 'top' && index > 0 && seg.locked);
+
+                // Dinamik Etiketler
+                let inputLabel = "Yarıçap";
+                if (ref === 'ir') {
+                    if (seg.type === 'male') inputLabel = "İç Yarıçap (Delik)";
+                    else if (seg.type === 'female') inputLabel = "En İç Yarıçap (Diş Tepesi)";
+                    else inputLabel = "İç Yarıçap";
+                } else {
+                    if (seg.type === 'male') inputLabel = "En Dış Yarıçap (Diş Tepesi)";
+                    else if (seg.type === 'female') inputLabel = "Dış Yarıçap (Dış Duvar)";
+                    else inputLabel = "Dış Yarıçap";
+                }
+
+                return `
+                <div class="segment-section">
+                    <div class="section-title">
+                        <span>${title}</span>
+                    </div>
+                    
+                    <!-- Referans Seçici -->
+                    <div class="ref-selector">
+                        <div class="ref-option ${ref === 'ir' ? 'active' : ''}" 
+                             onclick="updateParam(${index}, '${side}Ref', 'ir')">
+                             <i class="fa-solid fa-compress-arrows-alt"></i> İÇ Ref
+                        </div>
+                        <div class="ref-option ${ref === 'or' ? 'active' : ''}" 
+                             onclick="updateParam(${index}, '${side}Ref', 'or')">
+                             <i class="fa-solid fa-expand-arrows-alt"></i> DIŞ Ref
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div>
+                            <label>${inputLabel}</label>
+                            <input type="number" step="0.1" value="${val}" 
+                                onchange="updateParam(${index}, '${side}Val', this.value)" ${isLocked ? 'disabled' : ''}>
+                        </div>
+                        <div>
+                            <label>Et Kalınlığı</label>
+                            <input type="number" step="0.1" value="${wall}" 
+                                onchange="updateParam(${index}, '${side}Wall', this.value)" ${isLocked ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                </div>`;
+            };
+
+            let topHTML = renderRadiusBlock('top', '<i class="fa-solid fa-arrow-up"></i> Tavan (Giriş)');
+            
+            // --- YÜKSEKLİK ---
+            let heightHTML = `
+                <div class="segment-section">
+                     <div class="control-group">
+                        <div class="control-full">
+                            <label>Bölüm Yüksekliği</label>
+                            <input type="number" step="1" value="${seg.height}" onchange="updateParam(${index}, 'height', this.value)">
+                        </div>
+                     </div>
+                </div>
+            `;
+
+            // --- VİDA AYARLARI (Sadece vida ise görünür) ---
+            let threadHTML = '';
+            if (seg.type !== 'plain') {
+                threadHTML = `
+                    <div class="segment-section thread-settings">
+                        <div class="section-title"><i class="fa-solid fa-gear"></i> Vida Parametreleri</div>
+                        <div class="control-group">
+                            <div><label>Adım (Pitch)</label><input type="number" step="0.1" value="${seg.pitch}" onchange="updateParam(${index}, 'pitch', this.value)"></div>
+                            <div><label>Derinlik</label><input type="number" step="0.1" value="${seg.depth}" onchange="updateParam(${index}, 'depth', this.value)"></div>
+                            <div class="control-full"><label>Tolerans</label><input type="number" step="0.05" value="${seg.tol}" onchange="updateParam(${index}, 'tol', this.value)"></div>
+                        </div>
+                        <div style="font-size:0.75rem; color:#aaa; margin-top:4px;">
+                            * Diş derinliği ve tolerans, seçtiğiniz "Referans Yönü"ne göre otomatik olarak eklenir veya çıkartılır.
+                        </div>
+                    </div>
+                `;
+            }
+
+            let bottomHTML = renderRadiusBlock('bottom', '<i class="fa-solid fa-arrow-down"></i> Taban (Çıkış)');
+            let statsHTML = `<div id="stats-${index}" class="stats-container"></div>`;
+
+            card.innerHTML = headerHTML + typeHTML + topHTML + threadHTML + heightHTML + bottomHTML + statsHTML;
+            container.appendChild(card);
+        });
+
+        updateStatsUI();
+    }
+
+    function toggleLock(index) {
+        segments[index].locked = !segments[index].locked;
+        if (segments[index].locked) {
+            propogateChanges(index - 1);
+        }
+        renderSidebar(); 
+        updateAll();
+    }
+
+    function updateParam(index, key, value) {
+        let val = parseFloat(value);
+        if (['type', 'topRef', 'bottomRef', 'locked'].includes(key)) val = value;
+        
+        segments[index][key] = val;
+        
+        // Kritik: Eğer referans tipi değiştiyse, var olan değerin "fiziksel" anlamı değişir.
+        // Ancak kullanıcı deneyimi için, mevcut fiziksel boyutu korumaya çalışmak yerine
+        // sadece input modunu değiştiriyoruz, değer aynı kalıyor (kullanıcı düzeltsin).
+        // Aksi takdirde sonsuz döngü veya kafa karışıklığı olabilir.
+
+        propogateChanges(index);
+        
+        // Yapısal değişikliklerde sidebar yeniden çizilir
+        if (['locked', 'type', 'topRef', 'bottomRef'].includes(key)) {
+            renderSidebar();
+        } 
+        updateAll();
+    }
+
+    function updateAll() {
+        updateStatsUI();
+        draw2DCrossSection();
+        update3DGeometry();
+    }
+
+    // --- İSTATİSTİK ve HESAPLAMA EKRANI ---
+    function updateStatsUI() {
+        segments.forEach((seg, index) => {
+            const el = document.getElementById(`stats-${index}`);
+            if (!el) return;
+
+            // Fiziksel sınırları hesapla
+            const t = calculatePhysicalGeometry(seg, 'top');
+            const b = calculatePhysicalGeometry(seg, 'bottom');
+
+            // Formatlayıcı
+            const fmtD = (rad) => {
+                const dia = rad * 2;
+                if (isInch) return `R${(rad / 25.4).toFixed(3)}" (Ø${(dia / 25.4).toFixed(3)}")`;
+                return `R${rad.toFixed(2)} (Ø${dia.toFixed(2)})`;
+            };
+
+            // HTML İçeriği - Fiziksel Sonuçlar
+            let html = `
+                <div style="margin-bottom:5px; color:#fff; border-bottom:1px solid #555; padding-bottom:3px;">Fiziksel Sonuçlar (Hesaplanan)</div>
+                <div class="stats-row"><span class="stats-label">Tavan Delik (ID):</span> <span class="stats-val">${fmtD(t.hole_ir)}</span></div>
+                <div class="stats-row"><span class="stats-label">Tavan Dış (OD):</span> <span class="stats-val">${fmtD(t.max_or)}</span></div>
+                <div class="stats-row" style="opacity:0.7; font-size:0.75rem;"><span class="stats-label">Katı Duvar:</span> <span>${fmtD(t.solid_ir)} - ${fmtD(t.solid_or)}</span></div>
+                <hr style="border:0; border-top:1px solid #444; margin:4px 0;">
+                <div class="stats-row"><span class="stats-label">Taban Delik (ID):</span> <span class="stats-val">${fmtD(b.hole_ir)}</span></div>
+                <div class="stats-row"><span class="stats-label">Taban Dış (OD):</span> <span class="stats-val">${fmtD(b.max_or)}</span></div>
+            `;
+
+            // Uyumlu Parça Bilgisi
+            if (seg.type === 'male') {
+                // Bu bir ERKEK parça. 
+                // Karşı Parça: DİŞİ olmalı.
+                // Erkeğin "Maksimum Dış Çapı" (Diş Tepesi) t.max_or'dur.
+                
+                // Dişinin Deliği (Diş Tepesi) = Erkek Dış R - Diş Derinliği
+                // Ancak bu, toleranssız teorik geçmedir.
+                // Biz toleransı üretime bırakıyoruz, nominal konuşuyoruz.
+                
+                const matchIR = t.max_or - seg.depth; // Dişinin en dar yeri
+                
+                html += `
+                    <div class="match-info">
+                        <div class="match-header"><i class="fa-solid fa-link"></i> Uyumlu Dişi Parça</div>
+                        <div class="match-detail">
+                            <div class="match-detail-title">Gereken İÇ Yarıçap (Ref: İÇ):</div>
+                            <div style="color:#fff;">${fmtD(matchIR)}</div>
+                            <span class="calc-logic">Erkek Dış R (${fmtD(t.max_or)}) - Derinlik</span>
+                        </div>
+                    </div>`;
+            } else if (seg.type === 'female') {
+                // Bu bir DİŞİ parça.
+                // Karşı Parça: ERKEK olmalı.
+                // Dişinin "Deliği" (Diş Tepesi) t.hole_ir'dir.
+                
+                // Erkeğin Maksimum Dış Çapı = Dişi Delik + Diş Derinliği
+                const matchOR = t.hole_ir + seg.depth;
+                
+                html += `
+                    <div class="match-info">
+                        <div class="match-header"><i class="fa-solid fa-link"></i> Uyumlu Erkek Parça</div>
+                        <div class="match-detail">
+                            <div class="match-detail-title">Gereken DIŞ Yarıçap (Ref: DIŞ):</div>
+                            <div style="color:#fff;">${fmtD(matchOR)}</div>
+                            <span class="calc-logic">Dişi Delik (${fmtD(t.hole_ir)}) + Derinlik</span>
+                        </div>
+                    </div>`;
+            }
+
+            el.innerHTML = html;
+        });
+    }
+
+    /**
+     * 2D KESİT ÇİZİMİ
+     */
+    function draw2DCrossSection() {
+        const cvs = document.getElementById('canvas-2d');
+        const ctx = cvs.getContext('2d');
+        const w = cvs.width;
+        const h = cvs.height;
+        
+        ctx.clearRect(0, 0, w, h);
+        
+        // Ölçekleme için sınırları bul
+        let totalH = 0;
+        let maxR = 0;
+        segments.forEach(s => {
+            totalH += s.height;
+            const t = calculatePhysicalGeometry(s, 'top');
+            const b = calculatePhysicalGeometry(s, 'bottom');
+            if (t.max_or > maxR) maxR = t.max_or;
+            if (b.max_or > maxR) maxR = b.max_or;
+        });
+
+        const maxW = maxR * 2;
+        const padding = 20;
+        const scaleX = (w - padding * 2) / maxW;
+        const scaleY = (h - padding * 2) / totalH;
+        const scale = Math.min(scaleX, scaleY); 
+
+        const centerX = w / 2;
+        let currentY = padding;
+
+        segments.forEach(s => {
+            const t = calculatePhysicalGeometry(s, 'top');
+            const b = calculatePhysicalGeometry(s, 'bottom');
+            const segH = s.height * scale;
+
+            ctx.fillStyle = '#' + s.color.toString(16).padStart(6,'0');
+            ctx.globalAlpha = 0.6;
+            
+            // KATI DUVAR ÇİZİMİ (SOLID WALL)
+            // Sol Duvar
+            ctx.beginPath();
+            ctx.moveTo(centerX - t.solid_or * scale, currentY);
+            ctx.lineTo(centerX - t.solid_ir * scale, currentY);
+            ctx.lineTo(centerX - b.solid_ir * scale, currentY + segH);
+            ctx.lineTo(centerX - b.solid_or * scale, currentY + segH);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // Sağ Duvar
+            ctx.beginPath();
+            ctx.moveTo(centerX + t.solid_ir * scale, currentY);
+            ctx.lineTo(centerX + t.solid_or * scale, currentY);
+            ctx.lineTo(centerX + b.solid_or * scale, currentY + segH);
+            ctx.lineTo(centerX + b.solid_ir * scale, currentY + segH);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            // VİDA DİŞLERİ ÇİZİMİ
+            if (s.type !== 'plain') {
+                const depth = s.depth * scale;
+                // Erkek: Dişler Solid OR'dan dışarı
+                if (s.type === 'male') {
+                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.fillRect(centerX + t.solid_or * scale, currentY, depth, segH);
+                    ctx.fillRect(centerX - t.solid_or * scale - depth, currentY, depth, segH);
+                } 
+                // Dişi: Dişler Solid IR'den içeri (boşluğa doğru değil, duvarın içine oyulmuştu zaten. 
+                // Solid IR zaten diş dibi. Delik ise diş tepesi.
+                // Görsel olarak Solid IR (Diş Dibi) ile Hole IR (Diş Tepesi) arasını dolduralım.
+                else if (s.type === 'female') {
+                    ctx.fillStyle = 'rgba(0,0,0,0.3)'; // Koyu renk, oyuk hissi
+                    // Hole IR (Tavan Delik) -> Solid IR (Tavan Diş Dibi)
+                    // Dikdörtgen çizerek basitleştiriyoruz
+                    const threadW = (t.solid_ir - t.hole_ir) * scale;
+                    ctx.fillRect(centerX + t.hole_ir * scale, currentY, threadW, segH);
+                    ctx.fillRect(centerX - t.solid_ir * scale, currentY, threadW, segH);
+                }
+            }
+
+            currentY += segH;
+        });
+        ctx.globalAlpha = 1.0;
+    }
+
+    /**
+     * 3D GEOMETRİ OLUŞTURMA
+     */
+    function initThreeJS() {
+        const container = document.getElementById('main-view');
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x111111);
+
+        camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 10000);
+        camera.position.set(100, 100, 100);
+
+        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas-3d'), antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.shadowMap.enabled = true;
+
+        const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+        dirLight.position.set(50, 50, 100);
+        scene.add(dirLight);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+
+        meshGroup = new THREE.Group();
+        scene.add(meshGroup);
+
+        window.addEventListener('resize', onResize);
+        animate();
+    }
+
+    function onResize() {
+        const container = document.getElementById('main-view');
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    function update3DGeometry() {
+        if (!meshGroup) return;
+        while(meshGroup.children.length > 0){ 
+            meshGroup.children[0].geometry.dispose();
+            meshGroup.children[0].material.dispose();
+            meshGroup.remove(meshGroup.children[0]); 
+        }
+
+        let currentY = 0;
+        segments.forEach((seg, index) => {
+            const geometry = generateSegmentGeometry(seg);
+            const material = new THREE.MeshStandardMaterial({
+                color: seg.color,
+                roughness: 0.4,
+                metalness: 0.2,
+                side: THREE.DoubleSide
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.y = -currentY; 
+            meshGroup.add(mesh);
+            currentY += seg.height;
+        });
+    }
+
+    function generateSegmentGeometry(seg) {
+        // Fiziksel sınırları al (Solid Duvar Sınırları)
+        const t = calculatePhysicalGeometry(seg, 'top');
+        const b = calculatePhysicalGeometry(seg, 'bottom');
+        
+        const height = seg.height;
+        const res = 72;
+        const vSegs = Math.ceil(height / (seg.type === 'plain' ? 5 : (seg.pitch / 4)));
+        
+        const vertices = [];
+        const indices = [];
+
+        // Belirli bir Y ve Açıda yarıçapları döndürür
+        const getRadiusAt = (y, angle) => {
+            const ratio = y / height; // 0 (top) -> 1 (bottom)
+            
+            // Konik interpolasyon (Katı Duvar İçin)
+            let baseR_in = t.solid_ir + (b.solid_ir - t.solid_ir) * ratio;
+            let baseR_out = t.solid_or + (b.solid_or - t.solid_or) * ratio;
+
+            // Vida Modülasyonu
+            if (seg.type !== 'plain') {
+                const phase = (y / seg.pitch) + (angle / (Math.PI * 2));
+                let wave = Math.abs((phase % 1) * 2 - 1); // 0..1..0 üçgen dalga
+                
+                // TOLERANS UYGULAMASI (3D Geometride)
+                // Tolerans, parçaları "birbirinden uzaklaştırır".
+                // Erkek parça: Dişler biraz daha içeri çekilmeli (küçülmeli) -> radius azalır.
+                // Dişi parça: Dişler/Duvar biraz daha dışarı itilmeli (büyümeli) -> radius artır.
+                const tol = seg.tol / 2;
+                const threadH = seg.depth;
+
+                if (seg.type === 'male') {
+                    // Erkek: Solid OR üzerine diş ekle
+                    // Tolerans: Dişleri biraz küçült (-tol)
+                    baseR_out += (wave * threadH) - tol;
+                } else if (seg.type === 'female') {
+                    // Dişi: Solid IR içine diş oyulmuştu. 
+                    // Ancak burada "Radius" çiziyoruz. 
+                    // Dişi diş dibi (Solid IR) ile Dişi Diş Tepesi (Hole IR) arasındayız.
+                    
+                    // Dişi için BaseR_in şu an "Solid IR" (Diş Dibi).
+                    // Bizim bunu "Hole IR"a (Diş Tepesi) kadar uzatıp, dalga ile geri çekmemiz lazım.
+                    // VEYA: BaseR_in'den içeriye doğru "Hole IR"a kadar dalga uygulayalım.
+                    
+                    // Yöntem: BaseR_in şu an "Diş Dibi" (En geniş yer).
+                    // Dalga 1 iken -> Diş Dibi (Duvar)
+                    // Dalga 0 iken -> Diş Tepesi (Delik)
+                    
+                    // Tolerans: Deliği büyüt (+tol)
+                    // Diş Dibi (BaseR_in) sabit kalsa bile, Diş Tepesi (Hole) +tol kadar genişlemeli.
+                    // Basitleştirme: Tüm iç yüzeyi +tol kadar genişletelim.
+                    
+                    // Wave: 0 ise (Tepe), Radius = BaseR_in - Depth
+                    // Wave: 1 ise (Dip),  Radius = BaseR_in
+                    
+                    // Formül: R = (BaseR_in - Depth) + (Wave * Depth)
+                    // Yani: R = Hole_IR + (Wave * Depth)
+                    // + Tolerans
+                    
+                    baseR_in = (baseR_in - threadH) + (wave * threadH) + tol;
+                }
+            }
+
+            return { rIn: baseR_in, rOut: baseR_out };
+        };
+
+        for (let y = 0; y <= vSegs; y++) {
+            const yPos = (y / vSegs) * height;
+            for (let x = 0; x <= res; x++) {
+                const angle = (x / res) * Math.PI * 2;
+                const radii = getRadiusAt(yPos, angle);
+                const cos = Math.cos(angle);
+                const sin = Math.sin(angle);
+                vertices.push(radii.rOut * cos, -yPos, radii.rOut * sin); // Outer vertex
+                vertices.push(radii.rIn * cos, -yPos, radii.rIn * sin);   // Inner vertex
+            }
+        }
+
+        // --- YÜZEY ÖRME (Triangulation) ---
+        const stride = (res + 1) * 2;
+        for (let y = 0; y < vSegs; y++) {
+            for (let x = 0; x < res; x++) {
+                const row1 = y * stride;
+                const row2 = (y + 1) * stride;
+                const o1 = row1 + x * 2, i1 = row1 + x * 2 + 1;
+                const o2 = row1 + (x+1)*2, i2 = row1 + (x+1)*2 + 1;
+                const o3 = row2 + x * 2, i3 = row2 + x * 2 + 1;
+                const o4 = row2 + (x+1)*2, i4 = row2 + (x+1)*2 + 1;
+
+                // Dış Yüzey
+                indices.push(o1, o4, o2); indices.push(o1, o3, o4);
+                // İç Yüzey (Ters normal)
+                indices.push(i1, i2, i4); indices.push(i1, i4, i3);
+            }
+        }
+
+        // Kapaklar (Top & Bottom Rims)
+        for (let x = 0; x < res; x++) {
+            // Top
+            let o1 = x * 2, i1 = x * 2 + 1;
+            let o2 = (x+1)*2, i2 = (x+1)*2 + 1;
+            indices.push(o1, o2, i2); indices.push(o1, i2, i1);
+            
+            // Bottom
+            let lastRow = vSegs * stride;
+            o1 = lastRow + x*2; i1 = lastRow + x*2 + 1;
+            o2 = lastRow + (x+1)*2; i2 = lastRow + (x+1)*2 + 1;
+            indices.push(o1, i2, o2); indices.push(o1, i1, i2);
+        }
+
+        const geom = new THREE.BufferGeometry();
+        geom.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+        geom.setIndex(indices);
+        geom.computeVertexNormals();
+        
+        return geom;
+    }
+
+    function exportSTL() {
+        let totalTriangles = 0;
+        const tempGeometries = [];
+        let currentY = 0;
+
+        segments.forEach(seg => {
+            const geom = generateSegmentGeometry(seg);
+            geom.translate(0, -currentY, 0);
+            tempGeometries.push(geom);
+            totalTriangles += geom.index.count / 3;
+            currentY += seg.height;
+        });
+
+        const bufferLen = 84 + (totalTriangles * 50);
+        const buffer = new ArrayBuffer(bufferLen);
+        const view = new DataView(buffer);
+
+        for (let i = 0; i < 80; i++) view.setUint8(i, 32);
+        view.setUint32(80, totalTriangles, true);
+
+        let offset = 84;
+        
+        tempGeometries.forEach(geom => {
+            const pos = geom.attributes.position;
+            const ind = geom.index;
+            for (let i = 0; i < ind.count; i += 3) {
+                const a = ind.getX(i), b = ind.getX(i+1), c = ind.getX(i+2);
+                const v1 = new THREE.Vector3().fromBufferAttribute(pos, a);
+                const v2 = new THREE.Vector3().fromBufferAttribute(pos, b);
+                const v3 = new THREE.Vector3().fromBufferAttribute(pos, c);
+                const norm = new THREE.Vector3().crossVectors(new THREE.Vector3().subVectors(v2, v1), new THREE.Vector3().subVectors(v3, v1)).normalize();
+
+                view.setFloat32(offset, norm.x, true); offset += 4;
+                view.setFloat32(offset, norm.y, true); offset += 4;
+                view.setFloat32(offset, norm.z, true); offset += 4;
+                view.setFloat32(offset, v1.x, true); offset += 4;
+                view.setFloat32(offset, v1.y, true); offset += 4;
+                view.setFloat32(offset, v1.z, true); offset += 4;
+                view.setFloat32(offset, v2.x, true); offset += 4;
+                view.setFloat32(offset, v2.y, true); offset += 4;
+                view.setFloat32(offset, v2.z, true); offset += 4;
+                view.setFloat32(offset, v3.x, true); offset += 4;
+                view.setFloat32(offset, v3.y, true); offset += 4;
+                view.setFloat32(offset, v3.z, true); offset += 4;
+                view.setUint16(offset, 0, true); offset += 2;
+            }
+        });
+
+        const blob = new Blob([buffer], {type: 'application/octet-stream'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `Modular_Pipe_Pro_${segments.length}Seg.stl`;
+        link.click();
+    }
+
+    initApp();
+</script>
+</body>
+</html>

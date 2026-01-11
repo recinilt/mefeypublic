@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="gunes-hilal.ico">
+    <meta http-cache-control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Farkındalık Resimleri</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2c5f2d;
+            --secondary: #d4af37;
+            --light-bg: #f8f9fa;
+            --dark-bg: #1a1a1a;
+            --card-bg: #ffffff;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --shadow: rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: white;
+            color: var(--primary);
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .content-box {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        /* Accordion Styles */
+        .accordion-item {
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .accordion-header {
+            background: var(--primary);
+            color: white;
+            padding: 18px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .accordion-header:hover {
+            background: #234a24;
+        }
+
+        .accordion-header.active {
+            background: #1f4020;
+        }
+
+        .accordion-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+        }
+
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: white;
+        }
+
+        .accordion-content.active {
+            max-height: 2000px;
+            padding: 20px;
+        }
+
+        /* Image Grid */
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .image-item {
+            cursor: pointer;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .image-thumbnail {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .image-name {
+            font-size: 0.9em;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox-image {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 10px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .lightbox-info {
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .lightbox-video {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .lightbox-name {
+            margin-top: 10px;
+            font-size: 1em;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            background: rgba(255, 0, 0, 0.7);
+            transform: rotate(90deg);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.5);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .lightbox-prev {
+            left: 20px;
+        }
+
+        .lightbox-next {
+            right: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+
+            .image-thumbnail {
+                height: 100px;
+            }
+
+            .lightbox-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 35px;
+            }
+
+            .lightbox-close {
+                width: 40px;
+                height: 40px;
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Farkındalık Resimleri</h1>
+            <p>Video kayıtlarından alınmış görsel anlar</p>
+        </div>
+
+        <a href="esmaulhusna.html" class="back-btn">← Ana Sayfaya Dön</a>
+
+        <div class="content-box">
+            <div id="accordion-container"></div>
+        </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-close" onclick="closeLightbox()">×</div>
+        <div class="lightbox-prev lightbox-nav" onclick="navigateImage(-1)">‹</div>
+        <div class="lightbox-next lightbox-nav" onclick="navigateImage(1)">›</div>
+        <div class="lightbox-content">
+            <img id="lightbox-img" class="lightbox-image" src="" alt="">
+            <div class="lightbox-info">
+                <div class="lightbox-video" id="lightbox-video"></div>
+                <div class="lightbox-name" id="lightbox-name"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VERİ YAPISI ====================
+        // Buraya videolarınızı ve resimlerinizi ekleyin
+        
+        const videoData = {
+            "Video 1": [
+                { name: "Resim 1", path: "images/video1/resim1.jpg" },
+                { name: "Resim 2", path: "images/video1/resim2.jpg" },
+                { name: "Resim 3", path: "images/video1/resim3.jpg" },
+                { name: "Resim 4", path: "images/video1/resim4.jpg" }
+            ],
+            "Video 2": [
+                { name: "Resim 1", path: "images/video2/resim1.jpg" },
+                { name: "Resim 2", path: "images/video2/resim2.jpg" },
+                { name: "Resim 3", path: "images/video2/resim3.jpg" }
+            ],
+            "Video 3": [
+                { name: "Resim 1", path: "images/video3/resim1.jpg" },
+                { name: "Resim 2", path: "images/video3/resim2.jpg" },
+                { name: "Resim 3", path: "images/video3/resim3.jpg" },
+                { name: "Resim 4", path: "images/video3/resim4.jpg" },
+                { name: "Resim 5", path: "images/video3/resim5.jpg" }
+            ],
+            "Video 4": [
+                { name: "Resim 1", path: "images/video4/resim1.jpg" },
+                { name: "Resim 2", path: "images/video4/resim2.jpg" }
+            ]
+        };
+
+        // ==================== GLOBAL DEĞİŞKENLER ====================
+        
+        let currentVideoKey = null;
+        let currentImageIndex = 0;
+        let allImages = [];
+
+        // ==================== ACCORDION OLUŞTURMA ====================
+        
+        function initAccordion() {
+            const container = document.getElementById('accordion-container');
+            
+            Object.keys(videoData).forEach((videoName, index) => {
+                const images = videoData[videoName];
+                
+                // Accordion item
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'accordion-item';
+                
+                // Header
+                const header = document.createElement('div');
+                header.className = 'accordion-header';
+                header.innerHTML = `
+                    <span>${videoName} (${images.length} resim)</span>
+                    <span class="accordion-icon">▼</span>
+                `;
+                header.onclick = () => toggleAccordion(index);
+                
+                // Content
+                const content = document.createElement('div');
+                content.className = 'accordion-content';
+                content.id = `accordion-content-${index}`;
+                
+                // Image grid
+                const imageGrid = document.createElement('div');
+                imageGrid.className = 'image-grid';
+                
+                images.forEach((image, imgIndex) => {
+                    const imageItem = document.createElement('div');
+                    imageItem.className = 'image-item';
+                    imageItem.onclick = () => openLightbox(videoName, imgIndex);
+                    
+                    imageItem.innerHTML = `
+                        <img src="${image.path}" alt="${image.name}" class="image-thumbnail" 
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2218%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EResim Yok%3C/text%3E%3C/svg%3E'">
+                        <div class="image-name">${image.name}</div>
+                    `;
+                    
+                    imageGrid.appendChild(imageItem);
+                });
+                
+                content.appendChild(imageGrid);
+                accordionItem.appendChild(header);
+                accordionItem.appendChild(content);
+                container.appendChild(accordionItem);
+            });
+        }
+
+        // ==================== ACCORDION FONKSİYONLARI ====================
+        
+        function toggleAccordion(index) {
+            const headers = document.querySelectorAll('.accordion-header');
+            const contents = document.querySelectorAll('.accordion-content');
+            
+            const header = headers[index];
+            const content = contents[index];
+            
+            // Tıklanan accordion'u aç/kapat
+            const isActive = header.classList.contains('active');
+            
+            // Önce hepsini kapat
+            headers.forEach(h => h.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+            
+            // Eğer kapalıysa aç
+            if (!isActive) {
+                header.classList.add('active');
+                content.classList.add('active');
+            }
+        }
+
+        // ==================== LIGHTBOX FONKSİYONLARI ====================
+        
+        function openLightbox(videoName, imageIndex) {
+            currentVideoKey = videoName;
+            currentImageIndex = imageIndex;
+            allImages = videoData[videoName];
+            
+            updateLightboxImage();
+            document.getElementById('lightbox').classList.add('active');
+            
+            // Esc tuşu ile kapatma
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+            document.removeEventListener('keydown', handleKeyPress);
+        }
+
+        function navigateImage(direction) {
+            currentImageIndex += direction;
+            
+            // Döngüsel gezinme
+            if (currentImageIndex < 0) {
+                currentImageIndex = allImages.length - 1;
+            } else if (currentImageIndex >= allImages.length) {
+                currentImageIndex = 0;
+            }
+            
+            updateLightboxImage();
+        }
+
+        function updateLightboxImage() {
+            const image = allImages[currentImageIndex];
+            document.getElementById('lightbox-img').src = image.path;
+            document.getElementById('lightbox-video').textContent = currentVideoKey;
+            document.getElementById('lightbox-name').textContent = image.name;
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Escape') {
+                closeLightbox();
+            } else if (e.key === 'ArrowLeft') {
+                navigateImage(-1);
+            } else if (e.key === 'ArrowRight') {
+                navigateImage(1);
+            }
+        }
+
+        // Lightbox dışına tıklayınca kapat
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeLightbox();
+            }
+        });
+
+        // ==================== BAŞLATMA ====================
+        
+        window.onload = function() {
+            initAccordion();
+        };
+    </script>
+</body>
+</html>
