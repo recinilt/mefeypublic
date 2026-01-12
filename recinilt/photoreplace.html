@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fotoğraf Birleştirme Stüdyosu</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            transition: all 0.3s ease;
+        }
+        .upload-area:hover, .upload-area.active {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen text-slate-800 pb-10">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> AI Stüdyo
+            </h1>
+            <button onclick="toggleSettings()" class="text-slate-500 hover:text-blue-600 transition">
+                <i class="fa-solid fa-gear text-lg"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Settings Modal (API Key) -->
+    <div id="settingsPanel" class="hidden max-w-3xl mx-auto px-4 py-4 bg-blue-50 border-b border-blue-100 transition-all">
+        <label class="block text-sm font-semibold text-slate-700 mb-2">Google Gemini API Anahtarı</label>
+        <div class="flex gap-2">
+            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="flex-1 p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
+            <button onclick="saveApiKey()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">Kaydet</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-circle-info"></i> Anahtarınız sadece tarayıcınızda (localStorage) saklanır.</p>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-3xl mx-auto px-4 mt-6 space-y-6">
+
+        <!-- Image Upload Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Reference Image 1 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-slate-700 text-sm">1. Ana Resim (Sahne)</h3>
+                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Referans</span>
+                </div>
+                <div class="upload-area rounded-lg h-48 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('fileInput1').click()">
+                    <input type="file" id="fileInput1" class="hidden" accept="image/*" onchange="handleFileSelect(event, 'preview1', 'base64_1')">
+                    <div id="preview1-placeholder" class="text-center p-4">
+                        <i class="fa-regular fa-image text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-xs text-slate-400">Atatürk vb. sahne resmi</p>
+                    </div>
+                    <img id="preview1" class="hidden w-full h-full object-contain absolute top-0 left-0 bg-white">
+                    <button onclick="clearImage(event, 'preview1', 'fileInput1', 'base64_1')" id="clearBtn1" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 z-10"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- Reference Image 2 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="font-semibold text-slate-700 text-sm">2. Eklenecek Kişi</h3>
+                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Kaynak</span>
+                </div>
+                <div class="upload-area rounded-lg h-48 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('fileInput2').click()">
+                    <input type="file" id="fileInput2" class="hidden" accept="image/*" onchange="handleFileSelect(event, 'preview2', 'base64_2')">
+                    <div id="preview2-placeholder" class="text-center p-4">
+                        <i class="fa-regular fa-user text-3xl text-slate-300 mb-2"></i>
+                        <p class="text-xs text-slate-400">Yüzü alınacak kişi</p>
+                    </div>
+                    <img id="preview2" class="hidden w-full h-full object-contain absolute top-0 left-0 bg-white">
+                    <button onclick="clearImage(event, 'preview2', 'fileInput2', 'base64_2')" id="clearBtn2" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 z-10"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prompt Section -->
+        <div class="bg-white p-5 rounded-xl shadow-sm">
+            <label class="block font-semibold text-slate-700 mb-2 text-sm">Düzenleme Talimatı (Prompt)</label>
+            <textarea id="promptInput" rows="4" class="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none" placeholder="Örn: Birinci resimdeki kadının yerine, ikinci resimdeki kişiyi yerleştir. Atatürk ile samimi bir şekilde kol kola dursunlar. İkinci kişiye 1930'lar modasına uygun şık bir elbise giydir. Ortam aydınlık ve nostaljik olsun..."></textarea>
+            <div class="mt-2 flex justify-between items-center">
+                <p class="text-xs text-slate-400">Detay ne kadar fazlaysa sonuç o kadar iyi olur.</p>
+                <button onclick="generateImage()" id="generateBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fa-solid fa-wand-magic"></i> Oluştur
+                </button>
+            </div>
+        </div>
+
+        <!-- Result Section -->
+        <div id="resultArea" class="hidden bg-white p-4 rounded-xl shadow-sm animate-fade-in">
+            <h3 class="font-semibold text-slate-700 mb-3 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-check-circle text-green-500"></i> Sonuç
+            </h3>
+            <div class="relative group">
+                <img id="resultImage" class="w-full rounded-lg shadow-inner border border-slate-100" src="" alt="AI Generated Result">
+                <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button onclick="downloadImage()" class="bg-white text-slate-800 px-4 py-2 rounded-lg shadow-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> İndir
+                    </button>
+                </div>
+            </div>
+            <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center rounded-xl">
+                <div class="loader mb-3"></div>
+                <p class="text-sm text-slate-600 font-medium animate-pulse">Sihir yapılıyor...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="errorMessage" class="hidden bg-red-50 text-red-600 p-4 rounded-lg border border-red-100 text-sm flex items-start gap-3">
+            <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
+            <span id="errorText">Bir hata oluştu.</span>
+        </div>
+
+    </main>
+
+    <script>
+        // Global Variables to store Base64 images
+        let base64_1 = "";
+        let base64_2 = "";
+        let apiKey = localStorage.getItem('gemini_api_key') || "";
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            if (apiKey) {
+                document.getElementById('apiKeyInput').value = apiKey;
+            } else {
+                toggleSettings(); // Show settings if no key
+            }
+        });
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                apiKey = key;
+                localStorage.setItem('gemini_api_key', key);
+                alert("API Anahtarı kaydedildi!");
+                toggleSettings();
+            } else {
+                alert("Lütfen geçerli bir anahtar girin.");
+            }
+        }
+
+        // File Handling
+        function handleFileSelect(event, previewId, storageVarName) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
+                
+                // Update global variable
+                if (storageVarName === 'base64_1') base64_1 = base64String;
+                if (storageVarName === 'base64_2') base64_2 = base64String;
+
+                // Show Preview
+                const previewImg = document.getElementById(previewId);
+                const placeholder = document.getElementById(previewId + '-placeholder');
+                const clearBtn = document.getElementById('clearBtn' + previewId.slice(-1));
+
+                previewImg.src = e.target.result;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                clearBtn.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearImage(e, previewId, inputId, storageVarName) {
+            e.stopPropagation(); // Prevent triggering upload click
+            
+            // Clear Data
+            if (storageVarName === 'base64_1') base64_1 = "";
+            if (storageVarName === 'base64_2') base64_2 = "";
+            document.getElementById(inputId).value = "";
+
+            // Reset UI
+            document.getElementById(previewId).src = "";
+            document.getElementById(previewId).classList.add('hidden');
+            document.getElementById(previewId + '-placeholder').classList.remove('hidden');
+            document.getElementById('clearBtn' + previewId.slice(-1)).classList.add('hidden');
+        }
+
+        // API Logic
+        async function generateImage() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            const btn = document.getElementById('generateBtn');
+            const resultArea = document.getElementById('resultArea');
+            const resultImg = document.getElementById('resultImage');
+            const errorDiv = document.getElementById('errorMessage');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Validations
+            errorDiv.classList.add('hidden');
+            if (!apiKey) {
+                showError("Lütfen önce ayarlardan Google Gemini API anahtarınızı girin.");
+                toggleSettings();
+                return;
+            }
+            if (!base64_1 || !base64_2) {
+                showError("Lütfen her iki referans resmini de yükleyin.");
+                return;
+            }
+            if (!prompt) {
+                showError("Lütfen bir açıklama (prompt) girin.");
+                return;
+            }
+
+            // UI Loading State
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...';
+            resultArea.classList.remove('hidden');
+            loadingOverlay.classList.remove('hidden');
+            resultImg.classList.add('opacity-50'); // Dim old image if exists
+
+            try {
+                const response = await fetchWithRetry(prompt);
+                
+                // Parse Response
+                const generatedBase64 = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                if (generatedBase64) {
+                    resultImg.src = `data:image/png;base64,${generatedBase64}`;
+                    resultImg.classList.remove('opacity-50');
+                    // Scroll to result
+                    resultArea.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    throw new Error("API geçerli bir resim döndürmedi.");
+                }
+
+            } catch (err) {
+                console.error(err);
+                showError("İşlem başarısız oldu: " + err.message);
+                resultArea.classList.add('hidden');
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-wand-magic"></i> Oluştur';
+            }
+        }
+
+        // Exponential Backoff Retry Logic
+        async function fetchWithRetry(promptText, retries = 3, delay = 1000) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [
+                        { text: promptText },
+                        { inlineData: { mimeType: "image/jpeg", data: base64_1 } },
+                        { inlineData: { mimeType: "image/jpeg", data: base64_2 } }
+                    ]
+                }],
+                generationConfig: {
+                    responseModalities: ["IMAGE"]
+                }
+            };
+
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error?.message || `HTTP Error: ${response.status}`);
+                    }
+
+                    return await response.json();
+
+                } catch (error) {
+                    if (i === retries - 1) throw error; // Throw on last retry
+                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i))); // Exponential backoff
+                }
+            }
+        }
+
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = msg;
+            errorDiv.classList.remove('hidden');
+            errorDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadImage() {
+            const img = document.getElementById('resultImage');
+            if (img.src) {
+                const link = document.createElement('a');
+                link.href = img.src;
+                link.download = 'ai-generated-image.png';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    </script>
+</body>
+</html>
