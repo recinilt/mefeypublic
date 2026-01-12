@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Fotoğraf Birleştirme Stüdyosu</title>
+    <title>AI Fotoğraf Birleştirme Stüdyosu - Master Pro</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -11,321 +11,266 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-        }
         .upload-area {
             border: 2px dashed #cbd5e1;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .upload-area:hover, .upload-area.active {
+        .upload-area:hover {
             border-color: #3b82f6;
             background-color: #eff6ff;
+            transform: scale(1.01);
         }
         .loader {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3b82f6;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .gradient-btn {
+            background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen text-slate-800 pb-10">
+<body class="bg-slate-50 min-h-screen text-slate-800 pb-12">
 
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i> AI Stüdyo
+    <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-xl font-extrabold text-slate-900 flex items-center gap-2 italic">
+                <span class="bg-blue-600 text-white px-2 py-1 rounded text-lg">AI</span> PHOTO MASTER
             </h1>
-            <button onclick="toggleSettings()" class="text-slate-500 hover:text-blue-600 transition">
-                <i class="fa-solid fa-gear text-lg"></i>
-            </button>
+            <div class="flex gap-3">
+                <button onclick="toggleSettings()" class="p-2 text-slate-400 hover:text-blue-600 transition">
+                    <i class="fa-solid fa-gear text-xl"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <!-- Settings Modal (API Key) -->
-    <div id="settingsPanel" class="hidden max-w-3xl mx-auto px-4 py-4 bg-blue-50 border-b border-blue-100 transition-all">
-        <label class="block text-sm font-semibold text-slate-700 mb-2">Google Gemini API Anahtarı</label>
-        <div class="flex gap-2">
-            <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="flex-1 p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm">
-            <button onclick="saveApiKey()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium">Kaydet</button>
+    <!-- Settings -->
+    <div id="settingsPanel" class="hidden max-w-4xl mx-auto px-4 py-6 bg-blue-50 border-b border-blue-200">
+        <div class="max-w-md">
+            <label class="block text-sm font-bold text-slate-700 mb-2">Google Gemini API Key</label>
+            <div class="flex gap-2">
+                <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="flex-1 p-3 rounded-xl border border-blue-200 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm">
+                <button onclick="saveApiKey()" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition font-bold">Kaydet</button>
+            </div>
         </div>
-        <p class="text-xs text-slate-500 mt-2"><i class="fa-solid fa-circle-info"></i> Anahtarınız sadece tarayıcınızda (localStorage) saklanır.</p>
     </div>
 
-    <!-- Main Content -->
-    <main class="max-w-3xl mx-auto px-4 mt-6 space-y-6">
+    <!-- Main -->
+    <main class="max-w-4xl mx-auto px-4 mt-8 space-y-8">
 
-        <!-- Image Upload Section -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- Reference Image 1 -->
-            <div class="bg-white p-4 rounded-xl shadow-sm">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-semibold text-slate-700 text-sm">1. Ana Resim (Sahne)</h3>
-                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Referans</span>
-                </div>
-                <div class="upload-area rounded-lg h-48 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('fileInput1').click()">
-                    <input type="file" id="fileInput1" class="hidden" accept="image/*" onchange="handleFileSelect(event, 'preview1', 'base64_1')">
-                    <div id="preview1-placeholder" class="text-center p-4">
-                        <i class="fa-regular fa-image text-3xl text-slate-300 mb-2"></i>
-                        <p class="text-xs text-slate-400">Atatürk vb. sahne resmi</p>
+        <!-- Uploads -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Arkaplan -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-camera text-blue-500"></i> 1. Sahne (Hedef)</h3>
+                <div class="upload-area rounded-2xl h-64 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden bg-white shadow-sm" onclick="document.getElementById('fileInput1').click()">
+                    <input type="file" id="fileInput1" class="hidden" accept="image/*" onchange="handleFileSelect(event, 1)">
+                    <div id="placeholder1" class="text-center p-6">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-slate-300 mb-3"></i>
+                        <p class="text-sm text-slate-500 font-medium">Sahne resmini buraya yükleyin</p>
                     </div>
-                    <img id="preview1" class="hidden w-full h-full object-contain absolute top-0 left-0 bg-white">
-                    <button onclick="clearImage(event, 'preview1', 'fileInput1', 'base64_1')" id="clearBtn1" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 z-10"><i class="fa-solid fa-xmark"></i></button>
+                    <img id="preview1" class="hidden w-full h-full object-contain absolute inset-0 bg-white">
                 </div>
             </div>
 
-            <!-- Reference Image 2 -->
-            <div class="bg-white p-4 rounded-xl shadow-sm">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="font-semibold text-slate-700 text-sm">2. Eklenecek Kişi</h3>
-                    <span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">Kaynak</span>
-                </div>
-                <div class="upload-area rounded-lg h-48 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden" onclick="document.getElementById('fileInput2').click()">
-                    <input type="file" id="fileInput2" class="hidden" accept="image/*" onchange="handleFileSelect(event, 'preview2', 'base64_2')">
-                    <div id="preview2-placeholder" class="text-center p-4">
-                        <i class="fa-regular fa-user text-3xl text-slate-300 mb-2"></i>
-                        <p class="text-xs text-slate-400">Yüzü alınacak kişi</p>
+            <!-- Referans Yüz -->
+            <div class="space-y-3">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2"><i class="fa-solid fa-face-smile text-blue-500"></i> 2. Kimlik (Kaynak Yüz)</h3>
+                <div class="upload-area rounded-2xl h-64 flex flex-col justify-center items-center cursor-pointer relative overflow-hidden bg-white shadow-sm" onclick="document.getElementById('fileInput2').click()">
+                    <input type="file" id="fileInput2" class="hidden" accept="image/*" onchange="handleFileSelect(event, 2)">
+                    <div id="placeholder2" class="text-center p-6">
+                        <i class="fa-solid fa-user-tag text-4xl text-slate-300 mb-3"></i>
+                        <p class="text-sm text-slate-500 font-medium">Referans yüz resmini yükleyin</p>
                     </div>
-                    <img id="preview2" class="hidden w-full h-full object-contain absolute top-0 left-0 bg-white">
-                    <button onclick="clearImage(event, 'preview2', 'fileInput2', 'base64_2')" id="clearBtn2" class="hidden absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow hover:bg-red-600 z-10"><i class="fa-solid fa-xmark"></i></button>
+                    <img id="preview2" class="hidden w-full h-full object-contain absolute inset-0 bg-white">
                 </div>
+                <p class="text-[10px] text-orange-600 font-bold bg-orange-50 p-2 rounded border border-orange-100 uppercase tracking-tighter text-center">İpucu: Sadece yüzün göründüğü net bir fotoğraf yüklemek benzerliği artırır.</p>
             </div>
         </div>
 
-        <!-- Prompt Section -->
-        <div class="bg-white p-5 rounded-xl shadow-sm">
-            <label class="block font-semibold text-slate-700 mb-2 text-sm">Düzenleme Talimatı (Prompt)</label>
-            <textarea id="promptInput" rows="4" class="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm resize-none" placeholder="Örn: Birinci resimdeki kadının yerine, ikinci resimdeki kişiyi yerleştir. Atatürk ile samimi bir şekilde kol kola dursunlar. İkinci kişiye 1930'lar modasına uygun şık bir elbise giydir. Ortam aydınlık ve nostaljik olsun..."></textarea>
-            <div class="mt-2 flex justify-between items-center">
-                <p class="text-xs text-slate-400">Detay ne kadar fazlaysa sonuç o kadar iyi olur.</p>
-                <button onclick="generateImage()" id="generateBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-lg shadow-md hover:shadow-lg transition flex items-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-                    <i class="fa-solid fa-wand-magic"></i> Oluştur
+        <!-- Prompt -->
+        <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-200">
+            <label class="block font-bold text-slate-700 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-terminal text-blue-600"></i> AI Master Talimatları
+            </label>
+            <textarea id="promptInput" rows="6" class="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium leading-relaxed bg-slate-50 shadow-inner" 
+            >DİKKAT: Bu bir yüksek hassasiyetli 'FACE SWAP' görevidir. 
+
+GÖREV: 1. resimdeki Atatürk'ün yanındaki kişinin kafasını/yüzünü tamamen sil. Yerine 2. resimdeki kişinin yüzünü BİREBİR PİKSEL SADAKATİ ile yerleştir. 
+
+KRİTİK KURALLAR:
+1. 2. resimdeki kişinin gözlüklerini, göz yapısını, burun şeklini ve yüz hatlarını ASLA DEĞİŞTİRME. 
+2. Yüzü uydurma (No Hallucination), sadece 2. resimdeki kimliği taşı.
+3. 1. resimdeki tarihi fotoğrafın gren yapısını, siyah-beyaz tonlarını ve ışık yönünü yüz üzerine kusursuz uyarla.
+4. Boyun ve saç geçişlerini gerçekçi birleştir. Kişi Atatürk'ün yanında doğal durmalı.</textarea>
+            
+            <div class="mt-4 flex flex-wrap gap-2">
+                <button onclick="setDetail('Gözlükleri ve karakteristik mimikleri kesinlikle koru.')" class="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold border border-blue-100 hover:bg-blue-100 transition">#GözlükleriKoru</button>
+                <button onclick="setDetail('Yüzü 1930\'lar retro fotoğraf kalitesine uyarla.')" class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">#RetroUyum</button>
+                <button onclick="setDetail('Cilt dokusunu ve gölgeleri sahneye göre eşitle.')" class="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 hover:bg-slate-200 transition">#IşıkEşitleme</button>
+            </div>
+
+            <button onclick="generateImage()" id="generateBtn" class="mt-8 w-full gradient-btn text-white py-5 rounded-2xl font-black text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
+                <i class="fa-solid fa-wand-sparkles text-2xl"></i> ANALİZ ET VE BİRLEŞTİR
+            </button>
+        </div>
+
+        <!-- Result -->
+        <div id="resultArea" class="hidden">
+            <div class="bg-white p-2 rounded-2xl shadow-2xl border-4 border-blue-600 relative overflow-hidden">
+                <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-20 flex flex-col items-center justify-center">
+                    <div class="loader mb-6"></div>
+                    <h4 class="text-xl font-black text-slate-900 tracking-tighter uppercase mb-2">Moleküler İşleme Devam Ediyor</h4>
+                    <p class="text-sm text-slate-500 font-medium text-center px-12">Yüz hatları haritalanıyor, gözlük detayı sabitleniyor ve tarihi sahneye entegre ediliyor...</p>
+                </div>
+                <img id="resultImage" class="w-full rounded-xl shadow-inner min-h-[400px]" src="">
+            </div>
+            <div class="mt-6 flex gap-4">
+                <button onclick="downloadImage()" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-black transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i> GALERİYE İNDİR
+                </button>
+                <button onclick="window.location.reload()" class="px-8 bg-white text-slate-600 py-4 rounded-2xl font-bold border border-slate-300 hover:bg-slate-50 transition">
+                    YENİDEN DENE
                 </button>
             </div>
         </div>
 
-        <!-- Result Section -->
-        <div id="resultArea" class="hidden bg-white p-4 rounded-xl shadow-sm animate-fade-in">
-            <h3 class="font-semibold text-slate-700 mb-3 text-sm flex items-center gap-2">
-                <i class="fa-solid fa-check-circle text-green-500"></i> Sonuç
-            </h3>
-            <div class="relative group">
-                <img id="resultImage" class="w-full rounded-lg shadow-inner border border-slate-100" src="" alt="AI Generated Result">
-                <div class="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="downloadImage()" class="bg-white text-slate-800 px-4 py-2 rounded-lg shadow-lg text-sm font-medium hover:bg-slate-50 flex items-center gap-2">
-                        <i class="fa-solid fa-download"></i> İndir
-                    </button>
-                </div>
-            </div>
-            <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center rounded-xl">
-                <div class="loader mb-3"></div>
-                <p class="text-sm text-slate-600 font-medium animate-pulse">Sihir yapılıyor...</p>
-            </div>
-        </div>
-
-        <!-- Error Message -->
-        <div id="errorMessage" class="hidden bg-red-50 text-red-600 p-4 rounded-lg border border-red-100 text-sm flex items-start gap-3">
-            <i class="fa-solid fa-triangle-exclamation mt-0.5"></i>
-            <span id="errorText">Bir hata oluştu.</span>
+        <!-- Error Area -->
+        <div id="errorMessage" class="hidden bg-red-100 text-red-700 p-5 rounded-2xl border-2 border-red-200 flex items-center gap-4 animate-pulse">
+             <i class="fa-solid fa-circle-xmark text-2xl"></i>
+             <div class="font-bold text-sm" id="errorTextContent"></div>
         </div>
 
     </main>
 
     <script>
-        // Global Variables to store Base64 images
-        let base64_1 = "";
-        let base64_2 = "";
+        let imgData = { 1: { base64: "", mime: "" }, 2: { base64: "", mime: "" } };
         let apiKey = localStorage.getItem('gemini_api_key') || "";
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            if (apiKey) {
-                document.getElementById('apiKeyInput').value = apiKey;
-            } else {
-                toggleSettings(); // Show settings if no key
-            }
-        });
-
-        function toggleSettings() {
-            const panel = document.getElementById('settingsPanel');
-            panel.classList.toggle('hidden');
-        }
-
+        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('hidden'); }
         function saveApiKey() {
-            const key = document.getElementById('apiKeyInput').value.trim();
-            if (key) {
-                apiKey = key;
-                localStorage.setItem('gemini_api_key', key);
-                alert("API Anahtarı kaydedildi!");
-                toggleSettings();
-            } else {
-                alert("Lütfen geçerli bir anahtar girin.");
-            }
+            apiKey = document.getElementById('apiKeyInput').value.trim();
+            if(!apiKey.startsWith("AIza")) { alert("Hata: Geçersiz API Key formatı."); return; }
+            localStorage.setItem('gemini_api_key', apiKey);
+            alert("Sistem Hazır! API Anahtarı Kaydedildi.");
+            toggleSettings();
         }
 
-        // File Handling
-        function handleFileSelect(event, previewId, storageVarName) {
+        function handleFileSelect(event, id) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64String = e.target.result.split(',')[1]; // Remove data:image/...;base64, prefix
-                
-                // Update global variable
-                if (storageVarName === 'base64_1') base64_1 = base64String;
-                if (storageVarName === 'base64_2') base64_2 = base64String;
-
-                // Show Preview
-                const previewImg = document.getElementById(previewId);
-                const placeholder = document.getElementById(previewId + '-placeholder');
-                const clearBtn = document.getElementById('clearBtn' + previewId.slice(-1));
-
-                previewImg.src = e.target.result;
-                previewImg.classList.remove('hidden');
-                placeholder.classList.add('hidden');
-                clearBtn.classList.remove('hidden');
+            reader.onload = (e) => {
+                imgData[id].base64 = e.target.result.split(',')[1];
+                imgData[id].mime = file.type;
+                document.getElementById(`preview${id}`).src = e.target.result;
+                document.getElementById(`preview${id}`).classList.remove('hidden');
+                document.getElementById(`placeholder${id}`).classList.add('hidden');
             };
             reader.readAsDataURL(file);
         }
 
-        function clearImage(e, previewId, inputId, storageVarName) {
-            e.stopPropagation(); // Prevent triggering upload click
-            
-            // Clear Data
-            if (storageVarName === 'base64_1') base64_1 = "";
-            if (storageVarName === 'base64_2') base64_2 = "";
-            document.getElementById(inputId).value = "";
-
-            // Reset UI
-            document.getElementById(previewId).src = "";
-            document.getElementById(previewId).classList.add('hidden');
-            document.getElementById(previewId + '-placeholder').classList.remove('hidden');
-            document.getElementById('clearBtn' + previewId.slice(-1)).classList.add('hidden');
+        function setDetail(text) {
+            const input = document.getElementById('promptInput');
+            input.value += "\n- EK NOT: " + text;
         }
 
-        // API Logic
         async function generateImage() {
-            const prompt = document.getElementById('promptInput').value.trim();
-            const btn = document.getElementById('generateBtn');
-            const resultArea = document.getElementById('resultArea');
-            const resultImg = document.getElementById('resultImage');
+            const userPrompt = document.getElementById('promptInput').value.trim();
             const errorDiv = document.getElementById('errorMessage');
-            const loadingOverlay = document.getElementById('loadingOverlay');
+            
+            if (!apiKey) { showError("API Key bulunamadı! Ayarlar ikonuna tıklayıp anahtarınızı girin."); return; }
+            if (!imgData[1].base64 || !imgData[2].base64) { showError("Eksik veri: Lütfen her iki fotoğrafı da yükleyin."); return; }
 
-            // Validations
+            // Bilimsel Yaklaşım: Modelin dikkati Reference 2'ye (Yüz) odaklanmalı
+            const masterPrompt = `
+                ACT AS A PROFESSIONAL VFX AND DEEPFAKE ARTIST.
+                PRIMARY SOURCE: Image 2 (Reference Face).
+                TARGET SCENE: Image 1 (Atatürk Scene).
+
+                EXECUTION PLAN:
+                1. ANALYZE identity of the person in Image 2. Note unique identifiers: face shape, eyewear, nose, and mouth.
+                2. LOCATE the person next to Atatürk in Image 1.
+                3. PERFORM A SEAMLESS FACE SWAP. Use the person's head from Image 2.
+                4. RECONSTRUCT the face to be identical to Image 2. Do not generalize or beautify. 
+                5. MATCH historic camera settings: If Image 1 is grainy black and white, apply the same film grain, ISO, and contrast to the new face.
+                6. PRESERVE GLASSES: If the person in Image 2 wears glasses, they MUST be present in the final image.
+                7. ANATOMIC BLENDING: Ensure the neck and lighting blend with the body in Image 1.
+
+                USER INSTRUCTIONS: ${userPrompt}
+            `.trim();
+
             errorDiv.classList.add('hidden');
-            if (!apiKey) {
-                showError("Lütfen önce ayarlardan Google Gemini API anahtarınızı girin.");
-                toggleSettings();
-                return;
-            }
-            if (!base64_1 || !base64_2) {
-                showError("Lütfen her iki referans resmini de yükleyin.");
-                return;
-            }
-            if (!prompt) {
-                showError("Lütfen bir açıklama (prompt) girin.");
-                return;
-            }
-
-            // UI Loading State
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> İşleniyor...';
-            resultArea.classList.remove('hidden');
-            loadingOverlay.classList.remove('hidden');
-            resultImg.classList.add('opacity-50'); // Dim old image if exists
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('generateBtn').disabled = true;
 
             try {
-                const response = await fetchWithRetry(prompt);
-                
-                // Parse Response
-                const generatedBase64 = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-
-                if (generatedBase64) {
-                    resultImg.src = `data:image/png;base64,${generatedBase64}`;
-                    resultImg.classList.remove('opacity-50');
-                    // Scroll to result
-                    resultArea.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    throw new Error("API geçerli bir resim döndürmedi.");
-                }
-
-            } catch (err) {
-                console.error(err);
-                showError("İşlem başarısız oldu: " + err.message);
-                resultArea.classList.add('hidden');
-            } finally {
-                loadingOverlay.classList.add('hidden');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fa-solid fa-wand-magic"></i> Oluştur';
-            }
-        }
-
-        // Exponential Backoff Retry Logic
-        async function fetchWithRetry(promptText, retries = 3, delay = 1000) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [
-                        { text: promptText },
-                        { inlineData: { mimeType: "image/jpeg", data: base64_1 } },
-                        { inlineData: { mimeType: "image/jpeg", data: base64_2 } }
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{
+                        parts: [
+                            { text: masterPrompt },
+                            { inlineData: { mimeType: imgData[2].mime, data: imgData[2].base64 } }, // Önce yüzü gönderiyoruz (Priority)
+                            { inlineData: { mimeType: imgData[1].mime, data: imgData[1].base64 } }
+                        ]
+                    }],
+                    generationConfig: { responseModalities: ["IMAGE"], candidateCount: 1 },
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
                     ]
-                }],
-                generationConfig: {
-                    responseModalities: ["IMAGE"]
+                };
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error("API Limitine takıldınız veya geçersiz anahtar.");
+                
+                const data = await response.json();
+                const base64Res = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                if (base64Res) {
+                    document.getElementById('resultImage').src = `data:image/png;base64,${base64Res}`;
+                    document.getElementById('resultImage').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const refusal = data.candidates?.[0]?.content?.parts?.find(p => p.text)?.text;
+                    throw new Error(refusal || "Model yüzü eşleştiremedi.");
                 }
-            };
-
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error?.message || `HTTP Error: ${response.status}`);
-                    }
-
-                    return await response.json();
-
-                } catch (error) {
-                    if (i === retries - 1) throw error; // Throw on last retry
-                    await new Promise(res => setTimeout(res, delay * Math.pow(2, i))); // Exponential backoff
-                }
+            } catch (err) {
+                showError(err.message);
+                document.getElementById('resultArea').classList.add('hidden');
+            } finally {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('generateBtn').disabled = false;
             }
         }
 
         function showError(msg) {
             const errorDiv = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-            errorText.textContent = msg;
+            document.getElementById('errorTextContent').innerText = msg;
             errorDiv.classList.remove('hidden');
             errorDiv.scrollIntoView({ behavior: 'smooth' });
         }
 
         function downloadImage() {
             const img = document.getElementById('resultImage');
-            if (img.src) {
-                const link = document.createElement('a');
-                link.href = img.src;
-                link.download = 'ai-generated-image.png';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            if(!img.src) return;
+            const a = document.createElement('a');
+            a.href = img.src;
+            a.download = 'deep-master-ai.png';
+            a.click();
         }
     </script>
 </body>
