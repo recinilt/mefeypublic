@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Face Swap & Creative Studio - Fal.ai</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+        .upload-card {
+            border: 2px dashed #e2e8f0;
+            transition: all 0.2s ease;
+        }
+        .upload-card:active { transform: scale(0.98); }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Mobil optimizasyonları */
+        @media (max-width: 640px) {
+            .upload-card { h-48 !important; }
+            h1 { font-size: 1.875rem !important; }
+        }
+    </style>
+</head>
+<body class="pb-10">
+
+    <header class="gradient-bg text-white py-8 shadow-2xl sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-5 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl md:text-4xl font-extrabold tracking-tighter italic">AI <span class="text-blue-400">CREATIVE</span></h1>
+                <p class="text-slate-400 font-medium uppercase text-[10px] tracking-[0.2em]">Face & Style Transformation</p>
+            </div>
+            <button onclick="toggleSettings()" class="bg-white/10 p-3 rounded-xl hover:bg-white/20 transition">
+                <i class="fa-solid fa-cog text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Ayarlar -->
+    <div id="settingsPanel" class="hidden max-w-4xl mx-auto px-5 mt-4">
+        <div class="bg-white border border-slate-200 p-6 rounded-3xl shadow-lg">
+            <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Fal.ai API Key</label>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="password" id="apiKeyInput" placeholder="Key_id:Key_secret..." 
+                       class="flex-1 p-4 rounded-xl bg-slate-50 border border-slate-200 outline-none font-mono text-xs">
+                <button onclick="saveApiKey()" class="bg-blue-600 text-white px-6 py-4 rounded-xl font-bold text-sm">Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-4xl mx-auto px-5 mt-8 space-y-6">
+        
+        <!-- Dosya Yükleme -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <label class="font-bold text-slate-700 text-xs uppercase flex justify-between">
+                    <span>Sahne (Arkaplan)</span>
+                    <span class="text-blue-500">Adım 1</span>
+                </label>
+                <div class="upload-card rounded-3xl h-56 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden bg-white shadow-sm" onclick="document.getElementById('inputBase').click()">
+                    <input type="file" id="inputBase" class="hidden" accept="image/*" onchange="handleFile(this, 'previewBase')">
+                    <img id="previewBase" class="hidden absolute inset-0 w-full h-full object-contain p-2">
+                    <div id="msgBase" class="text-center p-4">
+                        <i class="fa-solid fa-image text-2xl text-slate-300 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400">FOTOĞRAF SEÇ</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="font-bold text-slate-700 text-xs uppercase flex justify-between">
+                    <span>Yeni Yüz (Kaynağınız)</span>
+                    <span class="text-indigo-500">Adım 2</span>
+                </label>
+                <div class="upload-card rounded-3xl h-56 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden bg-white shadow-sm" onclick="document.getElementById('inputSwap').click()">
+                    <input type="file" id="inputSwap" class="hidden" accept="image/*" onchange="handleFile(this, 'previewSwap')">
+                    <img id="previewSwap" class="hidden absolute inset-0 w-full h-full object-contain p-2">
+                    <div id="msgSwap" class="text-center p-4">
+                        <i class="fa-solid fa-user-plus text-2xl text-slate-300 mb-2"></i>
+                        <p class="text-[10px] font-bold text-slate-400">YÜZÜNÜ SEÇ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kontrol Paneli -->
+        <div class="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <label class="font-bold text-slate-700 text-xs uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-wand-sparkles text-purple-500"></i> Stil ve Modifikasyon
+                </label>
+                <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase">Hangi Yüz Değişsin?</span>
+                    <select id="faceIndex" class="bg-transparent text-xs font-bold text-blue-600 outline-none">
+                        <option value="0">1. Kişi (Soldaki/Öndeki)</option>
+                        <option value="1">2. Kişi (Sağdaki/Arkadaki)</option>
+                        <option value="all">Herkesi Değiştir</option>
+                    </select>
+                </div>
+            </div>
+
+            <textarea id="promptInput" rows="4" 
+                      class="w-full p-4 rounded-2xl bg-slate-50 border border-slate-200 focus:ring-4 focus:ring-blue-100 outline-none transition text-sm text-slate-700 leading-relaxed" 
+                      placeholder="Talimatlarınızı buraya yazın...">Sahnedeki kişinin yüzünü, yüklediğim ikinci fotoğraftaki kişi ile yüksek benzerlikte değiştir. Fotoğrafın orijinal 1930'lar vintage dokusunu koru, yeni yüzün ışık ve gölgelerini sahneye mükemmel şekilde yedir. Eğer mümkünse hafif bir tebessüm ekle ve bakışları kameraya odakla.</textarea>
+            
+            <div class="flex flex-wrap gap-2">
+                <button onclick="setPrompt('Geniş ve içten bir gülümseme ekle, dişleri göster.')" class="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold uppercase hover:bg-blue-100 transition">Gülümseme</button>
+                <button onclick="setPrompt('Kişiye şık bir siyah takım elbise ve beyaz gömlek giydir.')" class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold uppercase hover:bg-indigo-100 transition">Takım Elbise</button>
+                <button onclick="setPrompt('Görseli netleştir, yüz detaylarını 4K kalitesine çıkar.')" class="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase hover:bg-emerald-100 transition">Netleştir</button>
+            </div>
+        </div>
+
+        <button onclick="startProcessing()" id="actionBtn" 
+                class="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold text-lg shadow-xl hover:bg-black transition-all flex items-center justify-center gap-3 active:scale-[0.98]">
+            <span id="btnText">DÖNÜŞÜMÜ BAŞLAT</span>
+            <i class="fa-solid fa-bolt text-yellow-400"></i>
+        </button>
+
+        <!-- Sonuç Bölümü -->
+        <div id="resultContainer" class="hidden space-y-4">
+            <div class="bg-white p-2 rounded-[32px] shadow-2xl relative overflow-hidden">
+                <div id="loadingOverlay" class="hidden absolute inset-0 bg-white/95 z-30 flex flex-col items-center justify-center text-center p-6">
+                    <div class="loader mb-4"></div>
+                    <p class="font-bold text-slate-900 uppercase tracking-widest text-xs">Yapay Zeka Çalışıyor</p>
+                    <p class="text-slate-400 text-[10px] mt-2">Yüz hatları piksellere işleniyor...</p>
+                </div>
+                <img id="finalImg" class="w-full rounded-2xl min-h-[300px] object-cover">
+            </div>
+            <button onclick="downloadResult()" class="w-full bg-blue-600 text-white py-5 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-download"></i> CİHAZA KAYDET
+            </button>
+        </div>
+
+        <div id="errorMsg" class="hidden bg-red-50 border border-red-100 p-4 rounded-2xl text-red-600 text-xs font-bold"></div>
+
+    </main>
+
+    <script>
+        let apiKey = localStorage.getItem('fal_api_key') || "";
+        let baseImg = "";
+        let swapImg = "";
+
+        if (apiKey) document.getElementById('apiKeyInput').value = apiKey;
+
+        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('hidden'); }
+        function saveApiKey() {
+            apiKey = document.getElementById('apiKeyInput').value.trim();
+            localStorage.setItem('fal_api_key', apiKey);
+            alert("Anahtar kaydedildi.");
+            toggleSettings();
+        }
+
+        function setPrompt(text) {
+            document.getElementById('promptInput').value = text;
+        }
+
+        function handleFile(input, previewId) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById(previewId);
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                document.getElementById(previewId.replace('preview', 'msg')).classList.add('hidden');
+                if (previewId === 'previewBase') baseImg = e.target.result;
+                else swapImg = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function startProcessing() {
+            const btn = document.getElementById('actionBtn');
+            const overlay = document.getElementById('loadingOverlay');
+            const faceIndex = document.getElementById('faceIndex').value;
+
+            if (!apiKey) { alert("Lütfen ayarlardan API Key girin."); toggleSettings(); return; }
+            if (!baseImg || !swapImg) { alert("Lütfen iki fotoğrafı da yükleyin."); return; }
+
+            document.getElementById('resultContainer').classList.remove('hidden');
+            overlay.classList.remove('hidden');
+            btn.disabled = true;
+
+            try {
+                // Not: Face Swap API'si face_to_swap_index parametresini destekler.
+                const response = await fetch("https://queue.fal.run/fal-ai/face-swap", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Key ${apiKey}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        base_image_url: baseImg,
+                        swap_image_url: swapImg,
+                        enable_face_restoration: true,
+                        // Fal.ai Face Swap parametresi:
+                        face_to_swap_index: faceIndex === 'all' ? -1 : parseInt(faceIndex) 
+                    })
+                });
+
+                if (!response.ok) throw new Error("İşlem başlatılamadı.");
+                const { request_id } = await response.json();
+                const result = await pollForResult(request_id);
+                document.getElementById('finalImg').src = result.image.url;
+            } catch (err) {
+                alert("Hata: " + err.message);
+                document.getElementById('resultContainer').classList.add('hidden');
+            } finally {
+                overlay.classList.add('hidden');
+                btn.disabled = false;
+            }
+        }
+
+        async function pollForResult(requestId) {
+            const pollUrl = `https://queue.fal.run/fal-ai/face-swap/requests/${requestId}`;
+            while (true) {
+                const response = await fetch(pollUrl, { headers: { "Authorization": `Key ${apiKey}` } });
+                const data = await response.json();
+                if (data.status === "COMPLETED") return data;
+                if (data.status === "FAILED") throw new Error("AI işlemi tamamlayamadı.");
+                await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+
+        function downloadResult() {
+            const img = document.getElementById('finalImg');
+            const link = document.createElement('a');
+            link.href = img.src;
+            link.download = `fal-ai-creative-${Date.now()}.png`;
+            link.click();
+        }
+    </script>
+</body>
+</html>
