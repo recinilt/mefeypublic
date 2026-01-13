@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR Sinema - Sosyal İzleme</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+        
+        #ui-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .ui-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 650px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #444;
+            font-size: 1.3em;
+            margin-top: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+        
+        .room-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .room-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .room-item.private {
+            border-left-color: #f5576c;
+        }
+        
+        .room-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .room-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .lock-icon {
+            float: right;
+            color: #f5576c;
+        }
+        
+        #vr-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        #vr-controls.visible {
+            display: block;
+        }
+        
+        #vr-controls button {
+            margin: 0 5px;
+            font-size: 14px;
+            padding: 10px 20px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-indicator.connected {
+            background: #4caf50;
+        }
+        
+        .status-indicator.syncing {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        #room-info-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #room-info-display.visible {
+            display: block;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .service-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-catbox {
+            background: #ff69b4;
+            color: white;
+        }
+        
+        .badge-bunny {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .badge-cors {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .badge-direct {
+            background: #4caf50;
+            color: white;
+        }
+        
+        #sync-status {
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #sync-status.visible {
+            opacity: 1;
+        }
+        
+        .environment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .environment-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            text-align: center;
+        }
+        
+        .environment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .environment-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .environment-icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+        }
+        
+        .environment-name {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .environment-desc {
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 2D UI Overlay -->
+<div id="ui-overlay">
+    <div class="ui-container">
+        <h1>🎬 VR Sosyal Sinema</h1>
+        
+        <!-- Ana Menü -->
+        <div id="main-menu">
+            <h2>Hoş Geldiniz</h2>
+            <button onclick="showCreateRoom()">➕ Yeni Oda Oluştur</button>
+            <button onclick="showRoomList()" class="secondary">🚪 Odalara Gözat</button>
+        </div>
+        
+        <!-- Oda Oluşturma -->
+        <div id="create-room" style="display: none;">
+            <h2>Yeni Oda Oluştur</h2>
+            <input type="text" id="room-name-input" placeholder="Oda Adı (örn: Film Gecesi)" />
+            
+            <div class="info-box">
+                💡 <strong>Önerilen Video Servisleri:</strong><br>
+                🔹 <strong>Catbox.moe</strong> - Ücretsiz, 200 MB limit<br>
+                🔹 <strong>Bunny.net</strong> - Profesyonel, $1/ay<br>
+                🔹 <strong>Direkt .mp4 linki</strong> - Herhangi bir kaynak<br>
+                <br>
+                ⚠️ Google Drive, pCloud, Koofr çalışmayabilir
+            </div>
+            
+            <textarea id="video-url-input" placeholder="Video URL (Catbox, Bunny veya direkt .mp4 linki)
+
+Örnek:
+https://files.catbox.moe/abc123.mp4
+https://yourzone.b-cdn.net/video.mp4
+https://example.com/video.mp4"></textarea>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="private-room-check" />
+                <label for="private-room-check">🔒 Özel Oda (Şifre Korumalı)</label>
+            </div>
+            
+            <input type="password" id="room-password-input" placeholder="Oda Şifresi (opsiyonel)" style="display: none;" />
+            
+            <label for="screen-size">Ekran Boyutu:</label>
+            <select id="screen-size">
+                <option value="normal">Normal (16m)</option>
+                <option value="large" selected>Büyük (24m)</option>
+                <option value="xlarge">Çok Büyük (32m)</option>
+                <option value="imax">IMAX (40m)</option>
+            </select>
+            
+            <h2>🎭 Sinema Ortamı Seçin</h2>
+            <div class="environment-grid" id="environment-selector">
+                <div class="environment-card selected" data-env="theater" onclick="selectEnvironment('theater', this)">
+                    <div class="environment-icon">🎪</div>
+                    <div class="environment-name">Klasik Sinema</div>
+                    <div class="environment-desc">Geleneksel sinema salonu</div>
+                </div>
+                <div class="environment-card" data-env="space" onclick="selectEnvironment('space', this)">
+                    <div class="environment-icon">🌌</div>
+                    <div class="environment-name">Uzay İstasyonu</div>
+                    <div class="environment-desc">Yıldızlar arasında</div>
+                </div>
+                <div class="environment-card" data-env="forest" onclick="selectEnvironment('forest', this)">
+                    <div class="environment-icon">🌲</div>
+                    <div class="environment-name">Orman</div>
+                    <div class="environment-desc">Doğanın içinde</div>
+                </div>
+                <div class="environment-card" data-env="desert" onclick="selectEnvironment('desert', this)">
+                    <div class="environment-icon">🏜️</div>
+                    <div class="environment-name">Çöl Gece</div>
+                    <div class="environment-desc">Yıldızlı çöl gökyüzü</div>
+                </div>
+                <div class="environment-card" data-env="moon" onclick="selectEnvironment('moon', this)">
+                    <div class="environment-icon">🌙</div>
+                    <div class="environment-name">Ay Yüzeyi</div>
+                    <div class="environment-desc">Dünya manzarası</div>
+                </div>
+                <div class="environment-card" data-env="cyberpunk" onclick="selectEnvironment('cyberpunk', this)">
+                    <div class="environment-icon">🌃</div>
+                    <div class="environment-name">Cyberpunk</div>
+                    <div class="environment-desc">Neon ışıklar</div>
+                </div>
+            </div>
+            
+            <br>
+            <button onclick="createRoom()">🎬 Oda Oluştur ve Başlat</button>
+            <button onclick="showMainMenu()" class="secondary">◀ Geri</button>
+        </div>
+        
+        <!-- Oda Listesi -->
+        <div id="room-list" style="display: none;">
+            <h2>Aktif Odalar</h2>
+            <div id="rooms-container">
+                <div class="loading">⏳ Odalar yükleniyor...</div>
+            </div>
+            <br>
+            <button onclick="refreshRooms()" class="secondary">🔄 Yenile</button>
+            <button onclick="showMainMenu()" class="secondary">◀ Geri</button>
+        </div>
+        
+        <!-- Şifre Girişi -->
+        <div id="password-prompt" style="display: none;">
+            <h2>🔒 Şifreli Oda</h2>
+            <p id="password-room-name"></p>
+            <input type="password" id="room-password-join" placeholder="Oda Şifresi" />
+            <br><br>
+            <button onclick="joinWithPassword()">Giriş Yap</button>
+            <button onclick="showRoomList()" class="secondary">◀ Geri</button>
+        </div>
+    </div>
+</div>
+
+<!-- Oda Silme Onay Modalı -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h2>🚪 Odadan Çıkış</h2>
+        <p>Siz bu odanın sahibisiniz.</p>
+        <p><strong>Odayı silmek istiyor musunuz?</strong></p>
+        <div class="warning-box">
+            ⚠️ Odayı silerseniz, diğer katılımcılar da otomatik olarak çıkarılır.<br>
+            Silmezseniz, oda açık kalır ve başkaları katılmaya devam edebilir.
+        </div>
+        <div class="modal-buttons">
+            <button onclick="confirmDeleteRoom(false)" class="secondary">Hayır, Açık Bırak</button>
+            <button onclick="confirmDeleteRoom(true)" class="danger">Evet, Sil</button>
+        </div>
+    </div>
+</div>
+
+<!-- VR Kontrolleri -->
+<div id="vr-controls">
+    <button onclick="togglePlayPause()">⏯ Play/Pause</button>
+    <button onclick="leaveRoom()">🚪 Odadan Çık</button>
+</div>
+
+<!-- Oda Bilgisi -->
+<div id="room-info-display">
+    <div><span id="status-indicator" class="status-indicator connected"></span> <span id="room-title">Oda</span></div>
+    <div style="font-size: 0.8em; margin-top: 5px;">👥 <span id="viewers-count">0</span> İzleyici</div>
+    <div id="video-service-badge" style="margin-top: 5px;"></div>
+    <div id="environment-badge" style="margin-top: 5px; font-size: 0.8em;">🎭 <span id="env-name">Ortam</span></div>
+    <div id="sync-status">⏱️ Senkronize ediliyor...</div>
+</div>
+
+<!-- VR Sahnesi -->
+<a-scene id="vr-scene" loading-screen="enabled: false">
+    <!-- Dinamik ortam (JavaScript ile değiştirilecek) -->
+    <a-entity id="environment-container"></a-entity>
+    
+    <!-- Sinema Ekranı -->
+    <a-video
+        id="cinema-screen"
+        src=""
+        width="24"
+        height="13.5"
+        position="0 2 -15"
+        visible="false"
+    ></a-video>
+    
+    <!-- Zemin (ortam yoksa) -->
+    <a-plane 
+        id="default-floor"
+        position="0 0 0" 
+        rotation="-90 0 0" 
+        width="100" 
+        height="100" 
+        color="#1a1a1a"
+    ></a-plane>
+    
+    <!-- Işıklandırma -->
+    <a-light type="ambient" color="#444"></a-light>
+    <a-light type="point" position="0 5 0" intensity="0.5"></a-light>
+    
+    <!-- Kamera -->
+    <a-entity id="camera-rig" position="0 1.6 0">
+        <a-camera></a-camera>
+    </a-entity>
+</a-scene>
+
+<script>
+// ============================================
+// FİREBASE YAPLANDIRMASI
+// ============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyC60idSLdAiqAjPWAOMaM3g8LAKPGEUwH8",
+    authDomain: "vr-sinema.firebaseapp.com",
+    databaseURL: "https://vr-sinema-default-rtdb.firebaseio.com",
+    projectId: "vr-sinema",
+    storageBucket: "vr-sinema.firebasestorage.app",
+    messagingSenderId: "724648238300",
+    appId: "1:724648238300:web:dceba8c536e8a5ffd96819"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const auth = firebase.auth();
+
+let authReady = false;
+auth.signInAnonymously()
+    .then(() => {
+        console.log('✓ Anonim giriş başarılı:', auth.currentUser.uid);
+        authReady = true;
+    })
+    .catch((error) => {
+        console.error('❌ Giriş hatası:', error);
+        alert('Firebase bağlantı hatası! Lütfen sayfayı yenileyin.\n\nHata: ' + error.message);
+    });
+
+// ============================================
+// GLOBAL DEĞİŞKENLER
+// ============================================
+let currentRoomId = null;
+let currentRoomData = null;
+let isRoomOwner = false;
+let videoElement = null;
+let roomRef = null;
+let selectedRoomForPassword = null;
+let videoServiceType = null;
+let selectedEnvironment = 'theater';
+
+// Senkronizasyon kontrol değişkenleri
+let lastSyncTime = 0;
+const DRIFT_THRESHOLD = 5.0;
+const UPDATE_INTERVAL = 5000;
+
+// ============================================
+// ORTAM YÖNETİMİ
+// ============================================
+const ENVIRONMENTS = {
+    theater: {
+        name: 'Klasik Sinema',
+        icon: '🎪',
+        config: 'preset: default; lighting: distant; shadow: true'
+    },
+    space: {
+        name: 'Uzay İstasyonu',
+        icon: '🌌',
+        config: 'preset: starry; lighting: none'
+    },
+    forest: {
+        name: 'Orman',
+        icon: '🌲',
+        config: 'preset: forest; lighting: distant'
+    },
+    desert: {
+        name: 'Çöl Gece',
+        icon: '🏜️',
+        config: 'preset: egypt; lighting: distant; dressing: none'
+    },
+    moon: {
+        name: 'Ay Yüzeyi',
+        icon: '🌙',
+        config: 'preset: goaland; lighting: distant; ground: flat'
+    },
+    cyberpunk: {
+        name: 'Cyberpunk',
+        icon: '🌃',
+        config: 'preset: japan; lighting: distant; fog: 0.8'
+    }
+};
+
+function selectEnvironment(envKey, element) {
+    selectedEnvironment = envKey;
+    
+    // UI güncelle
+    document.querySelectorAll('.environment-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    element.classList.add('selected');
+}
+
+function applyEnvironment(envKey) {
+    const container = document.getElementById('environment-container');
+    const floor = document.getElementById('default-floor');
+    
+    if (!ENVIRONMENTS[envKey]) {
+        console.error('Bilinmeyen ortam:', envKey);
+        envKey = 'theater';
+    }
+    
+    const env = ENVIRONMENTS[envKey];
+    
+    // Mevcut ortamı temizle
+    container.innerHTML = '';
+    
+    // Yeni ortam ekle
+    const envEntity = document.createElement('a-entity');
+    envEntity.setAttribute('environment', env.config);
+    container.appendChild(envEntity);
+    
+    // Zemin gizle (ortam zaten zemin içerir)
+    floor.setAttribute('visible', 'false');
+    
+    // UI güncelle
+    document.getElementById('env-name').textContent = `${env.icon} ${env.name}`;
+    
+    console.log('✓ Ortam yüklendi:', env.name);
+}
+
+// ============================================
+// VIDEO URL İŞLEME
+// ============================================
+function detectVideoService(url) {
+    if (url.includes('catbox.moe') || url.includes('files.catbox.moe')) {
+        return 'catbox';
+    }
+    if (url.includes('.b-cdn.net') || url.includes('bunny')) {
+        return 'bunny';
+    }
+    if (url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov')) {
+        return 'direct';
+    }
+    return 'unknown';
+}
+
+function processVideoUrl(url) {
+    const service = detectVideoService(url);
+    videoServiceType = service;
+    
+    if (service === 'catbox') {
+        console.log('📦 Catbox linki tespit edildi');
+        return url;
+    }
+    
+    if (service === 'bunny') {
+        console.log('🐰 Bunny CDN linki tespit edildi');
+        return url;
+    }
+    
+    if (service === 'direct') {
+        console.log('🎬 Direkt video linki tespit edildi');
+        return url;
+    }
+    
+    console.log('⚠️ Bilinmeyen kaynak, CORS proxy kullanılıyor');
+    videoServiceType = 'cors-proxy';
+    return 'https://corsproxy.io/?' + encodeURIComponent(url);
+}
+
+function getServiceBadge(service) {
+    const badges = {
+        'catbox': '<span class="service-badge badge-catbox">Catbox</span>',
+        'bunny': '<span class="service-badge badge-bunny">Bunny CDN</span>',
+        'direct': '<span class="service-badge badge-direct">Direkt</span>',
+        'cors-proxy': '<span class="service-badge badge-cors">CORS Proxy</span>'
+    };
+    return badges[service] || '';
+}
+
+// ============================================
+// UI FONKSİYONLARI
+// ============================================
+function showMainMenu() {
+    document.getElementById('main-menu').style.display = 'block';
+    document.getElementById('create-room').style.display = 'none';
+    document.getElementById('room-list').style.display = 'none';
+    document.getElementById('password-prompt').style.display = 'none';
+}
+
+function showCreateRoom() {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('create-room').style.display = 'block';
+    
+    document.getElementById('private-room-check').addEventListener('change', function() {
+        document.getElementById('room-password-input').style.display = 
+            this.checked ? 'block' : 'none';
+    });
+}
+
+function showRoomList() {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('room-list').style.display = 'block';
+    loadRooms();
+}
+
+function refreshRooms() {
+    loadRooms();
+}
+
+function showPasswordPrompt(roomId, roomName) {
+    selectedRoomForPassword = roomId;
+    document.getElementById('password-room-name').textContent = `Oda: ${roomName}`;
+    document.getElementById('room-list').style.display = 'none';
+    document.getElementById('password-prompt').style.display = 'block';
+}
+
+function showSyncStatus() {
+    const statusEl = document.getElementById('sync-status');
+    const indicator = document.getElementById('status-indicator');
+    
+    statusEl.classList.add('visible');
+    indicator.className = 'status-indicator syncing';
+    
+    setTimeout(() => {
+        statusEl.classList.remove('visible');
+        indicator.className = 'status-indicator connected';
+    }, 2000);
+}
+
+// ============================================
+// ODA YÖNETİMİ VE TEMİZLEME
+// ============================================
+function cleanupEmptyRooms() {
+    database.ref('rooms').once('value', (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const room = childSnapshot.val();
+            if (!room.viewers || room.viewers === 0) {
+                console.log('🗑️ Boş oda siliniyor:', childSnapshot.key);
+                childSnapshot.ref.remove();
+            }
+        });
+    });
+}
+
+function createRoom() {
+    if (!authReady) {
+        alert('Lütfen bekleyin, Firebase bağlantısı kuruluyor...');
+        return;
+    }
+    
+    const roomName = document.getElementById('room-name-input').value.trim();
+    const videoUrl = document.getElementById('video-url-input').value.trim();
+    const isPrivate = document.getElementById('private-room-check').checked;
+    const password = document.getElementById('room-password-input').value;
+    const screenSize = document.getElementById('screen-size').value;
+    
+    if (!roomName || !videoUrl) {
+        alert('Lütfen oda adı ve video URL giriniz!');
+        return;
+    }
+    
+    const processedUrl = processVideoUrl(videoUrl);
+    const newRoomRef = database.ref('rooms').push();
+    const roomId = newRoomRef.key;
+    
+    const roomData = {
+        name: roomName,
+        videoUrl: processedUrl,
+        originalUrl: videoUrl,
+        videoService: videoServiceType,
+        environment: selectedEnvironment,
+        isPrivate: isPrivate,
+        password: isPrivate ? btoa(password) : null,
+        screenSize: screenSize,
+        owner: auth.currentUser.uid,
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        videoState: {
+            isPlaying: false,
+            currentTime: 0,
+            lastUpdate: Date.now()
+        },
+        viewers: 1
+    };
+    
+    newRoomRef.set(roomData).then(() => {
+        isRoomOwner = true;
+        joinRoom(roomId, roomData);
+    }).catch(error => {
+        console.error('Oda oluşturma hatası:', error);
+        showVideoError('create', error, videoUrl);
+    });
+}
+
+function loadRooms() {
+    const roomsContainer = document.getElementById('rooms-container');
+    roomsContainer.innerHTML = '<div class="loading">⏳ Odalar yükleniyor...</div>';
+    
+    cleanupEmptyRooms();
+    
+    setTimeout(() => {
+        database.ref('rooms').orderByChild('createdAt').once('value', (snapshot) => {
+            roomsContainer.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            const rooms = [];
+            snapshot.forEach((childSnapshot) => {
+                const room = childSnapshot.val();
+                if (room.viewers && room.viewers > 0) {
+                    rooms.push({
+                        id: childSnapshot.key,
+                        data: room
+                    });
+                }
+            });
+            
+            if (rooms.length === 0) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            rooms.reverse().forEach(room => {
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-item' + (room.data.isPrivate ? ' private' : '');
+                const serviceBadge = getServiceBadge(room.data.videoService);
+                const envInfo = ENVIRONMENTS[room.data.environment] || ENVIRONMENTS['theater'];
+                roomDiv.innerHTML = `
+                    ${room.data.isPrivate ? '<span class="lock-icon">🔒</span>' : ''}
+                    <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
+                    <div class="room-info">
+                        👥 ${room.data.viewers} izleyici • ${envInfo.icon} ${envInfo.name}
+                    </div>
+                `;
+                roomDiv.onclick = () => selectRoom(room.id, room.data);
+                roomsContainer.appendChild(roomDiv);
+            });
+        }).catch(error => {
+            console.error('Oda listesi yükleme hatası:', error);
+            roomsContainer.innerHTML = '<p style="color: red;">Odalar yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
+        });
+    }, 500);
+}
+
+function selectRoom(roomId, roomData) {
+    if (roomData.isPrivate) {
+        showPasswordPrompt(roomId, roomData.name);
+    } else {
+        joinRoom(roomId, roomData);
+    }
+}
+
+function joinWithPassword() {
+    const password = document.getElementById('room-password-join').value;
+    
+    database.ref(`rooms/${selectedRoomForPassword}`).once('value', (snapshot) => {
+        const roomData = snapshot.val();
+        
+        if (!roomData) {
+            alert('Oda bulunamadı!');
+            return;
+        }
+        
+        if (btoa(password) === roomData.password) {
+            joinRoom(selectedRoomForPassword, roomData);
+        } else {
+            alert('Yanlış şifre!');
+        }
+    });
+}
+
+function joinRoom(roomId, roomData) {
+    currentRoomId = roomId;
+    currentRoomData = roomData;
+    roomRef = database.ref(`rooms/${roomId}`);
+    videoServiceType = roomData.videoService;
+    
+    isRoomOwner = (roomData.owner === auth.currentUser.uid);
+    
+    roomRef.child('viewers').transaction((current) => {
+        return (current || 0) + 1;
+    });
+    
+    document.getElementById('ui-overlay').classList.add('hidden');
+    document.getElementById('vr-controls').classList.add('visible');
+    document.getElementById('room-info-display').classList.add('visible');
+    
+    document.getElementById('room-title').textContent = roomData.name;
+    document.getElementById('video-service-badge').innerHTML = getServiceBadge(videoServiceType);
+    updateViewerCount();
+    
+    // Ortamı uygula
+    applyEnvironment(roomData.environment || 'theater');
+    
+    setupVideo(roomData.videoUrl, roomData.screenSize, roomData.originalUrl);
+    listenToRoomUpdates();
+    
+    window.addEventListener('beforeunload', () => {
+        leaveRoomSilent();
+    });
+}
+
+function leaveRoom() {
+    if (isRoomOwner) {
+        document.getElementById('delete-modal').classList.add('active');
+    } else {
+        leaveRoomSilent();
+        location.reload();
+    }
+}
+
+function leaveRoomSilent() {
+    if (currentRoomId && roomRef) {
+        roomRef.child('viewers').transaction((current) => {
+            const newCount = Math.max((current || 1) - 1, 0);
+            
+            if (newCount === 0) {
+                setTimeout(() => {
+                    roomRef.remove().then(() => {
+                        console.log('✓ Boş oda silindi');
+                    });
+                }, 500);
+            }
+            
+            return newCount;
+        });
+        roomRef.off();
+    }
+}
+
+function confirmDeleteRoom(shouldDelete) {
+    document.getElementById('delete-modal').classList.remove('active');
+    
+    if (shouldDelete && roomRef) {
+        roomRef.remove().then(() => {
+            console.log('✓ Oda sahibi tarafından silindi');
+        });
+    } else {
+        leaveRoomSilent();
+    }
+    
+    location.reload();
+}
+
+// ============================================
+// VİDEO YÖNETİMİ
+// ============================================
+function setupVideo(videoUrl, screenSize, originalUrl) {
+    const scene = document.querySelector('a-scene');
+    const screen = document.getElementById('cinema-screen');
+    
+    const sizes = {
+        normal: { width: 16, height: 9 },
+        large: { width: 24, height: 13.5 },
+        xlarge: { width: 32, height: 18 },
+        imax: { width: 40, height: 22.5 }
+    };
+    
+    const size = sizes[screenSize] || sizes.large;
+    screen.setAttribute('width', size.width);
+    screen.setAttribute('height', size.height);
+    
+    let assets = document.querySelector('a-assets');
+    if (!assets) {
+        assets = document.createElement('a-assets');
+        scene.appendChild(assets);
+    }
+    
+    const videoAsset = document.createElement('video');
+    videoAsset.id = 'video-src';
+    videoAsset.crossOrigin = 'anonymous';
+    videoAsset.src = videoUrl;
+    videoAsset.preload = 'auto';
+    videoAsset.loop = false;
+    videoAsset.playsInline = true;
+    
+    assets.appendChild(videoAsset);
+    videoElement = videoAsset;
+    
+    screen.setAttribute('src', '#video-src');
+    screen.setAttribute('visible', 'true');
+    
+    videoElement.addEventListener('loadedmetadata', () => {
+        console.log('✓ Video yüklendi:', videoElement.duration, 'saniye');
+    });
+    
+    videoElement.addEventListener('error', (e) => {
+        console.error('❌ Video yükleme hatası:', e);
+        showVideoError('load', e, originalUrl);
+    });
+}
+
+function showVideoError(type, error, url) {
+    const service = detectVideoService(url);
+    let message = '❌ <strong>Video Yüklenemedi!</strong><br><br>';
+    
+    if (type === 'load') {
+        message += '<strong>Sebep:</strong><br>';
+        message += '• URL yanlış veya erişilemiyor<br>';
+        message += '• Video formatı desteklenmiyor<br>';
+        message += '• CORS sorunu<br><br>';
+    }
+    
+    message += '<strong>Çözüm Önerileri:</strong><br>';
+    
+    if (service === 'unknown' || service === 'cors-proxy') {
+        message += '1. <strong>Catbox.moe</strong> kullanın (Ücretsiz):<br>';
+        message += '   • https://catbox.moe adresine gidin<br>';
+        message += '   • Videoyu yükleyin<br>';
+        message += '   • Direkt linki kopyalayın<br><br>';
+        
+        message += '2. <strong>Bunny.net</strong> kullanın ($1/ay):<br>';
+        message += '   • https://bunny.net adresine kaydolun<br>';
+        message += '   • Storage Zone oluşturun<br>';
+        message += '   • CDN linkini kullanın<br><br>';
+        
+        message += '3. <strong>Direkt .mp4 linki</strong> bulun<br>';
+        message += '   • Link .mp4 ile bitmelidir<br>';
+        message += '   • CORS izni olmalıdır<br>';
+    } else {
+        message += '• Linkin doğru olduğundan emin olun<br>';
+        message += '• Başka bir video deneyin<br>';
+        message += '• Tarayıcı konsolunu kontrol edin (F12)<br>';
+    }
+    
+    const overlay = document.getElementById('ui-overlay');
+    overlay.classList.remove('hidden');
+    overlay.querySelector('.ui-container').innerHTML = `
+        <h1>🎬 VR Sosyal Sinema</h1>
+        <div class="error-box">${message}</div>
+        <button onclick="location.reload()">◀ Ana Menüye Dön</button>
+    `;
+}
+
+function togglePlayPause() {
+    if (!isRoomOwner) {
+        alert('⚠️ Sadece oda sahibi video kontrolü yapabilir!');
+        return;
+    }
+    
+    if (!videoElement) {
+        alert('Video henüz yüklenmedi!');
+        return;
+    }
+    
+    if (videoElement.paused) {
+        videoElement.play().catch(err => {
+            console.error('Play hatası:', err);
+            alert('Video oynatılamadı. Tarayıcı izni gerekebilir.');
+        });
+        updateRoomState(true, videoElement.currentTime);
+    } else {
+        videoElement.pause();
+        updateRoomState(false, videoElement.currentTime);
+    }
+}
+
+function updateRoomState(isPlaying, currentTime) {
+    if (roomRef) {
+        roomRef.child('videoState').update({
+            isPlaying: isPlaying,
+            currentTime: currentTime,
+            lastUpdate: Date.now()
+        });
+    }
+}
+
+// ============================================
+// OPTİMİZE EDİLMİŞ SENKRONİZASYON
+// ============================================
+function listenToRoomUpdates() {
+    if (!roomRef) return;
+    
+    roomRef.child('videoState').on('value', (snapshot) => {
+        if (!videoElement) return;
+        
+        const state = snapshot.val();
+        if (!state) return;
+        
+        const now = Date.now();
+        const timeDiff = Math.abs(videoElement.currentTime - state.currentTime);
+        
+        if (state.isPlaying && videoElement.paused) {
+            console.log('▶️ Video başlatılıyor');
+            videoElement.currentTime = state.currentTime;
+            videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
+            lastSyncTime = now;
+            showSyncStatus();
+            return;
+        }
+        
+        if (!state.isPlaying && !videoElement.paused) {
+            console.log('⏸️ Video duraklatılıyor');
+            videoElement.pause();
+            videoElement.currentTime = state.currentTime;
+            lastSyncTime = now;
+            showSyncStatus();
+            return;
+        }
+        
+        if (timeDiff > DRIFT_THRESHOLD) {
+            console.log(`⚠️ Büyük fark tespit edildi: ${timeDiff.toFixed(2)}s - Düzeltiliyor`);
+            videoElement.currentTime = state.currentTime;
+            lastSyncTime = now;
+            showSyncStatus();
+        }
+    });
+    
+    roomRef.child('viewers').on('value', () => {
+        updateViewerCount();
+    });
+    
+    if (isRoomOwner) {
+        setInterval(() => {
+            if (videoElement && !videoElement.paused) {
+                updateRoomState(true, videoElement.currentTime);
+            }
+        }, UPDATE_INTERVAL);
+    }
+}
+
+function updateViewerCount() {
+    if (roomRef) {
+        roomRef.child('viewers').once('value', (snapshot) => {
+            document.getElementById('viewers-count').textContent = snapshot.val() || 0;
+        });
+    }
+}
+
+// ============================================
+// YARDIMCI FONKSİYONLAR
+// ============================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================
+// BAŞLATMA
+// ============================================
+console.log('🎬 VR Sosyal Sinema - Ortamlar Sürümü');
+console.log('📍 Site: https://recinilt.github.io/mefeypublic/recinilt/vr-sinema.html');
+console.log('⚙️ Senkronizasyon: 5s güncelleme, 5s drift threshold');
+console.log('🎭 6 Sinema Ortamı Mevcut');
+console.log('Firebase:', firebase.app().name ? 'Bağlı ✓' : 'Bağlı Değil ✗');
+
+document.addEventListener('DOMContentLoaded', () => {
+    const scene = document.querySelector('a-scene');
+    scene.addEventListener('loaded', () => {
+        console.log('✓ VR sahnesi yüklendi');
+    });
+});
+</script>
+
+</body>
+</html>
