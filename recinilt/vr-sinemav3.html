@@ -1,0 +1,2980 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR Sinema - Sosyal İzleme - Full Edition</title>
+    
+    <!-- A-Frame Core -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    
+    <!-- A-Frame Components -->
+    <script src="https://unpkg.com/aframe-environment-component@1.3.2/dist/aframe-environment-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-gui@0.3.4/dist/aframe-gui.min.js"></script>
+    
+    <!-- HLS.js for .ts video support -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    
+    <!-- YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    
+    <style>
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+        
+        #ui-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+        
+        #ui-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .ui-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        h2 {
+            color: #444;
+            font-size: 1.3em;
+            margin-top: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+            font-family: inherit;
+        }
+        
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+        
+        button.stop {
+            background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+        }
+        
+        .room-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .room-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .room-item.private {
+            border-left-color: #f5576c;
+        }
+        
+        .room-item.ownerless {
+            border-left-color: #ffa500;
+            opacity: 0.8;
+        }
+        
+        .room-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .room-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .lock-icon {
+            float: right;
+            color: #f5576c;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-ownerless {
+            background: #ffa500;
+            color: white;
+        }
+        
+        #vr-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 25px;
+            border-radius: 15px;
+            display: none;
+        }
+        
+        #vr-controls.visible {
+            display: block;
+        }
+        
+        #vr-controls button {
+            margin: 0 5px;
+            font-size: 14px;
+            padding: 10px 20px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-indicator.connected {
+            background: #4caf50;
+        }
+        
+        .status-indicator.syncing {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        #room-info-display {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #room-info-display.visible {
+            display: block;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        
+        .radio-container {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .radio-container label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        .radio-container input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .service-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-catbox {
+            background: #ff69b4;
+            color: white;
+        }
+        
+        .badge-bunny {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .badge-cors {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .badge-direct {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .badge-youtube {
+            background: #ff0000;
+            color: white;
+        }
+        
+        .badge-gdrive {
+            background: #4285f4;
+            color: white;
+        }
+        
+        .badge-hls {
+            background: #9c27b0;
+            color: white;
+        }
+        
+        #sync-status {
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #sync-status.visible {
+            opacity: 1;
+        }
+        
+        .environment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .environment-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+            text-align: center;
+        }
+        
+        .environment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .environment-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .environment-icon {
+            font-size: 2.2em;
+            margin-bottom: 6px;
+        }
+        
+        .environment-name {
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        
+        .environment-desc {
+            font-size: 0.7em;
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+        
+        /* Screen Position Controls */
+        #screen-controls {
+            position: fixed;
+            bottom: 150px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            z-index: 100;
+            display: none;
+        }
+        
+        #screen-controls.visible {
+            display: block;
+        }
+        
+        #screen-controls button {
+            font-size: 20px;
+            padding: 8px 12px;
+            margin: 2px;
+        }
+        
+        .screen-control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .screen-control-grid button:nth-child(1) { grid-column: 2; }
+        .screen-control-grid button:nth-child(2) { grid-column: 1; }
+        .screen-control-grid button:nth-child(3) { grid-column: 3; }
+        .screen-control-grid button:nth-child(4) { grid-column: 2; }
+        
+        /* Chat Container */
+        #chat-container {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            width: 350px;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+        }
+        
+        #chat-container.visible {
+            display: flex;
+        }
+        
+        #chat-header {
+            background: rgba(102, 126, 234, 0.8);
+            padding: 10px 15px;
+            border-radius: 15px 15px 0 0;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            animation: messageSlide 0.3s ease-out;
+        }
+        
+        @keyframes messageSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .message .nickname {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .message .text {
+            color: white;
+            margin-top: 3px;
+            word-wrap: break-word;
+        }
+        
+        .message .time {
+            font-size: 0.7em;
+            color: #aaa;
+            margin-top: 2px;
+        }
+        
+        #chat-input-area {
+            padding: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 8px;
+        }
+        
+        #chat-message {
+            flex: 1;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+        }
+        
+        #chat-message::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        #send-message-btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        #toggle-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 99;
+            font-size: 20px;
+            padding: 12px;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: none;
+        }
+        
+        #toggle-chat-btn.visible {
+            display: block;
+        }
+        
+        /* Settings Panel */
+        #settings-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            z-index: 100;
+            color: white;
+            display: none;
+            max-width: 300px;
+        }
+        
+        #settings-panel.visible {
+            display: block;
+        }
+        
+        #settings-panel h3 {
+            margin-top: 0;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        
+        #settings-panel label {
+            display: block;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+        
+        #settings-panel select {
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 5px;
+        }
+        
+        #settings-toggle-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 99;
+            font-size: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        #settings-toggle-btn.visible {
+            display: block;
+        }
+        
+        /* Video Error Overlay */
+        #video-error-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            z-index: 150;
+            color: white;
+            max-width: 500px;
+            display: none;
+        }
+        
+        #video-error-overlay.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 2D UI Overlay -->
+<div id="ui-overlay">
+    <div class="ui-container">
+        <h1>🎬 VR Sosyal Sinema</h1>
+        
+        <!-- Nickname Girişi -->
+        <div id="nickname-screen">
+            <h2>👤 Hoş Geldiniz</h2>
+            <p>Başlamadan önce bir takma ad seçin:</p>
+            <input type="text" id="nickname-input" placeholder="Takma adınız (örn: Ahmet123)" maxlength="20" />
+            <div class="info-box">
+                💡 Bu isim diğer kullanıcılar tarafından görülecektir.
+            </div>
+            <button onclick="setNickname()">✅ Devam Et</button>
+        </div>
+        
+        <!-- Ana Menü -->
+        <div id="main-menu" style="display: none;">
+            <h2>Hoş Geldiniz, <span id="welcome-nickname"></span></h2>
+            <button onclick="showCreateRoom()">➕ Yeni Oda Oluştur</button>
+            <button onclick="showRoomList()" class="secondary">🚪 Odalara Gözat</button>
+        </div>
+        
+        <!-- Oda Oluşturma -->
+        <div id="create-room" style="display: none;">
+            <h2>Yeni Oda Oluştur</h2>
+            <input type="text" id="room-name-input" placeholder="Oda Adı (örn: Film Gecesi)" />
+            
+            <div class="info-box">
+                💡 <strong>Video linki opsiyoneldir!</strong><br>
+                Şimdi boş bırakıp sonradan da ekleyebilirsiniz.
+            </div>
+            
+            <div class="info-box">
+                💡 <strong>Desteklenen Video Servisleri:</strong><br>
+                🔹 <strong>YouTube</strong> - youtube.com, youtu.be<br>
+                🔹 <strong>Google Drive</strong> - drive.google.com (public link)<br>
+                🔹 <strong>Catbox.moe</strong> - Ücretsiz, 200 MB<br>
+                🔹 <strong>Bunny CDN</strong> - Profesyonel<br>
+                🔹 <strong>HLS Streams</strong> - .m3u8, .ts dosyaları<br>
+                🔹 <strong>Direkt link</strong> - .mp4, .webm, .mov, .ogg
+            </div>
+            
+            <textarea id="video-url-input" placeholder="Video URL (opsiyonel - sonradan ekleyebilirsiniz)
+
+Örnekler:
+https://www.youtube.com/watch?v=VIDEO_ID
+https://youtu.be/VIDEO_ID
+https://drive.google.com/file/d/FILE_ID/view
+https://files.catbox.moe/abc123.mp4
+https://yourzone.b-cdn.net/video.mp4
+https://example.com/stream.m3u8"></textarea>
+            
+            <div class="checkbox-container">
+                <input type="checkbox" id="private-room-check" />
+                <label for="private-room-check">🔒 Özel Oda (Şifre Korumalı)</label>
+            </div>
+            
+            <input type="password" id="room-password-input" placeholder="Oda Şifresi (opsiyonel)" style="display: none;" />
+            
+            <label for="screen-size">Ekran Boyutu:</label>
+            <select id="screen-size">
+                <option value="normal">Normal (16m)</option>
+                <option value="large" selected>Büyük (24m)</option>
+                <option value="xlarge">Çok Büyük (32m)</option>
+                <option value="imax">IMAX (40m)</option>
+            </select>
+            
+            <div class="radio-container">
+                <strong>🎮 Video Kontrolü:</strong>
+                <label>
+                    <input type="radio" name="control-mode" value="owner" checked>
+                    Sadece oda sahibi kontrol edebilir
+                </label>
+                <label>
+                    <input type="radio" name="control-mode" value="everyone">
+                    Herkes kontrol edebilir
+                </label>
+            </div>
+            
+            <h2>🎭 Başlangıç Sinema Ortamı</h2>
+            <div class="info-box">
+                ℹ️ Odadayken herkes kendi ortamını kendisi için değiştirebilir.
+            </div>
+            <div class="environment-grid" id="environment-selector">
+                <div class="environment-card selected" data-env="none" onclick="selectEnvironment('none', this)">
+                    <div class="environment-icon">⬛</div>
+                    <div class="environment-name">Ortamsız</div>
+                    <div class="environment-desc">Sade karanlık</div>
+                </div>
+                <div class="environment-card" data-env="theater" onclick="selectEnvironment('theater', this)">
+                    <div class="environment-icon">🎪</div>
+                    <div class="environment-name">Klasik Sinema</div>
+                    <div class="environment-desc">Geleneksel salon</div>
+                </div>
+                <div class="environment-card" data-env="space" onclick="selectEnvironment('space', this)">
+                    <div class="environment-icon">🌌</div>
+                    <div class="environment-name">Uzay İstasyonu</div>
+                    <div class="environment-desc">Yıldızlar arası</div>
+                </div>
+                <div class="environment-card" data-env="forest" onclick="selectEnvironment('forest', this)">
+                    <div class="environment-icon">🌲</div>
+                    <div class="environment-name">Orman</div>
+                    <div class="environment-desc">Doğanın içi</div>
+                </div>
+                <div class="environment-card" data-env="desert" onclick="selectEnvironment('desert', this)">
+                    <div class="environment-icon">🏜️</div>
+                    <div class="environment-name">Çöl Gece</div>
+                    <div class="environment-desc">Yıldızlı gökyüzü</div>
+                </div>
+                <div class="environment-card" data-env="moon" onclick="selectEnvironment('moon', this)">
+                    <div class="environment-icon">🌙</div>
+                    <div class="environment-name">Ay Yüzeyi</div>
+                    <div class="environment-desc">Dünya manzarası</div>
+                </div>
+                <div class="environment-card" data-env="cyberpunk" onclick="selectEnvironment('cyberpunk', this)">
+                    <div class="environment-icon">🌃</div>
+                    <div class="environment-name">Cyberpunk</div>
+                    <div class="environment-desc">Neon ışıklar</div>
+                </div>
+                <div class="environment-card" data-env="underwater" onclick="selectEnvironment('underwater', this)">
+                    <div class="environment-icon">🌊</div>
+                    <div class="environment-name">Su Altı</div>
+                    <div class="environment-desc">Okyanus derinliği</div>
+                </div>
+                <div class="environment-card" data-env="mountain" onclick="selectEnvironment('mountain', this)">
+                    <div class="environment-icon">⛰️</div>
+                    <div class="environment-name">Dağ Zirvesi</div>
+                    <div class="environment-desc">Bulutlar üstü</div>
+                </div>
+                <div class="environment-card" data-env="volcano" onclick="selectEnvironment('volcano', this)">
+                    <div class="environment-icon">🌋</div>
+                    <div class="environment-name">Volkan</div>
+                    <div class="environment-desc">Ateş ve lav</div>
+                </div>
+                <div class="environment-card" data-env="fantasy" onclick="selectEnvironment('fantasy', this)">
+                    <div class="environment-icon">✨</div>
+                    <div class="environment-name">Fantastik</div>
+                    <div class="environment-desc">Rüya gibi</div>
+                </div>
+                <div class="environment-card" data-env="city" onclick="selectEnvironment('city', this)">
+                    <div class="environment-icon">🏙️</div>
+                    <div class="environment-name">Şehir</div>
+                    <div class="environment-desc">Gökdelenler</div>
+                </div>
+                <div class="environment-card" data-env="beach" onclick="selectEnvironment('beach', this)">
+                    <div class="environment-icon">🏖️</div>
+                    <div class="environment-name">Sahil</div>
+                    <div class="environment-desc">Gün batımı</div>
+                </div>
+            </div>
+            
+            <br>
+            <button onclick="createRoom()">🎬 Oda Oluştur ve Başlat</button>
+            <button onclick="showMainMenu()" class="secondary">◀ Geri</button>
+        </div>
+        
+        <!-- Oda Listesi -->
+        <div id="room-list" style="display: none;">
+            <h2>Aktif Odalar</h2>
+            <div id="rooms-container">
+                <div class="loading">⏳ Odalar yükleniyor...</div>
+            </div>
+            <br>
+            <button onclick="refreshRooms()" class="secondary">🔄 Yenile</button>
+            <button onclick="showMainMenu()" class="secondary">◀ Geri</button>
+        </div>
+        
+        <!-- Şifre Girişi -->
+        <div id="password-prompt" style="display: none;">
+            <h2>🔒 Şifreli Oda</h2>
+            <p id="password-room-name"></p>
+            <input type="password" id="room-password-join" placeholder="Oda Şifresi" />
+            <br><br>
+            <button onclick="joinWithPassword()">Giriş Yap</button>
+            <button onclick="showRoomList()" class="secondary">◀ Geri</button>
+        </div>
+    </div>
+</div>
+
+<!-- Oda Silme Onay Modalı -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h2>🚪 Odadan Çıkış</h2>
+        <p>Siz bu odanın sahibisiniz.</p>
+        <p><strong>Odayı silmek istiyor musunuz?</strong></p>
+        <div class="warning-box">
+            ⚠️ <strong>Odayı silerseniz:</strong> Diğer katılımcılar da otomatik olarak çıkarılır.<br><br>
+            ✅ <strong>Açık bırakırsanız:</strong> Oda sahipliği bir sonraki kişiye devredilir.<br>
+            • Odada başkaları varsa → Sahiplik devredilir<br>
+            • Odada kimse yoksa → Oda sahipsiz kalır, ilk giren sahip olur
+        </div>
+        <div class="modal-buttons">
+            <button onclick="confirmDeleteRoom(false)" class="secondary">Hayır, Açık Bırak</button>
+            <button onclick="confirmDeleteRoom(true)" class="danger">Evet, Sil</button>
+        </div>
+    </div>
+</div>
+
+<!-- Video Değiştirme Modalı -->
+<div id="change-video-modal" class="modal">
+    <div class="modal-content">
+        <h2>🎬 Video Değiştir</h2>
+        <textarea id="new-video-url" placeholder="Yeni Video URL
+
+YouTube, Google Drive, Catbox, Bunny CDN, HLS streams veya direkt .mp4/.webm/.mov/.ogg linki"></textarea>
+        <div class="info-box">
+            💡 Video değiştirildiğinde tüm izleyiciler yeni videoyu görecektir.
+        </div>
+        <div class="modal-buttons">
+            <button onclick="closeChangeVideoModal()" class="secondary">İptal</button>
+            <button onclick="applyVideoChange()">Değiştir</button>
+        </div>
+    </div>
+</div>
+
+<!-- Video Hata Overlay -->
+<div id="video-error-overlay">
+    <h2>⚠️ Video Yüklenemedi</h2>
+    <p id="video-error-message"></p>
+    <div style="margin-top: 20px;">
+        <button onclick="showChangeVideoModal()" style="width: 100%;">🔄 Farklı Video Dene</button>
+        <button onclick="dismissVideoError()" class="secondary" style="width: 100%; margin-top: 10px;">Kapat</button>
+    </div>
+</div>
+
+<!-- VR Kontrolleri -->
+<div id="vr-controls">
+    <button onclick="togglePlayPause()">⏯ Play/Pause</button>
+    <button onclick="stopVideo()" class="stop">⏹ Durdur</button>
+    <button onclick="showChangeVideoModal()">🎬 Video Değiştir</button>
+    <button onclick="leaveRoom()">🚪 Odadan Çık</button>
+</div>
+
+<!-- Ekran Pozisyon Kontrolleri -->
+<div id="screen-controls">
+    <div style="text-align: center; color: white; margin-bottom: 10px; font-size: 0.9em;">📐 Ekran Pozisyonu</div>
+    <div class="screen-control-grid">
+        <button onclick="moveScreen('up')" title="Yukarı">⬆️</button>
+        <button onclick="moveScreen('left')" title="Sola">⬅️</button>
+        <button onclick="moveScreen('right')" title="Sağa">➡️</button>
+        <button onclick="moveScreen('down')" title="Aşağı">⬇️</button>
+    </div>
+    <button onclick="moveScreen('forward')" style="width: 100%; margin: 5px 0;">⏫ Yakınlaştır</button>
+    <button onclick="moveScreen('backward')" style="width: 100%; margin: 5px 0;">⏬ Uzaklaştır</button>
+    <button onclick="resetScreenPosition()" style="width: 100%; margin-top: 10px;">🔄 Sıfırla</button>
+</div>
+
+<!-- Chat Konteyneri -->
+<div id="chat-container">
+    <div id="chat-header">
+        💬 Sohbet
+        <button onclick="toggleChat()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.2em;">✖</button>
+    </div>
+    <div id="messages"></div>
+    <div id="chat-input-area">
+        <input type="text" id="chat-message" placeholder="Mesaj yazın..." maxlength="200" />
+        <button id="send-message-btn" onclick="sendMessage()">📤</button>
+    </div>
+</div>
+
+<button id="toggle-chat-btn" onclick="toggleChat()">💬</button>
+
+<!-- Ayarlar Paneli -->
+<div id="settings-panel">
+    <h3>⚙️ Kişisel Ayarlar</h3>
+    
+    <label>
+        🎭 Sinema Ortamı:
+        <select id="personal-environment" onchange="changePersonalEnvironment()">
+            <option value="none">⬛ Ortamsız</option>
+            <option value="theater">🎪 Klasik Sinema</option>
+            <option value="space">🌌 Uzay İstasyonu</option>
+            <option value="forest">🌲 Orman</option>
+            <option value="desert">🏜️ Çöl Gece</option>
+            <option value="moon">🌙 Ay Yüzeyi</option>
+            <option value="cyberpunk">🌃 Cyberpunk</option>
+            <option value="underwater">🌊 Su Altı</option>
+            <option value="mountain">⛰️ Dağ Zirvesi</option>
+            <option value="volcano">🌋 Volkan</option>
+            <option value="fantasy">✨ Fantastik</option>
+            <option value="city">🏙️ Şehir</option>
+            <option value="beach">🏖️ Sahil</option>
+        </select>
+    </label>
+    
+    <label>
+        🎯 Performans Modu:
+        <select id="performance-mode" onchange="changePerformanceMode()">
+            <option value="high">Yüksek Kalite</option>
+            <option value="medium" selected>Orta (Önerilen)</option>
+            <option value="low">Düşük (Daha iyi FPS)</option>
+        </select>
+    </label>
+    
+    <div style="font-size: 0.8em; color: #aaa; margin-top: 15px;">
+        💡 Bu ayarlar sadece sizin için geçerlidir.
+    </div>
+</div>
+
+<button id="settings-toggle-btn" onclick="toggleSettings()">⚙️</button>
+
+<!-- Oda Bilgisi -->
+<div id="room-info-display">
+    <div><span id="status-indicator" class="status-indicator connected"></span> <span id="room-title">Oda</span></div>
+    <div style="font-size: 0.8em; margin-top: 5px;">👥 <span id="viewers-count">0</span> İzleyici</div>
+    <div id="video-service-badge" style="margin-top: 5px;"></div>
+    <div id="control-mode-badge" style="margin-top: 5px; font-size: 0.8em;">🎮 <span id="control-mode-text">Kontrol</span></div>
+    <div id="sync-status">⏱️ 3 saniye sonra başlıyor...</div>
+</div>
+
+<!-- VR Sahnesi -->
+<a-scene id="vr-scene" loading-screen="enabled: false">
+    <!-- Ortam Konteyneri -->
+    <a-entity id="environment-container"></a-entity>
+    
+    <!-- Video Ekranı -->
+    <a-video
+        id="cinema-screen"
+        src=""
+        width="24"
+        height="13.5"
+        position="0 2 -15"
+        visible="false"
+    ></a-video>
+    
+    <!-- Varsayılan Zemin -->
+    <a-plane 
+        id="default-floor"
+        position="0 0 0" 
+        rotation="-90 0 0" 
+        width="100" 
+        height="100" 
+        color="#1a1a1a"
+        visible="true"
+    ></a-plane>
+    
+    <!-- Aydınlatma -->
+    <a-light type="ambient" color="#444"></a-light>
+    <a-light type="point" position="0 5 0" intensity="0.5"></a-light>
+    
+    <!-- Spatial Audio için Listener -->
+    <a-entity id="audio-listener" sound-listener></a-entity>
+    
+    <!-- VR UI Panel (Gelişmiş - Hover ile göster/gizle) -->
+    <a-entity id="vr-ui-panel" position="0 1.5 -2" visible="false">
+        
+        <!-- Arka plan panel -->
+        <a-plane 
+            width="2.5" 
+            height="2" 
+            color="#1a1a1a" 
+            opacity="0.95"
+            position="0 0 -0.05">
+        </a-plane>
+        
+        <!-- Play/Pause Butonu -->
+        <a-box
+            id="vr-play-pause-btn"
+            width="0.6" 
+            height="0.25"
+            depth="0.05"
+            position="-0.7 0.7 0"
+            color="#667eea"
+            class="clickable">
+            <a-text value="▶️ Play" align="center" position="0 0 0.03" width="1.5" color="#ffffff"></a-text>
+        </a-box>
+        
+        <!-- Durdur Butonu -->
+        <a-box
+            id="vr-stop-btn"
+            width="0.6" 
+            height="0.25"
+            depth="0.05"
+            position="0 0.7 0"
+            color="#ff9800"
+            class="clickable">
+            <a-text value="⏹ Durdur" align="center" position="0 0 0.03" width="1.5" color="#ffffff"></a-text>
+        </a-box>
+        
+        <!-- Video Değiştir -->
+        <a-box
+            id="vr-change-video-btn"
+            width="0.6" 
+            height="0.25"
+            depth="0.05"
+            position="0.7 0.7 0"
+            color="#f093fb"
+            class="clickable">
+            <a-text value="🎬 Video" align="center" position="0 0 0.03" width="1.5" color="#ffffff"></a-text>
+        </a-box>
+        
+        <!-- Seek Bar (Progress) -->
+        <a-box
+            id="vr-seek-bar-bg"
+            width="2.2" 
+            height="0.08"
+            depth="0.02"
+            position="0 0.35 0"
+            color="#333333">
+        </a-box>
+        
+        <a-box
+            id="vr-seek-bar-progress"
+            width="0" 
+            height="0.08"
+            depth="0.03"
+            position="-1.1 0.35 0.01"
+            color="#667eea">
+        </a-box>
+        
+        <!-- Zaman göstergesi -->
+        <a-text
+            id="vr-time-display"
+            value="00:00 / 00:00"
+            position="0 0.15 0"
+            align="center"
+            width="2.5"
+            color="#ffffff">
+        </a-text>
+        
+        <!-- Ekran Pozisyon Kontrolleri -->
+        <a-text value="📐 Ekran" position="0 -0.1 0" align="center" width="2" color="#aaaaaa"></a-text>
+        
+        <a-box id="vr-screen-up" width="0.25" height="0.25" depth="0.05" position="0 -0.35 0" color="#555555" class="clickable">
+            <a-text value="⬆️" align="center" position="0 0 0.03" width="1.5"></a-text>
+        </a-box>
+        
+        <a-box id="vr-screen-left" width="0.25" height="0.25" depth="0.05" position="-0.3 -0.65 0" color="#555555" class="clickable">
+            <a-text value="⬅️" align="center" position="0 0 0.03" width="1.5"></a-text>
+        </a-box>
+        
+        <a-box id="vr-screen-right" width="0.25" height="0.25" depth="0.05" position="0.3 -0.65 0" color="#555555" class="clickable">
+            <a-text value="➡️" align="center" position="0 0 0.03" width="1.5"></a-text>
+        </a-box>
+        
+        <a-box id="vr-screen-down" width="0.25" height="0.25" depth="0.05" position="0 -0.95 0" color="#555555" class="clickable">
+            <a-text value="⬇️" align="center" position="0 0 0.03" width="1.5"></a-text>
+        </a-box>
+        
+        <!-- Sıfırla -->
+        <a-box id="vr-screen-reset" width="0.6" height="0.2" depth="0.05" position="0.8 -0.65 0" color="#444444" class="clickable">
+            <a-text value="🔄 Sıfırla" align="center" position="0 0 0.03" width="1.2" color="#ffffff"></a-text>
+        </a-box>
+        
+    </a-entity>
+    
+    <!-- Kamera + Kumandalar -->
+    <a-entity id="camera-rig" position="0 1.6 0">
+        <a-camera>
+            <a-cursor
+                id="cursor"
+                color="#667eea"
+                raycaster="objects: .clickable"
+                fuse="true"
+                fuse-timeout="1500">
+            </a-cursor>
+        </a-camera>
+    </a-entity>
+    
+</a-scene>
+
+<script>
+// ============================================
+// API YAPILANDIRMASI - SEN DOLDURACAKSIN
+// ============================================
+const API_KEYS = {
+    // YouTube Data API v3
+    // Nasıl alınır: https://console.cloud.google.com
+    // 1. Yeni proje oluştur
+    // 2. YouTube Data API v3'ü etkinleştir
+    // 3. Credentials → API Key oluştur
+    YOUTUBE: 'BURAYA_YOUTUBE_API_KEY_GELECEK',
+    
+    // Google Drive API v3
+    // Aynı projede Drive API'yi etkinleştir
+    GOOGLE_DRIVE: 'BURAYA_GOOGLE_DRIVE_API_KEY_GELECEK'
+};
+
+// API Key kontrolü
+function checkAPIKeys() {
+    const warnings = [];
+    
+    if (API_KEYS.YOUTUBE === 'BURAYA_YOUTUBE_API_KEY_GELECEK') {
+        warnings.push('YouTube API Key eksik - YouTube videoları çalışmayabilir');
+    }
+    
+    if (API_KEYS.GOOGLE_DRIVE === 'BURAYA_GOOGLE_DRIVE_API_KEY_GELECEK') {
+        warnings.push('Google Drive API Key eksik - Google Drive videoları çalışmayabilir');
+    }
+    
+    if (warnings.length > 0) {
+        console.warn('⚠️ API KEY UYARISI:');
+        warnings.forEach(w => console.warn('  - ' + w));
+        console.warn('API keylerini doldurmak için kod başındaki API_KEYS objesini düzenleyin.');
+    } else {
+        console.log('✓ API Keys yapılandırıldı');
+    }
+}
+
+// ============================================
+// FİREBASE YAPLANDIRMASI
+// ============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyC60idSLdAiqAjPWAOMaM3g8LAKPGEUwH8",
+    authDomain: "vr-sinema.firebaseapp.com",
+    databaseURL: "https://vr-sinema-default-rtdb.firebaseio.com",
+    projectId: "vr-sinema",
+    storageBucket: "vr-sinema.firebasestorage.app",
+    messagingSenderId: "724648238300",
+    appId: "1:724648238300:web:dceba8c536e8a5ffd96819"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const auth = firebase.auth();
+
+let authReady = false;
+auth.signInAnonymously()
+    .then(() => {
+        console.log('✓ Anonim giriş başarılı:', auth.currentUser.uid);
+        authReady = true;
+        checkAPIKeys();
+    })
+    .catch((error) => {
+        console.error('❌ Giriş hatası:', error);
+        alert('Firebase bağlantı hatası! Lütfen sayfayı yenileyin.\n\nHata: ' + error.message);
+    });
+
+// ============================================
+// GLOBAL DEĞİŞKENLER
+// ============================================
+let currentRoomId = null;
+let currentRoomData = null;
+let isRoomOwner = false;
+let videoElement = null;
+let roomRef = null;
+let selectedRoomForPassword = null;
+let videoServiceType = null;
+let selectedEnvironment = 'none';
+let syncTimeout = null;
+let currentUserNickname = '';
+let youtubePlayer = null;
+let hlsPlayer = null;
+
+// Ekran pozisyonu
+let screenPosition = {x: 0, y: 2, z: -15};
+
+// Performans ayarları
+let performanceMode = 'medium';
+
+const DRIFT_THRESHOLD = 5.0;
+const UPDATE_INTERVAL = 5000;
+const SYNC_DELAY = 3000;
+
+// ============================================
+// NICKNAME SİSTEMİ
+// ============================================
+function setNickname() {
+    const nickname = document.getElementById('nickname-input').value.trim();
+    
+    if (!nickname || nickname.length < 2) {
+        alert('Lütfen en az 2 karakter uzunluğunda bir takma ad girin!');
+        return;
+    }
+    
+    currentUserNickname = nickname;
+    
+    // Firebase'e kaydet
+    database.ref(`users/${auth.currentUser.uid}`).set({
+        nickname: nickname,
+        lastSeen: firebase.database.ServerValue.TIMESTAMP
+    });
+    
+    document.getElementById('nickname-screen').style.display = 'none';
+    document.getElementById('main-menu').style.display = 'block';
+    document.getElementById('welcome-nickname').textContent = nickname;
+    
+    console.log('✓ Nickname ayarlandı:', nickname);
+}
+
+// ============================================
+// ORTAM YÖNETİMİ - 13 ORTAM
+// ============================================
+const ENVIRONMENTS = {
+    none: {
+        name: 'Ortamsız',
+        icon: '⬛',
+        config: null
+    },
+    theater: {
+        name: 'Klasik Sinema',
+        icon: '🎪',
+        config: 'preset: default; lighting: distant; shadow: true'
+    },
+    space: {
+        name: 'Uzay İstasyonu',
+        icon: '🌌',
+        config: 'preset: starry; lighting: none'
+    },
+    forest: {
+        name: 'Orman',
+        icon: '🌲',
+        config: 'preset: forest; lighting: distant'
+    },
+    desert: {
+        name: 'Çöl Gece',
+        icon: '🏜️',
+        config: 'preset: egypt; lighting: distant; dressing: none'
+    },
+    moon: {
+        name: 'Ay Yüzeyi',
+        icon: '🌙',
+        config: 'preset: goaland; lighting: distant; ground: flat'
+    },
+    cyberpunk: {
+        name: 'Cyberpunk',
+        icon: '🌃',
+        config: 'preset: japan; lighting: distant; fog: 0.8'
+    },
+    underwater: {
+        name: 'Su Altı',
+        icon: '🌊',
+        config: 'preset: poison; lighting: distant; fog: 0.5'
+    },
+    mountain: {
+        name: 'Dağ Zirvesi',
+        icon: '⛰️',
+        config: 'preset: arches; lighting: distant; ground: hills'
+    },
+    volcano: {
+        name: 'Volkan',
+        icon: '🌋',
+        config: 'preset: volcano; lighting: distant; ground: canyon'
+    },
+    fantasy: {
+        name: 'Fantastik',
+        icon: '✨',
+        config: 'preset: dream; lighting: distant; dressing: cubes'
+    },
+    city: {
+        name: 'Şehir',
+        icon: '🏙️',
+        config: 'preset: chicago; lighting: distant; skyType: atmosphere'
+    },
+    beach: {
+        name: 'Sahil',
+        icon: '🏖️',
+        config: 'preset: yavapai; lighting: distant; ground: flat'
+    }
+};
+
+function selectEnvironment(envKey, element) {
+    selectedEnvironment = envKey;
+    document.querySelectorAll('.environment-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    element.classList.add('selected');
+}
+
+function applyEnvironment(envKey) {
+    const container = document.getElementById('environment-container');
+    const floor = document.getElementById('default-floor');
+    
+    if (!ENVIRONMENTS[envKey]) {
+        console.error('Bilinmeyen ortam:', envKey);
+        envKey = 'none';
+    }
+    
+    const env = ENVIRONMENTS[envKey];
+    container.innerHTML = '';
+    
+    // Performans moduna göre ayarla
+    let config = env.config;
+    if (config && performanceMode === 'low') {
+        config += '; shadow: false; fog: 0';
+    } else if (config && performanceMode === 'medium') {
+        config += '; shadow: true';
+    }
+    
+    if (config === null) {
+        floor.setAttribute('visible', 'true');
+        console.log('✓ Ortamsız mod aktif');
+    } else {
+        const envEntity = document.createElement('a-entity');
+        envEntity.setAttribute('environment', config);
+        container.appendChild(envEntity);
+        floor.setAttribute('visible', 'false');
+        console.log('✓ Ortam yüklendi:', env.name, '- Performans:', performanceMode);
+    }
+}
+
+function changePersonalEnvironment() {
+    const select = document.getElementById('personal-environment');
+    const envKey = select.value;
+    applyEnvironment(envKey);
+    console.log('✓ Kişisel ortam değiştirildi:', envKey);
+}
+
+function changePerformanceMode() {
+    const select = document.getElementById('performance-mode');
+    performanceMode = select.value;
+    
+    // Mevcut ortamı yeniden yükle
+    const currentEnv = document.getElementById('personal-environment').value;
+    applyEnvironment(currentEnv);
+    
+    console.log('✓ Performans modu değiştirildi:', performanceMode);
+}
+
+// ============================================
+// VİDEO URL İŞLEME - GENİŞLETİLMİŞ
+// ============================================
+function detectVideoService(url) {
+    if (!url) return null;
+    
+    // YouTube
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        return 'youtube';
+    }
+    
+    // Google Drive
+    if (url.includes('drive.google.com')) {
+        return 'googledrive';
+    }
+    
+    // Catbox
+    if (url.includes('catbox.moe') || url.includes('files.catbox.moe')) {
+        return 'catbox';
+    }
+    
+    // Bunny CDN
+    if (url.includes('.b-cdn.net') || url.includes('bunny')) {
+        return 'bunny';
+    }
+    
+    // HLS Streams (.m3u8, .ts)
+    if (url.includes('.m3u8') || url.includes('.ts')) {
+        return 'hls-stream';
+    }
+    
+    // Direkt video formatları
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.ogv', '.mov', '.avi', '.m4v'];
+    const lowerUrl = url.toLowerCase();
+    for (const ext of videoExtensions) {
+        if (lowerUrl.includes(ext)) {
+            return 'direct';
+        }
+    }
+    
+    // Bilinmeyen
+    return 'unknown';
+}
+
+function extractYouTubeId(url) {
+    // youtube.com/watch?v=VIDEO_ID
+    const match1 = url.match(/[?&]v=([^&]+)/);
+    if (match1) return match1[1];
+    
+    // youtu.be/VIDEO_ID
+    const match2 = url.match(/youtu\.be\/([^?]+)/);
+    if (match2) return match2[1];
+    
+    return null;
+}
+
+function extractGoogleDriveId(url) {
+    // https://drive.google.com/file/d/FILE_ID/view
+    const match1 = url.match(/\/file\/d\/([^/]+)/);
+    if (match1) return match1[1];
+    
+    // https://drive.google.com/open?id=FILE_ID
+    const match2 = url.match(/[?&]id=([^&]+)/);
+    if (match2) return match2[1];
+    
+    return null;
+}
+
+function processVideoUrl(url) {
+    if (!url) return null;
+    
+    const service = detectVideoService(url);
+    videoServiceType = service;
+    
+    if (service === 'youtube') {
+        console.log('📺 YouTube video tespit edildi');
+        return url;
+    }
+    
+    if (service === 'googledrive') {
+        console.log('💾 Google Drive video tespit edildi');
+        const fileId = extractGoogleDriveId(url);
+        if (fileId) {
+            // Google Drive API ile direkt indirme linki
+            return `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEYS.GOOGLE_DRIVE}`;
+        }
+        return url;
+    }
+    
+    if (service === 'catbox') {
+        console.log('📦 Catbox linki tespit edildi');
+        return url;
+    }
+    
+    if (service === 'bunny') {
+        console.log('🐰 Bunny CDN linki tespit edildi');
+        return url;
+    }
+    
+    if (service === 'hls-stream') {
+        console.log('📡 HLS stream tespit edildi');
+        return url;
+    }
+    
+    if (service === 'direct') {
+        console.log('🎬 Direkt video linki tespit edildi');
+        return url;
+    }
+    
+    console.log('⚠️ Bilinmeyen kaynak, CORS proxy kullanılıyor');
+    videoServiceType = 'cors-proxy';
+    return 'https://corsproxy.io/?' + encodeURIComponent(url);
+}
+
+function getServiceBadge(service) {
+    const badges = {
+        'youtube': '<span class="service-badge badge-youtube">YouTube</span>',
+        'googledrive': '<span class="service-badge badge-gdrive">Google Drive</span>',
+        'catbox': '<span class="service-badge badge-catbox">Catbox</span>',
+        'bunny': '<span class="service-badge badge-bunny">Bunny CDN</span>',
+        'hls-stream': '<span class="service-badge badge-hls">HLS Stream</span>',
+        'direct': '<span class="service-badge badge-direct">Direkt</span>',
+        'cors-proxy': '<span class="service-badge badge-cors">CORS Proxy</span>'
+    };
+    return badges[service] || '';
+}
+
+// ============================================
+// UI FONKSİYONLARI
+// ============================================
+function showMainMenu() {
+    document.getElementById('main-menu').style.display = 'block';
+    document.getElementById('create-room').style.display = 'none';
+    document.getElementById('room-list').style.display = 'none';
+    document.getElementById('password-prompt').style.display = 'none';
+}
+
+function showCreateRoom() {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('create-room').style.display = 'block';
+    
+    document.getElementById('private-room-check').addEventListener('change', function() {
+        document.getElementById('room-password-input').style.display = 
+            this.checked ? 'block' : 'none';
+    });
+}
+
+function showRoomList() {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('room-list').style.display = 'block';
+    loadRooms();
+}
+
+function refreshRooms() {
+    loadRooms();
+}
+
+function showPasswordPrompt(roomId, roomName) {
+    selectedRoomForPassword = roomId;
+    document.getElementById('password-room-name').textContent = `Oda: ${roomName}`;
+    document.getElementById('room-list').style.display = 'none';
+    document.getElementById('password-prompt').style.display = 'block';
+}
+
+function showSyncStatus(text) {
+    const statusEl = document.getElementById('sync-status');
+    const indicator = document.getElementById('status-indicator');
+    
+    statusEl.textContent = text || '⏱️ 3 saniye sonra başlıyor...';
+    statusEl.classList.add('visible');
+    indicator.className = 'status-indicator syncing';
+    
+    setTimeout(() => {
+        statusEl.classList.remove('visible');
+        indicator.className = 'status-indicator connected';
+    }, 3500);
+}
+
+function toggleSettings() {
+    const panel = document.getElementById('settings-panel');
+    const isVisible = panel.classList.contains('visible');
+    panel.classList.toggle('visible');
+}
+
+// ============================================
+// ODA SAHİPLİĞİ TRANSFERİ
+// ============================================
+function transferOwnership(roomId) {
+    const roomRef = database.ref(`rooms/${roomId}`);
+    
+    roomRef.child('members').once('value', (snapshot) => {
+        const members = snapshot.val() || [];
+        const otherMembers = members.filter(uid => uid !== auth.currentUser.uid);
+        
+        if (otherMembers.length > 0) {
+            const newOwner = otherMembers[0];
+            roomRef.child('owner').set(newOwner);
+            console.log('✓ Oda sahipliği devredildi:', newOwner);
+        } else {
+            roomRef.child('owner').set(null);
+            console.log('✓ Oda sahipsiz bırakıldı');
+        }
+    });
+}
+
+// ============================================
+// ODA YÖNETİMİ
+// ============================================
+function createRoom() {
+    if (!authReady) {
+        alert('Lütfen bekleyin, Firebase bağlantısı kuruluyor...');
+        return;
+    }
+    
+    const roomName = document.getElementById('room-name-input').value.trim();
+    const videoUrl = document.getElementById('video-url-input').value.trim();
+    const isPrivate = document.getElementById('private-room-check').checked;
+    const password = document.getElementById('room-password-input').value;
+    const screenSize = document.getElementById('screen-size').value;
+    const controlMode = document.querySelector('input[name="control-mode"]:checked').value;
+    
+    if (!roomName) {
+        alert('Lütfen oda adı giriniz!');
+        return;
+    }
+    
+    const processedUrl = videoUrl ? processVideoUrl(videoUrl) : null;
+    const newRoomRef = database.ref('rooms').push();
+    const roomId = newRoomRef.key;
+    
+    const roomData = {
+        name: roomName,
+        videoUrl: processedUrl,
+        originalUrl: videoUrl || null,
+        videoService: videoServiceType,
+        environment: selectedEnvironment,
+        controlMode: controlMode,
+        isPrivate: isPrivate,
+        password: isPrivate ? btoa(password) : null,
+        screenSize: screenSize,
+        owner: auth.currentUser.uid,
+        ownerNickname: currentUserNickname,
+        members: [auth.currentUser.uid],
+        createdAt: firebase.database.ServerValue.TIMESTAMP,
+        videoState: {
+            isPlaying: false,
+            currentTime: 0,
+            lastUpdate: Date.now(),
+            startTimestamp: null
+        },
+        screenPosition: screenPosition,
+        viewers: 1
+    };
+    
+    newRoomRef.set(roomData).then(() => {
+        isRoomOwner = true;
+        joinRoom(roomId, roomData);
+    }).catch(error => {
+        console.error('Oda oluşturma hatası:', error);
+        alert('Oda oluşturulamadı: ' + error.message);
+    });
+}
+
+function loadRooms() {
+    const roomsContainer = document.getElementById('rooms-container');
+    roomsContainer.innerHTML = '<div class="loading">⏳ Odalar yükleniyor...</div>';
+    
+    setTimeout(() => {
+        database.ref('rooms').orderByChild('createdAt').once('value', (snapshot) => {
+            roomsContainer.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            const rooms = [];
+            snapshot.forEach((childSnapshot) => {
+                const room = childSnapshot.val();
+                rooms.push({
+                    id: childSnapshot.key,
+                    data: room
+                });
+            });
+            
+            if (rooms.length === 0) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            rooms.reverse().forEach(room => {
+                const roomDiv = document.createElement('div');
+                let className = 'room-item';
+                if (room.data.isPrivate) className += ' private';
+                if (!room.data.owner || room.data.viewers === 0) className += ' ownerless';
+                
+                roomDiv.className = className;
+                const serviceBadge = getServiceBadge(room.data.videoService);
+                const envInfo = ENVIRONMENTS[room.data.environment] || ENVIRONMENTS['none'];
+                
+                let badges = '';
+                if (room.data.isPrivate) {
+                    badges += '<span class="lock-icon">🔒</span>';
+                }
+                if (!room.data.owner || room.data.viewers === 0) {
+                    badges += '<span class="badge badge-ownerless">🔓 Sahipsiz</span>';
+                }
+                
+                roomDiv.innerHTML = `
+                    ${badges}
+                    <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
+                    <div class="room-info">
+                        👤 ${escapeHtml(room.data.ownerNickname || 'Anonim')} • 👥 ${room.data.viewers || 0} izleyici • ${envInfo.icon} ${envInfo.name}
+                    </div>
+                `;
+                roomDiv.onclick = () => selectRoom(room.id, room.data);
+                roomsContainer.appendChild(roomDiv);
+            });
+        }).catch(error => {
+            console.error('Oda listesi yükleme hatası:', error);
+            roomsContainer.innerHTML = '<p style="color: red;">Odalar yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
+        });
+    }, 500);
+}
+
+function selectRoom(roomId, roomData) {
+    if (roomData.isPrivate) {
+        showPasswordPrompt(roomId, roomData.name);
+    } else {
+        joinRoom(roomId, roomData);
+    }
+}
+
+function joinWithPassword() {
+    const password = document.getElementById('room-password-join').value;
+    
+    database.ref(`rooms/${selectedRoomForPassword}`).once('value', (snapshot) => {
+        const roomData = snapshot.val();
+        
+        if (!roomData) {
+            alert('Oda bulunamadı!');
+            return;
+        }
+        
+        if (btoa(password) === roomData.password) {
+            joinRoom(selectedRoomForPassword, roomData);
+        } else {
+            alert('Yanlış şifre!');
+        }
+    });
+}
+
+function joinRoom(roomId, roomData) {
+    currentRoomId = roomId;
+    currentRoomData = roomData;
+    roomRef = database.ref(`rooms/${roomId}`);
+    videoServiceType = roomData.videoService;
+    
+    if (!roomData.owner || roomData.owner === null) {
+        roomRef.child('owner').set(auth.currentUser.uid);
+        roomRef.child('ownerNickname').set(currentUserNickname);
+        isRoomOwner = true;
+        console.log('✓ Sahipsiz odaya katıldım, şimdi ben sahibim');
+    } else {
+        isRoomOwner = (roomData.owner === auth.currentUser.uid);
+    }
+    
+    roomRef.child('members').transaction((currentMembers) => {
+        if (!currentMembers) currentMembers = [];
+        if (!currentMembers.includes(auth.currentUser.uid)) {
+            currentMembers.push(auth.currentUser.uid);
+        }
+        return currentMembers;
+    });
+    
+    roomRef.child('viewers').transaction((current) => {
+        return (current || 0) + 1;
+    });
+    
+    document.getElementById('ui-overlay').classList.add('hidden');
+    document.getElementById('vr-controls').classList.add('visible');
+    document.getElementById('room-info-display').classList.add('visible');
+    document.getElementById('screen-controls').classList.add('visible');
+    document.getElementById('toggle-chat-btn').classList.add('visible');
+    document.getElementById('settings-toggle-btn').classList.add('visible');
+    
+    document.getElementById('room-title').textContent = roomData.name;
+    document.getElementById('video-service-badge').innerHTML = getServiceBadge(videoServiceType);
+    
+    const controlText = roomData.controlMode === 'everyone' ? 'Herkes kontrol edebilir' : 'Sadece oda sahibi';
+    document.getElementById('control-mode-text').textContent = controlText;
+    
+    // Kişisel ortamı uygula
+    document.getElementById('personal-environment').value = roomData.environment || 'none';
+    applyEnvironment(roomData.environment || 'none');
+    
+    updateViewerCount();
+    
+    if (roomData.videoUrl) {
+        setupVideo(roomData.videoUrl, roomData.screenSize, roomData.originalUrl);
+    } else {
+        console.log('ℹ️ Oda video olmadan oluşturuldu');
+        document.getElementById('cinema-screen').setAttribute('visible', 'false');
+    }
+    
+    listenToRoomUpdates();
+    listenToMessages();
+    setupSpatialAudio();
+    
+    window.addEventListener('beforeunload', () => {
+        leaveRoomSilent();
+    });
+}
+
+function leaveRoom() {
+    if (isRoomOwner) {
+        document.getElementById('delete-modal').classList.add('active');
+    } else {
+        leaveRoomSilent();
+        location.reload();
+    }
+}
+
+function leaveRoomSilent() {
+    if (currentRoomId && roomRef) {
+        roomRef.child('members').transaction((currentMembers) => {
+            if (!currentMembers) return null;
+            return currentMembers.filter(uid => uid !== auth.currentUser.uid);
+        });
+        
+        roomRef.child('viewers').transaction((current) => {
+            const newCount = Math.max((current || 1) - 1, 0);
+            
+            if (newCount === 0) {
+                roomRef.child('owner').set(null);
+            }
+            
+            return newCount;
+        });
+        
+        roomRef.off();
+    }
+}
+
+function confirmDeleteRoom(shouldDelete) {
+    document.getElementById('delete-modal').classList.remove('active');
+    
+    if (shouldDelete) {
+        roomRef.remove().then(() => {
+            console.log('✓ Oda sahibi tarafından silindi');
+        });
+    } else {
+        if (currentRoomData.isPrivate) {
+            roomRef.update({
+                isPrivate: false,
+                password: null
+            });
+            console.log('✓ Şifreli oda açık bırakıldı, şifre silindi');
+        }
+        
+        transferOwnership(currentRoomId);
+        leaveRoomSilent();
+    }
+    
+    location.reload();
+}
+
+// ============================================
+// VİDEO YÖNETİMİ - GENİŞLETİLMİŞ
+// ============================================
+function setupVideo(videoUrl, screenSize, originalUrl) {
+    const service = detectVideoService(originalUrl || videoUrl);
+    
+    if (service === 'youtube') {
+        setupYouTubeVideo(originalUrl || videoUrl, screenSize);
+        return;
+    }
+    
+    if (service === 'hls-stream') {
+        setupHLSVideo(videoUrl, screenSize, originalUrl);
+        return;
+    }
+    
+    // Normal video setup
+    const scene = document.querySelector('a-scene');
+    const screen = document.getElementById('cinema-screen');
+    
+    const sizes = {
+        normal: { width: 16, height: 9 },
+        large: { width: 24, height: 13.5 },
+        xlarge: { width: 32, height: 18 },
+        imax: { width: 40, height: 22.5 }
+    };
+    
+    const size = sizes[screenSize] || sizes.large;
+    screen.setAttribute('width', size.width);
+    screen.setAttribute('height', size.height);
+    
+    let assets = document.querySelector('a-assets');
+    if (!assets) {
+        assets = document.createElement('a-assets');
+        scene.appendChild(assets);
+    }
+    
+    // Eski video varsa temizle
+    const oldVideo = document.getElementById('video-src');
+    if (oldVideo) oldVideo.remove();
+    
+    const videoAsset = document.createElement('video');
+    videoAsset.id = 'video-src';
+    videoAsset.crossOrigin = 'anonymous';
+    videoAsset.src = videoUrl;
+    videoAsset.preload = 'auto';
+    videoAsset.loop = false;
+    videoAsset.playsInline = true;
+    
+    assets.appendChild(videoAsset);
+    videoElement = videoAsset;
+    
+    screen.setAttribute('src', '#video-src');
+    screen.setAttribute('visible', 'true');
+    
+    videoElement.addEventListener('loadedmetadata', () => {
+        console.log('✓ Video yüklendi:', videoElement.duration, 'saniye');
+    });
+    
+    videoElement.addEventListener('error', (e) => {
+        console.error('❌ Video yükleme hatası:', e);
+        showVideoError('Video yüklenemedi. Lütfen farklı bir video URL\'si deneyin veya video formatının desteklendiğinden emin olun.');
+    });
+}
+
+function setupYouTubeVideo(url, screenSize) {
+    const videoId = extractYouTubeId(url);
+    if (!videoId) {
+        showVideoError('Geçersiz YouTube URL\'si!');
+        return;
+    }
+    
+    console.log('📺 YouTube video hazırlanıyor, VR modunda desteklenmez uyarısı gösteriliyor...');
+    
+    // YouTube VR'da desteklenmediği için uyarı göster
+    showVideoError('YouTube videoları VR modunda desteklenmemektedir. Lütfen normal tarayıcı modunda izleyin veya başka bir video kaynağı kullanın.');
+    
+    // Normal modda YouTube embed göster
+    document.getElementById('cinema-screen').setAttribute('visible', 'false');
+}
+
+function setupHLSVideo(url, screenSize, originalUrl) {
+    const scene = document.querySelector('a-scene');
+    const screen = document.getElementById('cinema-screen');
+    
+    const sizes = {
+        normal: { width: 16, height: 9 },
+        large: { width: 24, height: 13.5 },
+        xlarge: { width: 32, height: 18 },
+        imax: { width: 40, height: 22.5 }
+    };
+    
+    const size = sizes[screenSize] || sizes.large;
+    screen.setAttribute('width', size.width);
+    screen.setAttribute('height', size.height);
+    
+    let assets = document.querySelector('a-assets');
+    if (!assets) {
+        assets = document.createElement('a-assets');
+        scene.appendChild(assets);
+    }
+    
+    const oldVideo = document.getElementById('video-src');
+    if (oldVideo) oldVideo.remove();
+    
+    const videoAsset = document.createElement('video');
+    videoAsset.id = 'video-src';
+    videoAsset.crossOrigin = 'anonymous';
+    videoAsset.preload = 'auto';
+    videoAsset.loop = false;
+    videoAsset.playsInline = true;
+    
+    assets.appendChild(videoAsset);
+    videoElement = videoAsset;
+    
+    if (Hls.isSupported()) {
+        hlsPlayer = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 90
+        });
+        
+        hlsPlayer.loadSource(url);
+        hlsPlayer.attachMedia(videoElement);
+        
+        hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function() {
+            console.log('✓ HLS stream hazır');
+        });
+        
+        hlsPlayer.on(Hls.Events.ERROR, function(event, data) {
+            if (data.fatal) {
+                console.error('❌ HLS Fatal Error:', data);
+                showVideoError('HLS stream yüklenemedi: ' + data.type);
+            }
+        });
+        
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari için native HLS desteği
+        videoElement.src = url;
+        videoElement.addEventListener('loadedmetadata', function() {
+            console.log('✓ HLS video yüklendi (native)');
+        });
+    } else {
+        showVideoError('Tarayıcınız HLS videolarını desteklemiyor!');
+        return;
+    }
+    
+    screen.setAttribute('src', '#video-src');
+    screen.setAttribute('visible', 'true');
+    
+    videoElement.addEventListener('loadedmetadata', () => {
+        console.log('✓ HLS Video yüklendi:', videoElement.duration, 'saniye');
+    });
+    
+    videoElement.addEventListener('error', (e) => {
+        console.error('❌ HLS Video hatası:', e);
+        showVideoError('HLS video yüklenemedi. Lütfen farklı bir kaynak deneyin.');
+    });
+}
+
+function showVideoError(message) {
+    document.getElementById('video-error-message').textContent = message;
+    document.getElementById('video-error-overlay').classList.add('visible');
+}
+
+function dismissVideoError() {
+    document.getElementById('video-error-overlay').classList.remove('visible');
+}
+
+function showChangeVideoModal() {
+    if (!canControlVideo()) {
+        alert('⚠️ Bu odada sadece oda sahibi video değiştirebilir!');
+        return;
+    }
+    document.getElementById('change-video-modal').classList.add('active');
+}
+
+function closeChangeVideoModal() {
+    document.getElementById('change-video-modal').classList.remove('active');
+}
+
+function applyVideoChange() {
+    const newUrl = document.getElementById('new-video-url').value.trim();
+    
+    if (!newUrl) {
+        alert('Lütfen bir video URL\'si girin!');
+        return;
+    }
+    
+    const processedUrl = processVideoUrl(newUrl);
+    
+    roomRef.update({
+        videoUrl: processedUrl,
+        originalUrl: newUrl,
+        videoService: videoServiceType,
+        videoState: {
+            isPlaying: false,
+            currentTime: 0,
+            lastUpdate: Date.now(),
+            startTimestamp: null
+        }
+    }).then(() => {
+        console.log('✓ Video değiştirildi');
+        closeChangeVideoModal();
+        dismissVideoError();
+        
+        // Videoyu yeniden yükle
+        setupVideo(processedUrl, currentRoomData.screenSize, newUrl);
+    }).catch(error => {
+        console.error('Video değiştirme hatası:', error);
+        alert('Video değiştirilemedi: ' + error.message);
+    });
+}
+
+function canControlVideo() {
+    if (!currentRoomData) return false;
+    
+    if (currentRoomData.controlMode === 'everyone') {
+        return true;
+    }
+    
+    return isRoomOwner;
+}
+
+function togglePlayPause() {
+    if (!canControlVideo()) {
+        alert('⚠️ Bu odada sadece oda sahibi video kontrolü yapabilir!');
+        return;
+    }
+    
+    if (!videoElement) {
+        alert('Video henüz yüklenmedi!');
+        return;
+    }
+    
+    if (videoElement.paused) {
+        const startTimestamp = Date.now() + SYNC_DELAY;
+        
+        roomRef.child('videoState').update({
+            isPlaying: true,
+            currentTime: videoElement.currentTime,
+            startTimestamp: startTimestamp,
+            lastUpdate: Date.now()
+        });
+        
+        showSyncStatus('⏱️ 3 saniye sonra başlıyor...');
+        console.log('▶️ Video 3 saniye sonra başlatılacak:', new Date(startTimestamp).toLocaleTimeString());
+    } else {
+        videoElement.pause();
+        roomRef.child('videoState').update({
+            isPlaying: false,
+            currentTime: videoElement.currentTime,
+            startTimestamp: null,
+            lastUpdate: Date.now()
+        });
+        console.log('⏸️ Video durduruldu');
+    }
+}
+
+function stopVideo() {
+    if (!canControlVideo()) {
+        alert('⚠️ Bu odada sadece oda sahibi video kontrolü yapabilir!');
+        return;
+    }
+    
+    if (!videoElement) {
+        alert('Video henüz yüklenmedi!');
+        return;
+    }
+    
+    videoElement.pause();
+    videoElement.currentTime = 0;
+    
+    roomRef.child('videoState').update({
+        isPlaying: false,
+        currentTime: 0,
+        startTimestamp: null,
+        lastUpdate: Date.now()
+    });
+    
+    console.log('⏹ Video durduruldu ve başa sarıldı');
+    showSyncStatus('⏹ Video başa sarıldı');
+}
+
+// ============================================
+// EKRAN POZİSYONU KONTROLÜ
+// ============================================
+function moveScreen(direction) {
+    const screen = document.getElementById('cinema-screen');
+    const step = 1;
+    
+    switch(direction) {
+        case 'up':
+            screenPosition.y += step;
+            break;
+        case 'down':
+            screenPosition.y -= step;
+            break;
+        case 'left':
+            screenPosition.x -= step;
+            break;
+        case 'right':
+            screenPosition.x += step;
+            break;
+        case 'forward':
+            screenPosition.z += step;
+            break;
+        case 'backward':
+            screenPosition.z -= step;
+            break;
+    }
+    
+    screen.setAttribute('position', 
+        `${screenPosition.x} ${screenPosition.y} ${screenPosition.z}`);
+    
+    // Firebase'e kaydet (sadece oda sahibi)
+    if (isRoomOwner) {
+        roomRef.child('screenPosition').set(screenPosition);
+    }
+    
+    console.log('📐 Ekran taşındı:', direction, screenPosition);
+}
+
+function resetScreenPosition() {
+    screenPosition = {x: 0, y: 2, z: -15};
+    const screen = document.getElementById('cinema-screen');
+    screen.setAttribute('position', 
+        `${screenPosition.x} ${screenPosition.y} ${screenPosition.z}`);
+    
+    if (isRoomOwner) {
+        roomRef.child('screenPosition').set(screenPosition);
+    }
+    
+    console.log('🔄 Ekran pozisyonu sıfırlandı');
+}
+
+// ============================================
+// MESAJLAŞMA SİSTEMİ
+// ============================================
+function toggleChat() {
+    const chat = document.getElementById('chat-container');
+    chat.classList.toggle('visible');
+}
+
+function sendMessage() {
+    const input = document.getElementById('chat-message');
+    const messageText = input.value.trim();
+    
+    if (!messageText) return;
+    
+    const messageData = {
+        userId: auth.currentUser.uid,
+        nickname: currentUserNickname,
+        message: escapeHtml(messageText),
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+    
+    database.ref(`rooms/${currentRoomId}/messages`).push(messageData);
+    
+    input.value = '';
+}
+
+function listenToMessages() {
+    database.ref(`rooms/${currentRoomId}/messages`)
+        .orderByChild('timestamp')
+        .limitToLast(50)
+        .on('child_added', (snapshot) => {
+            const msg = snapshot.val();
+            displayMessage(msg);
+        });
+}
+
+function displayMessage(msg) {
+    const messagesDiv = document.getElementById('messages');
+    const msgElement = document.createElement('div');
+    msgElement.className = 'message';
+    
+    const time = new Date(msg.timestamp).toLocaleTimeString('tr-TR', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    msgElement.innerHTML = `
+        <div class="nickname">${msg.nickname}</div>
+        <div class="text">${msg.message}</div>
+        <div class="time">${time}</div>
+    `;
+    
+    messagesDiv.appendChild(msgElement);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    
+    // Max 50 mesaj göster (performans için)
+    if (messagesDiv.children.length > 50) {
+        messagesDiv.removeChild(messagesDiv.firstChild);
+    }
+}
+
+// Enter tuşu ile mesaj gönder
+document.addEventListener('DOMContentLoaded', () => {
+    const chatInput = document.getElementById('chat-message');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+});
+
+// ============================================
+// SPATIAL AUDIO (BONUS ÖZELLİK)
+// ============================================
+function setupSpatialAudio() {
+    if (!videoElement) return;
+    
+    // Video elementine pozisyonel ses ekle
+    const screen = document.getElementById('cinema-screen');
+    
+    // Web Audio API ile spatial audio
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioContext();
+    
+    const source = audioCtx.createMediaElementSource(videoElement);
+    const panner = audioCtx.createPanner();
+    
+    // Panner ayarları
+    panner.panningModel = 'HRTF';
+    panner.distanceModel = 'inverse';
+    panner.refDistance = 10;
+    panner.maxDistance = 100;
+    panner.rolloffFactor = 1;
+    panner.coneInnerAngle = 360;
+    panner.coneOuterAngle = 0;
+    panner.coneOuterGain = 0;
+    
+    // Ekranın pozisyonunu kullan
+    panner.positionX.value = screenPosition.x;
+    panner.positionY.value = screenPosition.y;
+    panner.positionZ.value = screenPosition.z;
+    
+    source.connect(panner);
+    panner.connect(audioCtx.destination);
+    
+    console.log('🔊 Spatial Audio aktif');
+    
+    // Ekran pozisyonu değiştiğinde ses pozisyonunu güncelle
+    const updateSpatialAudio = () => {
+        panner.positionX.value = screenPosition.x;
+        panner.positionY.value = screenPosition.y;
+        panner.positionZ.value = screenPosition.z;
+    };
+    
+    // Her saniye kontrol et
+    setInterval(updateSpatialAudio, 1000);
+}
+
+// ============================================
+// TAM SENKRONİZASYON SİSTEMİ
+// ============================================
+function listenToRoomUpdates() {
+    if (!roomRef) return;
+    
+    roomRef.child('videoState').on('value', (snapshot) => {
+        if (!videoElement) return;
+        
+        const state = snapshot.val();
+        if (!state) return;
+        
+        const now = Date.now();
+        
+        if (!state.isPlaying && !videoElement.paused) {
+            videoElement.pause();
+            videoElement.currentTime = state.currentTime;
+            console.log('⏸️ Video durduruldu');
+            return;
+        }
+        
+        if (state.isPlaying && videoElement.paused && state.startTimestamp) {
+            const waitTime = state.startTimestamp - now;
+            
+            if (waitTime > 0) {
+                console.log(`⏱️ ${(waitTime/1000).toFixed(1)}s sonra başlayacak`);
+                showSyncStatus(`⏱️ ${Math.ceil(waitTime/1000)}s sonra başlıyor...`);
+                
+                if (syncTimeout) clearTimeout(syncTimeout);
+                syncTimeout = setTimeout(() => {
+                    videoElement.currentTime = state.currentTime;
+                    videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
+                    console.log('▶️ Video başlatıldı (sync)');
+                }, waitTime);
+            } else {
+                const elapsedSeconds = Math.abs(waitTime) / 1000;
+                const newSeek = state.currentTime + elapsedSeconds;
+                
+                videoElement.currentTime = newSeek;
+                videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
+                console.log(`▶️ Video başlatıldı (${elapsedSeconds.toFixed(1)}s gecikmeli)`);
+            }
+        }
+    });
+    
+    roomRef.child('viewers').on('value', () => {
+        updateViewerCount();
+    });
+
+
+
+```javascript
+    roomRef.child('owner').on('value', (snapshot) => {
+        const newOwner = snapshot.val();
+        if (newOwner === auth.currentUser.uid && !isRoomOwner) {
+            isRoomOwner = true;
+            console.log('✓ Oda sahipliği size devredildi!');
+            alert('🎉 Oda sahipliği size devredildi! Artık video kontrollerini kullanabilirsiniz.');
+        }
+    });
+    
+    // Ekran pozisyonu senkronizasyonu
+    roomRef.child('screenPosition').on('value', (snapshot) => {
+        const pos = snapshot.val();
+        if (pos && !isRoomOwner) {
+            screenPosition = pos;
+            const screen = document.getElementById('cinema-screen');
+            screen.setAttribute('position', `${pos.x} ${pos.y} ${pos.z}`);
+        }
+    });
+    
+    // Video URL değişikliği dinle
+    roomRef.child('videoUrl').on('value', (snapshot) => {
+        const newUrl = snapshot.val();
+        if (newUrl && currentRoomData.videoUrl !== newUrl) {
+            console.log('🔄 Video değiştirildi, yeniden yükleniyor...');
+            
+            // Video servisini güncelle
+            roomRef.child('videoService').once('value', (serviceSnapshot) => {
+                videoServiceType = serviceSnapshot.val();
+            });
+            
+            roomRef.child('originalUrl').once('value', (originalSnapshot) => {
+                const originalUrl = originalSnapshot.val();
+                setupVideo(newUrl, currentRoomData.screenSize, originalUrl);
+                currentRoomData.videoUrl = newUrl;
+            });
+        }
+    });
+    
+    if (isRoomOwner) {
+        setInterval(() => {
+            if (videoElement && !videoElement.paused) {
+                roomRef.child('videoState').update({
+                    currentTime: videoElement.currentTime,
+                    lastUpdate: Date.now()
+                });
+            }
+        }, UPDATE_INTERVAL);
+    }
+}
+
+function updateViewerCount() {
+    if (roomRef) {
+        roomRef.child('viewers').once('value', (snapshot) => {
+            document.getElementById('viewers-count').textContent = snapshot.val() || 0;
+        });
+    }
+}
+
+// ============================================
+// VR UI İNTERAKSİYON SİSTEMİ
+// ============================================
+AFRAME.registerComponent('vr-ui-handler', {
+    init: function() {
+        const scene = this.el;
+        
+        // VR moduna geçiş
+        scene.addEventListener('enter-vr', () => {
+            document.getElementById('vr-ui-panel').setAttribute('visible', 'true');
+            console.log('✓ VR moduna geçildi, UI gösteriliyor');
+        });
+        
+        // VR modundan çıkış
+        scene.addEventListener('exit-vr', () => {
+            document.getElementById('vr-ui-panel').setAttribute('visible', 'false');
+            console.log('✓ VR modundan çıkıldı');
+        });
+    }
+});
+
+AFRAME.registerComponent('vr-button-handler', {
+    init: function() {
+        this.el.addEventListener('click', () => {
+            const buttonId = this.el.id;
+            
+            switch(buttonId) {
+                case 'vr-play-pause-btn':
+                    togglePlayPause();
+                    updateVRButtonState();
+                    break;
+                case 'vr-stop-btn':
+                    stopVideo();
+                    break;
+                case 'vr-change-video-btn':
+                    showChangeVideoModal();
+                    break;
+                case 'vr-screen-up':
+                    moveScreen('up');
+                    break;
+                case 'vr-screen-down':
+                    moveScreen('down');
+                    break;
+                case 'vr-screen-left':
+                    moveScreen('left');
+                    break;
+                case 'vr-screen-right':
+                    moveScreen('right');
+                    break;
+                case 'vr-screen-reset':
+                    resetScreenPosition();
+                    break;
+            }
+        });
+        
+        // Hover efekti
+        this.el.addEventListener('mouseenter', () => {
+            this.el.setAttribute('color', '#764ba2');
+        });
+        
+        this.el.addEventListener('mouseleave', () => {
+            const originalColors = {
+                'vr-play-pause-btn': '#667eea',
+                'vr-stop-btn': '#ff9800',
+                'vr-change-video-btn': '#f093fb',
+                'vr-screen-up': '#555555',
+                'vr-screen-down': '#555555',
+                'vr-screen-left': '#555555',
+                'vr-screen-right': '#555555',
+                'vr-screen-reset': '#444444'
+            };
+            this.el.setAttribute('color', originalColors[this.el.id] || '#667eea');
+        });
+    }
+});
+
+function updateVRButtonState() {
+    if (!videoElement) return;
+    
+    const button = document.querySelector('#vr-play-pause-btn a-text');
+    if (button) {
+        button.setAttribute('value', videoElement.paused ? '▶️ Play' : '⏸️ Pause');
+    }
+}
+
+// VR Seek Bar güncelleme
+function updateVRSeekBar() {
+    if (!videoElement || !videoElement.duration) return;
+    
+    const percent = (videoElement.currentTime / videoElement.duration);
+    const maxWidth = 2.2;
+    const progressWidth = maxWidth * percent;
+    
+    const progressBar = document.getElementById('vr-seek-bar-progress');
+    if (progressBar) {
+        progressBar.setAttribute('width', progressWidth);
+        progressBar.setAttribute('position', `${-1.1 + (progressWidth / 2)} 0.35 0.01`);
+    }
+    
+    // Zaman göstergesi
+    const timeDisplay = document.getElementById('vr-time-display');
+    if (timeDisplay) {
+        const currentTime = formatTime(videoElement.currentTime);
+        const totalTime = formatTime(videoElement.duration);
+        timeDisplay.setAttribute('value', `${currentTime} / ${totalTime}`);
+    }
+}
+
+// VR Seek Bar tıklama (gelişmiş)
+AFRAME.registerComponent('vr-seekbar-handler', {
+    init: function() {
+        this.el.addEventListener('click', (evt) => {
+            if (!canControlVideo() || !videoElement) return;
+            
+            // Tıklanan noktanın X pozisyonunu al
+            const intersection = evt.detail.intersection;
+            if (!intersection) return;
+            
+            const localX = intersection.point.x;
+            const barWidth = 2.2;
+            const barStartX = -1.1;
+            
+            // Yüzde hesapla
+            const percent = (localX - barStartX) / barWidth;
+            const clampedPercent = Math.max(0, Math.min(1, percent));
+            
+            // Videoyu bu noktaya atla
+            const newTime = clampedPercent * videoElement.duration;
+            videoElement.currentTime = newTime;
+            
+            // Firebase'e kaydet
+            if (isRoomOwner) {
+                roomRef.child('videoState').update({
+                    currentTime: newTime,
+                    lastUpdate: Date.now()
+                });
+            }
+            
+            console.log(`⏩ Seek: ${formatTime(newTime)}`);
+        });
+    }
+});
+
+function formatTime(seconds) {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Seek bar'ı otomatik güncelle
+setInterval(() => {
+    if (videoElement && !videoElement.paused) {
+        updateVRSeekBar();
+    }
+}, 500);
+
+// ============================================
+// VR UI HOVER SİSTEMİ (GELİŞMİŞ)
+// ============================================
+AFRAME.registerComponent('proximity-ui', {
+    init: function() {
+        const panel = this.el;
+        let hideTimeout = null;
+        
+        // Cursor panel üzerine geldiğinde
+        const cursor = document.getElementById('cursor');
+        
+        cursor.addEventListener('raycaster-intersection', (evt) => {
+            const intersectedEls = evt.detail.els;
+            
+            // Panel veya panel içindeki bir elemente bakıyorsa
+            const lookingAtPanel = intersectedEls.some(el => {
+                return el === panel || el.parentElement === panel || 
+                       el.classList.contains('clickable');
+            });
+            
+            if (lookingAtPanel) {
+                panel.setAttribute('visible', 'true');
+                
+                // Önceki timeout'u temizle
+                if (hideTimeout) clearTimeout(hideTimeout);
+                
+                // 5 saniye sonra gizle
+                hideTimeout = setTimeout(() => {
+                    panel.setAttribute('visible', 'false');
+                }, 5000);
+            }
+        });
+        
+        // Başlangıçta 3 saniye göster
+        setTimeout(() => {
+            panel.setAttribute('visible', 'true');
+            hideTimeout = setTimeout(() => {
+                panel.setAttribute('visible', 'false');
+            }, 5000);
+        }, 1000);
+    }
+});
+
+// ============================================
+// YARDIMCI FONKSİYONLAR
+// ============================================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================
+// COMPONENT KAYITLARI
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    const scene = document.querySelector('a-scene');
+    
+    if (scene.hasLoaded) {
+        initComponents();
+    } else {
+        scene.addEventListener('loaded', initComponents);
+    }
+});
+
+function initComponents() {
+    console.log('✓ VR sahnesi yüklendi, component'ler başlatılıyor...');
+    
+    // VR UI handler'ı ekle
+    const scene = document.querySelector('a-scene');
+    scene.setAttribute('vr-ui-handler', '');
+    
+    // VR Panel'e proximity handler ekle
+    const panel = document.getElementById('vr-ui-panel');
+    panel.setAttribute('proximity-ui', '');
+    
+    // Tüm clickable butonlara handler ekle
+    const clickables = document.querySelectorAll('.clickable');
+    clickables.forEach(el => {
+        el.setAttribute('vr-button-handler', '');
+    });
+    
+    // Seek bar'a handler ekle
+    const seekBarBg = document.getElementById('vr-seek-bar-bg');
+    if (seekBarBg) {
+        seekBarBg.setAttribute('vr-seekbar-handler', '');
+        seekBarBg.classList.add('clickable');
+    }
+}
+
+// ============================================
+// KLAVYE KISAYOLLARI
+// ============================================
+document.addEventListener('keydown', (e) => {
+    if (!currentRoomId) return;
+    
+    // Space - Play/Pause
+    if (e.code === 'Space' && canControlVideo()) {
+        e.preventDefault();
+        togglePlayPause();
+    }
+    
+    // S - Stop
+    if (e.code === 'KeyS' && canControlVideo()) {
+        e.preventDefault();
+        stopVideo();
+    }
+    
+    // Arrow keys - Ekran pozisyonu (sadece oda sahibi)
+    if (isRoomOwner) {
+        if (e.code === 'ArrowUp') {
+            e.preventDefault();
+            moveScreen('up');
+        }
+        if (e.code === 'ArrowDown') {
+            e.preventDefault();
+            moveScreen('down');
+        }
+        if (e.code === 'ArrowLeft') {
+            e.preventDefault();
+            moveScreen('left');
+        }
+        if (e.code === 'ArrowRight') {
+            e.preventDefault();
+            moveScreen('right');
+        }
+    }
+    
+    // C - Chat toggle
+    if (e.code === 'KeyC') {
+        e.preventDefault();
+        toggleChat();
+    }
+    
+    // G - Settings toggle
+    if (e.code === 'KeyG') {
+        e.preventDefault();
+        toggleSettings();
+    }
+});
+
+// ============================================
+// PERFORMANS İZLEME
+// ============================================
+let fpsCounter = 0;
+let lastFpsCheck = Date.now();
+
+function monitorPerformance() {
+    fpsCounter++;
+    
+    const now = Date.now();
+    if (now - lastFpsCheck >= 1000) {
+        const fps = fpsCounter;
+        fpsCounter = 0;
+        lastFpsCheck = now;
+        
+        // FPS düşükse uyarı
+        if (fps < 30 && performanceMode !== 'low') {
+            console.warn(`⚠️ Düşük FPS tespit edildi: ${fps} FPS. Performans modunu "Düşük" olarak ayarlamayı düşünün.`);
+        }
+        
+        // Debug için
+        // console.log(`FPS: ${fps}`);
+    }
+    
+    requestAnimationFrame(monitorPerformance);
+}
+
+// Performans izlemeyi başlat
+if (typeof requestAnimationFrame !== 'undefined') {
+    monitorPerformance();
+}
+
+// ============================================
+// HATA YÖNETİMİ
+// ============================================
+window.addEventListener('error', (e) => {
+    console.error('Global hata yakalandı:', e.error);
+    
+    // Kritik hatalarda kullanıcıyı bilgilendir
+    if (e.message.includes('Firebase') || e.message.includes('database')) {
+        console.error('Firebase bağlantı hatası! Lütfen internet bağlantınızı kontrol edin.');
+    }
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('Promise hatası:', e.reason);
+});
+
+// ============================================
+// BAŞLATMA VE KONSOL LOGOSU
+// ============================================
+console.log('%c🎬 VR Sosyal Sinema - Full Edition', 'font-size: 20px; font-weight: bold; color: #667eea;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+console.log('%cÖzellikler:', 'font-weight: bold; color: #764ba2;');
+console.log('%c✓ YouTube Desteği', 'color: #4caf50;');
+console.log('%c✓ Google Drive Desteği (API Key gerekli)', 'color: #4caf50;');
+console.log('%c✓ HLS Stream Desteği (.m3u8, .ts)', 'color: #4caf50;');
+console.log('%c✓ Çoklu Video Format Desteği', 'color: #4caf50;');
+console.log('%c✓ 13 Sinema Ortamı (Kişiselleştirilebilir)', 'color: #4caf50;');
+console.log('%c✓ Spatial Audio (3D Ses)', 'color: #4caf50;');
+console.log('%c✓ Nickname + Chat Sistemi', 'color: #4caf50;');
+console.log('%c✓ Video Sonradan Değiştirme', 'color: #4caf50;');
+console.log('%c✓ Ekran Pozisyonu Kontrolü', 'color: #4caf50;');
+console.log('%c✓ VR UI (Hover ile Göster/Gizle)', 'color: #4caf50;');
+console.log('%c✓ VR Seek Bar (Tıklanabilir)', 'color: #4caf50;');
+console.log('%c✓ Performans Modu Seçimi', 'color: #4caf50;');
+console.log('%c✓ Oda Sahipliği Transferi', 'color: #4caf50;');
+console.log('%c✓ 3 Saniye Tam Senkronizasyon', 'color: #4caf50;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+console.log('%cKlavye Kısayolları:', 'font-weight: bold; color: #764ba2;');
+console.log('%c  Space   → Play/Pause', 'color: #999;');
+console.log('%c  S       → Stop', 'color: #999;');
+console.log('%c  Arrows  → Ekran Pozisyonu (Oda sahibi)', 'color: #999;');
+console.log('%c  C       → Chat Aç/Kapa', 'color: #999;');
+console.log('%c  G       → Ayarlar Aç/Kapa', 'color: #999;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+
+// API Key kontrolü
+checkAPIKeys();
+
+// Firebase durum kontrolü
+setTimeout(() => {
+    if (firebase.apps.length > 0) {
+        console.log('%c✓ Firebase Bağlandı', 'color: #4caf50; font-weight: bold;');
+    } else {
+        console.error('%c✗ Firebase Bağlanamadı', 'color: #f44336; font-weight: bold;');
+    }
+}, 2000);
+
+// ============================================
+// DEBUGGING YARDIMCILARI (Geliştirme İçin)
+// ============================================
+window.vrCinemaDebug = {
+    // Mevcut oda bilgisi
+    getRoomInfo: () => {
+        return {
+            roomId: currentRoomId,
+            roomData: currentRoomData,
+            isOwner: isRoomOwner,
+            nickname: currentUserNickname,
+            videoService: videoServiceType,
+            screenPosition: screenPosition,
+            performanceMode: performanceMode
+        };
+    },
+    
+    // Video durumu
+    getVideoState: () => {
+        if (!videoElement) return 'Video yüklenmedi';
+        return {
+            paused: videoElement.paused,
+            currentTime: videoElement.currentTime,
+            duration: videoElement.duration,
+            readyState: videoElement.readyState,
+            networkState: videoElement.networkState
+        };
+    },
+    
+    // Manuel senkronizasyon tetikle
+    forceSync: () => {
+        if (videoElement && roomRef) {
+            roomRef.child('videoState').once('value', (snapshot) => {
+                const state = snapshot.val();
+                if (state) {
+                    videoElement.currentTime = state.currentTime;
+                    console.log('✓ Manuel senkronizasyon tamamlandı');
+                }
+            });
+        }
+    },
+    
+    // VR UI'yi zorla göster
+    showVRUI: () => {
+        document.getElementById('vr-ui-panel').setAttribute('visible', 'true');
+        console.log('✓ VR UI gösterildi');
+    },
+    
+    // Tüm dinleyicileri listele
+    listListeners: () => {
+        console.log('Aktif Firebase Dinleyiciler:');
+        console.log('- videoState');
+        console.log('- viewers');
+        console.log('- owner');
+        console.log('- screenPosition');
+        console.log('- videoUrl');
+        console.log('- messages');
+    }
+};
+
+console.log('%cDebug Komutları:', 'font-weight: bold; color: #764ba2;');
+console.log('%c  vrCinemaDebug.getRoomInfo()    → Oda bilgisi', 'color: #999;');
+console.log('%c  vrCinemaDebug.getVideoState()  → Video durumu', 'color: #999;');
+console.log('%c  vrCinemaDebug.forceSync()      → Manuel senkronizasyon', 'color: #999;');
+console.log('%c  vrCinemaDebug.showVRUI()       → VR UI\'yi göster', 'color: #999;');
+console.log('%c  vrCinemaDebug.listListeners()  → Aktif dinleyiciler', 'color: #999;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+
+// ============================================
+// MOBİL UYUMLULUK İYİLEŞTİRMELERİ
+// ============================================
+// Mobil cihazlarda touch event'leri ekle
+if ('ontouchstart' in window) {
+    console.log('📱 Mobil cihaz tespit edildi, touch optimizasyonları yapılıyor...');
+    
+    // Chat input için mobile keyboard fix
+    const chatInput = document.getElementById('chat-message');
+    if (chatInput) {
+        chatInput.addEventListener('focus', () => {
+            setTimeout(() => {
+                chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 300);
+        });
+    }
+    
+    // VR butonu için mobil uyarı
+    const scene = document.querySelector('a-scene');
+    scene.addEventListener('enter-vr', () => {
+        // Mobil VR mode için özel ayarlar
+        console.log('📱 Mobil VR modu aktif');
+    });
+}
+
+// ============================================
+// OTOMATIK RECONNECT (FIREBASE)
+// ============================================
+database.ref('.info/connected').on('value', (snapshot) => {
+    if (snapshot.val() === true) {
+        console.log('✓ Firebase bağlantısı aktif');
+        
+        // Eğer odadaysak, presence'ı güncelle
+        if (currentRoomId) {
+            roomRef.child('viewers').transaction((current) => {
+                return current; // Sadece okuma, değiştirme
+            });
+        }
+    } else {
+        console.warn('⚠️ Firebase bağlantısı kesildi, yeniden bağlanılıyor...');
+    }
+});
+
+// ============================================
+// SAYFA YÜKLENDİĞİNDE HAZIRLIK
+// ============================================
+window.addEventListener('load', () => {
+    console.log('✓ Sayfa tamamen yüklendi');
+    
+    // Service Worker (PWA için - opsiyonel)
+    if ('serviceWorker' in navigator) {
+        // navigator.serviceWorker.register('/sw.js').then(() => {
+        //     console.log('✓ Service Worker kayıtlı');
+        // }).catch(err => {
+        //     console.log('Service Worker hatası:', err);
+        // });
+    }
+});
+
+// ============================================
+// TEMIZLIK (SAYFA KAPATILIRKEN)
+// ============================================
+window.addEventListener('beforeunload', (e) => {
+    if (currentRoomId) {
+        leaveRoomSilent();
+        
+        // Kullanıcıyı uyar (opsiyonel)
+        // e.preventDefault();
+        // e.returnValue = 'Odadan çıkmak istediğinizden emin misiniz?';
+    }
+});
+
+// ============================================
+// EASTER EGG 🥚
+// ============================================
+let konamiCode = [];
+const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+
+document.addEventListener('keydown', (e) => {
+    konamiCode.push(e.code);
+    konamiCode = konamiCode.slice(-10);
+    
+    if (konamiCode.join(',') === konamiSequence.join(',')) {
+        console.log('%c🎮 KONAMI CODE ACTIVATED!', 'font-size: 30px; color: #ff00ff; font-weight: bold;');
+        console.log('%c🎉 Tebrikler! Gizli kodu buldunuz!', 'font-size: 16px; color: #00ff00;');
+        console.log('%c💡 Geliştirici: Bu projeyi beğendiyseniz yıldız vermeyi unutmayın! ⭐', 'font-size: 14px; color: #ffaa00;');
+        
+        // Ekrana confetti efekti (opsiyonel)
+        if (currentRoomId) {
+            alert('🎉 Gizli kod etkinleştirildi! Özel efektler aktif!');
+            // Burada özel efektler eklenebilir
+        }
+    }
+});
+
+// ============================================
+// VERSION BİLGİSİ
+// ============================================
+const VERSION = '2.0.0-FULL';
+const BUILD_DATE = '2025-01-13';
+
+console.log(`%cVersion: ${VERSION} | Build: ${BUILD_DATE}`, 'color: #999; font-style: italic;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+console.log('%cHazır! İyi eğlenceler! 🎬🍿', 'font-size: 16px; color: #4caf50; font-weight: bold;');
+console.log('%c━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'color: #667eea;');
+
+</script>
+
+</body>
+</html>
