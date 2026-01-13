@@ -15,7 +15,6 @@
             overflow: hidden;
         }
         
-        /* 2D UI Overlay */
         #ui-overlay {
             position: fixed;
             top: 0;
@@ -107,6 +106,10 @@
         
         button.secondary {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        button.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
         }
         
         .room-item {
@@ -219,10 +222,90 @@
             font-size: 0.9em;
         }
         
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .error-box {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
         .loading {
             text-align: center;
             padding: 20px;
             color: #666;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .service-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-catbox {
+            background: #ff69b4;
+            color: white;
+        }
+        
+        .badge-bunny {
+            background: #ff6b35;
+            color: white;
+        }
+        
+        .badge-cors {
+            background: #ffd700;
+            color: #333;
+        }
+        
+        .badge-direct {
+            background: #4caf50;
+            color: white;
         }
     </style>
 </head>
@@ -243,13 +326,23 @@
         <!-- Oda Oluşturma -->
         <div id="create-room" style="display: none;">
             <h2>Yeni Oda Oluştur</h2>
-            <input type="text" id="room-name-input" placeholder="Oda Adı (örn: Aksiyon Filmleri)" />
+            <input type="text" id="room-name-input" placeholder="Oda Adı (örn: Film Gecesi)" />
             
             <div class="info-box">
-                💡 <strong>İpucu:</strong> Google Drive, pCloud veya Koofr'dan videonuzu yükleyin ve herkese açık paylaşım linkini buraya yapıştırın.
+                💡 <strong>Önerilen Video Servisleri:</strong><br>
+                🔹 <strong>Catbox.moe</strong> - Ücretsiz, 200 MB limit<br>
+                🔹 <strong>Bunny.net</strong> - Profesyonel, $1/ay<br>
+                🔹 <strong>Direkt .mp4 linki</strong> - Herhangi bir kaynak<br>
+                <br>
+                ⚠️ Google Drive, pCloud, Koofr çalışmayabilir
             </div>
             
-            <textarea id="video-url-input" placeholder="Video URL (GDrive/pCloud/Koofr herkese açık paylaşım linki)"></textarea>
+            <textarea id="video-url-input" placeholder="Video URL (Catbox, Bunny veya direkt .mp4 linki)
+
+Örnek:
+https://files.catbox.moe/abc123.mp4
+https://yourzone.b-cdn.net/video.mp4
+https://example.com/video.mp4"></textarea>
             
             <div class="checkbox-container">
                 <input type="checkbox" id="private-room-check" />
@@ -294,6 +387,23 @@
     </div>
 </div>
 
+<!-- Oda Silme Onay Modalı -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content">
+        <h2>🚪 Odadan Çıkış</h2>
+        <p>Siz bu odanın sahibisiniz.</p>
+        <p><strong>Odayı silmek istiyor musunuz?</strong></p>
+        <div class="warning-box">
+            ⚠️ Odayı silerseniz, diğer katılımcılar da otomatik olarak çıkarılır.<br>
+            Silmezseniz, oda açık kalır ve başkaları katılmaya devam edebilir.
+        </div>
+        <div class="modal-buttons">
+            <button onclick="confirmDeleteRoom(false)" class="secondary">Hayır, Açık Bırak</button>
+            <button onclick="confirmDeleteRoom(true)" class="danger">Evet, Sil</button>
+        </div>
+    </div>
+</div>
+
 <!-- VR Kontrolleri -->
 <div id="vr-controls">
     <button onclick="togglePlayPause()">⏯ Play/Pause</button>
@@ -304,14 +414,12 @@
 <div id="room-info-display">
     <div><span class="status-indicator connected"></span> <span id="room-title">Oda</span></div>
     <div style="font-size: 0.8em; margin-top: 5px;">👥 <span id="viewers-count">0</span> İzleyici</div>
+    <div id="video-service-badge" style="margin-top: 5px;"></div>
 </div>
 
 <!-- VR Sahnesi -->
 <a-scene id="vr-scene" loading-screen="enabled: false">
-    <!-- Ortam -->
     <a-sky color="#000000"></a-sky>
-    
-    <!-- Sinema Ekranı -->
     <a-video
         id="cinema-screen"
         src=""
@@ -320,8 +428,6 @@
         position="0 2 -15"
         visible="false"
     ></a-video>
-    
-    <!-- Zemin -->
     <a-plane 
         position="0 0 0" 
         rotation="-90 0 0" 
@@ -329,12 +435,8 @@
         height="100" 
         color="#1a1a1a"
     ></a-plane>
-    
-    <!-- Işıklandırma -->
     <a-light type="ambient" color="#444"></a-light>
     <a-light type="point" position="0 5 0" intensity="0.5"></a-light>
-    
-    <!-- Kamera -->
     <a-entity id="camera-rig" position="0 1.6 0">
         <a-camera></a-camera>
     </a-entity>
@@ -354,12 +456,10 @@ const firebaseConfig = {
     appId: "1:724648238300:web:dceba8c536e8a5ffd96819"
 };
 
-// Firebase başlatma
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const auth = firebase.auth();
 
-// Anonim giriş
 let authReady = false;
 auth.signInAnonymously()
     .then(() => {
@@ -381,6 +481,61 @@ let videoElement = null;
 let syncTimeout = null;
 let roomRef = null;
 let selectedRoomForPassword = null;
+let videoServiceType = null;
+
+// ============================================
+// VIDEO URL İŞLEME
+// ============================================
+function detectVideoService(url) {
+    if (url.includes('catbox.moe') || url.includes('files.catbox.moe')) {
+        return 'catbox';
+    }
+    if (url.includes('.b-cdn.net') || url.includes('bunny')) {
+        return 'bunny';
+    }
+    if (url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.mov')) {
+        return 'direct';
+    }
+    return 'unknown';
+}
+
+function processVideoUrl(url) {
+    const service = detectVideoService(url);
+    videoServiceType = service;
+    
+    // Catbox - direkt çalışır
+    if (service === 'catbox') {
+        console.log('📦 Catbox linki tespit edildi');
+        return url;
+    }
+    
+    // Bunny CDN - direkt çalışır
+    if (service === 'bunny') {
+        console.log('🐰 Bunny CDN linki tespit edildi');
+        return url;
+    }
+    
+    // Direkt MP4 - çalışmalı
+    if (service === 'direct') {
+        console.log('🎬 Direkt video linki tespit edildi');
+        return url;
+    }
+    
+    // Bilinmeyen kaynak - CORS proxy kullan
+    console.log('⚠️ Bilinmeyen kaynak, CORS proxy kullanılıyor');
+    videoServiceType = 'cors-proxy';
+    return 'https://corsproxy.io/?' + encodeURIComponent(url);
+}
+
+function getServiceBadge(service) {
+    const badges = {
+        'catbox': '<span class="service-badge badge-catbox">Catbox</span>',
+        'bunny': '<span class="service-badge badge-bunny">Bunny CDN</span>',
+        'direct': '<span class="service-badge badge-direct">Direkt</span>',
+        'cors-proxy': '<span class="service-badge badge-cors">CORS Proxy</span>'
+    };
+    return badges[service] || '';
+}
 
 // ============================================
 // UI FONKSİYONLARI
@@ -396,7 +551,6 @@ function showCreateRoom() {
     document.getElementById('main-menu').style.display = 'none';
     document.getElementById('create-room').style.display = 'block';
     
-    // Şifre alanı kontrolü
     document.getElementById('private-room-check').addEventListener('change', function() {
         document.getElementById('room-password-input').style.display = 
             this.checked ? 'block' : 'none';
@@ -440,27 +594,15 @@ function createRoom() {
         return;
     }
     
-    // Video URL'sini düzenle (GDrive için)
-    let processedUrl = videoUrl;
-    if (videoUrl.includes('drive.google.com')) {
-        const fileId = extractGDriveFileId(videoUrl);
-        if (fileId) {
-            processedUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        }
-    }
-    
-    // pCloud için
-    if (videoUrl.includes('pcloud.com') && !videoUrl.includes('/download')) {
-        processedUrl = videoUrl.replace('/publink/show', '/download');
-    }
-    
-    // Yeni oda oluştur
+    const processedUrl = processVideoUrl(videoUrl);
     const newRoomRef = database.ref('rooms').push();
     const roomId = newRoomRef.key;
     
     const roomData = {
         name: roomName,
         videoUrl: processedUrl,
+        originalUrl: videoUrl,
+        videoService: videoServiceType,
         isPrivate: isPrivate,
         password: isPrivate ? btoa(password) : null,
         screenSize: screenSize,
@@ -479,7 +621,7 @@ function createRoom() {
         joinRoom(roomId, roomData);
     }).catch(error => {
         console.error('Oda oluşturma hatası:', error);
-        alert('Oda oluşturulurken hata: ' + error.message);
+        showVideoError('create', error, videoUrl);
     });
 }
 
@@ -503,13 +645,13 @@ function loadRooms() {
             });
         });
         
-        // Ters sırada göster (en yeni üstte)
         rooms.reverse().forEach(room => {
             const roomDiv = document.createElement('div');
             roomDiv.className = 'room-item' + (room.data.isPrivate ? ' private' : '');
+            const serviceBadge = getServiceBadge(room.data.videoService);
             roomDiv.innerHTML = `
                 ${room.data.isPrivate ? '<span class="lock-icon">🔒</span>' : ''}
-                <div class="room-name">${escapeHtml(room.data.name)}</div>
+                <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
                 <div class="room-info">👥 ${room.data.viewers || 1} izleyici</div>
             `;
             roomDiv.onclick = () => selectRoom(room.id, room.data);
@@ -552,70 +694,73 @@ function joinRoom(roomId, roomData) {
     currentRoomId = roomId;
     currentRoomData = roomData;
     roomRef = database.ref(`rooms/${roomId}`);
+    videoServiceType = roomData.videoService;
     
-    // Oda sahibi kontrolü
     isRoomOwner = (roomData.owner === auth.currentUser.uid);
     
-    // İzleyici sayısını artır
     roomRef.child('viewers').transaction((current) => {
         return (current || 0) + 1;
     });
     
-    // UI'yi gizle, VR sahnesini göster
     document.getElementById('ui-overlay').classList.add('hidden');
     document.getElementById('vr-controls').classList.add('visible');
     document.getElementById('room-info-display').classList.add('visible');
     
-    // Oda bilgilerini göster
     document.getElementById('room-title').textContent = roomData.name;
+    document.getElementById('video-service-badge').innerHTML = getServiceBadge(videoServiceType);
     updateViewerCount();
     
-    // Video'yu ayarla
-    setupVideo(roomData.videoUrl, roomData.screenSize);
-    
-    // Senkronizasyonu başlat
+    setupVideo(roomData.videoUrl, roomData.screenSize, roomData.originalUrl);
     listenToRoomUpdates();
     
-    // Sayfa kapatılınca temizlik
     window.addEventListener('beforeunload', () => {
-        leaveRoom();
+        leaveRoomSilent();
     });
 }
 
 function leaveRoom() {
+    if (isRoomOwner) {
+        // Oda sahibiyse modal göster
+        document.getElementById('delete-modal').classList.add('active');
+    } else {
+        // Oda sahibi değilse direkt çık
+        leaveRoomSilent();
+        location.reload();
+    }
+}
+
+function leaveRoomSilent() {
     if (currentRoomId && roomRef) {
-        // İzleyici sayısını azalt
         roomRef.child('viewers').transaction((current) => {
             return Math.max((current || 1) - 1, 0);
         });
-        
-        // Oda sahibiyse ve izleyici kalmadıysa odayı sil
-        if (isRoomOwner) {
-            setTimeout(() => {
-                roomRef.child('viewers').once('value', (snapshot) => {
-                    if (snapshot.val() <= 0) {
-                        roomRef.remove();
-                    }
-                });
-            }, 1000);
-        }
-        
-        // Listener'ı kaldır
         roomRef.off();
     }
+}
+
+function confirmDeleteRoom(shouldDelete) {
+    document.getElementById('delete-modal').classList.remove('active');
     
-    // Sayfayı yenile
+    if (shouldDelete && roomRef) {
+        // Odayı sil
+        roomRef.remove().then(() => {
+            console.log('✓ Oda silindi');
+        });
+    } else {
+        // Sadece çık, oda açık kalsın
+        leaveRoomSilent();
+    }
+    
     location.reload();
 }
 
 // ============================================
 // VİDEO YÖNETİMİ
 // ============================================
-function setupVideo(videoUrl, screenSize) {
+function setupVideo(videoUrl, screenSize, originalUrl) {
     const scene = document.querySelector('a-scene');
     const screen = document.getElementById('cinema-screen');
     
-    // Ekran boyutlarını ayarla
     const sizes = {
         normal: { width: 16, height: 9 },
         large: { width: 24, height: 13.5 },
@@ -627,7 +772,6 @@ function setupVideo(videoUrl, screenSize) {
     screen.setAttribute('width', size.width);
     screen.setAttribute('height', size.height);
     
-    // Video asset'i oluştur
     let assets = document.querySelector('a-assets');
     if (!assets) {
         assets = document.createElement('a-assets');
@@ -645,19 +789,59 @@ function setupVideo(videoUrl, screenSize) {
     assets.appendChild(videoAsset);
     videoElement = videoAsset;
     
-    // Ekrana bağla
     screen.setAttribute('src', '#video-src');
     screen.setAttribute('visible', 'true');
     
-    // Video event listener'ları
     videoElement.addEventListener('loadedmetadata', () => {
         console.log('✓ Video yüklendi:', videoElement.duration, 'saniye');
     });
     
     videoElement.addEventListener('error', (e) => {
         console.error('❌ Video yükleme hatası:', e);
-        alert('Video yüklenemedi!\n\nSebebi:\n- URL yanlış olabilir\n- Video herkese açık olmayabilir\n- CORS sorunu olabilir\n\nLütfen başka bir link deneyin.');
+        showVideoError('load', e, originalUrl);
     });
+}
+
+function showVideoError(type, error, url) {
+    const service = detectVideoService(url);
+    let message = '❌ <strong>Video Yüklenemedi!</strong><br><br>';
+    
+    if (type === 'load') {
+        message += '<strong>Sebep:</strong><br>';
+        message += '• URL yanlış veya erişilemiyor<br>';
+        message += '• Video formatı desteklenmiyor<br>';
+        message += '• CORS sorunu<br><br>';
+    }
+    
+    message += '<strong>Çözüm Önerileri:</strong><br>';
+    
+    if (service === 'unknown' || service === 'cors-proxy') {
+        message += '1. <strong>Catbox.moe</strong> kullanın (Ücretsiz):<br>';
+        message += '   • https://catbox.moe adresine gidin<br>';
+        message += '   • Videoyu yükleyin<br>';
+        message += '   • Direkt linki kopyalayın<br><br>';
+        
+        message += '2. <strong>Bunny.net</strong> kullanın ($1/ay):<br>';
+        message += '   • https://bunny.net adresine kaydolun<br>';
+        message += '   • Storage Zone oluşturun<br>';
+        message += '   • CDN linkini kullanın<br><br>';
+        
+        message += '3. <strong>Direkt .mp4 linki</strong> bulun<br>';
+        message += '   • Link .mp4 ile bitmelidir<br>';
+        message += '   • CORS izni olmalıdır<br>';
+    } else {
+        message += '• Linkin doğru olduğundan emin olun<br>';
+        message += '• Başka bir video deneyin<br>';
+        message += '• Tarayıcı konsolunu kontrol edin (F12)<br>';
+    }
+    
+    const overlay = document.getElementById('ui-overlay');
+    overlay.classList.remove('hidden');
+    overlay.querySelector('.ui-container').innerHTML = `
+        <h1>🎬 VR Sosyal Sinema</h1>
+        <div class="error-box">${message}</div>
+        <button onclick="location.reload()">◀ Ana Menüye Dön</button>
+    `;
 }
 
 function togglePlayPause() {
@@ -696,14 +880,12 @@ function updateRoomState(isPlaying, currentTime) {
 function listenToRoomUpdates() {
     if (!roomRef) return;
     
-    // Video durumu değişikliklerini dinle
     roomRef.child('videoState').on('value', (snapshot) => {
         if (!videoElement) return;
         
         const state = snapshot.val();
         if (!state) return;
         
-        // Senkronizasyon threshold (0.5 saniye)
         const timeDiff = Math.abs(videoElement.currentTime - state.currentTime);
         
         if (state.isPlaying && videoElement.paused) {
@@ -717,12 +899,10 @@ function listenToRoomUpdates() {
         }
     });
     
-    // İzleyici sayısını güncelle
     roomRef.child('viewers').on('value', () => {
         updateViewerCount();
     });
     
-    // Oda sahibiyse periyodik olarak durumu güncelle
     if (isRoomOwner) {
         setInterval(() => {
             if (videoElement && !videoElement.paused) {
@@ -743,20 +923,6 @@ function updateViewerCount() {
 // ============================================
 // YARDIMCI FONKSİYONLAR
 // ============================================
-function extractGDriveFileId(url) {
-    const patterns = [
-        /\/file\/d\/([a-zA-Z0-9_-]+)/,
-        /id=([a-zA-Z0-9_-]+)/,
-        /\/d\/([a-zA-Z0-9_-]+)/
-    ];
-    
-    for (let pattern of patterns) {
-        const match = url.match(pattern);
-        if (match) return match[1];
-    }
-    return null;
-}
-
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
@@ -767,10 +933,9 @@ function escapeHtml(text) {
 // BAŞLATMA
 // ============================================
 console.log('🎬 VR Sosyal Sinema başlatıldı!');
-console.log('📍 Site URL: https://recinilt.github.io/mefeypublic/recinilt/vr-sinema.html');
-console.log('Firebase bağlantısı:', firebase.app().name ? 'Başarılı ✓' : 'Başarısız ✗');
+console.log('📍 Site: https://recinilt.github.io/mefeypublic/recinilt/vr-sinema.html');
+console.log('Firebase:', firebase.app().name ? 'Bağlı ✓' : 'Bağlı Değil ✗');
 
-// VR sahnesini başlangıçta yükle
 document.addEventListener('DOMContentLoaded', () => {
     const scene = document.querySelector('a-scene');
     scene.addEventListener('loaded', () => {
