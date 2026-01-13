@@ -121,6 +121,7 @@
             border-left: 4px solid #667eea;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
         
         .room-item:hover {
@@ -130,6 +131,11 @@
         
         .room-item.private {
             border-left-color: #f5576c;
+        }
+        
+        .room-item.ownerless {
+            border-left-color: #ffa500;
+            opacity: 0.8;
         }
         
         .room-name {
@@ -147,6 +153,20 @@
         .lock-icon {
             float: right;
             color: #f5576c;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .badge-ownerless {
+            background: #ffa500;
+            color: white;
         }
         
         #vr-controls {
@@ -218,6 +238,24 @@
         .checkbox-container input[type="checkbox"] {
             width: auto;
             margin-right: 10px;
+        }
+        
+        .radio-container {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .radio-container label {
+            display: block;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        
+        .radio-container input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
         }
         
         .info-box {
@@ -424,6 +462,18 @@ https://example.com/video.mp4"></textarea>
                 <option value="imax">IMAX (40m)</option>
             </select>
             
+            <div class="radio-container">
+                <strong>🎮 Video Kontrolü:</strong>
+                <label>
+                    <input type="radio" name="control-mode" value="owner" checked>
+                    Sadece oda sahibi kontrol edebilir
+                </label>
+                <label>
+                    <input type="radio" name="control-mode" value="everyone">
+                    Herkes kontrol edebilir
+                </label>
+            </div>
+            
             <h2>🎭 Sinema Ortamı Seçin (13 Seçenek)</h2>
             <div class="environment-grid" id="environment-selector">
                 <div class="environment-card selected" data-env="none" onclick="selectEnvironment('none', this)">
@@ -528,8 +578,10 @@ https://example.com/video.mp4"></textarea>
         <p>Siz bu odanın sahibisiniz.</p>
         <p><strong>Odayı silmek istiyor musunuz?</strong></p>
         <div class="warning-box">
-            ⚠️ Odayı silerseniz, diğer katılımcılar da otomatik olarak çıkarılır.<br>
-            Silmezseniz, oda açık kalır ve başkaları katılmaya devam edebilir.
+            ⚠️ <strong>Odayı silerseniz:</strong> Diğer katılımcılar da otomatik olarak çıkarılır.<br><br>
+            ✅ <strong>Açık bırakırsanız:</strong> Oda sahipliği bir sonraki kişiye devredilir.<br>
+            • Odada başkaları varsa → Sahiplik devredilir<br>
+            • Odada kimse yoksa → Oda sahipsiz kalır, ilk giren sahip olur
         </div>
         <div class="modal-buttons">
             <button onclick="confirmDeleteRoom(false)" class="secondary">Hayır, Açık Bırak</button>
@@ -550,15 +602,13 @@ https://example.com/video.mp4"></textarea>
     <div style="font-size: 0.8em; margin-top: 5px;">👥 <span id="viewers-count">0</span> İzleyici</div>
     <div id="video-service-badge" style="margin-top: 5px;"></div>
     <div id="environment-badge" style="margin-top: 5px; font-size: 0.8em;"><span id="env-name">Ortam</span></div>
-    <div id="sync-status">⏱️ Senkronize ediliyor...</div>
+    <div id="control-mode-badge" style="margin-top: 5px; font-size: 0.8em;">🎮 <span id="control-mode-text">Kontrol</span></div>
+    <div id="sync-status">⏱️ 3 saniye sonra başlıyor...</div>
 </div>
 
 <!-- VR Sahnesi -->
 <a-scene id="vr-scene" loading-screen="enabled: false">
-    <!-- Dinamik ortam -->
     <a-entity id="environment-container"></a-entity>
-    
-    <!-- Sinema Ekranı -->
     <a-video
         id="cinema-screen"
         src=""
@@ -567,8 +617,6 @@ https://example.com/video.mp4"></textarea>
         position="0 2 -15"
         visible="false"
     ></a-video>
-    
-    <!-- Zemin (ortam yoksa) -->
     <a-plane 
         id="default-floor"
         position="0 0 0" 
@@ -578,12 +626,8 @@ https://example.com/video.mp4"></textarea>
         color="#1a1a1a"
         visible="true"
     ></a-plane>
-    
-    <!-- Işıklandırma -->
     <a-light type="ambient" color="#444"></a-light>
     <a-light type="point" position="0 5 0" intensity="0.5"></a-light>
-    
-    <!-- Kamera -->
     <a-entity id="camera-rig" position="0 1.6 0">
         <a-camera></a-camera>
     </a-entity>
@@ -629,11 +673,11 @@ let roomRef = null;
 let selectedRoomForPassword = null;
 let videoServiceType = null;
 let selectedEnvironment = 'none';
+let syncTimeout = null;
 
-// Senkronizasyon kontrol değişkenleri
-let lastSyncTime = 0;
 const DRIFT_THRESHOLD = 5.0;
 const UPDATE_INTERVAL = 5000;
+const SYNC_DELAY = 3000; // 3 saniye sync gecikmesi
 
 // ============================================
 // ORTAM YÖNETİMİ - 13 ORTAM
@@ -708,7 +752,6 @@ const ENVIRONMENTS = {
 
 function selectEnvironment(envKey, element) {
     selectedEnvironment = envKey;
-    
     document.querySelectorAll('.environment-card').forEach(card => {
         card.classList.remove('selected');
     });
@@ -725,7 +768,6 @@ function applyEnvironment(envKey) {
     }
     
     const env = ENVIRONMENTS[envKey];
-    
     container.innerHTML = '';
     
     if (env.config === null) {
@@ -829,34 +871,49 @@ function showPasswordPrompt(roomId, roomName) {
     document.getElementById('password-prompt').style.display = 'block';
 }
 
-function showSyncStatus() {
+function showSyncStatus(text) {
     const statusEl = document.getElementById('sync-status');
     const indicator = document.getElementById('status-indicator');
     
+    statusEl.textContent = text || '⏱️ 3 saniye sonra başlıyor...';
     statusEl.classList.add('visible');
     indicator.className = 'status-indicator syncing';
     
     setTimeout(() => {
         statusEl.classList.remove('visible');
         indicator.className = 'status-indicator connected';
-    }, 2000);
+    }, 3500);
 }
 
 // ============================================
-// ODA YÖNETİMİ VE TEMİZLEME
+// ODA SAHİPLİĞİ TRANSFERİ
 // ============================================
-function cleanupEmptyRooms() {
-    database.ref('rooms').once('value', (snapshot) => {
-        snapshot.forEach((childSnapshot) => {
-            const room = childSnapshot.val();
-            if (!room.viewers || room.viewers === 0) {
-                console.log('🗑️ Boş oda siliniyor:', childSnapshot.key);
-                childSnapshot.ref.remove();
-            }
-        });
+function transferOwnership(roomId) {
+    const roomRef = database.ref(`rooms/${roomId}`);
+    
+    roomRef.child('members').once('value', (snapshot) => {
+        const members = snapshot.val() || [];
+        const otherMembers = members.filter(uid => uid !== auth.currentUser.uid);
+        
+        if (otherMembers.length > 0) {
+            const newOwner = otherMembers[0];
+            roomRef.child('owner').set(newOwner);
+            console.log('✓ Oda sahipliği devredildi:', newOwner);
+        } else {
+            roomRef.child('owner').set(null);
+            console.log('✓ Oda sahipsiz bırakıldı');
+        }
     });
 }
 
+function cleanupEmptyRooms() {
+    // Artık boş odaları silmiyoruz, gösteriyoruz
+    console.log('✓ Boş odalar korunuyor (sahipsiz gösterilecek)');
+}
+
+// ============================================
+// ODA YÖNETİMİ
+// ============================================
 function createRoom() {
     if (!authReady) {
         alert('Lütfen bekleyin, Firebase bağlantısı kuruluyor...');
@@ -868,6 +925,7 @@ function createRoom() {
     const isPrivate = document.getElementById('private-room-check').checked;
     const password = document.getElementById('room-password-input').value;
     const screenSize = document.getElementById('screen-size').value;
+    const controlMode = document.querySelector('input[name="control-mode"]:checked').value;
     
     if (!roomName || !videoUrl) {
         alert('Lütfen oda adı ve video URL giriniz!');
@@ -884,15 +942,18 @@ function createRoom() {
         originalUrl: videoUrl,
         videoService: videoServiceType,
         environment: selectedEnvironment,
+        controlMode: controlMode,
         isPrivate: isPrivate,
         password: isPrivate ? btoa(password) : null,
         screenSize: screenSize,
         owner: auth.currentUser.uid,
+        members: [auth.currentUser.uid],
         createdAt: firebase.database.ServerValue.TIMESTAMP,
         videoState: {
             isPlaying: false,
             currentTime: 0,
-            lastUpdate: Date.now()
+            lastUpdate: Date.now(),
+            startTimestamp: null
         },
         viewers: 1
     };
@@ -910,8 +971,6 @@ function loadRooms() {
     const roomsContainer = document.getElementById('rooms-container');
     roomsContainer.innerHTML = '<div class="loading">⏳ Odalar yükleniyor...</div>';
     
-    cleanupEmptyRooms();
-    
     setTimeout(() => {
         database.ref('rooms').orderByChild('createdAt').once('value', (snapshot) => {
             roomsContainer.innerHTML = '';
@@ -924,12 +983,10 @@ function loadRooms() {
             const rooms = [];
             snapshot.forEach((childSnapshot) => {
                 const room = childSnapshot.val();
-                if (room.viewers && room.viewers > 0) {
-                    rooms.push({
-                        id: childSnapshot.key,
-                        data: room
-                    });
-                }
+                rooms.push({
+                    id: childSnapshot.key,
+                    data: room
+                });
             });
             
             if (rooms.length === 0) {
@@ -939,14 +996,27 @@ function loadRooms() {
             
             rooms.reverse().forEach(room => {
                 const roomDiv = document.createElement('div');
-                roomDiv.className = 'room-item' + (room.data.isPrivate ? ' private' : '');
+                let className = 'room-item';
+                if (room.data.isPrivate) className += ' private';
+                if (!room.data.owner || room.data.viewers === 0) className += ' ownerless';
+                
+                roomDiv.className = className;
                 const serviceBadge = getServiceBadge(room.data.videoService);
                 const envInfo = ENVIRONMENTS[room.data.environment] || ENVIRONMENTS['none'];
+                
+                let badges = '';
+                if (room.data.isPrivate) {
+                    badges += '<span class="lock-icon">🔒</span>';
+                }
+                if (!room.data.owner || room.data.viewers === 0) {
+                    badges += '<span class="badge badge-ownerless">🔓 Sahipsiz</span>';
+                }
+                
                 roomDiv.innerHTML = `
-                    ${room.data.isPrivate ? '<span class="lock-icon">🔒</span>' : ''}
+                    ${badges}
                     <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
                     <div class="room-info">
-                        👥 ${room.data.viewers} izleyici • ${envInfo.icon} ${envInfo.name}
+                        👥 ${room.data.viewers || 0} izleyici • ${envInfo.icon} ${envInfo.name}
                     </div>
                 `;
                 roomDiv.onclick = () => selectRoom(room.id, room.data);
@@ -992,8 +1062,25 @@ function joinRoom(roomId, roomData) {
     roomRef = database.ref(`rooms/${roomId}`);
     videoServiceType = roomData.videoService;
     
-    isRoomOwner = (roomData.owner === auth.currentUser.uid);
+    // Sahipsiz odaya ilk giren owner olur
+    if (!roomData.owner || roomData.owner === null) {
+        roomRef.child('owner').set(auth.currentUser.uid);
+        isRoomOwner = true;
+        console.log('✓ Sahipsiz odaya katıldım, şimdi ben sahibim');
+    } else {
+        isRoomOwner = (roomData.owner === auth.currentUser.uid);
+    }
     
+    // Members listesine ekle
+    roomRef.child('members').transaction((currentMembers) => {
+        if (!currentMembers) currentMembers = [];
+        if (!currentMembers.includes(auth.currentUser.uid)) {
+            currentMembers.push(auth.currentUser.uid);
+        }
+        return currentMembers;
+    });
+    
+    // Viewer sayısını artır
     roomRef.child('viewers').transaction((current) => {
         return (current || 0) + 1;
     });
@@ -1004,10 +1091,12 @@ function joinRoom(roomId, roomData) {
     
     document.getElementById('room-title').textContent = roomData.name;
     document.getElementById('video-service-badge').innerHTML = getServiceBadge(videoServiceType);
+    
+    const controlText = roomData.controlMode === 'everyone' ? 'Herkes kontrol edebilir' : 'Sadece oda sahibi';
+    document.getElementById('control-mode-text').textContent = controlText;
+    
     updateViewerCount();
-    
     applyEnvironment(roomData.environment || 'none');
-    
     setupVideo(roomData.videoUrl, roomData.screenSize, roomData.originalUrl);
     listenToRoomUpdates();
     
@@ -1027,19 +1116,24 @@ function leaveRoom() {
 
 function leaveRoomSilent() {
     if (currentRoomId && roomRef) {
+        // Members listesinden çıkar
+        roomRef.child('members').transaction((currentMembers) => {
+            if (!currentMembers) return null;
+            return currentMembers.filter(uid => uid !== auth.currentUser.uid);
+        });
+        
+        // Viewer sayısını azalt
         roomRef.child('viewers').transaction((current) => {
             const newCount = Math.max((current || 1) - 1, 0);
             
+            // Viewer 0 olduysa owner'ı null yap
             if (newCount === 0) {
-                setTimeout(() => {
-                    roomRef.remove().then(() => {
-                        console.log('✓ Boş oda silindi');
-                    });
-                }, 500);
+                roomRef.child('owner').set(null);
             }
             
             return newCount;
         });
+        
         roomRef.off();
     }
 }
@@ -1047,11 +1141,24 @@ function leaveRoomSilent() {
 function confirmDeleteRoom(shouldDelete) {
     document.getElementById('delete-modal').classList.remove('active');
     
-    if (shouldDelete && roomRef) {
+    if (shouldDelete) {
+        // Odayı tamamen sil
         roomRef.remove().then(() => {
             console.log('✓ Oda sahibi tarafından silindi');
         });
     } else {
+        // Oda açık kalsın
+        // Şifreli odaysa şifreyi sil
+        if (currentRoomData.isPrivate) {
+            roomRef.update({
+                isPrivate: false,
+                password: null
+            });
+            console.log('✓ Şifreli oda açık bırakıldı, şifre silindi');
+        }
+        
+        // Sahipliği devret
+        transferOwnership(currentRoomId);
         leaveRoomSilent();
     }
     
@@ -1148,9 +1255,19 @@ function showVideoError(type, error, url) {
     `;
 }
 
+function canControlVideo() {
+    if (!currentRoomData) return false;
+    
+    if (currentRoomData.controlMode === 'everyone') {
+        return true;
+    }
+    
+    return isRoomOwner;
+}
+
 function togglePlayPause() {
-    if (!isRoomOwner) {
-        alert('⚠️ Sadece oda sahibi video kontrolü yapabilir!');
+    if (!canControlVideo()) {
+        alert('⚠️ Bu odada sadece oda sahibi video kontrolü yapabilir!');
         return;
     }
     
@@ -1160,29 +1277,32 @@ function togglePlayPause() {
     }
     
     if (videoElement.paused) {
-        videoElement.play().catch(err => {
-            console.error('Play hatası:', err);
-            alert('Video oynatılamadı. Tarayıcı izni gerekebilir.');
-        });
-        updateRoomState(true, videoElement.currentTime);
-    } else {
-        videoElement.pause();
-        updateRoomState(false, videoElement.currentTime);
-    }
-}
-
-function updateRoomState(isPlaying, currentTime) {
-    if (roomRef) {
+        // 3 saniye sonra başlat
+        const startTimestamp = Date.now() + SYNC_DELAY;
+        
         roomRef.child('videoState').update({
-            isPlaying: isPlaying,
-            currentTime: currentTime,
+            isPlaying: true,
+            currentTime: videoElement.currentTime,
+            startTimestamp: startTimestamp,
             lastUpdate: Date.now()
         });
+        
+        showSyncStatus('⏱️ 3 saniye sonra başlıyor...');
+        console.log('▶️ Video 3 saniye sonra başlatılacak:', new Date(startTimestamp).toLocaleTimeString());
+    } else {
+        videoElement.pause();
+        roomRef.child('videoState').update({
+            isPlaying: false,
+            currentTime: videoElement.currentTime,
+            startTimestamp: null,
+            lastUpdate: Date.now()
+        });
+        console.log('⏸️ Video durduruldu');
     }
 }
 
 // ============================================
-// OPTİMİZE EDİLMİŞ SENKRONİZASYON
+// TAM SENKRONİZASYON SİSTEMİ
 // ============================================
 function listenToRoomUpdates() {
     if (!roomRef) return;
@@ -1194,31 +1314,39 @@ function listenToRoomUpdates() {
         if (!state) return;
         
         const now = Date.now();
-        const timeDiff = Math.abs(videoElement.currentTime - state.currentTime);
         
-        if (state.isPlaying && videoElement.paused) {
-            console.log('▶️ Video başlatılıyor');
-            videoElement.currentTime = state.currentTime;
-            videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
-            lastSyncTime = now;
-            showSyncStatus();
-            return;
-        }
-        
+        // PAUSE durumu
         if (!state.isPlaying && !videoElement.paused) {
-            console.log('⏸️ Video duraklatılıyor');
             videoElement.pause();
             videoElement.currentTime = state.currentTime;
-            lastSyncTime = now;
-            showSyncStatus();
+            console.log('⏸️ Video durduruldu');
             return;
         }
         
-        if (timeDiff > DRIFT_THRESHOLD) {
-            console.log(`⚠️ Büyük fark tespit edildi: ${timeDiff.toFixed(2)}s - Düzeltiliyor`);
-            videoElement.currentTime = state.currentTime;
-            lastSyncTime = now;
-            showSyncStatus();
+        // PLAY durumu - 3 saniye sync ile
+        if (state.isPlaying && videoElement.paused && state.startTimestamp) {
+            const waitTime = state.startTimestamp - now;
+            
+            if (waitTime > 0) {
+                // Henüz başlama zamanı gelmedi, bekle
+                console.log(`⏱️ ${(waitTime/1000).toFixed(1)}s sonra başlayacak`);
+                showSyncStatus(`⏱️ ${Math.ceil(waitTime/1000)}s sonra başlıyor...`);
+                
+                if (syncTimeout) clearTimeout(syncTimeout);
+                syncTimeout = setTimeout(() => {
+                    videoElement.currentTime = state.currentTime;
+                    videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
+                    console.log('▶️ Video başlatıldı (sync)');
+                }, waitTime);
+            } else {
+                // Başlama zamanı geçmiş, elapsed time hesapla
+                const elapsedSeconds = Math.abs(waitTime) / 1000;
+                const newSeek = state.currentTime + elapsedSeconds;
+                
+                videoElement.currentTime = newSeek;
+                videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
+                console.log(`▶️ Video başlatıldı (${elapsedSeconds.toFixed(1)}s gecikmeli)`);
+            }
         }
     });
     
@@ -1226,10 +1354,24 @@ function listenToRoomUpdates() {
         updateViewerCount();
     });
     
+    // Oda sahibi owner kontrolü yap
+    roomRef.child('owner').on('value', (snapshot) => {
+        const newOwner = snapshot.val();
+        if (newOwner === auth.currentUser.uid && !isRoomOwner) {
+            isRoomOwner = true;
+            console.log('✓ Oda sahipliği size devredildi!');
+            alert('🎉 Oda sahipliği size devredildi! Artık video kontrollerini kullanabilirsiniz.');
+        }
+    });
+    
+    // Oda sahibi için periyodik güncelleme
     if (isRoomOwner) {
         setInterval(() => {
             if (videoElement && !videoElement.paused) {
-                updateRoomState(true, videoElement.currentTime);
+                roomRef.child('videoState').update({
+                    currentTime: videoElement.currentTime,
+                    lastUpdate: Date.now()
+                });
             }
         }, UPDATE_INTERVAL);
     }
@@ -1255,10 +1397,15 @@ function escapeHtml(text) {
 // ============================================
 // BAŞLATMA
 // ============================================
-console.log('🎬 VR Sosyal Sinema - 13 Ortam Edition');
+console.log('🎬 VR Sosyal Sinema - Final Edition');
 console.log('📍 Site: https://recinilt.github.io/mefeypublic/recinilt/vr-sinema.html');
-console.log('⚙️ Senkronizasyon: 5s güncelleme, 5s drift threshold');
-console.log('🎭 13 Sinema Ortamı: Ortamsız, Klasik, Uzay, Orman, Çöl, Ay, Cyberpunk, Su Altı, Dağ, Volkan, Fantastik, Şehir, Sahil');
+console.log('⚙️ Özellikler:');
+console.log('   • 13 Sinema Ortamı');
+console.log('   • Oda Sahipliği Transferi');
+console.log('   • 3 Saniye Tam Senkronizasyon');
+console.log('   • Kontrol Modu Seçimi');
+console.log('   • Sahipsiz Oda Desteği');
+console.log('   • Şifreli Oda → Şifre Otomatik Silinir');
 console.log('Firebase:', firebase.app().name ? 'Bağlı ✓' : 'Bağlı Değil ✗');
 
 document.addEventListener('DOMContentLoaded', () => {
