@@ -182,8 +182,14 @@
             background: #4caf50;
         }
         
-        .status-indicator.disconnected {
-            background: #f44336;
+        .status-indicator.syncing {
+            background: #ff9800;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         #room-info-display {
@@ -307,6 +313,17 @@
             background: #4caf50;
             color: white;
         }
+        
+        #sync-status {
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #sync-status.visible {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -412,9 +429,10 @@ https://example.com/video.mp4"></textarea>
 
 <!-- Oda Bilgisi -->
 <div id="room-info-display">
-    <div><span class="status-indicator connected"></span> <span id="room-title">Oda</span></div>
+    <div><span id="status-indicator" class="status-indicator connected"></span> <span id="room-title">Oda</span></div>
     <div style="font-size: 0.8em; margin-top: 5px;">👥 <span id="viewers-count">0</span> İzleyici</div>
     <div id="video-service-badge" style="margin-top: 5px;"></div>
+    <div id="sync-status">⏱️ Senkronize ediliyor...</div>
 </div>
 
 <!-- VR Sahnesi -->
@@ -478,10 +496,14 @@ let currentRoomId = null;
 let currentRoomData = null;
 let isRoomOwner = false;
 let videoElement = null;
-let syncTimeout = null;
 let roomRef = null;
 let selectedRoomForPassword = null;
 let videoServiceType = null;
+
+// Senkronizasyon kontrol değişkenleri
+let lastSyncTime = 0;
+const DRIFT_THRESHOLD = 5.0; // 5 saniye fark varsa düzelt
+const UPDATE_INTERVAL = 5000; // Oda sahibi 5 saniyede bir güncelle
 
 // ============================================
 // VIDEO URL İŞLEME
@@ -503,25 +525,21 @@ function processVideoUrl(url) {
     const service = detectVideoService(url);
     videoServiceType = service;
     
-    // Catbox - direkt çalışır
     if (service === 'catbox') {
         console.log('📦 Catbox linki tespit edildi');
         return url;
     }
     
-    // Bunny CDN - direkt çalışır
     if (service === 'bunny') {
         console.log('🐰 Bunny CDN linki tespit edildi');
         return url;
     }
     
-    // Direkt MP4 - çalışmalı
     if (service === 'direct') {
         console.log('🎬 Direkt video linki tespit edildi');
         return url;
     }
     
-    // Bilinmeyen kaynak - CORS proxy kullan
     console.log('⚠️ Bilinmeyen kaynak, CORS proxy kullanılıyor');
     videoServiceType = 'cors-proxy';
     return 'https://corsproxy.io/?' + encodeURIComponent(url);
@@ -574,9 +592,36 @@ function showPasswordPrompt(roomId, roomName) {
     document.getElementById('password-prompt').style.display = 'block';
 }
 
+function showSyncStatus() {
+    const statusEl = document.getElementById('sync-status');
+    const indicator = document.getElementById('status-indicator');
+    
+    statusEl.classList.add('visible');
+    indicator.className = 'status-indicator syncing';
+    
+    setTimeout(() => {
+        statusEl.classList.remove('visible');
+        indicator.className = 'status-indicator connected';
+    }, 2000);
+}
+
 // ============================================
-// ODA YÖNETİMİ
+// ODA YÖNETİMİ VE TEMİZLEME
 // ============================================
+function cleanupEmptyRooms() {
+    // Boş odaları temizle
+    database.ref('rooms').once('value', (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const room = childSnapshot.val();
+            // Viewer 0 veya yok ise sil
+            if (!room.viewers || room.viewers === 0) {
+                console.log('🗑️ Boş oda siliniyor:', childSnapshot.key);
+                childSnapshot.ref.remove();
+            }
+        });
+    });
+}
+
 function createRoom() {
     if (!authReady) {
         alert('Lütfen bekleyin, Firebase bağlantısı kuruluyor...');
@@ -629,38 +674,53 @@ function loadRooms() {
     const roomsContainer = document.getElementById('rooms-container');
     roomsContainer.innerHTML = '<div class="loading">⏳ Odalar yükleniyor...</div>';
     
-    database.ref('rooms').orderByChild('createdAt').once('value', (snapshot) => {
-        roomsContainer.innerHTML = '';
-        
-        if (!snapshot.exists()) {
-            roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
-            return;
-        }
-        
-        const rooms = [];
-        snapshot.forEach((childSnapshot) => {
-            rooms.push({
-                id: childSnapshot.key,
-                data: childSnapshot.val()
+    // Önce boş odaları temizle
+    cleanupEmptyRooms();
+    
+    // Sonra odaları listele
+    setTimeout(() => {
+        database.ref('rooms').orderByChild('createdAt').once('value', (snapshot) => {
+            roomsContainer.innerHTML = '';
+            
+            if (!snapshot.exists()) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            const rooms = [];
+            snapshot.forEach((childSnapshot) => {
+                const room = childSnapshot.val();
+                // Sadece viewer'ı olan odaları göster
+                if (room.viewers && room.viewers > 0) {
+                    rooms.push({
+                        id: childSnapshot.key,
+                        data: room
+                    });
+                }
             });
+            
+            if (rooms.length === 0) {
+                roomsContainer.innerHTML = '<p style="text-align: center; color: #666;">Henüz aktif oda yok. İlk odayı siz oluşturun! 🎬</p>';
+                return;
+            }
+            
+            rooms.reverse().forEach(room => {
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-item' + (room.data.isPrivate ? ' private' : '');
+                const serviceBadge = getServiceBadge(room.data.videoService);
+                roomDiv.innerHTML = `
+                    ${room.data.isPrivate ? '<span class="lock-icon">🔒</span>' : ''}
+                    <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
+                    <div class="room-info">👥 ${room.data.viewers} izleyici</div>
+                `;
+                roomDiv.onclick = () => selectRoom(room.id, room.data);
+                roomsContainer.appendChild(roomDiv);
+            });
+        }).catch(error => {
+            console.error('Oda listesi yükleme hatası:', error);
+            roomsContainer.innerHTML = '<p style="color: red;">Odalar yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
         });
-        
-        rooms.reverse().forEach(room => {
-            const roomDiv = document.createElement('div');
-            roomDiv.className = 'room-item' + (room.data.isPrivate ? ' private' : '');
-            const serviceBadge = getServiceBadge(room.data.videoService);
-            roomDiv.innerHTML = `
-                ${room.data.isPrivate ? '<span class="lock-icon">🔒</span>' : ''}
-                <div class="room-name">${escapeHtml(room.data.name)} ${serviceBadge}</div>
-                <div class="room-info">👥 ${room.data.viewers || 1} izleyici</div>
-            `;
-            roomDiv.onclick = () => selectRoom(room.id, room.data);
-            roomsContainer.appendChild(roomDiv);
-        });
-    }).catch(error => {
-        console.error('Oda listesi yükleme hatası:', error);
-        roomsContainer.innerHTML = '<p style="color: red;">Odalar yüklenirken hata oluştu. Lütfen sayfayı yenileyin.</p>';
-    });
+    }, 500);
 }
 
 function selectRoom(roomId, roomData) {
@@ -720,10 +780,8 @@ function joinRoom(roomId, roomData) {
 
 function leaveRoom() {
     if (isRoomOwner) {
-        // Oda sahibiyse modal göster
         document.getElementById('delete-modal').classList.add('active');
     } else {
-        // Oda sahibi değilse direkt çık
         leaveRoomSilent();
         location.reload();
     }
@@ -732,7 +790,18 @@ function leaveRoom() {
 function leaveRoomSilent() {
     if (currentRoomId && roomRef) {
         roomRef.child('viewers').transaction((current) => {
-            return Math.max((current || 1) - 1, 0);
+            const newCount = Math.max((current || 1) - 1, 0);
+            
+            // Viewer 0 olursa odayı tamamen sil
+            if (newCount === 0) {
+                setTimeout(() => {
+                    roomRef.remove().then(() => {
+                        console.log('✓ Boş oda silindi');
+                    });
+                }, 500);
+            }
+            
+            return newCount;
         });
         roomRef.off();
     }
@@ -742,12 +811,10 @@ function confirmDeleteRoom(shouldDelete) {
     document.getElementById('delete-modal').classList.remove('active');
     
     if (shouldDelete && roomRef) {
-        // Odayı sil
         roomRef.remove().then(() => {
-            console.log('✓ Oda silindi');
+            console.log('✓ Oda sahibi tarafından silindi');
         });
     } else {
-        // Sadece çık, oda açık kalsın
         leaveRoomSilent();
     }
     
@@ -877,38 +944,64 @@ function updateRoomState(isPlaying, currentTime) {
     }
 }
 
+// ============================================
+// OPTİMİZE EDİLMİŞ SENKRONİZASYON
+// ============================================
 function listenToRoomUpdates() {
     if (!roomRef) return;
     
+    // Video durumu değişikliklerini dinle
     roomRef.child('videoState').on('value', (snapshot) => {
         if (!videoElement) return;
         
         const state = snapshot.val();
         if (!state) return;
         
+        const now = Date.now();
         const timeDiff = Math.abs(videoElement.currentTime - state.currentTime);
         
+        // SADECE PLAY/PAUSE DURUMU DEĞİŞTİYSE MÜDAHALE ET
         if (state.isPlaying && videoElement.paused) {
+            console.log('▶️ Video başlatılıyor');
             videoElement.currentTime = state.currentTime;
             videoElement.play().catch(err => console.log('Auto-play engellendi:', err));
-        } else if (!state.isPlaying && !videoElement.paused) {
+            lastSyncTime = now;
+            showSyncStatus();
+            return;
+        }
+        
+        if (!state.isPlaying && !videoElement.paused) {
+            console.log('⏸️ Video duraklatılıyor');
             videoElement.pause();
             videoElement.currentTime = state.currentTime;
-        } else if (timeDiff > 0.5) {
-            videoElement.currentTime = state.currentTime;
+            lastSyncTime = now;
+            showSyncStatus();
+            return;
         }
+        
+        // BÜYÜK FARK VARSA DÜZELT (kullanıcı seek yaptı)
+        if (timeDiff > DRIFT_THRESHOLD) {
+            console.log(`⚠️ Büyük fark tespit edildi: ${timeDiff.toFixed(2)}s - Düzeltiliyor`);
+            videoElement.currentTime = state.currentTime;
+            lastSyncTime = now;
+            showSyncStatus();
+        }
+        
+        // Küçük farklara (0-5 saniye) DOKUNMA - bu network gecikmesi
     });
     
+    // İzleyici sayısını güncelle
     roomRef.child('viewers').on('value', () => {
         updateViewerCount();
     });
     
+    // Oda sahibi için OPTİMİZE EDİLMİŞ güncelleme (5 saniyede bir)
     if (isRoomOwner) {
         setInterval(() => {
             if (videoElement && !videoElement.paused) {
                 updateRoomState(true, videoElement.currentTime);
             }
-        }, 2000);
+        }, UPDATE_INTERVAL);
     }
 }
 
@@ -934,6 +1027,7 @@ function escapeHtml(text) {
 // ============================================
 console.log('🎬 VR Sosyal Sinema başlatıldı!');
 console.log('📍 Site: https://recinilt.github.io/mefeypublic/recinilt/vr-sinema.html');
+console.log('⚙️ Senkronizasyon: 5s güncelleme, 5s drift threshold');
 console.log('Firebase:', firebase.app().name ? 'Bağlı ✓' : 'Bağlı Değil ✗');
 
 document.addEventListener('DOMContentLoaded', () => {
