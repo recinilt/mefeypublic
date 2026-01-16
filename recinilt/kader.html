@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kader ve Seçim Simülasyonu</title>
+    <title>Hayat Simülasyonu - Kader ve İrade</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
@@ -20,7 +24,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -32,7 +36,8 @@
             text-align: center;
             color: #667eea;
             margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .subtitle {
@@ -40,6 +45,7 @@
             color: #666;
             margin-bottom: 30px;
             font-size: 1.1em;
+            line-height: 1.6;
         }
 
         .setup-screen, .game-screen {
@@ -51,10 +57,11 @@
         }
 
         .selection-box {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 15px;
             padding: 30px;
             margin-bottom: 25px;
+            border: 2px solid #dee2e6;
         }
 
         .selection-box h2 {
@@ -63,11 +70,16 @@
             font-size: 1.8em;
         }
 
-        .character-grid, .destiny-grid {
+        .character-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 15px;
-            margin-top: 15px;
+        }
+
+        .destiny-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
         }
 
         .option-card {
@@ -82,12 +94,12 @@
 
         .option-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
         }
 
         .option-card.selected {
             border-color: #667eea;
-            background: #f0f4ff;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8efff 100%);
             transform: scale(1.05);
         }
 
@@ -103,22 +115,29 @@
             line-height: 1.5;
         }
 
+        .option-card .emoji {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
         .start-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 50px;
-            font-size: 1.2em;
+            padding: 18px 60px;
+            font-size: 1.3em;
             border-radius: 30px;
             cursor: pointer;
             display: block;
             margin: 30px auto;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .start-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        .start-btn:hover:not(:disabled) {
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
         }
 
         .start-btn:disabled {
@@ -126,141 +145,98 @@
             cursor: not-allowed;
         }
 
-        .timelines-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .timeline {
-            background: #f8f9fa;
+        /* Timeline Özellikleri */
+        .journey-timeline {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 3px solid #2196f3;
             border-radius: 15px;
-            padding: 20px;
-            position: relative;
+            padding: 25px;
+            margin-bottom: 30px;
         }
 
-        .timeline.user-timeline {
-            grid-column: 1 / -1;
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
-            border: 3px solid #667eea;
-        }
-
-        .timeline-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #ddd;
-        }
-
-        .character-name {
+        .timeline-title {
             font-size: 1.5em;
+            color: #1565c0;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .timeline-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .timeline-card.user-card {
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff8f0 0%, #ffe8d5 100%);
+        }
+
+        .timeline-card-header {
             font-weight: bold;
             color: #667eea;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
         }
 
-        .destiny-type {
-            background: #764ba2;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.9em;
+        .timeline-card.user-card .timeline-card-header {
+            color: #ff9800;
         }
 
-        .timeline-steps {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            position: relative;
-            margin-top: 20px;
+        .timeline-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        .timeline-line {
-            position: absolute;
-            top: 25px;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #ddd;
-            z-index: 0;
+        .timeline-item:last-child {
+            border-bottom: none;
         }
 
-        .timeline-progress {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.5s ease;
-        }
-
-        .step {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-circle {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid #ddd;
-            margin: 0 auto 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #999;
-            transition: all 0.3s ease;
-        }
-
-        .step.completed .step-circle {
-            background: #667eea;
-            border-color: #667eea;
-            color: white;
-        }
-
-        .step.active .step-circle {
-            background: #764ba2;
-            border-color: #764ba2;
-            color: white;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .step-label {
-            font-size: 0.85em;
-            color: #666;
+        .timeline-label {
             font-weight: 600;
-            margin-bottom: 5px;
+            color: #555;
+            font-size: 0.9em;
         }
 
-        .step-value {
-            font-size: 0.9em;
+        .timeline-value {
             color: #333;
+            font-size: 0.95em;
+            margin-top: 3px;
+        }
+
+        .timeline-score {
+            background: #4caf50;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-align: center;
             font-weight: bold;
-            min-height: 20px;
+            margin-top: 10px;
         }
 
         .choice-panel {
-            background: white;
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border: 3px solid #667eea;
             border-radius: 15px;
             padding: 30px;
             margin: 30px 0;
-            border: 3px solid #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .choice-panel h2 {
             color: #667eea;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            font-size: 2em;
             text-align: center;
         }
 
@@ -273,80 +249,151 @@
 
         .choice-btn {
             background: white;
-            border: 2px solid #667eea;
-            color: #667eea;
-            padding: 15px 25px;
-            border-radius: 10px;
+            border: 3px solid #e0e0e0;
+            padding: 18px 25px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 1em;
             transition: all 0.3s ease;
+            font-size: 1.05em;
             font-weight: 600;
+            color: #333;
         }
 
         .choice-btn:hover {
             background: #667eea;
             color: white;
+            border-color: #667eea;
             transform: translateY(-3px);
+        }
+
+        .choice-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .parameter-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .parameter-label {
+            font-size: 1.2em;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: block;
         }
 
         .info-text {
             text-align: center;
-            color: #666;
-            font-style: italic;
+            font-size: 1.2em;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 10px;
             margin: 20px 0;
+            color: #2e7d32;
+        }
+
+        .destiny-indicator {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 8px;
+            font-weight: bold;
+        }
+
+        .destiny-indicator.kader {
+            background: #ff9800;
+            color: white;
+        }
+
+        .destiny-indicator.irade {
+            background: #4caf50;
+            color: white;
         }
 
         .final-results {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border-radius: 15px;
-            padding: 30px;
+            padding: 40px;
             margin-top: 30px;
         }
 
         .final-results h2 {
             color: #667eea;
+            font-size: 2.5em;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 2em;
+            margin-bottom: 40px;
         }
 
         .results-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
         }
 
         .result-card {
             background: white;
-            border-radius: 12px;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
             padding: 25px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            scroll-margin-top: 20px;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
 
         .result-card.user-result {
-            border: 3px solid #667eea;
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
+            border-color: #ff9800;
+            background: linear-gradient(135deg, #fff8f0 0%, #ffe8d5 100%);
         }
 
         .result-character {
-            font-size: 1.5em;
+            font-size: 1.6em;
             font-weight: bold;
-            color: #333;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .user-result .result-character {
+            color: #ff9800;
+        }
+
+        .result-section {
+            margin-bottom: 20px;
+        }
+
+        .result-section-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
             margin-bottom: 10px;
         }
 
-        .result-profession {
-            font-size: 2em;
-            color: #667eea;
-            margin: 15px 0;
-        }
-
-        .result-path {
-            font-size: 0.9em;
+        .result-item {
+            padding: 8px 0;
             color: #666;
             line-height: 1.6;
-            margin-top: 15px;
+        }
+
+        .result-highlight {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            padding: 15px;
+            background: #f0f4ff;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
         }
 
         .restart-btn {
@@ -358,392 +405,916 @@
             border-radius: 30px;
             cursor: pointer;
             display: block;
-            margin: 30px auto 0;
+            margin: 40px auto 0;
             transition: all 0.3s ease;
         }
 
         .restart-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: scale(1.08);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
         }
 
-        .destiny-indicator {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 15px;
-            font-size: 0.75em;
-            margin-left: 5px;
-            font-weight: bold;
-        }
+        /* Mobil Uyumluluk */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
 
-        .destiny-indicator.kader {
-            background: #ffebee;
-            color: #c62828;
-        }
+            h1 {
+                font-size: 1.8em;
+            }
 
-        .destiny-indicator.secim {
-            background: #e8f5e9;
-            color: #2e7d32;
+            .subtitle {
+                font-size: 0.95em;
+            }
+
+            .character-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .destiny-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .choice-options {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎭 Kader ve Seçim Simülasyonu</h1>
-        <p class="subtitle">Hayatınızı şekillendiren güçleri keşfedin</p>
+        <h1>🎭 Hayat Simülasyonu: Kader ve İrade</h1>
+        <p class="subtitle">
+            8 kişinin hayat yolculuğunu keşfedin. İki kritik irade noktasında kararlar verin.<br>
+            Hayat bazen sizin kontrolünüzde, bazen kaderin elinde...
+        </p>
 
         <!-- Kurulum Ekranı -->
         <div class="setup-screen active">
             <div class="selection-box">
-                <h2>1️⃣ Karakterinizi Seçin</h2>
-                <div class="character-grid" id="characterGrid">
-                    <div class="option-card" data-character="Ayşe">
-                        <h3>👩 Ayşe</h3>
-                        <p>Azimli ve kararlı bir genç kadın</p>
-                    </div>
-                    <div class="option-card" data-character="Burak">
-                        <h3>👨 Burak</h3>
-                        <p>Meraklı ve hırslı bir genç adam</p>
-                    </div>
-                    <div class="option-card" data-character="Cem">
-                        <h3>👦 Cem</h3>
-                        <p>Sakin ve düşünceli bir kişi</p>
-                    </div>
-                    <div class="option-card" data-character="Deniz">
-                        <h3>👧 Deniz</h3>
-                        <p>Enerjik ve sosyal bir karakter</p>
-                    </div>
-                </div>
+                <h2>👤 Karakterinizi Seçin</h2>
+                <div class="character-grid" id="characterGrid"></div>
             </div>
 
             <div class="selection-box">
-                <h2>2️⃣ Kader Tipinizi Seçin</h2>
-                <div class="destiny-grid" id="destinyGrid">
-                    <div class="option-card" data-destiny="1">
-                        <h3>Tip 1: Kader → Seçim</h3>
-                        <p>Kader sizi bir yere getirir, sonra siz seçim yaparsınız ve sonucunu yaşarsınız</p>
-                    </div>
-                    <div class="option-card" data-destiny="2">
-                        <h3>Tip 2: Seçim → Kader</h3>
-                        <p>Siz seçimle başlarsınız, sonra kader devreye girip sizi bir yere götürür</p>
-                    </div>
-                    <div class="option-card" data-destiny="3">
-                        <h3>Tip 3: Tam İrade</h3>
-                        <p>Baştan sona her şey sizin kontrolünüzde, tamamen özgürsünüz</p>
-                    </div>
-                    <div class="option-card" data-destiny="4">
-                        <h3>Tip 4: Tam Kader</h3>
-                        <p>Her şey önceden belirlenmiş, hiçbir şey elinizde değil</p>
-                    </div>
-                </div>
+                <h2>🎲 Kader Tipinizi Seçin</h2>
+                <div class="destiny-grid" id="destinyGrid"></div>
             </div>
 
-            <button class="start-btn" id="startBtn" disabled>Simülasyonu Başlat</button>
+            <button class="start-btn" id="startBtn" disabled>🚀 Simülasyonu Başlat</button>
         </div>
 
         <!-- Oyun Ekranı -->
-        <div class="game-screen" id="gameScreen">
+        <div class="game-screen">
+            <div id="timelineDisplay"></div>
             <div id="choicePanel"></div>
-            <div class="timelines-container" id="timelinesContainer"></div>
             <div id="finalResults"></div>
         </div>
     </div>
 
     <script>
-        const characters = ['Ayşe', 'Burak', 'Cem', 'Deniz'];
-        const professions = ['Doktor', 'Mühendis', 'Çöpçü', 'Manav'];
-        const steps = ['Aile Durumu', 'Eğitim Fırsatı', 'İlgi Alanı', 'Sınav Sonucu', 'Meslek'];
+        // === TEMEL VERİLER ===
+        const characters = ['Ahmet', 'Zeynep', 'Mehmet', 'Ayşe', 'Mustafa', 'Fatma', 'Ali', 'Elif'];
+        const professions = ['Kronik Hasta', 'Hırsız', 'Çöpçü', 'Manav', 'Polis', 'Müzisyen', 'Mühendis', 'Doktor'];
         
+        const destinyTypes = {
+            1: { 
+                name: 'Kader → İrade', 
+                desc: 'Bölüm 1: Kader, Bölüm 2: İrade',
+                icon: '🎯',
+                part1: false,
+                part2: true
+            },
+            2: { 
+                name: 'İrade → Kader', 
+                desc: 'Bölüm 1: İrade, Bölüm 2: Kader',
+                icon: '🔄',
+                part1: true,
+                part2: false
+            },
+            3: { 
+                name: 'Tam Özgürlük', 
+                desc: 'Her iki bölümde de İrade',
+                icon: '🦅',
+                part1: true,
+                part2: true
+            },
+            4: { 
+                name: 'Tam Kader', 
+                desc: 'Her iki bölümde de Kader',
+                icon: '⚡',
+                part1: false,
+                part2: false
+            }
+        };
+
+        // === OYUN DEĞİŞKENLERİ ===
         let selectedCharacter = null;
         let selectedDestiny = null;
-        let currentStep = 0;
         let gameData = {};
 
-        // Karakter seçimi
-        document.getElementById('characterGrid').addEventListener('click', (e) => {
-            const card = e.target.closest('.option-card');
-            if (card) {
-                document.querySelectorAll('#characterGrid .option-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                selectedCharacter = card.dataset.character;
-                checkStartButton();
-            }
+        // === KURULUM ===
+        const characterEmojis = ['👨', '👩', '👨‍💼', '👩‍💼', '👨‍🎓', '👩‍🎓', '👨‍🏫', '👩‍🏫'];
+        
+        characters.forEach((char, idx) => {
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.innerHTML = `
+                <span class="emoji">${characterEmojis[idx]}</span>
+                <h3>${char}</h3>
+            `;
+            card.onclick = () => selectCharacter(char);
+            document.getElementById('characterGrid').appendChild(card);
         });
 
-        // Kader tipi seçimi
-        document.getElementById('destinyGrid').addEventListener('click', (e) => {
-            const card = e.target.closest('.option-card');
-            if (card) {
-                document.querySelectorAll('#destinyGrid .option-card').forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                selectedDestiny = parseInt(card.dataset.destiny);
-                checkStartButton();
-            }
+        Object.keys(destinyTypes).forEach(type => {
+            const dt = destinyTypes[type];
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.innerHTML = `
+                <span class="emoji">${dt.icon}</span>
+                <h3>${dt.name}</h3>
+                <p>${dt.desc}</p>
+            `;
+            card.onclick = () => selectDestiny(type);
+            document.getElementById('destinyGrid').appendChild(card);
         });
 
-        function checkStartButton() {
+        function selectCharacter(char) {
+            selectedCharacter = char;
+            document.querySelectorAll('#characterGrid .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            checkStart();
+        }
+
+        function selectDestiny(type) {
+            selectedDestiny = parseInt(type);
+            document.querySelectorAll('#destinyGrid .option-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            checkStart();
+        }
+
+        function checkStart() {
             document.getElementById('startBtn').disabled = !(selectedCharacter && selectedDestiny);
         }
 
-        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('startBtn').onclick = startGame;
 
+        // === OYUN BAŞLATMA ===
         function startGame() {
-            document.querySelector('.setup-screen').classList.remove('active');
-            document.getElementById('gameScreen').classList.add('active');
-            
-            initializeGame();
-            createTimelines();
-            processStep();
-        }
-
-        function initializeGame() {
-            gameData = {};
             characters.forEach(char => {
-                const isUser = char === selectedCharacter;
+                let destinyType;
+                if (char === selectedCharacter) {
+                    destinyType = selectedDestiny;
+                } else {
+                    destinyType = Math.floor(Math.random() * 4) + 1;
+                }
+                
                 gameData[char] = {
-                    isUser: isUser,
-                    destinyType: isUser ? selectedDestiny : Math.floor(Math.random() * 4) + 1,
-                    steps: {},
-                    profession: null
+                    destinyType: destinyType,
+                    isUser: char === selectedCharacter,
+                    score: 0,
+                    birth: {},
+                    childhood: {},
+                    will1: {},
+                    education: {},
+                    educationLevel: '',
+                    will2: {},
+                    career: {},
+                    family: {},
+                    profession: '',
+                    marriageStatus: '',
+                    childrenCount: 0,
+                    happiness: '',
+                    luxuryAccess: ''
                 };
             });
-            currentStep = 0;
+
+            document.querySelector('.setup-screen').classList.remove('active');
+            document.querySelector('.game-screen').classList.add('active');
+
+            startPhase1();
         }
 
-        function createTimelines() {
-            const container = document.getElementById('timelinesContainer');
-            container.innerHTML = '';
-
-            characters.forEach(char => {
-                const data = gameData[char];
-                const isUser = data.isUser;
-                
-                const timeline = document.createElement('div');
-                timeline.className = `timeline ${isUser ? 'user-timeline' : ''}`;
-                timeline.id = `timeline-${char}`;
-                
-                const destinyNames = ['', 'Kader→Seçim', 'Seçim→Kader', 'Tam İrade', 'Tam Kader'];
-                
-                timeline.innerHTML = `
-                    <div class="timeline-header">
-                        <div class="character-name">${isUser ? '⭐ ' : ''}${char}</div>
-                        <div class="destiny-type">${destinyNames[data.destinyType]}</div>
-                    </div>
-                    <div class="timeline-steps">
-                        <div class="timeline-line">
-                            <div class="timeline-progress" id="progress-${char}" style="width: 0%"></div>
-                        </div>
-                        ${steps.map((step, i) => `
-                            <div class="step" id="step-${char}-${i}">
-                                <div class="step-circle">${i + 1}</div>
-                                <div class="step-label">${step}</div>
-                                <div class="step-value" id="value-${char}-${i}"></div>
+        // === TIMELINE GÖSTERME ===
+        function showTimeline(title, showOnlyUser = false) {
+            let timelineHtml = '';
+            
+            if (showOnlyUser) {
+                // Sadece kullanıcının kartını göster
+                const userData = gameData[selectedCharacter];
+                timelineHtml = `
+                    <div class="journey-timeline">
+                        <div class="timeline-title">${title}</div>
+                        <div class="timeline-grid" style="grid-template-columns: 1fr; max-width: 600px; margin: 0 auto;">
+                            <div class="timeline-card user-card">
+                                <div class="timeline-card-header">
+                                    ⭐ ${selectedCharacter}
+                                    <br><small>${destinyTypes[userData.destinyType].icon} ${destinyTypes[userData.destinyType].name}</small>
+                                </div>
+                                ${getTimelineContent(selectedCharacter)}
+                                <div class="timeline-score">Skor: ${userData.score}</div>
                             </div>
-                        `).join('')}
+                        </div>
                     </div>
                 `;
-                
-                container.appendChild(timeline);
-            });
-        }
-
-        function processStep() {
-            if (currentStep >= 5) {
-                showFinalResults();
-                return;
-            }
-
-            const userChar = selectedCharacter;
-            const userData = gameData[userChar];
-            const needsChoice = shouldUserChoose(userData.destinyType, currentStep);
-
-            if (needsChoice) {
-                showChoicePanel();
             } else {
-                // Otomatik kader
-                setTimeout(() => {
-                    processAllCharacters(true);
-                }, 1000);
-            }
-        }
-
-        function shouldUserChoose(destinyType, step) {
-            switch(destinyType) {
-                case 1: // Kader → Seçim → Sonuç
-                    return step >= 2 && step <= 3;
-                case 2: // Seçim → Kader → Sonuç
-                    return step <= 1;
-                case 3: // Tam İrade
-                    return step < 4;
-                case 4: // Tam Kader
-                    return false;
-                default:
-                    return false;
-            }
-        }
-
-        function showChoicePanel() {
-            const panel = document.getElementById('choicePanel');
-            const options = getOptionsForStep(currentStep);
-            
-            panel.innerHTML = `
-                <div class="choice-panel">
-                    <h2>🎯 ${steps[currentStep]} - Seçiminizi Yapın</h2>
-                    <div class="choice-options">
-                        ${options.map(opt => `
-                            <button class="choice-btn" onclick="makeChoice('${opt}')">${opt}</button>
-                        `).join('')}
+                // Tüm kartları göster
+                timelineHtml = `
+                    <div class="journey-timeline">
+                        <div class="timeline-title">${title}</div>
+                        <div class="timeline-grid">
+                            ${characters.map(char => {
+                                const data = gameData[char];
+                                return `
+                                    <div class="timeline-card ${data.isUser ? 'user-card' : ''}">
+                                        <div class="timeline-card-header">
+                                            ${data.isUser ? '⭐ ' : ''}${char}
+                                            <br><small>${destinyTypes[data.destinyType].icon} ${destinyTypes[data.destinyType].name}</small>
+                                        </div>
+                                        ${getTimelineContent(char)}
+                                        <div class="timeline-score">Skor: ${data.score}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
                     </div>
-                </div>
-            `;
-        }
-
-        function getOptionsForStep(step) {
-            switch(step) {
-                case 0: return ['Zengin Aile', 'Orta Halli Aile', 'Fakir Aile'];
-                case 1: return ['Özel Okul', 'Devlet Okulu', 'Köy Okulu'];
-                case 2: return ['Fen Bilimleri', 'Sosyal Bilimler', 'Sanat', 'Pratik İşler'];
-                case 3: return ['Çok Çalıştım', 'Orta Çalıştım', 'Az Çalıştım'];
-                default: return [];
+                `;
             }
+            
+            document.getElementById('timelineDisplay').innerHTML = timelineHtml;
+            
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        function makeChoice(choice) {
-            gameData[selectedCharacter].steps[currentStep] = choice;
-            updateTimeline(selectedCharacter, currentStep, choice, true);
+        function getTimelineContent(char) {
+            const data = gameData[char];
+            let html = '';
             
-            document.getElementById('choicePanel').innerHTML = `
-                <div class="info-text">✅ Seçiminiz kaydedildi: <strong>${choice}</strong></div>
-            `;
+            // Doğum
+            if (Object.keys(data.birth).length > 0) {
+                html += '<div class="timeline-item"><div class="timeline-label">📍 Doğum</div><div class="timeline-value">';
+                html += Object.entries(data.birth).slice(0, 3).map(([k, v]) => `${v}`).join(', ');
+                html += '</div></div>';
+            }
+            
+            // Çocukluk
+            if (Object.keys(data.childhood).length > 0) {
+                html += '<div class="timeline-item"><div class="timeline-label">👶 Çocukluk</div><div class="timeline-value">';
+                html += Object.entries(data.childhood).slice(0, 2).map(([k, v]) => `${v}`).join(', ');
+                html += '</div></div>';
+            }
+            
+            // İrade 1
+            if (Object.keys(data.will1).length > 0) {
+                html += '<div class="timeline-item"><div class="timeline-label">✋ İrade Noktası 1</div><div class="timeline-value">';
+                html += Object.entries(data.will1).slice(0, 2).map(([k, v]) => `${v}`).join(', ');
+                html += '</div></div>';
+            }
+            
+            // Eğitim
+            if (data.educationLevel) {
+                html += '<div class="timeline-item"><div class="timeline-label">🎓 Eğitim</div><div class="timeline-value">';
+                html += data.educationLevel;
+                html += '</div></div>';
+            }
+            
+            // İrade 2
+            if (Object.keys(data.will2).length > 0) {
+                html += '<div class="timeline-item"><div class="timeline-label">✋ İrade Noktası 2</div><div class="timeline-value">';
+                html += Object.entries(data.will2).slice(0, 2).map(([k, v]) => `${v}`).join(', ');
+                html += '</div></div>';
+            }
+            
+            return html;
+        }
+
+        // === BÖLÜM 1: EĞİTİM DÖNEMİ ===
+        function startPhase1() {
+            // 1. Doğum
+            characters.forEach(char => {
+                processBirth(char);
+            });
 
             setTimeout(() => {
-                processAllCharacters(false);
+                // 2. Çocukluk
+                characters.forEach(char => {
+                    processChildhood(char);
+                });
+
+                setTimeout(() => {
+                    // 3. İrade Noktası 1
+                    processWillPoint1();
+                }, 1000);
             }, 1000);
         }
 
-        function processAllCharacters(includeUser) {
-            characters.forEach(char => {
-                const data = gameData[char];
-                
-                if (char === selectedCharacter && !includeUser) {
-                    // Kullanıcı zaten seçti
-                    return;
-                }
-
-                let value;
-                if (char === selectedCharacter && includeUser) {
-                    // Kullanıcı için kader
-                    value = getDestinyValue(currentStep);
-                } else {
-                    // Diğer karakterler
-                    const needsChoice = shouldUserChoose(data.destinyType, currentStep);
-                    value = needsChoice ? getIntelligentChoice(char, currentStep) : getDestinyValue(currentStep);
-                }
-                
-                data.steps[currentStep] = value;
-                updateTimeline(char, currentStep, value, char === selectedCharacter);
-            });
-
-            setTimeout(() => {
-                currentStep++;
-                processStep();
-            }, 1500);
-        }
-
-        function getDestinyValue(step) {
-            const rand = Math.random();
-            switch(step) {
-                case 0: // Aile
-                    if (rand < 0.4) return 'Orta Halli Aile';
-                    if (rand < 0.7) return 'Fakir Aile';
-                    return 'Zengin Aile';
-                case 1: // Eğitim
-                    if (rand < 0.5) return 'Devlet Okulu';
-                    if (rand < 0.8) return 'Köy Okulu';
-                    return 'Özel Okul';
-                case 2: // İlgi
-                    const interests = ['Fen Bilimleri', 'Sosyal Bilimler', 'Sanat', 'Pratik İşler'];
-                    return interests[Math.floor(Math.random() * interests.length)];
-                case 3: // Sınav
-                    if (rand < 0.4) return 'Orta Çalıştım';
-                    if (rand < 0.7) return 'Az Çalıştım';
-                    return 'Çok Çalıştım';
-                default:
-                    return '';
-            }
-        }
-
-        function getIntelligentChoice(char, step) {
+        function processBirth(char) {
             const data = gameData[char];
+            const rand = Math.random;
             
-            // Önceki adımlara göre mantıklı seçim yap
-            if (step === 0) {
-                return getDestinyValue(0);
-            } else if (step === 1) {
-                const family = data.steps[0];
-                if (family === 'Zengin Aile') return Math.random() < 0.7 ? 'Özel Okul' : 'Devlet Okulu';
-                if (family === 'Fakir Aile') return Math.random() < 0.6 ? 'Köy Okulu' : 'Devlet Okulu';
-                return 'Devlet Okulu';
-            } else if (step === 2) {
-                return getDestinyValue(2);
-            } else if (step === 3) {
-                const education = data.steps[1];
-                if (education === 'Özel Okul') return Math.random() < 0.6 ? 'Çok Çalıştım' : 'Orta Çalıştım';
-                if (education === 'Köy Okulu') return Math.random() < 0.5 ? 'Az Çalıştım' : 'Orta Çalıştım';
-                return 'Orta Çalıştım';
+            data.birth = {
+                'Aile Durumu': rand() < 0.15 ? 'Zengin Aile' : (rand() < 0.5 ? 'Orta Halli Aile' : 'Fakir Aile'),
+                'IQ Seviyesi': rand() < 0.2 ? 'Yüksek IQ' : (rand() < 0.6 ? 'Orta IQ' : 'Düşük IQ'),
+                'Kardeş Sayısı': rand() < 0.2 ? 'Tek Çocuk' : (rand() < 0.5 ? '1 Kardeş' : (rand() < 0.8 ? '2 Kardeş' : '3+ Kardeş')),
+                'Sağlık Durumu': rand() < 0.15 ? 'Zayıf Sağlık' : (rand() < 0.8 ? 'Normal Sağlık' : 'Güçlü Sağlık'),
+                'Anne-Baba Eğitimi': rand() < 0.25 ? 'Üniversite Mezunu' : (rand() < 0.6 ? 'Lise Mezunu' : 'İlkokul Mezunu')
+            };
+            
+            if (data.birth['Kardeş Sayısı'] !== 'Tek Çocuk') {
+                data.birth['Doğum Sırası'] = rand() < 0.4 ? 'İlk Çocuk' : (rand() < 0.7 ? 'Ortanca Çocuk' : 'En Küçük Çocuk');
             }
-            return getDestinyValue(step);
+            
+            calculateScore(char, 'birth');
         }
 
-        function updateTimeline(char, step, value, isUserCharacter) {
-            const stepEl = document.getElementById(`step-${char}-${step}`);
-            const valueEl = document.getElementById(`value-${char}-${step}`);
-            const progress = document.getElementById(`progress-${char}`);
-            
-            stepEl.classList.add('completed');
-            valueEl.textContent = value;
-            
-            // Bu adımda seçim yapma hakkı var mı kontrol et
+        function processChildhood(char) {
             const data = gameData[char];
-            const hasChoice = shouldUserChoose(data.destinyType, step);
+            const score = data.score;
+            const rand = Math.random;
             
-            if (hasChoice) {
-                valueEl.innerHTML += ' <span class="destiny-indicator secim">Seçim</span>';
+            data.childhood = {
+                'Aile İlgisi': score > 60 ? (rand() < 0.6 ? 'Yüksek İlgi' : 'Normal İlgi') : (rand() < 0.4 ? 'Az İlgi' : 'Normal İlgi'),
+                'Kişilik': score > 70 ? ['Normal', 'Sosyal', 'Hiperaktif'][Math.floor(rand() * 3)] : ['Utangaç', 'Normal', 'Sosyal'][Math.floor(rand() * 3)],
+                'Oyun Türü': ['Bireysel', 'Grup Oyunları', 'Spor', 'Sanat'][Math.floor(rand() * 4)],
+                'Beslenme': score > 50 ? (rand() < 0.6 ? 'İyi' : 'Normal') : (rand() < 0.5 ? 'Kötü' : 'Normal'),
+                'Okuma Alışkanlığı': score > 65 ? (rand() < 0.5 ? 'Çok Okur' : 'Az Okur') : (rand() < 0.3 ? 'Çok Okur' : 'Hiç Okumaz')
+            };
+            
+            calculateScore(char, 'childhood');
+        }
+
+        function processWillPoint1() {
+            const data = gameData[selectedCharacter];
+            const canChoose = destinyTypes[data.destinyType].part1;
+            
+            if (canChoose) {
+                // Kullanıcı seçim yapacak - sadece kendi kartını göster
+                showTimeline('📍 Bölüm 1: Eğitim Dönemi - Sizin Durumunuz', true);
+                setTimeout(() => showWillPoint1Choice(), 500);
             } else {
-                valueEl.innerHTML += ' <span class="destiny-indicator kader">Kader</span>';
+                // Kader - tüm kartları göster
+                showTimeline('📍 Bölüm 1: Eğitim Dönemi', false);
+                characters.forEach(char => {
+                    processWill1Auto(char);
+                });
+                setTimeout(() => continueToEducation(), 1500);
+            }
+        }
+
+        function showWillPoint1Choice() {
+            const panel = document.getElementById('choicePanel');
+            panel.innerHTML = `
+                <div class="choice-panel">
+                    <h2>✋ İrade Noktası 1: İlkokul Sonu</h2>
+                    <p class="info-text">Kendi kontrolünüzde olan faktörleri seçin</p>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Çalışma Alışkanlığı</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill1('study', 'Hiç Çalışmadı')">Hiç Çalışmadı</button>
+                            <button class="choice-btn" onclick="selectWill1('study', 'Az Çalıştı')">Az Çalıştı</button>
+                            <button class="choice-btn" onclick="selectWill1('study', 'Orta Çalıştı')">Orta Çalıştı</button>
+                            <button class="choice-btn" onclick="selectWill1('study', 'Çok Çalıştı')">Çok Çalıştı</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Sosyal Aktivite Tercihi</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill1('social', 'Yok')">Yok</button>
+                            <button class="choice-btn" onclick="selectWill1('social', 'Spor')">Spor</button>
+                            <button class="choice-btn" onclick="selectWill1('social', 'Sanat')">Sanat</button>
+                            <button class="choice-btn" onclick="selectWill1('social', 'Kulüp')">Kulüp</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Arkadaş İlişkileri</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill1('friends', 'İzole')">İzole</button>
+                            <button class="choice-btn" onclick="selectWill1('friends', 'Az Arkadaş')">Az Arkadaş</button>
+                            <button class="choice-btn" onclick="selectWill1('friends', 'Normal')">Normal</button>
+                            <button class="choice-btn" onclick="selectWill1('friends', 'Popüler')">Popüler</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Sorumluluk Alma</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill1('responsibility', 'Düşük')">Düşük</button>
+                            <button class="choice-btn" onclick="selectWill1('responsibility', 'Normal')">Normal</button>
+                            <button class="choice-btn" onclick="selectWill1('responsibility', 'Yüksek')">Yüksek</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Hedef Belirleme</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill1('goals', 'Belirsiz')">Belirsiz</button>
+                            <button class="choice-btn" onclick="selectWill1('goals', 'Kısa Vadeli')">Kısa Vadeli</button>
+                            <button class="choice-btn" onclick="selectWill1('goals', 'Uzun Vadeli')">Uzun Vadeli</button>
+                        </div>
+                    </div>
+
+                    <button class="start-btn" id="confirmWill1" onclick="confirmWill1()" disabled>✅ Devam Et</button>
+                </div>
+                
+                <div class="journey-timeline" style="margin-top: 30px;">
+                    <div class="timeline-title">Diğer Karakterlerin Durumu</div>
+                    <div class="timeline-grid">
+                        ${characters.filter(c => c !== selectedCharacter).map(char => {
+                            const data = gameData[char];
+                            return `
+                                <div class="timeline-card">
+                                    <div class="timeline-card-header">
+                                        ${char}
+                                        <br><small>${destinyTypes[data.destinyType].icon} ${destinyTypes[data.destinyType].name}</small>
+                                    </div>
+                                    ${getTimelineContent(char)}
+                                    <div class="timeline-score">Skor: ${data.score}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            gameData[selectedCharacter].will1 = {};
+        }
+
+        function selectWill1(category, value) {
+            const data = gameData[selectedCharacter];
+            data.will1[category] = value;
+            
+            const buttons = event.currentTarget.parentElement.querySelectorAll('.choice-btn');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            const requiredChoices = ['study', 'social', 'friends', 'responsibility', 'goals'];
+            const allSelected = requiredChoices.every(choice => data.will1[choice]);
+            document.getElementById('confirmWill1').disabled = !allSelected;
+        }
+
+        function confirmWill1() {
+            calculateScore(selectedCharacter, 'will1');
+            
+            characters.forEach(char => {
+                if (char !== selectedCharacter) {
+                    processWill1Auto(char);
+                }
+            });
+            
+            document.getElementById('choicePanel').innerHTML = '<div class="info-text">✅ Seçimleriniz kaydedildi!</div>';
+            
+            setTimeout(() => {
+                continueToEducation();
+            }, 1000);
+        }
+
+        function processWill1Auto(char) {
+            const data = gameData[char];
+            const score = data.score;
+            const rand = Math.random;
+            
+            data.will1 = {
+                'study': score > 70 ? (rand() < 0.6 ? 'Çok Çalıştı' : 'Orta Çalıştı') : (score > 40 ? 'Orta Çalıştı' : (rand() < 0.5 ? 'Az Çalıştı' : 'Hiç Çalışmadı')),
+                'social': ['Yok', 'Spor', 'Sanat', 'Kulüp'][Math.floor(rand() * 4)],
+                'friends': score > 60 ? (rand() < 0.5 ? 'Normal' : 'Popüler') : (rand() < 0.5 ? 'İzole' : 'Az Arkadaş'),
+                'responsibility': score > 65 ? 'Yüksek' : (score > 35 ? 'Normal' : 'Düşük'),
+                'goals': score > 70 ? 'Uzun Vadeli' : (score > 40 ? 'Kısa Vadeli' : 'Belirsiz')
+            };
+            
+            calculateScore(char, 'will1');
+        }
+
+        function continueToEducation() {
+            characters.forEach(char => {
+                processEducation(char);
+            });
+            
+            setTimeout(() => {
+                startPhase2();
+            }, 1000);
+        }
+
+        function processEducation(char) {
+            const data = gameData[char];
+            const score = data.score;
+            const rand = Math.random;
+            
+            let eduLevel;
+            if (score < 150) {
+                eduLevel = rand() < 0.6 ? 'Üniversiteye Giremedi' : 'Açık Öğretim';
+            } else if (score < 250) {
+                eduLevel = rand() < 0.4 ? 'Meslek Okulu' : (rand() < 0.7 ? 'Devlet Üniversitesi' : 'Açık Öğretim');
+            } else if (score < 350) {
+                eduLevel = rand() < 0.6 ? 'Devlet Üniversitesi' : 'İyi Devlet Üniversitesi';
+            } else {
+                eduLevel = rand() < 0.3 ? 'Yurtdışı Üniversite' : (rand() < 0.6 ? 'Özel Üniversite' : 'İyi Devlet Üniversitesi');
             }
             
-            const progressPercent = ((step + 1) / 5) * 100;
-            progress.style.width = progressPercent + '%';
-
-            if (step < 4) {
-                document.getElementById(`step-${char}-${step + 1}`).classList.add('active');
+            data.educationLevel = eduLevel;
+            
+            if (eduLevel !== 'Üniversiteye Giremedi') {
+                data.education = {
+                    'Eğitim Seviyesi': eduLevel,
+                    'Bölüm': getRandomDepartment(score),
+                    'Akademik Performans': score > 300 ? (rand() < 0.6 ? 'Çok İyi' : 'İyi') : (score > 200 ? 'İyi' : (score > 100 ? 'Orta' : 'Zayıf'))
+                };
+            } else {
+                data.education = {
+                    'Eğitim Seviyesi': eduLevel
+                };
             }
+            
+            calculateScore(char, 'education');
+        }
+
+        function getRandomDepartment(score) {
+            const rand = Math.random();
+            if (score > 350) {
+                return rand < 0.4 ? 'Tıp' : (rand < 0.7 ? 'Mühendislik' : 'Hukuk');
+            } else if (score > 250) {
+                return rand < 0.5 ? 'Mühendislik' : (rand < 0.75 ? 'İşletme' : 'Eğitim');
+            } else {
+                return rand < 0.4 ? 'İşletme' : (rand < 0.7 ? 'Sosyal Bilimler' : 'Sanat');
+            }
+        }
+
+        // === BÖLÜM 2: YETİŞKİN HAYATI ===
+        function startPhase2() {
+            const data = gameData[selectedCharacter];
+            const canChoose = destinyTypes[data.destinyType].part2;
+            
+            if (canChoose) {
+                // Kullanıcı seçim yapacak - sadece kendi kartını göster
+                showTimeline('📍 Bölüm 2: Yetişkin Hayatı - Sizin Durumunuz', true);
+                setTimeout(() => showWillPoint2Choice(), 500);
+            } else {
+                // Kader - tüm kartları göster
+                showTimeline('📍 Bölüm 2: Yetişkin Hayatı', false);
+                characters.forEach(char => {
+                    processWill2Auto(char);
+                });
+                setTimeout(() => continueToFinalSteps(), 1500);
+            }
+        }
+
+        function showWillPoint2Choice() {
+            const panel = document.getElementById('choicePanel');
+            panel.innerHTML = `
+                <div class="choice-panel">
+                    <h2>✋ İrade Noktası 2: Eğitim Sonrası</h2>
+                    <p class="info-text">Yetişkin hayatınızda kendi kontrolünüzdeki kararlar</p>
+                    
+                    <div class="parameter-group">
+                        <label class="parameter-label">Evlilik</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill2('marriage', 'Evlenmedi')">Evlenmedi</button>
+                            <button class="choice-btn" onclick="selectWill2('marriage', 'Evlendi')">Evlendi</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">İş Arama Çabası</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill2('jobSearch', 'Aramadı')">Aramadı</button>
+                            <button class="choice-btn" onclick="selectWill2('jobSearch', 'Az Aradı')">Az Aradı</button>
+                            <button class="choice-btn" onclick="selectWill2('jobSearch', 'Aktif Aradı')">Aktif Aradı</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Girişimcilik</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill2('entrepreneurship', 'Hayır')">Hayır</button>
+                            <button class="choice-btn" onclick="selectWill2('entrepreneurship', 'Evet')">Evet (Kendi İşi)</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Aileden Ayrılma</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill2('relocation', 'Ayrılmadı')">Ayrılmadı</button>
+                            <button class="choice-btn" onclick="selectWill2('relocation', 'Ayrıldı')">Ayrıldı</button>
+                        </div>
+                    </div>
+
+                    <div class="parameter-group">
+                        <label class="parameter-label">Ek Eğitim</label>
+                        <div class="choice-options">
+                            <button class="choice-btn" onclick="selectWill2('extraEdu', 'Almadı')">Almadı</button>
+                            <button class="choice-btn" onclick="selectWill2('extraEdu', 'Kurs/Sertifika')">Kurs/Sertifika</button>
+                            <button class="choice-btn" onclick="selectWill2('extraEdu', 'Yüksek Lisans')">Yüksek Lisans</button>
+                        </div>
+                    </div>
+
+                    <button class="start-btn" id="confirmWill2" onclick="confirmWill2()" disabled>✅ Devam Et</button>
+                </div>
+                
+                <div class="journey-timeline" style="margin-top: 30px;">
+                    <div class="timeline-title">Diğer Karakterlerin Durumu</div>
+                    <div class="timeline-grid">
+                        ${characters.filter(c => c !== selectedCharacter).map(char => {
+                            const data = gameData[char];
+                            return `
+                                <div class="timeline-card">
+                                    <div class="timeline-card-header">
+                                        ${char}
+                                        <br><small>${destinyTypes[data.destinyType].icon} ${destinyTypes[data.destinyType].name}</small>
+                                    </div>
+                                    ${getTimelineContent(char)}
+                                    <div class="timeline-score">Skor: ${data.score}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            gameData[selectedCharacter].will2 = {};
+        }
+
+        function selectWill2(category, value) {
+            const data = gameData[selectedCharacter];
+            data.will2[category] = value;
+            
+            const buttons = event.currentTarget.parentElement.querySelectorAll('.choice-btn');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+            
+            const requiredChoices = ['marriage', 'jobSearch', 'entrepreneurship', 'relocation', 'extraEdu'];
+            const allSelected = requiredChoices.every(choice => data.will2[choice]);
+            document.getElementById('confirmWill2').disabled = !allSelected;
+        }
+
+        function confirmWill2() {
+            calculateScore(selectedCharacter, 'will2');
+            
+            characters.forEach(char => {
+                if (char !== selectedCharacter) {
+                    processWill2Auto(char);
+                }
+            });
+            
+            document.getElementById('choicePanel').innerHTML = '<div class="info-text">✅ Seçimleriniz kaydedildi!</div>';
+            
+            setTimeout(() => {
+                continueToFinalSteps();
+            }, 1000);
+        }
+
+        function processWill2Auto(char) {
+            const data = gameData[char];
+            const score = data.score;
+            const rand = Math.random;
+            
+            data.will2 = {
+                'marriage': rand() < 0.6 ? 'Evlendi' : 'Evlenmedi',
+                'jobSearch': score > 300 ? 'Aktif Aradı' : (score > 200 ? (rand() < 0.6 ? 'Aktif Aradı' : 'Az Aradı') : 'Az Aradı'),
+                'entrepreneurship': score > 350 ? (rand() < 0.3 ? 'Evet' : 'Hayır') : 'Hayır',
+                'relocation': rand() < 0.5 ? 'Ayrıldı' : 'Ayrılmadı',
+                'extraEdu': score > 320 ? (rand() < 0.4 ? 'Yüksek Lisans' : 'Kurs/Sertifika') : (rand() < 0.3 ? 'Kurs/Sertifika' : 'Almadı')
+            };
+            
+            calculateScore(char, 'will2');
+        }
+
+        function continueToFinalSteps() {
+            characters.forEach(char => {
+                processCareer(char);
+                processFamily(char);
+            });
+            
+            assignProfessions();
+            setTimeout(() => {
+                showFinalResults();
+            }, 1000);
+        }
+
+        function processCareer(char) {
+            const data = gameData[char];
+            const score = data.score;
+            const rand = Math.random;
+            
+            data.career = {
+                'İş Bulma': score > 300 ? 'Başarılı' : (score > 200 ? 'Normal' : 'Zor Buldu'),
+                'Terfi': score > 350 ? (rand() < 0.6 ? 'Hızlı' : 'Normal') : (score > 200 ? 'Normal' : 'Yavaş'),
+                'Maaş Seviyesi': score > 350 ? 'Yüksek' : (score > 200 ? 'Orta' : 'Düşük')
+            };
+        }
+
+        function processFamily(char) {
+            const data = gameData[char];
+            const rand = Math.random;
+            
+            data.marriageStatus = data.will2.marriage === 'Evlendi' ? 'Evli' : 'Bekar';
+            
+            if (data.marriageStatus === 'Evli') {
+                data.childrenCount = Math.floor(rand() * 4);
+            } else {
+                data.childrenCount = 0;
+            }
+            
+            const happinessOptions = ['Mutsuz', 'Normal', 'Mutlu', 'Çok Mutlu'];
+            data.happiness = happinessOptions[Math.floor(rand() * 4)];
+            
+            const score = data.score;
+            if (score < 200) {
+                data.luxuryAccess = 'Çok Kısıtlı';
+            } else if (score < 300) {
+                data.luxuryAccess = 'Kısıtlı';
+            } else if (score < 400) {
+                data.luxuryAccess = 'Orta';
+            } else if (score < 500) {
+                data.luxuryAccess = 'İyi';
+            } else {
+                data.luxuryAccess = 'Çok İyi';
+            }
+        }
+
+        function calculateScore(char, phase) {
+            const data = gameData[char];
+            let scoreIncrease = 0;
+            
+            if (phase === 'birth') {
+                if (data.birth['Aile Durumu'] === 'Zengin Aile') scoreIncrease += 40;
+                else if (data.birth['Aile Durumu'] === 'Orta Halli Aile') scoreIncrease += 20;
+                
+                if (data.birth['IQ Seviyesi'] === 'Yüksek IQ') scoreIncrease += 50;
+                else if (data.birth['IQ Seviyesi'] === 'Orta IQ') scoreIncrease += 25;
+                else scoreIncrease -= 10;
+                
+                if (data.birth['Sağlık Durumu'] === 'Zayıf Sağlık') scoreIncrease -= 30;
+                else if (data.birth['Sağlık Durumu'] === 'Güçlü Sağlık') scoreIncrease += 15;
+                
+                if (data.birth['Anne-Baba Eğitimi'] === 'Üniversite Mezunu') scoreIncrease += 30;
+                else if (data.birth['Anne-Baba Eğitimi'] === 'Lise Mezunu') scoreIncrease += 15;
+                
+                if (data.birth['Kardeş Sayısı'] === 'Tek Çocuk') scoreIncrease += 12;
+                if (data.birth['Doğum Sırası'] === 'İlk Çocuk') scoreIncrease += 8;
+                
+            } else if (phase === 'childhood') {
+                if (data.childhood['Aile İlgisi'] === 'Yüksek İlgi') scoreIncrease += 25;
+                else if (data.childhood['Aile İlgisi'] === 'Az İlgi') scoreIncrease -= 15;
+                
+                if (data.childhood['Okuma Alışkanlığı'] === 'Çok Okur') scoreIncrease += 30;
+                else if (data.childhood['Okuma Alışkanlığı'] === 'Hiç Okumaz') scoreIncrease -= 20;
+                
+                if (data.childhood['Beslenme'] === 'İyi') scoreIncrease += 15;
+                else if (data.childhood['Beslenme'] === 'Kötü') scoreIncrease -= 20;
+                
+                if (data.childhood['Kişilik'] === 'Sosyal') scoreIncrease += 12;
+                else if (data.childhood['Kişilik'] === 'Utangaç') scoreIncrease -= 8;
+                
+            } else if (phase === 'will1') {
+                if (data.will1['study'] === 'Çok Çalıştı') scoreIncrease += 50;
+                else if (data.will1['study'] === 'Orta Çalıştı') scoreIncrease += 25;
+                else if (data.will1['study'] === 'Az Çalıştı') scoreIncrease += 5;
+                else scoreIncrease -= 20;
+                
+                if (data.will1['social'] !== 'Yok') scoreIncrease += 15;
+                
+                if (data.will1['friends'] === 'Popüler') scoreIncrease += 20;
+                else if (data.will1['friends'] === 'Normal') scoreIncrease += 10;
+                else if (data.will1['friends'] === 'İzole') scoreIncrease -= 15;
+                
+                if (data.will1['responsibility'] === 'Yüksek') scoreIncrease += 25;
+                else if (data.will1['responsibility'] === 'Normal') scoreIncrease += 10;
+                
+                if (data.will1['goals'] === 'Uzun Vadeli') scoreIncrease += 30;
+                else if (data.will1['goals'] === 'Kısa Vadeli') scoreIncrease += 15;
+                
+            } else if (phase === 'education') {
+                if (data.educationLevel === 'Yurtdışı Üniversite') scoreIncrease += 80;
+                else if (data.educationLevel === 'Özel Üniversite') scoreIncrease += 50;
+                else if (data.educationLevel === 'İyi Devlet Üniversitesi') scoreIncrease += 60;
+                else if (data.educationLevel === 'Devlet Üniversitesi') scoreIncrease += 35;
+                else if (data.educationLevel === 'Meslek Okulu') scoreIncrease += 15;
+                else if (data.educationLevel === 'Açık Öğretim') scoreIncrease += 8;
+                else scoreIncrease -= 30;
+                
+                if (data.education['Bölüm'] === 'Tıp') scoreIncrease += 60;
+                else if (data.education['Bölüm'] === 'Mühendislik') scoreIncrease += 50;
+                else if (data.education['Bölüm'] === 'Hukuk') scoreIncrease += 45;
+                else if (data.education['Bölüm'] === 'İşletme') scoreIncrease += 35;
+                
+                if (data.education['Akademik Performans'] === 'Çok İyi') scoreIncrease += 40;
+                else if (data.education['Akademik Performans'] === 'İyi') scoreIncrease += 25;
+                else if (data.education['Akademik Performans'] === 'Orta') scoreIncrease += 10;
+                
+            } else if (phase === 'will2') {
+                if (data.will2['jobSearch'] === 'Aktif Aradı') scoreIncrease += 40;
+                else if (data.will2['jobSearch'] === 'Az Aradı') scoreIncrease += 15;
+                
+                if (data.will2['entrepreneurship'] === 'Evet') scoreIncrease += 30;
+                
+                if (data.will2['extraEdu'] === 'Yüksek Lisans') scoreIncrease += 35;
+                else if (data.will2['extraEdu'] === 'Kurs/Sertifika') scoreIncrease += 20;
+                
+                if (data.will2['relocation'] === 'Ayrıldı') scoreIncrease += 15;
+            }
+            
+            data.score += scoreIncrease;
+        }
+
+        function assignProfessions() {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            gameData[characters[randomIndex]].profession = 'Kronik Hasta';
+            
+            const remaining = characters.filter((_, idx) => idx !== randomIndex);
+            remaining.sort((a, b) => gameData[b].score - gameData[a].score);
+            
+            const remainingProfessions = professions.filter(p => p !== 'Kronik Hasta');
+            remaining.forEach((char, idx) => {
+                gameData[char].profession = remainingProfessions[idx];
+            });
         }
 
         function showFinalResults() {
+            document.getElementById('timelineDisplay').innerHTML = '';
             document.getElementById('choicePanel').innerHTML = '';
-            
-            // Meslek dağıtımı
-            assignProfessions();
             
             const resultsHTML = `
                 <div class="final-results">
-                    <h2>🎓 Simülasyon Tamamlandı - Sonuçlar</h2>
+                    <h2>🎓 Hayat Simülasyonu Tamamlandı</h2>
                     <div class="results-grid">
                         ${characters.map(char => {
                             const data = gameData[char];
                             const isUser = data.isUser;
                             return `
-                                <div class="result-card ${isUser ? 'user-result' : ''}">
+                                <div class="result-card ${isUser ? 'user-result' : ''}" id="result-${char}">
                                     <div class="result-character">${isUser ? '⭐ ' : ''}${char}</div>
-                                    <div class="result-profession">${data.profession}</div>
-                                    <div class="result-path">
-                                        ${data.steps[0]}<br>
-                                        → ${data.steps[1]}<br>
-                                        → ${data.steps[2]}<br>
-                                        → ${data.steps[3]}<br>
-                                        → <strong>${data.profession}</strong>
+                                    
+                                    <div class="result-section">
+                                        <div class="result-section-title">🎯 Hayat Sonuçları</div>
+                                        <div class="result-highlight">💼 ${data.profession}</div>
+                                        <div class="result-highlight">💑 ${data.marriageStatus}</div>
+                                        <div class="result-highlight">👶 ${data.childrenCount} Çocuk</div>
+                                        <div class="result-highlight">😊 Mutluluk: ${data.happiness}</div>
+                                        <div class="result-highlight">🏆 Keyif Nesneleri: ${data.luxuryAccess}</div>
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">📍 Doğum (Otomatik)</div>
+                                        ${Object.entries(data.birth).map(([key, val]) => 
+                                            `<div class="result-item">${key}: ${val} <span class="destiny-indicator kader">Kader</span></div>`
+                                        ).join('')}
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">👶 Çocukluk (Otomatik)</div>
+                                        ${Object.entries(data.childhood).map(([key, val]) => 
+                                            `<div class="result-item">${key}: ${val} <span class="destiny-indicator kader">Kader</span></div>`
+                                        ).join('')}
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">✋ İrade Noktası 1 (İlkokul Sonu)</div>
+                                        ${Object.entries(data.will1).map(([key, val]) => {
+                                            const hasWill = destinyTypes[data.destinyType].part1;
+                                            const indicator = hasWill ? 
+                                                '<span class="destiny-indicator irade">İrade</span>' : 
+                                                '<span class="destiny-indicator kader">Kader</span>';
+                                            return `<div class="result-item">${formatWill1Key(key)}: ${val} ${indicator}</div>`;
+                                        }).join('')}
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">🎓 Eğitim (Otomatik)</div>
+                                        ${Object.entries(data.education).map(([key, val]) => 
+                                            `<div class="result-item">${key}: ${val} <span class="destiny-indicator kader">Kader</span></div>`
+                                        ).join('')}
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">✋ İrade Noktası 2 (Eğitim Sonrası)</div>
+                                        ${Object.entries(data.will2).map(([key, val]) => {
+                                            const hasWill = destinyTypes[data.destinyType].part2;
+                                            const indicator = hasWill ? 
+                                                '<span class="destiny-indicator irade">İrade</span>' : 
+                                                '<span class="destiny-indicator kader">Kader</span>';
+                                            return `<div class="result-item">${formatWill2Key(key)}: ${val} ${indicator}</div>`;
+                                        }).join('')}
+                                    </div>
+
+                                    <div class="result-section">
+                                        <div class="result-section-title">📊 Final Skor: ${data.score}</div>
                                     </div>
                                 </div>
                             `;
@@ -754,57 +1325,36 @@
             `;
             
             document.getElementById('finalResults').innerHTML = resultsHTML;
-
-            // Timeline'larda mesleği göster
-            characters.forEach(char => {
-                const data = gameData[char];
-                document.getElementById(`value-${char}-4`).textContent = data.profession;
-                document.getElementById(`step-${char}-4`).classList.add('completed');
-            });
+            
+            // Kullanıcının kartına otomatik scroll
+            setTimeout(() => {
+                const userCard = document.getElementById(`result-${selectedCharacter}`);
+                if (userCard) {
+                    userCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
         }
 
-        function assignProfessions() {
-            // Her karakter için puan hesapla
-            const scores = {};
-            characters.forEach(char => {
-                scores[char] = calculateScore(char);
-            });
-
-            // Puanlara göre sırala
-            const sorted = characters.sort((a, b) => scores[b] - scores[a]);
-            
-            // Meslek dağıt
-            const availableProfessions = [...professions];
-            sorted.forEach((char, index) => {
-                gameData[char].profession = availableProfessions[index];
-            });
+        function formatWill1Key(key) {
+            const map = {
+                'study': 'Çalışma Alışkanlığı',
+                'social': 'Sosyal Aktivite',
+                'friends': 'Arkadaş İlişkileri',
+                'responsibility': 'Sorumluluk',
+                'goals': 'Hedef Belirleme'
+            };
+            return map[key] || key;
         }
 
-        function calculateScore(char) {
-            const data = gameData[char];
-            let score = 0;
-
-            // Aile durumu
-            if (data.steps[0] === 'Zengin Aile') score += 30;
-            else if (data.steps[0] === 'Orta Halli Aile') score += 15;
-            
-            // Eğitim
-            if (data.steps[1] === 'Özel Okul') score += 30;
-            else if (data.steps[1] === 'Devlet Okulu') score += 15;
-            
-            // İlgi alanı
-            if (data.steps[2] === 'Fen Bilimleri') score += 25;
-            else if (data.steps[2] === 'Sosyal Bilimler') score += 20;
-            else if (data.steps[2] === 'Sanat') score += 10;
-            
-            // Sınav
-            if (data.steps[3] === 'Çok Çalıştım') score += 30;
-            else if (data.steps[3] === 'Orta Çalıştım') score += 15;
-
-            // Rastgele faktör
-            score += Math.random() * 10;
-
-            return score;
+        function formatWill2Key(key) {
+            const map = {
+                'marriage': 'Evlilik',
+                'jobSearch': 'İş Arama',
+                'entrepreneurship': 'Girişimcilik',
+                'relocation': 'Taşınma',
+                'extraEdu': 'Ek Eğitim'
+            };
+            return map[key] || key;
         }
     </script>
 </body>
