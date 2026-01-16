@@ -202,23 +202,23 @@
 <body>
     <div class="container">
         <h1>🗜️ ZIP Raw Dönüştürücü</h1>
-        <p class="subtitle">Özel karakterleri koruyarak dosyalarınızı raw formatına dönüştürün</p>
+        <p class="subtitle">Özel karakterleri koruyarak ZIP dosyalarınızı raw formatına dönüştürün</p>
 
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📦</div>
-            <div class="upload-text">Dosya/klasör seçin veya sürükleyin</div>
-            <div class="upload-hint">ZIP dosyası veya çoklu dosya/klasörler desteklenir</div>
-            <input type="file" id="fileInput" multiple webkitdirectory directory>
+            <div class="upload-text">ZIP dosyası seçin veya sürükleyin</div>
+            <div class="upload-hint">Dosya otomatik olarak işlenecek ve indirilecektir</div>
+            <input type="file" id="fileInput" accept=".zip">
         </div>
 
         <div class="info-box">
             <h3>✨ Özellikler</h3>
             <ul>
-                <li>Tek ZIP dosyası: Açılır, raw'e çevrilir, tekrar ziplenir</li>
-                <li>Çoklu dosya/klasörler: Direkt raw'e çevrilir ve ziplenir</li>
                 <li>Türkçe karakterler dahil tüm özel karakterleri korur</li>
-                <li>Klasör yapısını korur</li>
+                <li>ZIP içindeki klasör yapısını korur</li>
+                <li>Unicode escape sequence kullanarak güvenli dönüşüm</li>
                 <li>İşlem tamamlandığında otomatik indirme</li>
+                <li>Tarayıcıda çalışır, kurulum gerektirmez</li>
             </ul>
         </div>
 
@@ -226,7 +226,7 @@
 
         <div class="footer">
             Claude.ai projelerinizde kullanmak için hazırlandı<br>
-            <code>files_raw.zip</code> olarak indirilecektir
+            <code>dosyaadi_raw.zip</code> olarak indirilecektir
         </div>
     </div>
 
@@ -253,39 +253,10 @@
             return result;
         }
 
-        // Dosyayı raw'e çevirip ZIP'e ekle
-        async function processFileToRaw(file, zip, basePath = '') {
+        // Dosya işleme fonksiyonu
+        async function processZipFile(file) {
             try {
-                const fileContent = await file.arrayBuffer();
-                
-                // Text olarak decode etmeye çalış
-                let textContent;
-                try {
-                    const decoder = new TextDecoder('utf-8');
-                    textContent = decoder.decode(fileContent);
-                } catch (e) {
-                    // Binary dosya ise latin-1 kullan
-                    const decoder = new TextDecoder('latin1');
-                    textContent = decoder.decode(fileContent);
-                }
-                
-                // Raw formatına dönüştür
-                const rawContent = rawEncode(textContent);
-                
-                // ZIP'e ekle (webkitRelativePath veya name kullan)
-                const relativePath = file.webkitRelativePath || file.name;
-                const fullPath = basePath ? `${basePath}/${relativePath}` : relativePath;
-                zip.file(fullPath, rawContent);
-                
-            } catch (e) {
-                console.error(`Dosya işlenirken hata: ${file.name}`, e);
-            }
-        }
-
-        // Tek ZIP dosyası işleme
-        async function processSingleZip(file) {
-            try {
-                showStatus('processing', '<span class="spinner"></span>ZIP dosyası açılıyor...');
+                showStatus('processing', '<span class="spinner"></span>ZIP dosyası işleniyor, lütfen bekleyin...');
                 
                 const zip = new JSZip();
                 const content = await file.arrayBuffer();
@@ -335,80 +306,37 @@
                     updateProgress(processed, files.length);
                 }
                 
-                // ZIP oluştur ve indir
+                showStatus('processing', '<span class="spinner"></span>ZIP dosyası oluşturuluyor...');
+                
+                // Yeni ZIP dosyasını oluştur
+                const blob = await newZip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+                
+                // Dosyayı indir
                 const originalName = file.name.replace('.zip', '');
-                await generateAndDownloadZip(newZip, `${originalName}_raw.zip`);
+                const newFileName = `${originalName}_raw.zip`;
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = newFileName;
+                downloadLink.click();
+                
+                // URL'i temizle
+                setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
+                
+                showStatus('success', `✅ İşlem tamamlandı! <strong>${newFileName}</strong> dosyası indiriliyor...`);
+                
+                // 3 saniye sonra durumu temizle
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
                 
             } catch (error) {
                 console.error('Hata:', error);
                 showStatus('error', `❌ Hata oluştu: ${error.message}`);
-            }
-        }
-
-        // Çoklu dosya/klasör işleme
-        async function processMultipleFiles(files) {
-            try {
-                showStatus('processing', '<span class="spinner"></span>Dosyalar işleniyor...');
-                
-                const newZip = new JSZip();
-                const fileArray = Array.from(files);
-                let processed = 0;
-                
-                for (const file of fileArray) {
-                    await processFileToRaw(file, newZip);
-                    processed++;
-                    updateProgress(processed, fileArray.length);
-                }
-                
-                // ZIP oluştur ve indir
-                await generateAndDownloadZip(newZip, 'files_raw.zip');
-                
-            } catch (error) {
-                console.error('Hata:', error);
-                showStatus('error', `❌ Hata oluştu: ${error.message}`);
-            }
-        }
-
-        // ZIP oluştur ve indir
-        async function generateAndDownloadZip(zip, filename) {
-            showStatus('processing', '<span class="spinner"></span>ZIP dosyası oluşturuluyor...');
-            
-            const blob = await zip.generateAsync({
-                type: 'blob',
-                compression: 'DEFLATE',
-                compressionOptions: { level: 6 }
-            });
-            
-            // Dosyayı indir
-            const downloadLink = document.createElement('a');
-            downloadLink.href = URL.createObjectURL(blob);
-            downloadLink.download = filename;
-            downloadLink.click();
-            
-            // URL'i temizle
-            setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
-            
-            showStatus('success', `✅ İşlem tamamlandı! <strong>${filename}</strong> dosyası indiriliyor...`);
-            
-            // 3 saniye sonra durumu temizle
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        // Ana işlem fonksiyonu
-        async function processFiles(files) {
-            if (!files || files.length === 0) {
-                showStatus('error', '❌ Lütfen dosya seçin.');
-                return;
-            }
-
-            // Tek ZIP dosyası mı kontrol et
-            if (files.length === 1 && files[0].name.endsWith('.zip')) {
-                await processSingleZip(files[0]);
-            } else {
-                // Çoklu dosya veya ZIP değil
-                await processMultipleFiles(files);
             }
         }
 
@@ -430,19 +358,19 @@
             `);
         }
 
-        // Upload area tıklama - hem dosya hem klasör seçimi için
+        // Dosya seçimi
         uploadArea.addEventListener('click', () => {
-            // Input'u sıfırla ve dosya seçimine izin ver
-            const newInput = document.createElement('input');
-            newInput.type = 'file';
-            newInput.multiple = true;
-            newInput.webkitdirectory = false;
-            
-            newInput.addEventListener('change', (e) => {
-                processFiles(e.target.files);
-            });
-            
-            newInput.click();
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                processZipFile(file);
+            } else {
+                showStatus('error', '❌ Lütfen geçerli bir ZIP dosyası seçin.');
+            }
+            fileInput.value = ''; // Reset input
         });
 
         // Drag & Drop
@@ -455,64 +383,17 @@
             uploadArea.classList.remove('dragover');
         });
 
-        uploadArea.addEventListener('drop', async (e) => {
+        uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
             
-            const items = e.dataTransfer.items;
-            const files = [];
-            
-            // DataTransferItemList'ten dosyaları topla
-            if (items) {
-                for (let i = 0; i < items.length; i++) {
-                    const item = items[i];
-                    
-                    if (item.kind === 'file') {
-                        const entry = item.webkitGetAsEntry();
-                        if (entry) {
-                            await traverseFileTree(entry, '', files);
-                        } else {
-                            files.push(item.getAsFile());
-                        }
-                    }
-                }
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                processZipFile(file);
             } else {
-                // Fallback: direkt dosyaları al
-                for (let i = 0; i < e.dataTransfer.files.length; i++) {
-                    files.push(e.dataTransfer.files[i]);
-                }
-            }
-            
-            if (files.length > 0) {
-                processFiles(files);
+                showStatus('error', '❌ Lütfen geçerli bir ZIP dosyası seçin.');
             }
         });
-
-        // Klasör yapısını traverse et (drag&drop için)
-        async function traverseFileTree(entry, path, files) {
-            if (entry.isFile) {
-                const file = await new Promise((resolve) => {
-                    entry.file((f) => {
-                        // webkitRelativePath ekle
-                        Object.defineProperty(f, 'webkitRelativePath', {
-                            value: path + f.name,
-                            writable: false
-                        });
-                        resolve(f);
-                    });
-                });
-                files.push(file);
-            } else if (entry.isDirectory) {
-                const dirReader = entry.createReader();
-                const entries = await new Promise((resolve) => {
-                    dirReader.readEntries(resolve);
-                });
-                
-                for (const childEntry of entries) {
-                    await traverseFileTree(childEntry, path + entry.name + '/', files);
-                }
-            }
-        }
     </script>
 </body>
 </html>
