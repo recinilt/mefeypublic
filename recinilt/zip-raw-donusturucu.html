@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZIP Raw Dönüştürücü</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f2ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: #e8ebff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 13px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #0369a1;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #0c4a6e;
+            font-size: 13px;
+        }
+
+        .info-box li {
+            margin-bottom: 5px;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status.processing {
+            display: block;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+        }
+
+        .status.success {
+            display: block;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .status.error {
+            display: block;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #fed7aa;
+            border-top-color: #9a3412;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            color: #6b7280;
+            font-size: 12px;
+        }
+
+        code {
+            background: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗜️ ZIP Raw Dönüştürücü</h1>
+        <p class="subtitle">Özel karakterleri koruyarak ZIP dosyalarınızı raw formatına dönüştürün</p>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📦</div>
+            <div class="upload-text">ZIP dosyası seçin veya sürükleyin</div>
+            <div class="upload-hint">Dosya otomatik olarak işlenecek ve indirilecektir</div>
+            <input type="file" id="fileInput" accept=".zip">
+        </div>
+
+        <div class="info-box">
+            <h3>✨ Özellikler</h3>
+            <ul>
+                <li>Türkçe karakterler dahil tüm özel karakterleri korur</li>
+                <li>ZIP içindeki klasör yapısını korur</li>
+                <li>Unicode escape sequence kullanarak güvenli dönüşüm</li>
+                <li>İşlem tamamlandığında otomatik indirme</li>
+                <li>Tarayıcıda çalışır, kurulum gerektirmez</li>
+            </ul>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div class="footer">
+            Claude.ai projelerinizde kullanmak için hazırlandı<br>
+            <code>dosyaadi_raw.zip</code> olarak indirilecektir
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const statusDiv = document.getElementById('status');
+
+        // Raw encoding fonksiyonu
+        function rawEncode(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = char.charCodeAt(0);
+                
+                // ASCII yazdırılabilir karakterler (özel karakterler hariç)
+                if (code < 128 && /[a-zA-Z0-9\s\.\-_]/.test(char)) {
+                    result += char;
+                } else {
+                    // Unicode escape sequence
+                    result += '\\u' + code.toString(16).padStart(4, '0');
+                }
+            }
+            return result;
+        }
+
+        // Dosya işleme fonksiyonu
+        async function processZipFile(file) {
+            try {
+                showStatus('processing', '<span class="spinner"></span>ZIP dosyası işleniyor, lütfen bekleyin...');
+                
+                const zip = new JSZip();
+                const content = await file.arrayBuffer();
+                const loadedZip = await JSZip.loadAsync(content);
+                
+                const newZip = new JSZip();
+                const files = Object.keys(loadedZip.files);
+                let processed = 0;
+                
+                // Her dosyayı işle
+                for (const filename of files) {
+                    const zipEntry = loadedZip.files[filename];
+                    
+                    if (!zipEntry.dir) {
+                        try {
+                            // Dosya içeriğini al
+                            const fileContent = await zipEntry.async('arraybuffer');
+                            
+                            // Text olarak decode etmeye çalış
+                            let textContent;
+                            try {
+                                const decoder = new TextDecoder('utf-8');
+                                textContent = decoder.decode(fileContent);
+                            } catch (e) {
+                                // Binary dosya ise latin-1 kullan
+                                const decoder = new TextDecoder('latin1');
+                                textContent = decoder.decode(fileContent);
+                            }
+                            
+                            // Raw formatına dönüştür
+                            const rawContent = rawEncode(textContent);
+                            
+                            // Yeni ZIP'e ekle
+                            newZip.file(filename, rawContent);
+                        } catch (e) {
+                            console.error(`Dosya işlenirken hata: ${filename}`, e);
+                            // Hatalı dosyayı da ekle (orijinal haliyle)
+                            const fileContent = await zipEntry.async('arraybuffer');
+                            newZip.file(filename, fileContent);
+                        }
+                    } else {
+                        // Klasör ise, boş klasör olarak ekle
+                        newZip.folder(filename.replace(/\/$/, ''));
+                    }
+                    
+                    processed++;
+                    updateProgress(processed, files.length);
+                }
+                
+                showStatus('processing', '<span class="spinner"></span>ZIP dosyası oluşturuluyor...');
+                
+                // Yeni ZIP dosyasını oluştur
+                const blob = await newZip.generateAsync({
+                    type: 'blob',
+                    compression: 'DEFLATE',
+                    compressionOptions: { level: 6 }
+                });
+                
+                // Dosyayı indir
+                const originalName = file.name.replace('.zip', '');
+                const newFileName = `${originalName}_raw.zip`;
+                
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(blob);
+                downloadLink.download = newFileName;
+                downloadLink.click();
+                
+                // URL'i temizle
+                setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
+                
+                showStatus('success', `✅ İşlem tamamlandı! <strong>${newFileName}</strong> dosyası indiriliyor...`);
+                
+                // 3 saniye sonra durumu temizle
+                setTimeout(() => {
+                    statusDiv.style.display = 'none';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Hata:', error);
+                showStatus('error', `❌ Hata oluştu: ${error.message}`);
+            }
+        }
+
+        // Durum gösterme
+        function showStatus(type, message) {
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+            statusDiv.style.display = 'block';
+        }
+
+        // İlerleme güncelleme
+        function updateProgress(current, total) {
+            const percent = Math.round((current / total) * 100);
+            showStatus('processing', `
+                <span class="spinner"></span>Dosyalar işleniyor... (${current}/${total})
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${percent}%"></div>
+                </div>
+            `);
+        }
+
+        // Dosya seçimi
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                processZipFile(file);
+            } else {
+                showStatus('error', '❌ Lütfen geçerli bir ZIP dosyası seçin.');
+            }
+            fileInput.value = ''; // Reset input
+        });
+
+        // Drag & Drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.zip')) {
+                processZipFile(file);
+            } else {
+                showStatus('error', '❌ Lütfen geçerli bir ZIP dosyası seçin.');
+            }
+        });
+    </script>
+</body>
+</html>
