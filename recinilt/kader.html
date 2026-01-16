@@ -695,7 +695,7 @@
             return getDestinyValue(step);
         }
 
-        function updateTimeline(char, step, value, isChoice) {
+        function updateTimeline(char, step, value, isUserCharacter) {
             const stepEl = document.getElementById(`step-${char}-${step}`);
             const valueEl = document.getElementById(`value-${char}-${step}`);
             const progress = document.getElementById(`progress-${char}`);
@@ -703,7 +703,11 @@
             stepEl.classList.add('completed');
             valueEl.textContent = value;
             
-            if (isChoice) {
+            // Bu adımda seçim yapma hakkı var mı kontrol et
+            const data = gameData[char];
+            const hasChoice = shouldUserChoose(data.destinyType, step);
+            
+            if (hasChoice) {
                 valueEl.innerHTML += ' <span class="destiny-indicator secim">Seçim</span>';
             } else {
                 valueEl.innerHTML += ' <span class="destiny-indicator kader">Kader</span>';
