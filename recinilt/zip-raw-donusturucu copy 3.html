@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claude.ai Dosya Hazırlayıcı</title>
+    <title>ZIP Raw Dönüştürücü</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         * {
@@ -110,26 +110,6 @@
             margin-bottom: 5px;
         }
 
-        .warning-box {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 5px;
-        }
-
-        .warning-box h3 {
-            color: #92400e;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .warning-box p {
-            color: #78350f;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
         .status {
             margin-top: 20px;
             padding: 15px;
@@ -221,40 +201,32 @@
 </head>
 <body>
     <div class="container">
-        <h1>📦 Claude.ai Dosya Hazırlayıcı</h1>
-        <p class="subtitle">Klasör yapısını koruyarak dosyalarınızı Claude.ai için UTF-8 formatında hazırlayın</p>
+        <h1>🗜️ ZIP Raw Dönüştürücü</h1>
+        <p class="subtitle">Özel karakterleri koruyarak dosyalarınızı raw formatına dönüştürün</p>
 
         <div class="upload-area" id="uploadArea">
-            <div class="upload-icon">📂</div>
+            <div class="upload-icon">📦</div>
             <div class="upload-text">Dosya/klasör seçin veya sürükleyin</div>
             <div class="upload-hint">ZIP dosyası veya çoklu dosya/klasörler desteklenir</div>
             <input type="file" id="fileInput" multiple webkitdirectory directory>
         </div>
 
-        <div class="warning-box">
-            <h3>⚠️ Claude.ai Encoding Bilgisi</h3>
-            <p>Claude.ai dosyaları <strong>düz UTF-8 text</strong> olarak saklar (BOM olmadan). Bu araç tüm dosyalarınızı bu formata çevirerek Claude.ai Projects ve Claude Code ile tam uyumlu hale getirir.</p>
-        </div>
-
         <div class="info-box">
             <h3>✨ Özellikler</h3>
             <ul>
-                <li><strong>Tek ZIP dosyası:</strong> Açılır, UTF-8'e çevrilir, tekrar ziplenir</li>
-                <li><strong>Çoklu dosya/klasörler:</strong> Direkt UTF-8'e çevrilir ve ziplenir</li>
-                <li><strong>Klasör yapısı korunur:</strong> İç içe klasörler tam yoluyla kaydedilir</li>
-                <li><strong>Sürükle-bırak:</strong> Dosya ve klasörleri direkt sürükleyebilirsiniz</li>
-                <li><strong>Tüm Unicode karakterler:</strong> Türkçe, Çince, Emoji - hepsi %100 korunur</li>
-                <li><strong>Binary dosyalar:</strong> Resim, PDF, Excel vb. bozulmadan korunur</li>
-                <li><strong>İlerleme takibi:</strong> Kaç dosya işlendiğini görün</li>
-                <li><strong>Otomatik indirme:</strong> İşlem bitince ZIP otomatik indirilir</li>
+                <li>Tek ZIP dosyası: Açılır, raw'e çevrilir, tekrar ziplenir</li>
+                <li>Çoklu dosya/klasörler: Direkt raw'e çevrilir ve ziplenir</li>
+                <li>Türkçe karakterler dahil tüm özel karakterleri korur</li>
+                <li>Klasör yapısını korur</li>
+                <li>İşlem tamamlandığında otomatik indirme</li>
             </ul>
         </div>
 
         <div id="status" class="status"></div>
 
         <div class="footer">
-            Claude.ai Projects ve Claude Code ile tam uyumlu<br>
-            <code>claude_files.zip</code> olarak indirilecektir
+            Claude.ai projelerinizde kullanmak için hazırlandı<br>
+            <code>files_raw.zip</code> olarak indirilecektir
         </div>
     </div>
 
@@ -263,149 +235,70 @@
         const fileInput = document.getElementById('fileInput');
         const statusDiv = document.getElementById('status');
 
-        // Text dosya uzantıları (kapsamlı liste)
-        const TEXT_EXTENSIONS = [
-            // Genel text dosyaları
-            '.txt', '.md', '.markdown', '.log', '.cfg', '.conf', '.ini', '.env',
-            // Web geliştirme
-            '.html', '.htm', '.css', '.scss', '.sass', '.less', '.xml', '.svg',
-            '.json', '.jsonc', '.json5', '.yaml', '.yml', '.toml',
-            // JavaScript/TypeScript
-            '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.vue', '.svelte', '.astro',
-            // Python
-            '.py', '.pyw', '.pyx', '.pyi', '.ipynb',
-            // Java/JVM dilleri
-            '.java', '.kt', '.kts', '.groovy', '.scala', '.clj', '.cljs',
-            // C/C++
-            '.c', '.cpp', '.cc', '.cxx', '.h', '.hpp', '.hh', '.hxx',
-            // C#/.NET
-            '.cs', '.cshtml', '.razor', '.vb', '.fs', '.fsx',
-            // Web assembly
-            '.wat', '.wast',
-            // Go
-            '.go', '.mod', '.sum',
-            // Rust
-            '.rs', '.toml',
-            // Ruby
-            '.rb', '.rake', '.gemspec',
-            // PHP
-            '.php', '.phtml', '.php3', '.php4', '.php5', '.phps',
-            // Swift/Objective-C
-            '.swift', '.m', '.mm', '.h',
-            // Shell/Bash
-            '.sh', '.bash', '.zsh', '.fish', '.bat', '.cmd', '.ps1',
-            // SQL
-            '.sql', '.mysql', '.pgsql', '.sqlite',
-            // R/MATLAB
-            '.r', '.R', '.rmd', '.m',
-            // Database
-            '.prisma', '.graphql', '.gql',
-            // Infrastructure
-            '.tf', '.tfvars', '.hcl', '.nomad',
-            // Elixir
-            '.ex', '.exs', '.eex', '.leex',
-            // Elm
-            '.elm',
-            // Dart
-            '.dart',
-            // Lua
-            '.lua',
-            // Perl
-            '.pl', '.pm', '.perl',
-            // Haskell
-            '.hs', '.lhs',
-            // OCaml
-            '.ml', '.mli',
-            // Lisp
-            '.lisp', '.el', '.scm',
-            // CSV/TSV
-            '.csv', '.tsv', '.tab',
-            // Diğer
-            '.dockerfile', '.makefile', '.gitignore', '.editorconfig',
-            '.proto', '.thrift'
-        ];
-
-        // Dosyanın text mi binary mi olduğunu kontrol et
-        function isTextFile(filename) {
-            const lowerName = filename.toLowerCase();
-            
-            // Uzantısı yoksa dosya adına bak
-            if (!lowerName.includes('.')) {
-                const textFileNames = [
-                    'dockerfile', 'makefile', 'rakefile', 'gemfile', 'procfile',
-                    'readme', 'license', 'changelog', 'authors', 'contributors'
-                ];
-                return textFileNames.some(name => lowerName.includes(name));
+        // Raw encoding fonksiyonu - TÜM ÖZEL KARAKTERLERİ KORUR
+        function rawEncode(text) {
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = char.charCodeAt(0);
+                
+                // Sadece sorunlu kontrol karakterlerini escape et
+                // Tab (9), LF (10), CR (13) ve Space (32) ve üzeri tüm karakterler KORUNUR
+                // Bu sayede Türkçe, Çince, Emoji, tüm Unicode karakterler AYNEN KALIR
+                if ((code >= 0 && code <= 8) ||    // NULL, SOH, STX, ETX, EOT, ENQ, ACK, BEL, BS
+                    (code === 11) ||                // VT (Vertical Tab)
+                    (code === 12) ||                // FF (Form Feed)  
+                    (code >= 14 && code <= 31) ||   // SO, SI, DLE, DC1-4, NAK, SYN, ETB, CAN, EM, SUB, ESC, FS, GS, RS, US
+                    (code === 127)) {               // DEL
+                    // Sadece bu kontrol karakterlerini Unicode escape yap
+                    result += '\\u' + code.toString(16).padStart(4, '0');
+                } else {
+                    // DİĞER HER ŞEYİ OLDUĞU GİBİ KORU
+                    // Bu şunları içerir:
+                    // - Tab, newline, carriage return
+                    // - Tüm ASCII yazdırılabilir karakterler
+                    // - Tüm Latin extended karakterler (ğ, ü, ş, ı, ö, ç, vs.)
+                    // - Tüm Unicode karakterler (Çince, Arapça, Rusça, Emoji, vs.)
+                    result += char;
+                }
             }
-            
-            const ext = lowerName.substring(lowerName.lastIndexOf('.'));
-            return TEXT_EXTENSIONS.includes(ext);
+            return result;
         }
 
-        // Dosyayı işle ve ZIP'e ekle (KLASÖR YAPISI KORUNARAK)
-        async function processFileToZip(file, zip, basePath = '') {
+        // Dosyayı raw'e çevirip ZIP'e ekle
+        async function processFileToRaw(file, zip, basePath = '') {
             try {
                 const fileContent = await file.arrayBuffer();
                 
-                // KLASÖR YOLU KORUMA - webkitRelativePath varsa onu kullan
+                // Text olarak decode etmeye çalış
+                let textContent;
+                try {
+                    const decoder = new TextDecoder('utf-8', { fatal: true });
+                    textContent = decoder.decode(fileContent);
+                } catch (e) {
+                    // UTF-8 değilse latin-1 dene
+                    try {
+                        const decoder = new TextDecoder('latin1');
+                        textContent = decoder.decode(fileContent);
+                    } catch (e2) {
+                        // Binary dosya - olduğu gibi ekle
+                        const relativePath = file.webkitRelativePath || file.name;
+                        const fullPath = basePath ? `${basePath}/${relativePath}` : relativePath;
+                        zip.file(fullPath, fileContent);
+                        return;
+                    }
+                }
+                
+                // Raw formatına dönüştür
+                const rawContent = rawEncode(textContent);
+                
+                // ZIP'e ekle (webkitRelativePath veya name kullan)
                 const relativePath = file.webkitRelativePath || file.name;
                 const fullPath = basePath ? `${basePath}/${relativePath}` : relativePath;
-
-                if (isTextFile(file.name)) {
-                    // TEXT DOSYA İŞLEME - UTF-8'E ÇEVİR
-                    let textContent;
-                    
-                    // Sırasıyla farklı encodingleri dene
-                    try {
-                        // Önce UTF-8 (fatal: true ile - hata varsa throw eder)
-                        const decoder = new TextDecoder('utf-8', { fatal: true });
-                        textContent = decoder.decode(fileContent);
-                    } catch (e) {
-                        try {
-                            // Windows-1254 (Türkçe Windows encoding)
-                            const decoder = new TextDecoder('windows-1254');
-                            textContent = decoder.decode(fileContent);
-                        } catch (e2) {
-                            try {
-                                // ISO-8859-9 (Türkçe Latin encoding)
-                                const decoder = new TextDecoder('iso-8859-9');
-                                textContent = decoder.decode(fileContent);
-                            } catch (e3) {
-                                try {
-                                    // ISO-8859-1 (Latin-1)
-                                    const decoder = new TextDecoder('iso-8859-1');
-                                    textContent = decoder.decode(fileContent);
-                                } catch (e4) {
-                                    // Son çare: latin1
-                                    const decoder = new TextDecoder('latin1');
-                                    textContent = decoder.decode(fileContent);
-                                }
-                            }
-                        }
-                    }
-                    
-                    // DÜZ UTF-8 olarak kaydet (BOM OLMADAN)
-                    // Claude.ai için en iyi format bu
-                    const encoder = new TextEncoder(); // UTF-8 encoder
-                    const utf8Bytes = encoder.encode(textContent);
-                    zip.file(fullPath, utf8Bytes);
-                    
-                } else {
-                    // BINARY DOSYA - Olduğu gibi koru (hiç dokunma)
-                    zip.file(fullPath, fileContent);
-                }
+                zip.file(fullPath, rawContent);
                 
             } catch (e) {
                 console.error(`Dosya işlenirken hata: ${file.name}`, e);
-                // Hata olsa bile dosyayı eklemeye çalış (orijinal haliyle)
-                try {
-                    const fileContent = await file.arrayBuffer();
-                    const relativePath = file.webkitRelativePath || file.name;
-                    const fullPath = basePath ? `${basePath}/${relativePath}` : relativePath;
-                    zip.file(fullPath, fileContent);
-                } catch (e2) {
-                    showStatus('error', `❌ Hata: ${file.name} işlenemedi - ${e.message}`);
-                }
             }
         }
 
@@ -414,6 +307,7 @@
             try {
                 showStatus('processing', '<span class="spinner"></span>ZIP dosyası açılıyor...');
                 
+                const zip = new JSZip();
                 const content = await file.arrayBuffer();
                 const loadedZip = await JSZip.loadAsync(content);
                 
@@ -426,59 +320,45 @@
                     const zipEntry = loadedZip.files[filename];
                     
                     if (!zipEntry.dir) {
-                        // DOSYA İŞLEME
                         try {
+                            // Dosya içeriğini al
                             const fileContent = await zipEntry.async('arraybuffer');
                             
-                            if (isTextFile(filename)) {
-                                // TEXT DOSYA - UTF-8'E ÇEVİR
-                                let textContent;
-                                
+                            // Text olarak decode etmeye çalış
+                            let textContent;
+                            let isBinary = false;
+                            try {
+                                const decoder = new TextDecoder('utf-8', { fatal: true });
+                                textContent = decoder.decode(fileContent);
+                            } catch (e) {
+                                // UTF-8 değilse latin-1 dene
                                 try {
-                                    const decoder = new TextDecoder('utf-8', { fatal: true });
+                                    const decoder = new TextDecoder('latin1');
                                     textContent = decoder.decode(fileContent);
-                                } catch (e) {
-                                    try {
-                                        const decoder = new TextDecoder('windows-1254');
-                                        textContent = decoder.decode(fileContent);
-                                    } catch (e2) {
-                                        try {
-                                            const decoder = new TextDecoder('iso-8859-9');
-                                            textContent = decoder.decode(fileContent);
-                                        } catch (e3) {
-                                            try {
-                                                const decoder = new TextDecoder('iso-8859-1');
-                                                textContent = decoder.decode(fileContent);
-                                            } catch (e4) {
-                                                const decoder = new TextDecoder('latin1');
-                                                textContent = decoder.decode(fileContent);
-                                            }
-                                        }
-                                    }
+                                } catch (e2) {
+                                    // Binary dosya
+                                    isBinary = true;
                                 }
-                                
-                                // DÜZ UTF-8 olarak kaydet (BOM OLMADAN)
-                                const encoder = new TextEncoder();
-                                const utf8Bytes = encoder.encode(textContent);
-                                newZip.file(filename, utf8Bytes);
-                                
-                            } else {
-                                // BINARY DOSYA - Olduğu gibi koru
-                                newZip.file(filename, fileContent);
                             }
                             
+                            if (isBinary) {
+                                // Binary dosyayı olduğu gibi ekle
+                                newZip.file(filename, fileContent);
+                            } else {
+                                // Raw formatına dönüştür
+                                const rawContent = rawEncode(textContent);
+                                
+                                // Yeni ZIP'e ekle
+                                newZip.file(filename, rawContent);
+                            }
                         } catch (e) {
                             console.error(`Dosya işlenirken hata: ${filename}`, e);
-                            // Hata olursa orijinal dosyayı ekle
-                            try {
-                                const fileContent = await zipEntry.async('arraybuffer');
-                                newZip.file(filename, fileContent);
-                            } catch (e2) {
-                                console.error(`Dosya eklenemedi: ${filename}`, e2);
-                            }
+                            // Hatalı dosyayı da ekle (orijinal haliyle)
+                            const fileContent = await zipEntry.async('arraybuffer');
+                            newZip.file(filename, fileContent);
                         }
                     } else {
-                        // KLASÖR - Boş klasör olarak ekle (klasör yapısı korunur)
+                        // Klasör ise, boş klasör olarak ekle
                         newZip.folder(filename.replace(/\/$/, ''));
                     }
                     
@@ -488,7 +368,7 @@
                 
                 // ZIP oluştur ve indir
                 const originalName = file.name.replace('.zip', '');
-                await generateAndDownloadZip(newZip, `${originalName}_claude.zip`);
+                await generateAndDownloadZip(newZip, `${originalName}_raw.zip`);
                 
             } catch (error) {
                 console.error('Hata:', error);
@@ -506,13 +386,13 @@
                 let processed = 0;
                 
                 for (const file of fileArray) {
-                    await processFileToZip(file, newZip);
+                    await processFileToRaw(file, newZip);
                     processed++;
                     updateProgress(processed, fileArray.length);
                 }
                 
                 // ZIP oluştur ve indir
-                await generateAndDownloadZip(newZip, 'claude_files.zip');
+                await generateAndDownloadZip(newZip, 'files_raw.zip');
                 
             } catch (error) {
                 console.error('Hata:', error);
@@ -539,12 +419,12 @@
             // URL'i temizle
             setTimeout(() => URL.revokeObjectURL(downloadLink.href), 1000);
             
-            showStatus('success', `✅ İşlem tamamlandı! <strong>${filename}</strong> Claude.ai'da sorunsuz çalışacaktır.`);
+            showStatus('success', `✅ İşlem tamamlandı! <strong>${filename}</strong> dosyası indiriliyor...`);
             
-            // 5 saniye sonra durumu temizle
+            // 3 saniye sonra durumu temizle
             setTimeout(() => {
                 statusDiv.style.display = 'none';
-            }, 5000);
+            }, 3000);
         }
 
         // Ana işlem fonksiyonu
@@ -581,8 +461,9 @@
             `);
         }
 
-        // Upload area tıklama
+        // Upload area tıklama - hem dosya hem klasör seçimi için
         uploadArea.addEventListener('click', () => {
+            // Input'u sıfırla ve dosya seçimine izin ver
             const newInput = document.createElement('input');
             newInput.type = 'file';
             newInput.multiple = true;
@@ -595,7 +476,7 @@
             newInput.click();
         });
 
-        // Drag & Drop - KLASÖR DESTEĞİ İLE
+        // Drag & Drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadArea.classList.add('dragover');
@@ -612,7 +493,7 @@
             const items = e.dataTransfer.items;
             const files = [];
             
-            // DataTransferItemList ile klasör desteği
+            // DataTransferItemList'ten dosyaları topla
             if (items) {
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
@@ -620,7 +501,6 @@
                     if (item.kind === 'file') {
                         const entry = item.webkitGetAsEntry();
                         if (entry) {
-                            // RECURSIVE KLASÖR TARAMA
                             await traverseFileTree(entry, '', files);
                         } else {
                             files.push(item.getAsFile());
@@ -628,7 +508,7 @@
                     }
                 }
             } else {
-                // Fallback: eski tarayıcılar için
+                // Fallback: direkt dosyaları al
                 for (let i = 0; i < e.dataTransfer.files.length; i++) {
                     files.push(e.dataTransfer.files[i]);
                 }
@@ -639,13 +519,12 @@
             }
         });
 
-        // Klasör yapısını traverse et - İÇ İÇE KLASÖRLER DESTEĞİ
+        // Klasör yapısını traverse et (drag&drop için)
         async function traverseFileTree(entry, path, files) {
             if (entry.isFile) {
-                // DOSYA - webkitRelativePath ile tam yolu ekle
                 const file = await new Promise((resolve) => {
                     entry.file((f) => {
-                        // Klasör yolunu korumak için webkitRelativePath ekle
+                        // webkitRelativePath ekle
                         Object.defineProperty(f, 'webkitRelativePath', {
                             value: path + f.name,
                             writable: false
@@ -655,13 +534,11 @@
                 });
                 files.push(file);
             } else if (entry.isDirectory) {
-                // KLASÖR - İçindekileri recursive tara
                 const dirReader = entry.createReader();
                 const entries = await new Promise((resolve) => {
                     dirReader.readEntries(resolve);
                 });
                 
-                // Her alt öğeyi recursive tara
                 for (const childEntry of entries) {
                     await traverseFileTree(childEntry, path + entry.name + '/', files);
                 }
