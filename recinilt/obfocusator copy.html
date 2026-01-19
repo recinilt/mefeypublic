@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kod Obfuscatör Pro - JS & PY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        hacker: {
+                            bg: '#0d1117',
+                            panel: '#161b22',
+                            border: '#30363d',
+                            text: '#c9d1d9',
+                            green: '#2ea043',
+                            greenHover: '#3fb950',
+                            accent: '#58a6ff'
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+    </style>
+</head>
+<body class="bg-hacker-bg text-hacker-text min-h-screen flex items-center justify-center p-4 selection:bg-hacker-accent selection:text-white">
+
+    <div class="w-full max-w-4xl bg-hacker-panel border border-hacker-border rounded-xl shadow-2xl overflow-hidden">
+        
+        <div class="p-6 border-b border-hacker-border flex justify-between items-center bg-gray-900/50">
+            <div>
+                <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-hacker-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    Kod Obfuscatör <span class="text-hacker-green">Pro</span>
+                </h1>
+                <p class="text-sm text-gray-500 mt-1">v2.1 - Global Scope & Deep Escape Fix</p>
+            </div>
+            <div class="hidden sm:block text-xs font-mono text-gray-600 border border-gray-700 rounded px-2 py-1">
+                Stable
+            </div>
+        </div>
+
+        <div class="flex border-b border-hacker-border">
+            <button id="btn-js" onclick="setLanguage('js')" class="flex-1 py-4 text-center font-medium transition-colors border-b-2 border-hacker-green text-white bg-gray-800/50 hover:bg-gray-800">
+                JavaScript (.js)
+            </button>
+            <button id="btn-py" onclick="setLanguage('py')" class="flex-1 py-4 text-center font-medium transition-colors border-b-2 border-transparent text-gray-500 hover:text-white hover:bg-gray-800/30">
+                Python (.py)
+            </button>
+        </div>
+
+        <div class="p-6 space-y-6">
+            
+            <div class="relative group">
+                <label class="block text-sm font-medium text-gray-400 mb-2">Kaynak Kodunuzu Buraya Yapıştırın:</label>
+                <textarea id="inputCode" spellcheck="false" class="w-full h-48 bg-[#0d1117] border border-hacker-border rounded-lg p-4 font-mono text-sm text-gray-300 focus:outline-none focus:border-hacker-accent focus:ring-1 focus:ring-hacker-accent transition-all resize-y placeholder-gray-700" placeholder="// Kodunuzu buraya yapıştırın..."></textarea>
+                <div class="absolute top-10 right-4 text-xs text-gray-600 font-mono">Giriş</div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="obfuscate()" class="flex-1 bg-hacker-green hover:bg-hacker-greenHover text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-green-900/20 flex justify-center items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                    Kodu Güçlendir (Obfuscate)
+                </button>
+                <button onclick="clearAll()" class="px-4 py-3 border border-hacker-border text-gray-400 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">
+                    Temizle
+                </button>
+            </div>
+
+            <div class="relative">
+                <label class="block text-sm font-medium text-gray-400 mb-2">Karmaşıklaştırılmış Sonuç:</label>
+                <textarea id="outputCode" readonly spellcheck="false" class="w-full h-48 bg-[#0d1117] border border-hacker-border rounded-lg p-4 font-mono text-xs text-hacker-green focus:outline-none transition-all resize-y placeholder-gray-800" placeholder="Sonuç burada görünecek..."></textarea>
+                
+                <button onclick="copyToClipboard()" class="absolute bottom-4 right-4 bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded border border-gray-600 flex items-center gap-2 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    Kopyala
+                </button>
+            </div>
+
+            <div id="statusMsg" class="h-6 text-center text-sm font-medium text-hacker-accent opacity-0 transition-opacity duration-300"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentLang = 'js';
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const btnJs = document.getElementById('btn-js');
+            const btnPy = document.getElementById('btn-py');
+            const input = document.getElementById('inputCode');
+
+            if (lang === 'js') {
+                btnJs.classList.add('border-hacker-green', 'text-white', 'bg-gray-800/50');
+                btnJs.classList.remove('border-transparent', 'text-gray-500');
+                btnPy.classList.add('border-transparent', 'text-gray-500');
+                btnPy.classList.remove('border-hacker-green', 'text-white', 'bg-gray-800/50');
+                input.placeholder = "// JavaScript kodunuzu buraya yapıştırın...";
+            } else {
+                btnPy.classList.add('border-hacker-green', 'text-white', 'bg-gray-800/50');
+                btnPy.classList.remove('border-transparent', 'text-gray-500');
+                btnJs.classList.add('border-transparent', 'text-gray-500');
+                btnJs.classList.remove('border-hacker-green', 'text-white', 'bg-gray-800/50');
+                input.placeholder = "# Python kodunuzu buraya yapıştırın...";
+            }
+            showStatus(`${lang === 'js' ? 'JavaScript' : 'Python'} modu seçildi.`);
+        }
+
+        function obfuscate() {
+            const input = document.getElementById('inputCode').value;
+            const outputArea = document.getElementById('outputCode');
+
+            if (!input.trim()) {
+                showStatus("Hata: Lütfen önce kod girin!", true);
+                return;
+            }
+
+            let result = "";
+            try {
+                if (currentLang === 'js') {
+                    result = obfuscateJS(input);
+                } else {
+                    result = obfuscatePython(input);
+                }
+                outputArea.value = result;
+                showStatus("Kod başarıyla karmaşıklaştırıldı!");
+            } catch (e) {
+                showStatus("Bir hata oluştu: " + e.message, true);
+            }
+        }
+
+        // --- DÜZELTİLMİŞ JS OBFUSCATOR ---
+        function obfuscateJS(code) {
+            let minified = code.trim();
+
+            // FIX 1: Double Escape. 
+            // JavaScript parser'ı \x41'i anında 'A' harfine çevirir. 
+            // Biz '\\x41' yaparak parser'ın bunu literal string olarak tutmasını sağlıyoruz.
+            // Böylece decoder fonksiyonu gerçekten hex kodu alıp çözebiliyor.
+            let encoded = "";
+            for (let i = 0; i < minified.length; i++) {
+                let hex = minified.charCodeAt(i).toString(16);
+                // ÖNEMLİ: \\x kullanıyoruz (iki ters çizgi)
+                encoded += "\\\\x" + (hex.length === 1 ? "0" + hex : hex);
+            }
+
+            // Rastgele değişken isimleri
+            const varScript = "_" + Math.random().toString(36).substring(2, 7);
+            const varDecode = "_" + Math.random().toString(36).substring(2, 7);
+            
+            // FIX 2: Script Injection (Global Scope)
+            // 'new Function' yerine 'document.createElement("script")' kullanıyoruz.
+            // Bu, kodun global alanda çalışmasını sağlar. 'apiKey' gibi değişkenler artık erişilebilir olur.
+            
+            return `(function(){
+    var ${varDecode} = function(str){
+        var res = '';
+        var arr = str.split('\\\\x'); // Burada da çift escape önemli
+        for(var i=1; i<arr.length; i++){
+            res += String.fromCharCode(parseInt(arr[i], 16));
+        }
+        return res;
+    };
+    var ${varScript} = document.createElement('script');
+    ${varScript}.textContent = ${varDecode}('${encoded}');
+    document.body.appendChild(${varScript});
+    // ${varScript}.remove(); // İsteğe bağlı: Temizlik için script tag'ini kaldırır ama kod çalışmaya devam eder.
+})();`;
+        }
+
+        function obfuscatePython(code) {
+            const utf8Bytes = encodeURIComponent(code).replace(/%([0-9A-F]{2})/g,
+                function(match, p1) {
+                    return String.fromCharCode('0x' + p1);
+                });
+            const b64 = btoa(utf8Bytes);
+            const reversedB64 = b64.split('').reverse().join('');
+            return `import base64
+_0x = "${reversedB64}"
+exec(base64.b64decode(_0x[::-1]).decode("utf-8"))`;
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('outputCode');
+            if (!output.value) return;
+
+            output.select();
+            output.setSelectionRange(0, 99999);
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(output.value)
+                    .then(() => showStatus("Panoya kopyalandı!"))
+                    .catch((err) => {
+                        console.warn("Clipboard API hatası:", err);
+                        fallbackCopy();
+                    });
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        function fallbackCopy() {
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) showStatus("Panoya kopyalandı!");
+                else showStatus("Kopyalama başarısız oldu!", true);
+            } catch (err) {
+                showStatus("Kopyalama başarısız!", true);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('inputCode').value = '';
+            document.getElementById('outputCode').value = '';
+            showStatus("Temizlendi.");
+        }
+
+        function showStatus(msg, isError = false) {
+            const el = document.getElementById('statusMsg');
+            el.innerText = msg;
+            el.className = `h-6 text-center text-sm font-medium transition-opacity duration-300 ${isError ? 'text-red-500' : 'text-hacker-accent'}`;
+            el.style.opacity = '1';
+            setTimeout(() => { el.style.opacity = '0'; }, 3000);
+        }
+    </script>
+</body>
+</html>

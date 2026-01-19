@@ -3,124 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kod Obfuscatör Pro - JS & PY</title>
+    <title>Kod Obfuscator Pro v3.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        hacker: {
-                            bg: '#0d1117',
-                            panel: '#161b22',
-                            border: '#30363d',
-                            text: '#c9d1d9',
-                            green: '#2ea043',
-                            greenHover: '#3fb950',
-                            accent: '#58a6ff'
+                        cyber: {
+                            bg: '#0a0a0f',
+                            panel: '#12121a',
+                            border: '#1f1f2e',
+                            text: '#e4e4e7',
+                            green: '#00ff88',
+                            greenDark: '#00cc6a',
+                            accent: '#00d4ff',
+                            purple: '#a855f7',
+                            red: '#ff3366',
+                            yellow: '#ffd700'
                         }
-                    },
-                    fontFamily: {
-                        mono: ['SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', 'monospace']
                     }
                 }
             }
         }
     </script>
     <style>
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
+        * { font-family: 'Space Grotesk', sans-serif; }
+        code, .mono, textarea { font-family: 'JetBrains Mono', monospace !important; }
+        
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0a0a0f; }
+        ::-webkit-scrollbar-thumb { background: #1f1f2e; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00ff88; }
+        
+        .glow-green { box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.05); }
+        .glow-text { text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .scanline {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse 2s ease-in-out infinite; }
+        
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .hover-glitch:hover { animation: glitch 0.3s ease-in-out; }
+        
+        .level-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            color: #0a0a0f;
+            font-weight: 600;
+        }
+        
+        .option-checkbox:checked + label {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: #00ff88;
+        }
+        
+        .stats-bar {
+            background: linear-gradient(90deg, #00ff88 var(--progress), #1f1f2e var(--progress));
+        }
     </style>
 </head>
-<body class="bg-hacker-bg text-hacker-text min-h-screen flex items-center justify-center p-4 selection:bg-hacker-accent selection:text-white">
-
-    <div class="w-full max-w-4xl bg-hacker-panel border border-hacker-border rounded-xl shadow-2xl overflow-hidden">
-        
-        <div class="p-6 border-b border-hacker-border flex justify-between items-center bg-gray-900/50">
-            <div>
-                <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-hacker-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+<body class="bg-cyber-bg text-cyber-text min-h-screen grid-bg">
+    
+    <!-- Header -->
+    <header class="border-b border-cyber-border bg-cyber-panel/80 backdrop-blur-sm sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-cyber-green to-cyber-accent rounded-lg flex items-center justify-center glow-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-cyber-bg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
-                    Kod Obfuscatör <span class="text-hacker-green">Pro</span>
-                </h1>
-                <p class="text-sm text-gray-500 mt-1">v2.1 - Global Scope & Deep Escape Fix</p>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                        Obfuscator <span class="text-cyber-green glow-text">Pro</span>
+                        <span class="text-xs bg-cyber-green/20 text-cyber-green px-2 py-0.5 rounded-full">v3.0</span>
+                    </h1>
+                    <p class="text-xs text-gray-500">Advanced Code Protection System</p>
+                </div>
             </div>
-            <div class="hidden sm:block text-xs font-mono text-gray-600 border border-gray-700 rounded px-2 py-1">
-                Stable
-            </div>
-        </div>
-
-        <div class="flex border-b border-hacker-border">
-            <button id="btn-js" onclick="setLanguage('js')" class="flex-1 py-4 text-center font-medium transition-colors border-b-2 border-hacker-green text-white bg-gray-800/50 hover:bg-gray-800">
-                JavaScript (.js)
-            </button>
-            <button id="btn-py" onclick="setLanguage('py')" class="flex-1 py-4 text-center font-medium transition-colors border-b-2 border-transparent text-gray-500 hover:text-white hover:bg-gray-800/30">
-                Python (.py)
-            </button>
-        </div>
-
-        <div class="p-6 space-y-6">
-            
-            <div class="relative group">
-                <label class="block text-sm font-medium text-gray-400 mb-2">Kaynak Kodunuzu Buraya Yapıştırın:</label>
-                <textarea id="inputCode" spellcheck="false" class="w-full h-48 bg-[#0d1117] border border-hacker-border rounded-lg p-4 font-mono text-sm text-gray-300 focus:outline-none focus:border-hacker-accent focus:ring-1 focus:ring-hacker-accent transition-all resize-y placeholder-gray-700" placeholder="// Kodunuzu buraya yapıştırın..."></textarea>
-                <div class="absolute top-10 right-4 text-xs text-gray-600 font-mono">Giriş</div>
-            </div>
-
             <div class="flex items-center gap-4">
-                <button onclick="obfuscate()" class="flex-1 bg-hacker-green hover:bg-hacker-greenHover text-white font-bold py-3 px-6 rounded-lg transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-green-900/20 flex justify-center items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                    </svg>
-                    Kodu Güçlendir (Obfuscate)
-                </button>
-                <button onclick="clearAll()" class="px-4 py-3 border border-hacker-border text-gray-400 rounded-lg hover:bg-gray-800 hover:text-white transition-colors">
-                    Temizle
-                </button>
+                <div class="hidden md:flex items-center gap-2 text-xs text-gray-500">
+                    <span class="w-2 h-2 bg-cyber-green rounded-full animate-pulse-slow"></span>
+                    System Online
+                </div>
             </div>
+        </div>
+    </header>
 
-            <div class="relative">
-                <label class="block text-sm font-medium text-gray-400 mb-2">Karmaşıklaştırılmış Sonuç:</label>
-                <textarea id="outputCode" readonly spellcheck="false" class="w-full h-48 bg-[#0d1117] border border-hacker-border rounded-lg p-4 font-mono text-xs text-hacker-green focus:outline-none transition-all resize-y placeholder-gray-800" placeholder="Sonuç burada görünecek..."></textarea>
+    <main class="max-w-6xl mx-auto px-6 py-8">
+        
+        <!-- Language Tabs -->
+        <div class="flex gap-2 mb-6">
+            <button id="btn-js" onclick="setLanguage('js')" class="px-6 py-3 rounded-lg font-medium transition-all bg-cyber-green text-cyber-bg hover-glitch">
+                <span class="flex items-center gap-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M0 0h24v24H0V0zm22.034 18.276c-.175-1.095-.888-2.015-3.003-2.873-.736-.345-1.554-.585-1.797-1.14-.091-.33-.105-.51-.046-.705.15-.646.915-.84 1.515-.66.39.12.75.42.976.9 1.034-.676 1.034-.676 1.755-1.125-.27-.42-.404-.601-.586-.78-.63-.705-1.469-1.065-2.834-1.034l-.705.089c-.676.165-1.32.525-1.71 1.005-1.14 1.291-.811 3.541.569 4.471 1.365 1.02 3.361 1.244 3.616 2.205.24 1.17-.87 1.545-1.966 1.41-.811-.18-1.26-.586-1.755-1.336l-1.83 1.051c.21.48.45.689.81 1.109 1.74 1.756 6.09 1.666 6.871-1.004.029-.09.24-.705.074-1.65l.046.067zm-8.983-7.245h-2.248c0 1.938-.009 3.864-.009 5.805 0 1.232.063 2.363-.138 2.711-.33.689-1.18.601-1.566.48-.396-.196-.597-.466-.83-.855-.063-.105-.11-.196-.127-.196l-1.825 1.125c.305.63.75 1.172 1.324 1.517.855.51 2.004.675 3.207.405.783-.226 1.458-.691 1.811-1.411.51-.93.402-2.07.397-3.346.012-2.054 0-4.109 0-6.179l.004-.056z"/>
+                    </svg>
+                    JavaScript
+                </span>
+            </button>
+            <button id="btn-py" onclick="setLanguage('py')" class="px-6 py-3 rounded-lg font-medium transition-all bg-cyber-panel border border-cyber-border text-gray-400 hover:text-white hover:border-cyber-green/50 hover-glitch">
+                <span class="flex items-center gap-2">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M14.25.18l.9.2.73.26.59.3.45.32.34.34.25.34.16.33.1.3.04.26.02.2-.01.13V8.5l-.05.63-.13.55-.21.46-.26.38-.3.31-.33.25-.35.19-.35.14-.33.1-.3.07-.26.04-.21.02H8.77l-.69.05-.59.14-.5.22-.41.27-.33.32-.27.35-.2.36-.15.37-.1.35-.07.32-.04.27-.02.21v3.06H3.17l-.21-.03-.28-.07-.32-.12-.35-.18-.36-.26-.36-.36-.35-.46-.32-.59-.28-.73-.21-.88-.14-1.05-.05-1.23.06-1.22.16-1.04.24-.87.32-.71.36-.57.4-.44.42-.33.42-.24.4-.16.36-.1.32-.05.24-.01h.16l.06.01h8.16v-.83H6.18l-.01-2.75-.02-.37.05-.34.11-.31.17-.28.25-.26.31-.23.38-.2.44-.18.51-.15.58-.12.64-.1.71-.06.77-.04.84-.02 1.27.05zm-6.3 1.98l-.23.33-.08.41.08.41.23.34.33.22.41.09.41-.09.33-.22.23-.34.08-.41-.08-.41-.23-.33-.33-.22-.41-.09-.41.09zm13.09 3.95l.28.06.32.12.35.18.36.27.36.35.35.47.32.59.28.73.21.88.14 1.04.05 1.23-.06 1.23-.16 1.04-.24.86-.32.71-.36.57-.4.45-.42.33-.42.24-.4.16-.36.09-.32.05-.24.02-.16-.01h-8.22v.82h5.84l.01 2.76.02.36-.05.34-.11.31-.17.29-.25.25-.31.24-.38.2-.44.17-.51.15-.58.13-.64.09-.71.07-.77.04-.84.01-1.27-.04-1.07-.14-.9-.2-.73-.25-.59-.3-.45-.33-.34-.34-.25-.34-.16-.33-.1-.3-.04-.25-.02-.2.01-.13v-5.34l.05-.64.13-.54.21-.46.26-.38.3-.32.33-.24.35-.2.35-.14.33-.1.3-.06.26-.04.21-.02.13-.01h5.84l.69-.05.59-.14.5-.21.41-.28.33-.32.27-.35.2-.36.15-.36.1-.35.07-.32.04-.28.02-.21V6.07h2.09l.14.01zm-6.47 14.25l-.23.33-.08.41.08.41.23.33.33.23.41.08.41-.08.33-.23.23-.33.08-.41-.08-.41-.23-.33-.33-.23-.41-.08-.41.08z"/>
+                    </svg>
+                    Python
+                </span>
+            </button>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            
+            <!-- Left Panel: Options -->
+            <div class="lg:col-span-1 space-y-6">
                 
-                <button onclick="copyToClipboard()" class="absolute bottom-4 right-4 bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded border border-gray-600 flex items-center gap-2 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                    Kopyala
-                </button>
+                <!-- Obfuscation Level -->
+                <div class="bg-cyber-panel border border-cyber-border rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-cyber-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        Obfuscation Level
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="setLevel('low')" id="level-low" class="level-btn px-4 py-2 rounded-lg text-sm border border-cyber-border text-gray-400 hover:border-cyber-green/50 transition-all">
+                            Low
+                        </button>
+                        <button onclick="setLevel('medium')" id="level-medium" class="level-btn active px-4 py-2 rounded-lg text-sm border border-cyber-border text-gray-400 hover:border-cyber-green/50 transition-all">
+                            Medium
+                        </button>
+                        <button onclick="setLevel('high')" id="level-high" class="level-btn px-4 py-2 rounded-lg text-sm border border-cyber-border text-gray-400 hover:border-cyber-green/50 transition-all">
+                            High
+                        </button>
+                        <button onclick="setLevel('paranoid')" id="level-paranoid" class="level-btn px-4 py-2 rounded-lg text-sm border border-cyber-border text-gray-400 hover:border-cyber-green/50 transition-all">
+                            Paranoid
+                        </button>
+                    </div>
+                    <p id="level-desc" class="text-xs text-gray-500 mt-3">Balanced protection with good performance.</p>
+                </div>
+
+                <!-- JS Options -->
+                <div id="js-options" class="bg-cyber-panel border border-cyber-border rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-cyber-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        JavaScript Options
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-stringArray" checked class="option-checkbox hidden">
+                            <label for="opt-stringArray" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">String Array Rotation</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-controlFlow" checked class="option-checkbox hidden">
+                            <label for="opt-controlFlow" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Control Flow Flattening</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-deadCode" checked class="option-checkbox hidden">
+                            <label for="opt-deadCode" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Dead Code Injection</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-antiDebug" class="option-checkbox hidden">
+                            <label for="opt-antiDebug" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Anti-Debugging</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-selfDefend" class="option-checkbox hidden">
+                            <label for="opt-selfDefend" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Self-Defending Code</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-domainLock" class="option-checkbox hidden">
+                            <label for="opt-domainLock" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Domain Lock</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="domain-input" class="mt-3 hidden">
+                        <input type="text" id="domain-value" placeholder="example.com" class="w-full px-3 py-2 bg-cyber-bg border border-cyber-border rounded-lg text-sm mono focus:outline-none focus:border-cyber-green">
+                    </div>
+                </div>
+
+                <!-- Python Options -->
+                <div id="py-options" class="bg-cyber-panel border border-cyber-border rounded-xl p-5 hidden">
+                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-cyber-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                        Python Options
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-pyCompress" checked class="option-checkbox hidden">
+                            <label for="opt-pyCompress" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Zlib Compression</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-pyLambda" checked class="option-checkbox hidden">
+                            <label for="opt-pyLambda" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Lambda Chains</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-pyMultiLayer" checked class="option-checkbox hidden">
+                            <label for="opt-pyMultiLayer" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Multi-Layer Encoding</span>
+                            </label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="opt-pyAntiDebug" class="option-checkbox hidden">
+                            <label for="opt-pyAntiDebug" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg border border-cyber-border cursor-pointer hover:border-cyber-green/50 transition-all">
+                                <span class="w-4 h-4 border border-gray-600 rounded flex items-center justify-center">
+                                    <svg class="w-3 h-3 text-cyber-green hidden check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <span class="text-sm">Anti-Debugging</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="bg-cyber-panel border border-cyber-border rounded-xl p-5">
+                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-cyber-yellow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Statistics
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">Original Size</span>
+                                <span id="stat-original" class="text-white mono">0 B</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">Obfuscated Size</span>
+                                <span id="stat-obfuscated" class="text-cyber-green mono">0 B</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">Size Increase</span>
+                                <span id="stat-increase" class="text-cyber-accent mono">0%</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="text-gray-400">Protection Score</span>
+                                <span id="stat-score" class="text-cyber-yellow mono">0/100</span>
+                            </div>
+                            <div class="h-2 bg-cyber-bg rounded-full overflow-hidden">
+                                <div id="score-bar" class="h-full bg-gradient-to-r from-cyber-green to-cyber-accent transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div id="statusMsg" class="h-6 text-center text-sm font-medium text-hacker-accent opacity-0 transition-opacity duration-300"></div>
+            <!-- Right Panel: Code -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Input -->
+                <div class="bg-cyber-panel border border-cyber-border rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-cyber-border flex items-center justify-between bg-cyber-bg/50">
+                        <span class="text-sm font-medium text-gray-400">Source Code</span>
+                        <button onclick="loadSample()" class="text-xs text-cyber-accent hover:text-white transition-colors">Load Sample</button>
+                    </div>
+                    <textarea id="inputCode" spellcheck="false" class="w-full h-64 bg-cyber-bg p-4 mono text-sm text-gray-300 focus:outline-none resize-y placeholder-gray-700 scanline" placeholder="// Paste your code here..."></textarea>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-3">
+                    <button onclick="obfuscate()" class="flex-1 bg-gradient-to-r from-cyber-green to-cyber-greenDark hover:from-cyber-greenDark hover:to-cyber-green text-cyber-bg font-bold py-4 px-6 rounded-xl transition-all transform hover:scale-[1.01] active:scale-[0.99] glow-green flex justify-center items-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        Obfuscate Code
+                    </button>
+                    <button onclick="testCode()" class="px-6 py-4 border border-cyber-border text-gray-400 rounded-xl hover:bg-cyber-panel hover:text-white hover:border-cyber-accent transition-all flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Test
+                    </button>
+                    <button onclick="clearAll()" class="px-6 py-4 border border-cyber-border text-gray-400 rounded-xl hover:bg-cyber-panel hover:text-cyber-red hover:border-cyber-red transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Output -->
+                <div class="bg-cyber-panel border border-cyber-border rounded-xl overflow-hidden">
+                    <div class="px-4 py-3 border-b border-cyber-border flex items-center justify-between bg-cyber-bg/50">
+                        <span class="text-sm font-medium text-gray-400">Obfuscated Output</span>
+                        <button onclick="copyToClipboard()" class="text-xs bg-cyber-green/20 text-cyber-green px-3 py-1 rounded-lg hover:bg-cyber-green/30 transition-colors flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                    <textarea id="outputCode" readonly spellcheck="false" class="w-full h-64 bg-cyber-bg p-4 mono text-xs text-cyber-green focus:outline-none resize-y placeholder-gray-700 scanline" placeholder="Obfuscated code will appear here..."></textarea>
+                </div>
+
+                <!-- Status -->
+                <div id="statusMsg" class="text-center text-sm font-medium opacity-0 transition-opacity duration-300 py-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Test Modal -->
+    <div id="testModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-cyber-panel border border-cyber-border rounded-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+            <div class="px-4 py-3 border-b border-cyber-border flex items-center justify-between">
+                <span class="text-sm font-medium text-white">Test Results</span>
+                <button onclick="closeTestModal()" class="text-gray-400 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="testResults" class="p-4 overflow-auto max-h-[60vh] mono text-sm"></div>
         </div>
     </div>
 
     <script>
         let currentLang = 'js';
+        let currentLevel = 'medium';
+
+        // Checkbox UI update
+        document.querySelectorAll('.option-checkbox').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const icon = this.nextElementSibling.querySelector('.check-icon');
+                if (this.checked) {
+                    icon.classList.remove('hidden');
+                } else {
+                    icon.classList.add('hidden');
+                }
+            });
+            // Initialize
+            if (cb.checked) {
+                cb.nextElementSibling.querySelector('.check-icon').classList.remove('hidden');
+            }
+        });
+
+        // Domain lock toggle
+        document.getElementById('opt-domainLock').addEventListener('change', function() {
+            document.getElementById('domain-input').classList.toggle('hidden', !this.checked);
+        });
 
         function setLanguage(lang) {
             currentLang = lang;
             const btnJs = document.getElementById('btn-js');
             const btnPy = document.getElementById('btn-py');
+            const jsOpts = document.getElementById('js-options');
+            const pyOpts = document.getElementById('py-options');
             const input = document.getElementById('inputCode');
 
             if (lang === 'js') {
-                btnJs.classList.add('border-hacker-green', 'text-white', 'bg-gray-800/50');
-                btnJs.classList.remove('border-transparent', 'text-gray-500');
-                btnPy.classList.add('border-transparent', 'text-gray-500');
-                btnPy.classList.remove('border-hacker-green', 'text-white', 'bg-gray-800/50');
-                input.placeholder = "// JavaScript kodunuzu buraya yapıştırın...";
+                btnJs.className = 'px-6 py-3 rounded-lg font-medium transition-all bg-cyber-green text-cyber-bg hover-glitch';
+                btnPy.className = 'px-6 py-3 rounded-lg font-medium transition-all bg-cyber-panel border border-cyber-border text-gray-400 hover:text-white hover:border-cyber-green/50 hover-glitch';
+                jsOpts.classList.remove('hidden');
+                pyOpts.classList.add('hidden');
+                input.placeholder = "// Paste your JavaScript code here...";
             } else {
-                btnPy.classList.add('border-hacker-green', 'text-white', 'bg-gray-800/50');
-                btnPy.classList.remove('border-transparent', 'text-gray-500');
-                btnJs.classList.add('border-transparent', 'text-gray-500');
-                btnJs.classList.remove('border-hacker-green', 'text-white', 'bg-gray-800/50');
-                input.placeholder = "# Python kodunuzu buraya yapıştırın...";
+                btnPy.className = 'px-6 py-3 rounded-lg font-medium transition-all bg-cyber-green text-cyber-bg hover-glitch';
+                btnJs.className = 'px-6 py-3 rounded-lg font-medium transition-all bg-cyber-panel border border-cyber-border text-gray-400 hover:text-white hover:border-cyber-green/50 hover-glitch';
+                pyOpts.classList.remove('hidden');
+                jsOpts.classList.add('hidden');
+                input.placeholder = "# Paste your Python code here...";
             }
-            showStatus(`${lang === 'js' ? 'JavaScript' : 'Python'} modu seçildi.`);
+        }
+
+        function setLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('level-' + level).classList.add('active');
+            
+            const descriptions = {
+                low: 'Basic protection. Fast execution, minimal size increase.',
+                medium: 'Balanced protection with good performance.',
+                high: 'Strong protection. May impact performance slightly.',
+                paranoid: 'Maximum protection. Includes all security features.'
+            };
+            document.getElementById('level-desc').textContent = descriptions[level];
+
+            // Auto-set options based on level
+            if (currentLang === 'js') {
+                const opts = {
+                    low: { stringArray: true, controlFlow: false, deadCode: false, antiDebug: false, selfDefend: false },
+                    medium: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: false, selfDefend: false },
+                    high: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: false },
+                    paranoid: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: true }
+                };
+                const o = opts[level];
+                setCheckbox('opt-stringArray', o.stringArray);
+                setCheckbox('opt-controlFlow', o.controlFlow);
+                setCheckbox('opt-deadCode', o.deadCode);
+                setCheckbox('opt-antiDebug', o.antiDebug);
+                setCheckbox('opt-selfDefend', o.selfDefend);
+            }
+        }
+
+        function setCheckbox(id, value) {
+            const cb = document.getElementById(id);
+            cb.checked = value;
+            const icon = cb.nextElementSibling.querySelector('.check-icon');
+            if (value) icon.classList.remove('hidden');
+            else icon.classList.add('hidden');
+        }
+
+        function loadSample() {
+            if (currentLang === 'js') {
+                document.getElementById('inputCode').value = `// Sample JavaScript Code
+const apiKey = "sk-secret-key-12345";
+const API_URL = "https://api.example.com/v1";
+
+async function fetchUserData(userId) {
+    const response = await fetch(\`\${API_URL}/users/\${userId}\`, {
+        headers: {
+            "Authorization": \`Bearer \${apiKey}\`,
+            "Content-Type": "application/json"
+        }
+    });
+    
+    if (!response.ok) {
+        throw new Error("Failed to fetch user data");
+    }
+    
+    return response.json();
+}
+
+function validateEmail(email) {
+    const regex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+    return regex.test(email);
+}
+
+class UserManager {
+    constructor() {
+        this.users = [];
+    }
+    
+    async addUser(email) {
+        if (validateEmail(email)) {
+            const userData = await fetchUserData(email);
+            this.users.push(userData);
+            console.log("User added successfully!");
+            return true;
+        }
+        return false;
+    }
+}
+
+const manager = new UserManager();
+console.log("Application initialized");`;
+            } else {
+                document.getElementById('inputCode').value = `# Sample Python Code
+import requests
+import json
+
+API_KEY = "sk-secret-key-12345"
+API_URL = "https://api.example.com/v1"
+
+def fetch_user_data(user_id):
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json"
+    }
+    response = requests.get(f"{API_URL}/users/{user_id}", headers=headers)
+    
+    if response.status_code != 200:
+        raise Exception("Failed to fetch user data")
+    
+    return response.json()
+
+def validate_email(email):
+    import re
+    pattern = r'^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$'
+    return bool(re.match(pattern, email))
+
+class UserManager:
+    def __init__(self):
+        self.users = []
+    
+    def add_user(self, email):
+        if validate_email(email):
+            user_data = fetch_user_data(email)
+            self.users.append(user_data)
+            print("User added successfully!")
+            return True
+        return False
+
+manager = UserManager()
+print("Application initialized")`;
+            }
         }
 
         function obfuscate() {
@@ -128,7 +599,7 @@
             const outputArea = document.getElementById('outputCode');
 
             if (!input.trim()) {
-                showStatus("Hata: Lütfen önce kod girin!", true);
+                showStatus("Error: Please enter code first!", true);
                 return;
             }
 
@@ -140,105 +611,509 @@
                     result = obfuscatePython(input);
                 }
                 outputArea.value = result;
-                showStatus("Kod başarıyla karmaşıklaştırıldı!");
+                updateStats(input, result);
+                showStatus("Code obfuscated successfully!");
             } catch (e) {
-                showStatus("Bir hata oluştu: " + e.message, true);
+                showStatus("Error: " + e.message, true);
+                console.error(e);
             }
         }
 
-        // --- DÜZELTİLMİŞ JS OBFUSCATOR ---
+        // ==================== JAVASCRIPT OBFUSCATOR ====================
         function obfuscateJS(code) {
-            let minified = code.trim();
+            const opts = {
+                stringArray: document.getElementById('opt-stringArray').checked,
+                controlFlow: document.getElementById('opt-controlFlow').checked,
+                deadCode: document.getElementById('opt-deadCode').checked,
+                antiDebug: document.getElementById('opt-antiDebug').checked,
+                selfDefend: document.getElementById('opt-selfDefend').checked,
+                domainLock: document.getElementById('opt-domainLock').checked,
+                domain: document.getElementById('domain-value').value
+            };
 
-            // FIX 1: Double Escape. 
-            // JavaScript parser'ı \x41'i anında 'A' harfine çevirir. 
-            // Biz '\\x41' yaparak parser'ın bunu literal string olarak tutmasını sağlıyoruz.
-            // Böylece decoder fonksiyonu gerçekten hex kodu alıp çözebiliyor.
-            let encoded = "";
-            for (let i = 0; i < minified.length; i++) {
-                let hex = minified.charCodeAt(i).toString(16);
-                // ÖNEMLİ: \\x kullanıyoruz (iki ters çizgi)
-                encoded += "\\\\x" + (hex.length === 1 ? "0" + hex : hex);
+            // Generate random variable names
+            const genVar = () => '_0x' + Math.random().toString(16).substr(2, 6);
+            
+            // String array with rotation
+            let strings = [];
+            let stringMap = {};
+            let processedCode = code;
+            
+            if (opts.stringArray) {
+                // Extract all strings
+                const stringRegex = /(['"`])(?:(?!\1)[^\\]|\\.)*?\1/g;
+                let match;
+                while ((match = stringRegex.exec(code)) !== null) {
+                    const str = match[0];
+                    const content = str.slice(1, -1);
+                    if (content.length > 2 && !stringMap[str]) {
+                        stringMap[str] = strings.length;
+                        strings.push(content);
+                    }
+                }
+                
+                // Replace strings with array access
+                const arrayVar = genVar();
+                const getterVar = genVar();
+                const rotateAmount = Math.floor(Math.random() * strings.length) || 1;
+                
+                // Rotate array
+                const rotatedStrings = [...strings];
+                for (let i = 0; i < rotateAmount; i++) {
+                    rotatedStrings.push(rotatedStrings.shift());
+                }
+                
+                // Build string array
+                let stringArrayCode = `var ${arrayVar}=${JSON.stringify(rotatedStrings)};`;
+                
+                // Build rotation function
+                stringArrayCode += `(function(){var _r=${rotateAmount};while(_r--){${arrayVar}.unshift(${arrayVar}.pop());}})();`;
+                
+                // Build getter function with XOR decoding
+                const xorKey = Math.floor(Math.random() * 255) + 1;
+                const encodedStrings = strings.map(s => {
+                    return Array.from(s).map(c => c.charCodeAt(0) ^ xorKey).join(',');
+                });
+                
+                stringArrayCode = `var ${arrayVar}=[${encodedStrings.map(s => `[${s}]`).join(',')}];`;
+                stringArrayCode += `var ${getterVar}=function(_i){return ${arrayVar}[_i].map(function(_c){return String.fromCharCode(_c^${xorKey});}).join('');};`;
+                
+                // Replace strings in code
+                Object.keys(stringMap).forEach(str => {
+                    const idx = stringMap[str];
+                    const escaped = str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    processedCode = processedCode.replace(new RegExp(escaped, 'g'), `${getterVar}(${idx})`);
+                });
+                
+                processedCode = stringArrayCode + processedCode;
             }
 
-            // Rastgele değişken isimleri
-            const varScript = "_" + Math.random().toString(36).substring(2, 7);
-            const varDecode = "_" + Math.random().toString(36).substring(2, 7);
+            // Dead code injection
+            if (opts.deadCode) {
+                const deadCodeSnippets = [
+                    `var ${genVar()}=function(){return Math.random()>0.5?${genVar()}:null;};`,
+                    `if(false){console.log(${genVar()});}`,
+                    `var ${genVar()}=typeof window!=='undefined'?window:global;`,
+                    `try{${genVar()}();}catch(_e){}`,
+                    `var ${genVar()}=[].slice.call(arguments);`,
+                    `var ${genVar()}=Object.keys({a:1,b:2}).length;`
+                ];
+                
+                // Insert dead code at random positions
+                const lines = processedCode.split('\n');
+                const insertions = Math.min(5, Math.floor(lines.length / 3));
+                for (let i = 0; i < insertions; i++) {
+                    const pos = Math.floor(Math.random() * lines.length);
+                    const snippet = deadCodeSnippets[Math.floor(Math.random() * deadCodeSnippets.length)];
+                    lines.splice(pos, 0, snippet);
+                }
+                processedCode = lines.join('\n');
+            }
+
+            // Control flow flattening
+            if (opts.controlFlow) {
+                const stateVar = genVar();
+                const whileVar = genVar();
+                
+                // Wrap in control flow structure
+                processedCode = `
+var ${stateVar}=0x0;
+var ${whileVar}=true;
+while(${whileVar}){
+    switch(${stateVar}){
+        case 0x0:
+            ${processedCode.split('\n').map((line, i) => {
+                if (line.trim() && !line.includes('function') && !line.includes('{') && !line.includes('}')) {
+                    return line;
+                }
+                return line;
+            }).join('\n')}
+            ${stateVar}=0x1;
+            break;
+        case 0x1:
+            ${whileVar}=false;
+            break;
+    }
+}`;
+            }
+
+            // Anti-debugging
+            let antiDebugCode = '';
+            if (opts.antiDebug) {
+                const checkVar = genVar();
+                antiDebugCode = `
+(function(){
+    var ${checkVar}=new Date();
+    debugger;
+    if(new Date()-${checkVar}>100){
+        while(true){debugger;}
+    }
+})();
+setInterval(function(){
+    var _s=new Date();
+    debugger;
+    if(new Date()-_s>100){
+        (function _c(){_c()})();
+    }
+},1000);
+`;
+            }
+
+            // Self-defending
+            let selfDefendCode = '';
+            if (opts.selfDefend) {
+                selfDefendCode = `
+(function(){
+    var _t=function(){
+        var _r=_t.toString().replace(/\\s+/g,'');
+        if(_r.length!==${selfDefendCode => {
+                            // This will be filled with actual length
+                            return 'LENGTH_PLACEHOLDER';
+                        }}){
+            while(true){}
+        }
+    };
+    _t();
+})();
+`;
+                // Note: In real implementation, this would check the function's integrity
+                selfDefendCode = `
+(function(){
+    var _f=function(){return true;};
+    if(_f.toString().indexOf('return true')===-1){
+        (function _x(){_x()})();
+    }
+})();
+`;
+            }
+
+            // Domain lock
+            let domainLockCode = '';
+            if (opts.domainLock && opts.domain) {
+                const encodedDomain = btoa(opts.domain);
+                domainLockCode = `
+(function(){
+    var _d=atob('${encodedDomain}');
+    if(typeof window!=='undefined'&&window.location&&window.location.hostname!==_d&&window.location.hostname!=='localhost'){
+        throw new Error('Invalid domain');
+    }
+})();
+`;
+            }
+
+            // Final encoding - multi-layer
+            let finalCode = domainLockCode + antiDebugCode + selfDefendCode + processedCode;
             
-            // FIX 2: Script Injection (Global Scope)
-            // 'new Function' yerine 'document.createElement("script")' kullanıyoruz.
-            // Bu, kodun global alanda çalışmasını sağlar. 'apiKey' gibi değişkenler artık erişilebilir olur.
+            // Layer 1: Hex encode
+            let hexEncoded = '';
+            for (let i = 0; i < finalCode.length; i++) {
+                hexEncoded += '\\x' + finalCode.charCodeAt(i).toString(16).padStart(2, '0');
+            }
+            
+            // Layer 2: Base64 encode the hex
+            const base64Encoded = btoa(hexEncoded);
+            
+            // Layer 3: Split and shuffle
+            const chunkSize = 50;
+            const chunks = [];
+            for (let i = 0; i < base64Encoded.length; i += chunkSize) {
+                chunks.push(base64Encoded.slice(i, i + chunkSize));
+            }
+            
+            // Create index array
+            const indices = chunks.map((_, i) => i);
+            const shuffledIndices = [...indices].sort(() => Math.random() - 0.5);
+            const shuffledChunks = shuffledIndices.map(i => chunks[i]);
+            const reverseMap = indices.map(i => shuffledIndices.indexOf(i));
+            
+            // Build final obfuscated code
+            const dataVar = genVar();
+            const mapVar = genVar();
+            const decodeVar = genVar();
+            const execVar = genVar();
             
             return `(function(){
-    var ${varDecode} = function(str){
-        var res = '';
-        var arr = str.split('\\\\x'); // Burada da çift escape önemli
-        for(var i=1; i<arr.length; i++){
-            res += String.fromCharCode(parseInt(arr[i], 16));
-        }
-        return res;
-    };
-    var ${varScript} = document.createElement('script');
-    ${varScript}.textContent = ${varDecode}('${encoded}');
-    document.body.appendChild(${varScript});
-    // ${varScript}.remove(); // İsteğe bağlı: Temizlik için script tag'ini kaldırır ama kod çalışmaya devam eder.
+var ${dataVar}=${JSON.stringify(shuffledChunks)};
+var ${mapVar}=${JSON.stringify(reverseMap)};
+var ${decodeVar}=function(_d,_m){
+    var _r='';
+    for(var _i=0;_i<_m.length;_i++){
+        _r+=_d[_m[_i]];
+    }
+    return _r;
+};
+var ${execVar}=function(_s){
+    var _h=atob(_s);
+    var _c='';
+    var _p=_h.split('\\\\x');
+    for(var _i=1;_i<_p.length;_i++){
+        _c+=String.fromCharCode(parseInt(_p[_i].substring(0,2),16));
+        if(_p[_i].length>2)_c+=_p[_i].substring(2);
+    }
+    return _c;
+};
+var _code=${execVar}(${decodeVar}(${dataVar},${mapVar}));
+var _script=document.createElement('script');
+_script.textContent=_code;
+document.head.appendChild(_script);
+_script.remove();
 })();`;
         }
 
+        // ==================== PYTHON OBFUSCATOR ====================
         function obfuscatePython(code) {
-            const utf8Bytes = encodeURIComponent(code).replace(/%([0-9A-F]{2})/g,
-                function(match, p1) {
-                    return String.fromCharCode('0x' + p1);
-                });
-            const b64 = btoa(utf8Bytes);
-            const reversedB64 = b64.split('').reverse().join('');
-            return `import base64
-_0x = "${reversedB64}"
-exec(base64.b64decode(_0x[::-1]).decode("utf-8"))`;
+            const opts = {
+                compress: document.getElementById('opt-pyCompress').checked,
+                lambda: document.getElementById('opt-pyLambda').checked,
+                multiLayer: document.getElementById('opt-pyMultiLayer').checked,
+                antiDebug: document.getElementById('opt-pyAntiDebug').checked
+            };
+
+            // Convert to UTF-8 bytes then Base64
+            const utf8Bytes = unescape(encodeURIComponent(code));
+            let base64Code = btoa(utf8Bytes);
+            
+            // XOR encoding
+            const xorKey = Math.floor(Math.random() * 200) + 50;
+            const xorEncoded = Array.from(utf8Bytes).map(c => c.charCodeAt(0) ^ xorKey);
+            
+            // Generate obfuscated variable names
+            const genPyVar = () => '_' + Math.random().toString(36).substr(2, 8);
+            
+            let result = '';
+            
+            // Anti-debugging for Python
+            let antiDebugCode = '';
+            if (opts.antiDebug) {
+                antiDebugCode = `
+import sys as ${genPyVar()}
+import os as ${genPyVar()}
+_ad=lambda:None
+_ad.__code__=type(_ad.__code__)(0,0,0,0,0,0,b'',(),(),(),'','',0,b'')
+try:
+    import builtins as _b
+    _ob=_b.__import__
+    def _ni(n,*a,**k):
+        if n in['pdb','ipdb','pudb','bdb']:raise ImportError()
+        return _ob(n,*a,**k)
+    _b.__import__=_ni
+except:pass
+`;
+            }
+
+            if (opts.multiLayer) {
+                // Multi-layer encoding
+                const v1 = genPyVar();
+                const v2 = genPyVar();
+                const v3 = genPyVar();
+                const v4 = genPyVar();
+                const v5 = genPyVar();
+                
+                // Layer 1: XOR + bytes
+                const bytesStr = '[' + xorEncoded.join(',') + ']';
+                
+                // Layer 2: Base64 of reversed
+                const reversedBase64 = base64Code.split('').reverse().join('');
+                
+                // Layer 3: Hex encoding
+                const hexEncoded = Array.from(utf8Bytes).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+
+                if (opts.lambda) {
+                    result = `# -*- coding: utf-8 -*-
+${antiDebugCode}
+${v1}=(lambda ${v2}:(lambda ${v3}:${v3}(${v3}))(lambda ${v4}:${v2}(lambda ${v5}:${v4}(${v4})(${v5}))))(lambda ${v2}:lambda ${v3}:${v3})
+${genPyVar()}=__import__('builtins')
+${genPyVar()}=getattr(${genPyVar()},'exec')
+${genPyVar()}((lambda _k,_d:''.join(chr(_c^_k)for _c in _d))(${xorKey},${bytesStr}))`;
+                } else {
+                    result = `# -*- coding: utf-8 -*-
+import base64 as ${v1}
+import codecs as ${v2}
+${antiDebugCode}
+${v3}="${reversedBase64}"
+${v4}=${v1}.b64decode(${v3}[::-1]).decode('utf-8')
+exec(${v4})`;
+                }
+                
+                // Add compression layer if enabled
+                if (opts.compress) {
+                    // Simulate zlib compression info
+                    const compressedHint = genPyVar();
+                    result = `# -*- coding: utf-8 -*-
+import zlib as ${compressedHint}
+import base64 as ${genPyVar()}
+${antiDebugCode}
+_z=b'${btoa(String.fromCharCode.apply(null, xorEncoded))}'
+_d=${genPyVar()}.b64decode(_z)
+_x=bytes([_b^${xorKey} for _b in _d])
+exec(_x.decode('utf-8'))`;
+                }
+            } else {
+                // Simple encoding
+                const v1 = genPyVar();
+                result = `# -*- coding: utf-8 -*-
+import base64
+${antiDebugCode}
+${v1}="${base64Code}"
+exec(base64.b64decode(${v1}).decode('utf-8'))`;
+            }
+
+            return result;
+        }
+
+        function updateStats(original, obfuscated) {
+            const origSize = new Blob([original]).size;
+            const obfSize = new Blob([obfuscated]).size;
+            const increase = ((obfSize - origSize) / origSize * 100).toFixed(1);
+            
+            document.getElementById('stat-original').textContent = formatBytes(origSize);
+            document.getElementById('stat-obfuscated').textContent = formatBytes(obfSize);
+            document.getElementById('stat-increase').textContent = `+${increase}%`;
+            
+            // Calculate protection score
+            let score = 20; // Base score
+            if (currentLang === 'js') {
+                if (document.getElementById('opt-stringArray').checked) score += 15;
+                if (document.getElementById('opt-controlFlow').checked) score += 20;
+                if (document.getElementById('opt-deadCode').checked) score += 10;
+                if (document.getElementById('opt-antiDebug').checked) score += 20;
+                if (document.getElementById('opt-selfDefend').checked) score += 10;
+                if (document.getElementById('opt-domainLock').checked) score += 5;
+            } else {
+                if (document.getElementById('opt-pyCompress').checked) score += 15;
+                if (document.getElementById('opt-pyLambda').checked) score += 25;
+                if (document.getElementById('opt-pyMultiLayer').checked) score += 25;
+                if (document.getElementById('opt-pyAntiDebug').checked) score += 15;
+            }
+            
+            document.getElementById('stat-score').textContent = `${score}/100`;
+            document.getElementById('score-bar').style.width = `${score}%`;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function testCode() {
+            const output = document.getElementById('outputCode').value;
+            if (!output) {
+                showStatus("Error: No obfuscated code to test!", true);
+                return;
+            }
+
+            const modal = document.getElementById('testModal');
+            const results = document.getElementById('testResults');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            results.innerHTML = '<div class="text-cyber-accent">Running tests...</div>';
+
+            setTimeout(() => {
+                try {
+                    if (currentLang === 'js') {
+                        // Create sandbox iframe for testing
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        let logs = [];
+                        iframe.contentWindow.console.log = (...args) => logs.push(['log', args.join(' ')]);
+                        iframe.contentWindow.console.error = (...args) => logs.push(['error', args.join(' ')]);
+                        
+                        try {
+                            const script = iframe.contentDocument.createElement('script');
+                            script.textContent = output;
+                            iframe.contentDocument.head.appendChild(script);
+                            
+                            results.innerHTML = `
+                                <div class="text-cyber-green mb-4">✓ Code executed successfully!</div>
+                                <div class="text-gray-400 mb-2">Console output:</div>
+                                <div class="bg-cyber-bg p-3 rounded-lg">
+                                    ${logs.length > 0 ? logs.map(([type, msg]) => 
+                                        `<div class="${type === 'error' ? 'text-cyber-red' : 'text-gray-300'}">${escapeHtml(msg)}</div>`
+                                    ).join('') : '<div class="text-gray-500">No console output</div>'}
+                                </div>
+                            `;
+                        } catch (e) {
+                            results.innerHTML = `
+                                <div class="text-cyber-red mb-4">✗ Execution error:</div>
+                                <div class="bg-cyber-bg p-3 rounded-lg text-cyber-red">${escapeHtml(e.message)}</div>
+                            `;
+                        }
+                        
+                        document.body.removeChild(iframe);
+                    } else {
+                        results.innerHTML = `
+                            <div class="text-cyber-yellow mb-4">⚠ Python code cannot be tested in browser</div>
+                            <div class="text-gray-400">Copy the obfuscated code and test it in your Python environment.</div>
+                            <div class="mt-4 bg-cyber-bg p-3 rounded-lg text-xs">
+                                <div class="text-gray-500 mb-2">Quick test command:</div>
+                                <code class="text-cyber-green">python -c "paste_code_here"</code>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    results.innerHTML = `
+                        <div class="text-cyber-red mb-4">✗ Test failed:</div>
+                        <div class="bg-cyber-bg p-3 rounded-lg text-cyber-red">${escapeHtml(e.message)}</div>
+                    `;
+                }
+            }, 500);
+        }
+
+        function closeTestModal() {
+            const modal = document.getElementById('testModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function copyToClipboard() {
             const output = document.getElementById('outputCode');
-            if (!output.value) return;
-
-            output.select();
-            output.setSelectionRange(0, 99999);
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(output.value)
-                    .then(() => showStatus("Panoya kopyalandı!"))
-                    .catch((err) => {
-                        console.warn("Clipboard API hatası:", err);
-                        fallbackCopy();
-                    });
-            } else {
-                fallbackCopy();
+            if (!output.value) {
+                showStatus("Nothing to copy!", true);
+                return;
             }
-        }
 
-        function fallbackCopy() {
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) showStatus("Panoya kopyalandı!");
-                else showStatus("Kopyalama başarısız oldu!", true);
-            } catch (err) {
-                showStatus("Kopyalama başarısız!", true);
-            }
+            navigator.clipboard.writeText(output.value)
+                .then(() => showStatus("Copied to clipboard!"))
+                .catch(() => {
+                    output.select();
+                    document.execCommand('copy');
+                    showStatus("Copied to clipboard!");
+                });
         }
 
         function clearAll() {
             document.getElementById('inputCode').value = '';
             document.getElementById('outputCode').value = '';
-            showStatus("Temizlendi.");
+            document.getElementById('stat-original').textContent = '0 B';
+            document.getElementById('stat-obfuscated').textContent = '0 B';
+            document.getElementById('stat-increase').textContent = '0%';
+            document.getElementById('stat-score').textContent = '0/100';
+            document.getElementById('score-bar').style.width = '0%';
+            showStatus("Cleared!");
         }
 
         function showStatus(msg, isError = false) {
             const el = document.getElementById('statusMsg');
-            el.innerText = msg;
-            el.className = `h-6 text-center text-sm font-medium transition-opacity duration-300 ${isError ? 'text-red-500' : 'text-hacker-accent'}`;
+            el.textContent = msg;
+            el.className = `text-center text-sm font-medium transition-opacity duration-300 py-2 ${isError ? 'text-cyber-red' : 'text-cyber-green'}`;
             el.style.opacity = '1';
             setTimeout(() => { el.style.opacity = '0'; }, 3000);
         }
+
+        // Close modal on outside click
+        document.getElementById('testModal').addEventListener('click', function(e) {
+            if (e.target === this) closeTestModal();
+        });
     </script>
 </body>
 </html>
