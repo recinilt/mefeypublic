@@ -299,7 +299,7 @@
             <div class="mode-card" onclick="selectMode('split')">
                 <div class="mode-icon">✂️</div>
                 <div class="mode-title">Split</div>
-                <div class="mode-desc">HTML'i CSS ve JS dosyalarına ayırıp ZIP olarak indir</div>
+                <div class="mode-desc">HTML'i parçalara ayır</div>
             </div>
             <div class="mode-card" onclick="selectMode('merge')">
                 <div class="mode-icon">🔗</div>
@@ -311,7 +311,7 @@
         <!-- SPLIT SECTION -->
         <div id="splitSection" class="file-section">
             <div class="info-banner">
-                📝 Split modu: HTML dosyanızdaki CSS ve JS'i ayrı dosyalara çıkarır. JS belirtilen parça sayısına bölünür. Tüm dosyalar UTF-8 (BOM'suz) formatında ZIP içinde sunulur.
+                📝 Split modu: HTML dosyanızı belirtilen satır sayısına göre parçalara ayırır. Tüm dosyalar UTF-8 (BOM'suz) formatında ZIP içinde sunulur.
             </div>
 
             <div class="file-input-wrapper">
@@ -322,8 +322,8 @@
             </div>
 
             <div class="split-options">
-                <label for="jsPartCount">JS Kaç Parçaya Ayrılsın?</label>
-                <input type="number" id="jsPartCount" min="1" max="50" value="5" placeholder="Örn: 5">
+                <label for="linesPerFile">Dosya Başına Satır Sayısı:</label>
+                <input type="number" id="linesPerFile" min="10" value="100" placeholder="Örn: 100">
             </div>
 
             <button class="process-btn" id="splitBtn" disabled onclick="processSplit()">
@@ -554,14 +554,17 @@
             }
 
             // TextDecoder ile decode et
+            // ignoreBOM: false (varsayılan) = BOM'u otomatik kaldır
+            // fatal: true = hatalı byte dizilerinde exception fırlat
             try {
                 const decoder = new TextDecoder(detectedEncoding, { 
                     fatal: true,
-                    ignoreBOM: false
+                    ignoreBOM: false  // BOM'u otomatik kaldır
                 });
                 text = decoder.decode(uint8Array);
             } catch (e) {
                 console.warn(`Encoding hatası (${file.name}), UTF-8 non-fatal deneniyor:`, e);
+                // Hata durumunda non-fatal mode ile tekrar dene
                 const decoder = new TextDecoder('utf-8', { 
                     fatal: false,
                     ignoreBOM: false 
@@ -570,193 +573,101 @@
             }
 
             // Ek güvenlik: String seviyesinde BOM karakterini de kontrol et
+            // TextDecoder bazen string içinde U+FEFF bırakabilir
             if (text.charCodeAt(0) === 0xFEFF) {
                 text = text.substring(1);
             }
 
             // UTF-8 without BOM olarak encode et
+            // TextEncoder her zaman BOM olmadan encode eder
             const encoder = new TextEncoder();
             return encoder.encode(text);
-        }
-
-        function stringToUTF8WithoutBOM(str) {
-            // String'den BOM karakterini kaldır
-            if (str.charCodeAt(0) === 0xFEFF) {
-                str = str.substring(1);
-            }
-            // UTF-8 without BOM olarak encode et
-            const encoder = new TextEncoder();
-            return encoder.encode(str);
         }
 
         function isTextFile(filename) {
             return filename.match(/\.(txt|md|js|jsx|ts|tsx|css|html|htm|json|xml|csv|log|sql|py|java|c|cpp|h|hpp|cs|php|rb|go|rs|swift|kt|sh|bat|yaml|yml|toml|ini|cfg|conf|srt|sub|ass)$/i);
         }
 
-        // =============================================
-        // SPLIT FONKSİYONLARI (1.html'den alındı)
-        // =============================================
+        // SPLIT PROCESS
+        async function processSplit() {
+            if (!selectedFile) return;
+            
+            document.getElementById('splitBtn').disabled = true;
+            const progressDiv = document.getElementById('splitProgress');
+            const progressFill = document.getElementById('splitProgressFill');
+            const progressText = document.getElementById('splitProgressText');
+            
+            progressDiv.style.display = 'block';
+            progressFill.style.width = '0%';
+            progressText.textContent = 'Dosya okunuyor...';
 
-        function extractStyles(html) {
-            const styleRegex = /(<style\b[^>]*>)(.*?)<\/style>/gis;
-            const cssParts = [];
-            
-            const newHtml = html.replace(styleRegex, function(match, openTag, content) {
-                if (content.trim()) {
-                    cssParts.push(content.trim());
-                }
-                return openTag + '<' + '/style>';
-            });
-            
-            return {
-                html: newHtml,
-                css: cssParts.join('\n\n')
-            };
-        }
-
-        function extractBodyScripts(html) {
-            const bodyRegex = /(<body\b[^>]*>)(.*?)(<\/body>)/is;
-            const bodyMatch = html.match(bodyRegex);
-            
-            if (!bodyMatch) {
-                const result = extractScriptsFromText(html);
-                return { html: result.html, js: result.js };
-            }
-            
-            const bodyOpen = bodyMatch[1];
-            const bodyContent = bodyMatch[2];
-            const bodyClose = bodyMatch[3];
-            
-            const result = extractScriptsFromText(bodyContent);
-            const newBodyContent = result.html;
-            const js = result.js;
-            
-            const newBody = bodyOpen + newBodyContent + bodyClose;
-            const finalHtml = html.substring(0, bodyMatch.index) + newBody + html.substring(bodyMatch.index + bodyMatch[0].length);
-            
-            return { html: finalHtml, js: js };
-        }
-
-        function extractScriptsFromText(text) {
-            const scriptRegex = /(<script\b[^>]*>)(.*?)<\/script>/gis;
-            const jsParts = [];
-            
-            const newText = text.replace(scriptRegex, function(match, openTag, content) {
-                if (content.trim()) {
-                    jsParts.push(content.trim());
-                }
-                return openTag + '<' + '/script>';
-            });
-            
-            return {
-                html: newText,
-                js: jsParts.join('\n\n')
-            };
-        }
-
-        function splitJsIntoUnits(js) {
-            if (!js.trim()) return [];
-            
-            const lines = js.split('\n');
-            const units = [];
-            let current = [];
-            let braceDepth = 0;
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                current.push(line);
+            try {
+                const htmlText = await selectedFile.text();
+                const linesPerFile = parseInt(document.getElementById('linesPerFile').value) || 100;
+                const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
                 
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    if (char === '{') braceDepth++;
-                    if (char === '}') braceDepth = Math.max(0, braceDepth - 1);
+                progressText.textContent = 'Satırlar bölünüyor...';
+                progressFill.style.width = '30%';
+                
+                const lines = htmlText.split('\n');
+                const totalLines = lines.length;
+                const fileCount = Math.ceil(totalLines / linesPerFile);
+                
+                const zip = new JSZip();
+                const fileNames = [];
+
+                progressText.textContent = 'Dosyalar oluşturuluyor...';
+                
+                for (let i = 0; i < fileCount; i++) {
+                    const start = i * linesPerFile;
+                    const end = Math.min(start + linesPerFile, totalLines);
+                    const chunk = lines.slice(start, end).join('\n');
+                    
+                    const chunkFileName = fileName + '_part' + (i + 1) + '.html';
+                    fileNames.push(chunkFileName);
+                    
+                    // Her parça için Blob oluştur ve UTF-8'e dönüştür
+                    const chunkBlob = new Blob([chunk], { type: 'text/html' });
+                    const chunkFile = new File([chunkBlob], chunkFileName);
+                    const utf8Data = await convertToUTF8WithoutBOM(chunkFile);
+                    zip.file(chunkFileName, utf8Data);
+                    
+                    const progress = 30 + ((i + 1) / fileCount * 60);
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = 'Dosyalar oluşturuluyor... ' + (i + 1) + '/' + fileCount;
                 }
                 
-                const trimmed = line.trim();
-                if (braceDepth === 0 && (trimmed.endsWith(';') || trimmed.endsWith('}'))) {
-                    units.push(current.join('\n') + '\n');
-                    current = [];
-                }
+                progressText.textContent = 'ZIP oluşturuluyor...';
+                progressFill.style.width = '95%';
+                
+                const blob = await zip.generateAsync({ type: 'blob' });
+                
+                progressFill.style.width = '100%';
+                progressText.textContent = 'İndiriliyor...';
+                
+                downloadBlob(blob, fileName + '_split.zip');
+                
+                progressText.textContent = '✅ Tamamlandı!';
+                
+                showResult('success', '✅ Başarılı!', 
+                    totalLines + ' satır ' + fileCount + ' dosyaya bölündü ve UTF-8 (BOM\'suz) formatında ZIP\'lendi.', 
+                    fileNames);
+                
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 2000);
+                
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                showResult('error', '❌ Hata', 'İşlem sırasında hata oluştu: ' + error.message);
             }
             
-            if (current.length > 0) {
-                units.push(current.join('\n') + '\n');
-            }
-            
-            const merged = [];
-            let buffer = '';
-            for (let i = 0; i < units.length; i++) {
-                const unit = units[i];
-                if (unit.trim().length < 30) {
-                    buffer += unit;
-                } else {
-                    if (buffer) {
-                        merged.push(buffer);
-                        buffer = '';
-                    }
-                    merged.push(unit);
-                }
-            }
-            if (buffer) merged.push(buffer);
-            
-            return merged.filter(function(u) {
-                return u.trim();
-            });
+            document.getElementById('splitBtn').disabled = false;
         }
 
-        function packUnitsIntoFiles(units, n) {
-            if (n <= 1) return [units.join('')];
-            if (units.length === 0) {
-                const arr = [];
-                for (let i = 0; i < n; i++) arr.push('');
-                return arr;
-            }
-            
-            const total = units.reduce(function(sum, u) {
-                return sum + u.length;
-            }, 0);
-            const target = Math.max(1, Math.floor(total / n));
-            
-            const files = [];
-            let current = '';
-            
-            for (let i = 0; i < units.length; i++) {
-                const unit = units[i];
-                if (files.length < n - 1 && current && (current.length + unit.length > target)) {
-                    files.push(current);
-                    current = '';
-                }
-                current += unit;
-            }
-            files.push(current);
-            
-            while (files.length < n) files.push('');
-            if (files.length > n) {
-                const tail = files.slice(n - 1).join('');
-                return files.slice(0, n - 1).concat([tail]);
-            }
-            
-            return files;
-        }
-
-        function buildLoaderScript(jsFilenames) {
-            let script = '<script>\n';
-            script += 'const v = new Date().getTime();\n';
-            for (let i = 0; i < jsFilenames.length; i++) {
-                const fn = jsFilenames[i];
-                script += 'document.write(\'<script src="js/' + fn + '?v=\' + v + \'"><\\/script>\');\n';
-            }
-            script += '<' + '/script>';
-            return script;
-        }
-
-        function ensureStylesLinkInHead(html) {
-            const linkTag = '<link rel="stylesheet" href="styles.css">';
-            
-            if (/<link\b[^>]*href=["']styles\.css["']/i.test(html)) {
-                return html;
-            }
-            
+        // MERGE PROCESS
+        function addLinkToHead(html, linkTag) {
             const headRegex = /(<head\b[^>]*>)(.*?)(<\/head>)/is;
             const headMatch = html.match(headRegex);
             
@@ -788,136 +699,6 @@
             }
             
             return html;
-        }
-
-        // =============================================
-        // SPLIT PROCESS (Güncellenmiş)
-        // =============================================
-        async function processSplit() {
-            if (!selectedFile) return;
-            
-            const jsCount = parseInt(document.getElementById('jsPartCount').value);
-            if (jsCount < 1 || jsCount > 50) {
-                showResult('error', '❌ Hata', 'JS parça sayısı 1-50 arasında olmalıdır.');
-                return;
-            }
-
-            document.getElementById('splitBtn').disabled = true;
-            const progressDiv = document.getElementById('splitProgress');
-            const progressFill = document.getElementById('splitProgressFill');
-            const progressText = document.getElementById('splitProgressText');
-            
-            progressDiv.style.display = 'block';
-            progressFill.style.width = '0%';
-            progressText.textContent = 'Dosya okunuyor...';
-
-            try {
-                const htmlText = await selectedFile.text();
-                const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
-                
-                progressText.textContent = 'CSS çıkarılıyor...';
-                progressFill.style.width = '15%';
-                
-                const result1 = extractStyles(htmlText);
-                const htmlWithoutStyles = result1.html;
-                const css = result1.css;
-                
-                progressText.textContent = 'JavaScript çıkarılıyor...';
-                progressFill.style.width = '30%';
-                
-                const result2 = extractBodyScripts(htmlWithoutStyles);
-                const finalHtml = result2.html;
-                const js = result2.js;
-                
-                progressText.textContent = 'JS parçalara ayrılıyor...';
-                progressFill.style.width = '45%';
-                
-                const jsUnits = splitJsIntoUnits(js);
-                const jsFiles = packUnitsIntoFiles(jsUnits, jsCount);
-                const htmlWithLink = ensureStylesLinkInHead(finalHtml);
-                
-                progressText.textContent = 'Loader script oluşturuluyor...';
-                progressFill.style.width = '60%';
-                
-                const jsFilenames = jsFiles.map(function(_, i) {
-                    return 'js' + (i + 1) + '.js';
-                });
-                const loaderScript = buildLoaderScript(jsFilenames);
-                const htmlFinal = addLoaderToBody(htmlWithLink, loaderScript);
-                
-                progressText.textContent = 'UTF-8 dönüşümü yapılıyor...';
-                progressFill.style.width = '75%';
-                
-                const zip = new JSZip();
-                
-                // HTML dosyasını UTF-8 BOM'suz olarak ekle
-                const htmlUtf8 = stringToUTF8WithoutBOM(htmlFinal);
-                zip.file(fileName + '.html', htmlUtf8);
-                
-                // CSS dosyasını UTF-8 BOM'suz olarak ekle
-                const cssUtf8 = stringToUTF8WithoutBOM(css || '');
-                zip.file('styles.css', cssUtf8);
-                
-                progressText.textContent = 'JS dosyaları oluşturuluyor...';
-                progressFill.style.width = '85%';
-                
-                // JS dosyalarını UTF-8 BOM'suz olarak ekle
-                const jsFolder = zip.folder('js');
-                jsFiles.forEach(function(content, i) {
-                    const jsUtf8 = stringToUTF8WithoutBOM(content || '');
-                    jsFolder.file('js' + (i + 1) + '.js', jsUtf8);
-                });
-                
-                progressText.textContent = 'ZIP oluşturuluyor...';
-                progressFill.style.width = '95%';
-                
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                
-                progressFill.style.width = '100%';
-                progressText.textContent = 'İndiriliyor...';
-                
-                downloadBlob(zipBlob, fileName + '_split.zip');
-                
-                progressText.textContent = '✅ Tamamlandı!';
-                
-                showResult('success', '✅ Başarılı!', 'Dosyalar başarıyla oluşturuldu ve UTF-8 (BOM\'suz) formatında ZIP\'lendi.', [
-                    fileName + '.html (CSS link + JS loader eklenmiş)',
-                    'styles.css',
-                    'js/ klasöründe ' + jsCount + ' dosya'
-                ]);
-                
-                setTimeout(() => {
-                    progressDiv.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }, 2000);
-                
-            } catch (error) {
-                progressDiv.style.display = 'none';
-                showResult('error', '❌ Hata', 'İşlem sırasında hata oluştu: ' + error.message);
-            }
-            
-            document.getElementById('splitBtn').disabled = false;
-        }
-
-        // =============================================
-        // MERGE FONKSİYONLARI
-        // =============================================
-
-        function addLinkToHead(html, linkTag) {
-            const headRegex = /(<head\b[^>]*>)(.*?)(<\/head>)/is;
-            const headMatch = html.match(headRegex);
-            
-            if (headMatch) {
-                const newHead = headMatch[1] + headMatch[2].trimEnd() + '\n' + linkTag + '\n' + headMatch[3];
-                return html.substring(0, headMatch.index) + newHead + html.substring(headMatch.index + headMatch[0].length);
-            }
-            
-            const htmlCloseMatch = html.match(/<\/html\s*>/i);
-            if (htmlCloseMatch) {
-                return html.substring(0, htmlCloseMatch.index) + '\n' + linkTag + '\n' + html.substring(htmlCloseMatch.index);
-            }
-            
-            return linkTag + '\n' + html;
         }
 
         async function processMerge() {
