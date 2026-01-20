@@ -306,11 +306,6 @@
                 <div class="mode-title">Merge</div>
                 <div class="mode-desc">Dosyaları birleştir</div>
             </div>
-            <div class="mode-card" onclick="selectMode('minify')">
-                <div class="mode-icon">📐</div>
-                <div class="mode-title">JS Splitter</div>
-                <div class="mode-desc">Büyük JS dosyalarını max satır sayısına göre böl</div>
-            </div>
         </div>
 
         <!-- SPLIT SECTION -->
@@ -380,46 +375,6 @@
             <div id="mergeResult" class="result-box"></div>
             <button class="back-btn" onclick="resetMode()">⬅️ Geri Dön</button>
         </div>
-
-        <!-- MINIFY/JS SPLITTER SECTION -->
-        <div id="minifySection" class="file-section">
-            <div class="info-banner">
-                📐 JS Splitter modu: HTML ve klasörünüzü seçin. Max satır sayısını aşan JS dosyaları akıllıca bölünür (fonksiyon bütünlüğü korunur). Tüm dosyalar UTF-8 (BOM'suz) formatında ZIP içinde sunulur.
-            </div>
-
-            <div class="file-input-wrapper">
-                <label for="minifyHtmlInput" class="file-input-label">
-                    📄 HTML Dosyası Seç
-                </label>
-                <input type="file" id="minifyHtmlInput" accept=".html,.htm">
-            </div>
-
-            <div class="file-input-wrapper">
-                <label for="minifyFolderInput" class="file-input-label">
-                    📁 Klasör Seç (CSS/JS dosyaları)
-                </label>
-                <input type="file" id="minifyFolderInput" webkitdirectory directory multiple>
-            </div>
-
-            <div class="split-options">
-                <label for="maxLineCount">Maksimum Satır Sayısı (bu sayıyı aşan JS'ler bölünür)</label>
-                <input type="number" id="maxLineCount" min="50" max="10000" value="500" placeholder="Örn: 500">
-            </div>
-
-            <button class="process-btn" id="minifyBtn" disabled onclick="processMinify()">
-                📐 Böl ve ZIP İndir
-            </button>
-
-            <div class="progress" id="minifyProgress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="minifyProgressFill"></div>
-                </div>
-                <div class="progress-text" id="minifyProgressText">İşleniyor...</div>
-            </div>
-
-            <div id="minifyResult" class="result-box"></div>
-            <button class="back-btn" onclick="resetMode()">⬅️ Geri Dön</button>
-        </div>
     </div>
 
     <script>
@@ -442,10 +397,8 @@
             
             if (mode === 'split') {
                 document.getElementById('splitSection').classList.add('active');
-            } else if (mode === 'merge') {
+            } else {
                 document.getElementById('mergeSection').classList.add('active');
-            } else if (mode === 'minify') {
-                document.getElementById('minifySection').classList.add('active');
             }
         }
 
@@ -465,14 +418,10 @@
             document.getElementById('splitFileInput').value = '';
             document.getElementById('mergeHtmlInput').value = '';
             document.getElementById('mergeFolderInput').value = '';
-            document.getElementById('minifyHtmlInput').value = '';
-            document.getElementById('minifyFolderInput').value = '';
             document.getElementById('splitBtn').disabled = true;
             document.getElementById('mergeBtn').disabled = true;
-            document.getElementById('minifyBtn').disabled = true;
             document.getElementById('splitResult').style.display = 'none';
             document.getElementById('mergeResult').style.display = 'none';
-            document.getElementById('minifyResult').style.display = 'none';
         }
 
         // SPLIT EVENT LISTENERS
@@ -504,39 +453,10 @@
             document.getElementById('mergeBtn').disabled = !selectedFile || Object.keys(folderFiles).length === 0;
         }
 
-        // MINIFY EVENT LISTENERS
-        let minifySelectedFile = null;
-        let minifyFolderFiles = {};
-
-        document.getElementById('minifyHtmlInput').addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                minifySelectedFile = e.target.files[0];
-                updateMinifyButton();
-            }
-        });
-
-        document.getElementById('minifyFolderInput').addEventListener('change', function(e) {
-            minifyFolderFiles = {};
-            Array.from(e.target.files).forEach(file => {
-                const path = file.webkitRelativePath || file.name;
-                minifyFolderFiles[path] = file;
-            });
-            updateMinifyButton();
-        });
-
-        function updateMinifyButton() {
-            document.getElementById('minifyBtn').disabled = !minifySelectedFile || Object.keys(minifyFolderFiles).length === 0;
-        }
-
         function showResult(type, title, message, listItems = []) {
-            let resultBox;
-            if (selectedMode === 'split') {
-                resultBox = document.getElementById('splitResult');
-            } else if (selectedMode === 'merge') {
-                resultBox = document.getElementById('mergeResult');
-            } else if (selectedMode === 'minify') {
-                resultBox = document.getElementById('minifyResult');
-            }
+            const resultBox = selectedMode === 'split' 
+                ? document.getElementById('splitResult') 
+                : document.getElementById('mergeResult');
             
             resultBox.className = 'result-box ' + type;
             
@@ -892,10 +812,7 @@
             progressText.textContent = 'Dosya okunuyor...';
 
             try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(selectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
+                const htmlText = await selectedFile.text();
                 const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
                 
                 progressText.textContent = 'CSS çıkarılıyor...';
@@ -1016,10 +933,7 @@
             progressText.textContent = 'HTML dosyası okunuyor...';
 
             try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(selectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
+                const htmlText = await selectedFile.text();
                 const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
                 
                 let mergedHtml = htmlText;
@@ -1266,495 +1180,6 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
-        }
-
-        // =============================================
-        // MINIFY / JS SPLITTER FONKSİYONLARI
-        // =============================================
-
-        async function findFileInMinifyFolder(path) {
-            path = path.split('?')[0];
-            
-            let foundFile = null;
-            let foundPath = null;
-            
-            // 1. Tam path ile ara
-            if (minifyFolderFiles[path]) {
-                foundFile = minifyFolderFiles[path];
-                foundPath = path;
-            }
-            
-            // 2. Path'in tamamı ile ara (klasör yapısıyla)
-            if (!foundFile) {
-                for (let filePath in minifyFolderFiles) {
-                    if (filePath === path || filePath.endsWith('/' + path)) {
-                        foundFile = minifyFolderFiles[filePath];
-                        foundPath = filePath;
-                        break;
-                    }
-                }
-            }
-            
-            // 3. Sadece dosya adı ile ara
-            if (!foundFile) {
-                const fileName = path.split('/').pop();
-                for (let filePath in minifyFolderFiles) {
-                    if (filePath.endsWith('/' + fileName)) {
-                        foundFile = minifyFolderFiles[filePath];
-                        foundPath = filePath;
-                        break;
-                    }
-                }
-            }
-            
-            // 4. Path içinde arama (örn: js/js1.js için)
-            if (!foundFile) {
-                const pathParts = path.split('/');
-                for (let filePath in minifyFolderFiles) {
-                    const filePathParts = filePath.split('/');
-                    if (pathParts.length >= 2 && filePathParts.length >= 2) {
-                        const lastTwo = pathParts.slice(-2).join('/');
-                        const fileLastTwo = filePathParts.slice(-2).join('/');
-                        if (lastTwo === fileLastTwo) {
-                            foundFile = minifyFolderFiles[filePath];
-                            foundPath = filePath;
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            if (!foundFile) return { content: null, path: null };
-            
-            // Dosyayı UTF-8'e dönüştürerek oku
-            let content;
-            if (isTextFile(foundFile.name)) {
-                const utf8Data = await convertToUTF8WithoutBOM(foundFile);
-                const decoder = new TextDecoder('utf-8');
-                content = decoder.decode(utf8Data);
-            } else {
-                content = await foundFile.text();
-            }
-            
-            return { content: content, path: foundPath, file: foundFile };
-        }
-
-        function splitJsIntoUnitsForMinify(js) {
-            if (!js.trim()) return [];
-            
-            const lines = js.split('\n');
-            const units = [];
-            let current = [];
-            let braceDepth = 0;
-            let inString = false;
-            let stringChar = '';
-            let inMultiComment = false;
-            let inSingleComment = false;
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                current.push(line);
-                
-                // Daha güvenli brace tracking
-                for (let j = 0; j < line.length; j++) {
-                    const char = line[j];
-                    const prevChar = j > 0 ? line[j - 1] : '';
-                    const nextChar = j < line.length - 1 ? line[j + 1] : '';
-                    
-                    // Single line comment kontrolü
-                    if (!inString && !inMultiComment && char === '/' && nextChar === '/') {
-                        break; // Bu satırın geri kalanını atla
-                    }
-                    
-                    // Multi-line comment başlangıç
-                    if (!inString && !inMultiComment && char === '/' && nextChar === '*') {
-                        inMultiComment = true;
-                        j++;
-                        continue;
-                    }
-                    
-                    // Multi-line comment bitiş
-                    if (inMultiComment && char === '*' && nextChar === '/') {
-                        inMultiComment = false;
-                        j++;
-                        continue;
-                    }
-                    
-                    if (inMultiComment) continue;
-                    
-                    // String kontrolü
-                    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
-                        if (!inString) {
-                            inString = true;
-                            stringChar = char;
-                        } else if (char === stringChar) {
-                            inString = false;
-                        }
-                    }
-                    
-                    if (!inString) {
-                        if (char === '{') braceDepth++;
-                        if (char === '}') braceDepth = Math.max(0, braceDepth - 1);
-                    }
-                }
-                
-                // Satır sonunda multi-line comment devam edebilir
-                inSingleComment = false;
-                
-                const trimmed = line.trim();
-                if (braceDepth === 0 && !inMultiComment && !inString && 
-                    (trimmed.endsWith(';') || trimmed.endsWith('}') || trimmed === '')) {
-                    if (current.join('\n').trim()) {
-                        units.push(current.join('\n'));
-                    }
-                    current = [];
-                }
-            }
-            
-            if (current.length > 0 && current.join('\n').trim()) {
-                units.push(current.join('\n'));
-            }
-            
-            return units;
-        }
-
-        function packUnitsIntoFilesByLines(units, maxLines) {
-            if (units.length === 0) return [''];
-            
-            const files = [];
-            let current = [];
-            let currentLineCount = 0;
-            
-            for (let i = 0; i < units.length; i++) {
-                const unit = units[i];
-                const unitLines = unit.split('\n').length;
-                
-                // Eğer tek bir unit max satırı aşıyorsa, aynen bırak (bölme)
-                if (unitLines > maxLines) {
-                    // Önceki biriktirilen varsa kaydet
-                    if (current.length > 0) {
-                        files.push(current.join('\n\n'));
-                        current = [];
-                        currentLineCount = 0;
-                    }
-                    // Büyük unit'i tek başına dosya olarak ekle
-                    files.push(unit);
-                    continue;
-                }
-                
-                // Normal unit - sığıyorsa ekle
-                if (currentLineCount + unitLines <= maxLines) {
-                    current.push(unit);
-                    currentLineCount += unitLines;
-                } else {
-                    // Sığmıyor - yeni dosya başlat
-                    if (current.length > 0) {
-                        files.push(current.join('\n\n'));
-                    }
-                    current = [unit];
-                    currentLineCount = unitLines;
-                }
-            }
-            
-            // Son kalan
-            if (current.length > 0) {
-                files.push(current.join('\n\n'));
-            }
-            
-            return files.length > 0 ? files : [''];
-        }
-
-        function generateSplitFilenames(originalPath, partCount) {
-            const dir = originalPath.substring(0, originalPath.lastIndexOf('/') + 1);
-            const filename = originalPath.substring(originalPath.lastIndexOf('/') + 1);
-            const nameWithoutExt = filename.replace(/\.js$/i, '');
-            
-            const filenames = [];
-            for (let i = 0; i < partCount; i++) {
-                const partNum = String(i + 1).padStart(2, '0');
-                filenames.push(dir + nameWithoutExt + '-' + partNum + '.js');
-            }
-            return filenames;
-        }
-
-        function buildScriptTagsForSplitFiles(filenames, originalSrc) {
-            // originalSrc'den path kısmını al (HTML'deki yolu korumak için)
-            const srcDir = originalSrc.substring(0, originalSrc.lastIndexOf('/') + 1);
-            
-            let tags = '';
-            for (let i = 0; i < filenames.length; i++) {
-                const fullPath = filenames[i];
-                const justFilename = fullPath.substring(fullPath.lastIndexOf('/') + 1);
-                tags += '<script src="' + srcDir + justFilename + '"></' + 'script>\n';
-            }
-            return tags.trim();
-        }
-
-        async function processMinify() {
-            if (!minifySelectedFile || Object.keys(minifyFolderFiles).length === 0) return;
-            
-            const maxLines = parseInt(document.getElementById('maxLineCount').value);
-            if (maxLines < 50 || maxLines > 10000) {
-                showResult('error', '❌ Hata', 'Maksimum satır sayısı 50-10000 arasında olmalıdır.');
-                return;
-            }
-
-            document.getElementById('minifyBtn').disabled = true;
-            const progressDiv = document.getElementById('minifyProgress');
-            const progressFill = document.getElementById('minifyProgressFill');
-            const progressText = document.getElementById('minifyProgressText');
-            
-            progressDiv.style.display = 'block';
-            progressFill.style.width = '0%';
-            progressText.textContent = 'HTML dosyası okunuyor...';
-
-            try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(minifySelectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
-                const fileName = minifySelectedFile.name.replace(/\.(html|htm)$/i, '');
-                
-                let modifiedHtml = htmlText;
-                const processedFiles = [];
-                const splitFiles = [];
-                const errors = [];
-                const allFilesToZip = {};
-                
-                progressText.textContent = 'JS dosyaları taranıyor...';
-                progressFill.style.width = '10%';
-                
-                // 1. Normal script src'lerini işle
-                const scriptRegex = /<script\b[^>]*src=["']([^"']+)["'][^>]*><\/script>/gi;
-                let match;
-                const jsReplacements = [];
-                
-                while ((match = scriptRegex.exec(htmlText)) !== null) {
-                    const src = match[1];
-                    if (isRelativePath(src)) {
-                        const result = await findFileInMinifyFolder(src);
-                        if (result.content) {
-                            const lineCount = result.content.split('\n').length;
-                            
-                            if (lineCount > maxLines) {
-                                // Bölme gerekiyor
-                                const units = splitJsIntoUnitsForMinify(result.content);
-                                const splitContents = packUnitsIntoFilesByLines(units, maxLines);
-                                
-                                if (splitContents.length > 1) {
-                                    const newFilenames = generateSplitFilenames(result.path, splitContents.length);
-                                    const newTags = buildScriptTagsForSplitFiles(newFilenames, src);
-                                    
-                                    jsReplacements.push({
-                                        original: match[0],
-                                        replacement: '<!-- Split: ' + src + ' (' + lineCount + ' satır -> ' + splitContents.length + ' dosya) -->\n' + newTags
-                                    });
-                                    
-                                    // Bölünmüş dosyaları kaydet
-                                    for (let i = 0; i < splitContents.length; i++) {
-                                        allFilesToZip[newFilenames[i]] = splitContents[i];
-                                        splitFiles.push(newFilenames[i].substring(newFilenames[i].lastIndexOf('/') + 1) + ' (' + splitContents[i].split('\n').length + ' satır)');
-                                    }
-                                    
-                                    processedFiles.push(src + ' -> ' + splitContents.length + ' parçaya bölündü');
-                                } else {
-                                    // Bölünemedi (tek büyük fonksiyon vs.)
-                                    allFilesToZip[result.path] = result.content;
-                                    processedFiles.push(src + ' (bölünemedi - tek büyük blok)');
-                                }
-                            } else {
-                                // Bölme gerekmiyor, aynen al
-                                allFilesToZip[result.path] = result.content;
-                            }
-                        } else {
-                            errors.push('JS bulunamadı: ' + src);
-                        }
-                    }
-                }
-                
-                // HTML'i güncelle
-                for (let i = 0; i < jsReplacements.length; i++) {
-                    const repl = jsReplacements[i];
-                    modifiedHtml = modifiedHtml.replace(repl.original, repl.replacement);
-                }
-                
-                progressText.textContent = 'Loader scriptleri işleniyor...';
-                progressFill.style.width = '40%';
-                
-                // 2. document.write ile yüklenen scriptleri işle
-                const loaderScripts = extractDocumentWriteScripts(modifiedHtml);
-                
-                for (let i = 0; i < loaderScripts.length; i++) {
-                    const loaderInfo = loaderScripts[i];
-                    let newSources = [];
-                    let hasChanges = false;
-                    
-                    for (let j = 0; j < loaderInfo.sources.length; j++) {
-                        const src = loaderInfo.sources[j];
-                        const result = await findFileInMinifyFolder(src);
-                        
-                        if (result.content) {
-                            const lineCount = result.content.split('\n').length;
-                            
-                            if (lineCount > maxLines) {
-                                const units = splitJsIntoUnitsForMinify(result.content);
-                                const splitContents = packUnitsIntoFilesByLines(units, maxLines);
-                                
-                                if (splitContents.length > 1) {
-                                    const newFilenames = generateSplitFilenames(result.path, splitContents.length);
-                                    
-                                    for (let k = 0; k < splitContents.length; k++) {
-                                        allFilesToZip[newFilenames[k]] = splitContents[k];
-                                        // src path'ini koru
-                                        const srcDir = src.substring(0, src.lastIndexOf('/') + 1);
-                                        const justFilename = newFilenames[k].substring(newFilenames[k].lastIndexOf('/') + 1);
-                                        newSources.push(srcDir + justFilename);
-                                        splitFiles.push(justFilename + ' (' + splitContents[k].split('\n').length + ' satır)');
-                                    }
-                                    
-                                    hasChanges = true;
-                                    processedFiles.push(src + ' (loader) -> ' + splitContents.length + ' parçaya bölündü');
-                                } else {
-                                    allFilesToZip[result.path] = result.content;
-                                    newSources.push(src);
-                                }
-                            } else {
-                                allFilesToZip[result.path] = result.content;
-                                newSources.push(src);
-                            }
-                        } else {
-                            errors.push('Loader JS bulunamadı: ' + src);
-                            newSources.push(src);
-                        }
-                    }
-                    
-                    if (hasChanges) {
-                        // Yeni loader script oluştur
-                        let newLoader = '<script>\n';
-                        newLoader += 'const v = new Date().getTime();\n';
-                        for (let k = 0; k < newSources.length; k++) {
-                            newLoader += 'document.write(\'<script src="' + newSources[k] + '?v=\' + v + \'"><\\/script>\');\n';
-                        }
-                        newLoader += '<' + '/script>';
-                        
-                        modifiedHtml = modifiedHtml.replace(loaderInfo.fullScript, '<!-- Updated loader -->\n' + newLoader);
-                    }
-                }
-                
-                progressText.textContent = 'CSS dosyaları ekleniyor...';
-                progressFill.style.width = '60%';
-                
-                // 3. CSS dosyalarını da ZIP'e ekle
-                const linkRegex = /<link\b[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["'][^>]*>/gi;
-                linkRegex.lastIndex = 0;
-                
-                while ((match = linkRegex.exec(htmlText)) !== null) {
-                    const href = match[1];
-                    if (isRelativePath(href)) {
-                        const result = await findFileInMinifyFolder(href);
-                        if (result.content) {
-                            allFilesToZip[result.path] = result.content;
-                        }
-                    }
-                }
-                
-                // Ayrıca href="stylesheet" formatı için de kontrol
-                const linkRegex2 = /<link\b[^>]*href=["']([^"']+)["'][^>]*rel=["']stylesheet["'][^>]*>/gi;
-                while ((match = linkRegex2.exec(htmlText)) !== null) {
-                    const href = match[1];
-                    if (isRelativePath(href)) {
-                        const result = await findFileInMinifyFolder(href);
-                        if (result.content) {
-                            allFilesToZip[result.path] = result.content;
-                        }
-                    }
-                }
-                
-                progressText.textContent = 'Bölünmemiş JS dosyaları ekleniyor...';
-                progressFill.style.width = '70%';
-                
-                // 4. Klasördeki tüm JS ve CSS dosyalarını kontrol et (eksik kalanlar için)
-                for (let filePath in minifyFolderFiles) {
-                    if (filePath.match(/\.(js|css)$/i) && !allFilesToZip[filePath]) {
-                        const file = minifyFolderFiles[filePath];
-                        if (isTextFile(file.name)) {
-                            const utf8Data = await convertToUTF8WithoutBOM(file);
-                            const decoder = new TextDecoder('utf-8');
-                            allFilesToZip[filePath] = decoder.decode(utf8Data);
-                        }
-                    }
-                }
-                
-                progressText.textContent = 'UTF-8 dönüşümü yapılıyor...';
-                progressFill.style.width = '80%';
-                
-                // ZIP oluştur
-                const zip = new JSZip();
-                
-                // HTML dosyasını ekle
-                const htmlUtf8 = stringToUTF8WithoutBOM(modifiedHtml);
-                zip.file(fileName + '.html', htmlUtf8);
-                
-                // Diğer dosyaları klasör yapısını koruyarak ekle
-                for (let filePath in allFilesToZip) {
-                    const content = allFilesToZip[filePath];
-                    const utf8Content = stringToUTF8WithoutBOM(content);
-                    
-                    // İlk klasör adını kaldır (webkitRelativePath root klasörü içerir)
-                    const pathParts = filePath.split('/');
-                    const relativePath = pathParts.length > 1 ? pathParts.slice(1).join('/') : filePath;
-                    
-                    zip.file(relativePath, utf8Content);
-                }
-                
-                progressText.textContent = 'ZIP oluşturuluyor...';
-                progressFill.style.width = '95%';
-                
-                const blob = await zip.generateAsync({ type: 'blob' });
-                
-                progressFill.style.width = '100%';
-                progressText.textContent = 'İndiriliyor...';
-                
-                downloadBlob(blob, fileName + '_split.zip');
-                
-                progressText.textContent = '✅ Tamamlandı!';
-                
-                const resultList = [];
-                if (processedFiles.length > 0) {
-                    resultList.push('📂 Bölünen JS dosyaları:');
-                    processedFiles.forEach(f => resultList.push('  • ' + f));
-                }
-                if (splitFiles.length > 0) {
-                    resultList.push('📄 Oluşturulan yeni dosyalar:');
-                    splitFiles.forEach(f => resultList.push('  • ' + f));
-                }
-                if (errors.length > 0) {
-                    resultList.push('⚠️ Hatalar:');
-                    errors.forEach(e => resultList.push('  • ' + e));
-                }
-                resultList.push('');
-                resultList.push('Toplam ' + Object.keys(allFilesToZip).length + ' dosya ZIP\'e eklendi.');
-                
-                showResult(
-                    errors.length > 0 ? 'info' : 'success',
-                    errors.length > 0 ? '⚠️ Kısmen Başarılı' : '✅ Başarılı!',
-                    processedFiles.length > 0 
-                        ? 'JS dosyaları başarıyla bölündü ve UTF-8 (BOM\'suz) formatında ZIP\'lendi.'
-                        : 'Hiçbir JS dosyası max satır sayısını (' + maxLines + ') aşmadı. Dosyalar aynen ZIP\'lendi.',
-                    resultList
-                );
-                
-                setTimeout(() => {
-                    progressDiv.style.display = 'none';
-                    progressFill.style.width = '0%';
-                }, 2000);
-                
-            } catch (error) {
-                progressDiv.style.display = 'none';
-                showResult('error', '❌ Hata', 'İşlem sırasında hata oluştu: ' + error.message);
-            }
-            
-            document.getElementById('minifyBtn').disabled = false;
         }
     </script>
 </body>

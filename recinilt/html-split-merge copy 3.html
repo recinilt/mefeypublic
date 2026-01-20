@@ -892,10 +892,7 @@
             progressText.textContent = 'Dosya okunuyor...';
 
             try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(selectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
+                const htmlText = await selectedFile.text();
                 const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
                 
                 progressText.textContent = 'CSS çıkarılıyor...';
@@ -1016,10 +1013,7 @@
             progressText.textContent = 'HTML dosyası okunuyor...';
 
             try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(selectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
+                const htmlText = await selectedFile.text();
                 const fileName = selectedFile.name.replace(/\.(html|htm)$/i, '');
                 
                 let mergedHtml = htmlText;
@@ -1509,10 +1503,7 @@
             progressText.textContent = 'HTML dosyası okunuyor...';
 
             try {
-                // UTF-8 BOM'suz olarak oku (encoding algılama ile)
-                const inputUtf8 = await convertToUTF8WithoutBOM(minifySelectedFile);
-                const inputDecoder = new TextDecoder('utf-8');
-                const htmlText = inputDecoder.decode(inputUtf8);
+                const htmlText = await minifySelectedFile.text();
                 const fileName = minifySelectedFile.name.replace(/\.(html|htm)$/i, '');
                 
                 let modifiedHtml = htmlText;
