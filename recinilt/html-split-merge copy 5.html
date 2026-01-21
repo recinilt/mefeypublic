@@ -734,103 +734,6 @@
             };
         }
 
-        // =============================================
-        // LOADER CODE TEMİZLEME (SPLIT için)
-        // Merge edilmiş dosyalardaki eski document.write
-        // loader kodlarını temizler
-        // =============================================
-        function cleanLoaderCode(js) {
-            if (!js || !js.trim()) return js;
-            
-            const lines = js.split('\n');
-            const cleanedLines = [];
-            let skipNextEmptyLines = false;
-            let inLoaderBlock = false;
-            let loaderBlockDepth = 0;
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i];
-                const trimmed = line.trim();
-                
-                // document.write('<script src="...') satırlarını atla
-                if (/^document\.write\s*\(\s*['"]<script\s+src=/.test(trimmed)) {
-                    skipNextEmptyLines = true;
-                    continue;
-                }
-                
-                // document.write("<script src="...") satırlarını atla (çift tırnak)
-                if (/^document\.write\s*\(\s*["']<script\s+src=/.test(trimmed)) {
-                    skipNextEmptyLines = true;
-                    continue;
-                }
-                
-                // const v = new Date().getTime(); veya var v = new Date().getTime(); atla
-                if (/^(const|var|let)\s+v\s*=\s*new\s+Date\s*\(\s*\)\s*\.\s*getTime\s*\(\s*\)\s*;?\s*$/.test(trimmed)) {
-                    skipNextEmptyLines = true;
-                    continue;
-                }
-                
-                // const v = Date.now(); veya var v = Date.now(); atla
-                if (/^(const|var|let)\s+v\s*=\s*Date\s*\.\s*now\s*\(\s*\)\s*;?\s*$/.test(trimmed)) {
-                    skipNextEmptyLines = true;
-                    continue;
-                }
-                
-                // Boş satırları loader'dan sonra atla
-                if (skipNextEmptyLines && trimmed === '') {
-                    continue;
-                }
-                
-                // Başka içerik geldi, artık boş satırları atlama
-                if (trimmed !== '') {
-                    skipNextEmptyLines = false;
-                }
-                
-                // IIFE içindeki loader'ları tespit et ve atla
-                // (function(){ ... document.write ... })();
-                if (/^\(function\s*\(\s*\)\s*\{/.test(trimmed) || /^\(\s*\(\s*\)\s*=>\s*\{/.test(trimmed)) {
-                    // IIFE başlangıcı - içeriğe bak
-                    let iife = line + '\n';
-                    let depth = 1;
-                    let j = i + 1;
-                    let hasDocumentWrite = false;
-                    
-                    while (j < lines.length && depth > 0) {
-                        const nextLine = lines[j];
-                        iife += nextLine + '\n';
-                        
-                        // document.write kontrolü
-                        if (/document\.write\s*\(\s*['"]<script/.test(nextLine)) {
-                            hasDocumentWrite = true;
-                        }
-                        
-                        // Depth tracking (basit)
-                        for (let k = 0; k < nextLine.length; k++) {
-                            if (nextLine[k] === '{') depth++;
-                            if (nextLine[k] === '}') depth--;
-                        }
-                        j++;
-                    }
-                    
-                    // IIFE sadece loader içeriyorsa atla
-                    if (hasDocumentWrite) {
-                        // IIFE içinde loader var - tüm IIFE'yi atla
-                        i = j - 1; // döngü i'yi artıracak
-                        skipNextEmptyLines = true;
-                        continue;
-                    }
-                }
-                
-                cleanedLines.push(line);
-            }
-            
-            // Sonuçtaki ardışık boş satırları tek satıra indir
-            let result = cleanedLines.join('\n');
-            result = result.replace(/\n{3,}/g, '\n\n');
-            
-            return result;
-        }
-
         function splitJsIntoUnits(js) {
             if (!js.trim()) return [];
             
@@ -1007,7 +910,7 @@
                 
                 const result2 = extractBodyScripts(htmlWithoutStyles);
                 const finalHtml = result2.html;
-                const js = cleanLoaderCode(result2.js); // Eski loader kodlarını temizle
+                const js = result2.js;
                 
                 progressText.textContent = 'JS parçalara ayrılıyor...';
                 progressFill.style.width = '45%';
