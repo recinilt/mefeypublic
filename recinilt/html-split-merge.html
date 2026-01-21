@@ -1194,6 +1194,19 @@
                     
                     for (let j = 0; j < loaderInfo.sources.length; j++) {
                         const src = loaderInfo.sources[j];
+                        
+                        // Aynı dosya zaten işlendiyse atla (tekrar eklemeyi önle)
+                        const srcNormalized = src.split('/').pop(); // Sadece dosya adı
+                        const alreadyProcessed = processedFiles.some(p => {
+                            const pNormalized = p.split('/').pop();
+                            return pNormalized === srcNormalized;
+                        });
+                        
+                        if (alreadyProcessed) {
+                            console.log('⚠️ Skipping duplicate:', src);
+                            continue;
+                        }
+                        
                         const fileContent = await findFileInFolder(src);
                         if (fileContent) {
                             replacement += '<!-- ' + src + ' -->\n<script>\n' + fileContent + '\n<' + '/script>\n\n';
@@ -1256,10 +1269,15 @@
 
         function extractDocumentWriteScripts(html) {
             const loaders = [];
+            
+            // ÖNCELİKLE: HTML yorumlarını geçici olarak kaldır (içindeki script'leri işlememek için)
+            // Yorumlar: <!-- ... -->
+            const htmlWithoutComments = html.replace(/<!--[\s\S]*?-->/g, '');
+            
             const scriptRegex = /<script\b[^>]*>(.*?)<\/script>/gis;
             let match;
             
-            while ((match = scriptRegex.exec(html)) !== null) {
+            while ((match = scriptRegex.exec(htmlWithoutComments)) !== null) {
                 const scriptContent = match[1];
                 const fullScript = match[0];
                 
@@ -1277,10 +1295,14 @@
                 }
                 
                 if (sources.length > 0) {
-                    loaders.push({
-                        fullScript: fullScript,
-                        sources: sources
-                    });
+                    // Orijinal HTML'de bu script'i bul (tam eşleşme için)
+                    // htmlWithoutComments üzerinde bulduk, ama html üzerinde de olmalı
+                    if (html.indexOf(fullScript) !== -1) {
+                        loaders.push({
+                            fullScript: fullScript,
+                            sources: sources
+                        });
+                    }
                 }
             }
             
