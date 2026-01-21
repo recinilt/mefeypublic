@@ -685,8 +685,7 @@
                 if (content.trim()) {
                     cssParts.push(content.trim());
                 }
-                // Boş style tag'i bırakma, tamamen kaldır
-                return '';
+                return openTag + '<' + '/style>';
             });
             
             return {
@@ -754,25 +753,25 @@
                 const trimmed = line.trim();
                 
                 // document.write('<script src="...') satırlarını atla
-                if (/^document\.write[\s\S]*\([\s\S]*['"]<script[\s\S]+src=/.test(trimmed)) {
+                if (/^document\.write\s*\(\s*['"]<script\s+src=/.test(trimmed)) {
                     skipNextEmptyLines = true;
                     continue;
                 }
                 
                 // document.write("<script src="...") satırlarını atla (çift tırnak)
-                if (/^document\.write[\s\S]*\([\s\S]*["']<script[\s\S]+src=/.test(trimmed)) {
+                if (/^document\.write\s*\(\s*["']<script\s+src=/.test(trimmed)) {
                     skipNextEmptyLines = true;
                     continue;
                 }
                 
                 // const v = new Date().getTime(); veya var v = new Date().getTime(); atla
-                if (/^(const|var|let)[\s\S]+v[\s\S]*=[\s\S]*new[\s\S]+Date[\s\S]*\([\s\S]*\)[\s\S]*\.[\s\S]*getTime[\s\S]*\([\s\S]*\)[\s\S]*;?[\s\S]*$/.test(trimmed)) {
+                if (/^(const|var|let)\s+v\s*=\s*new\s+Date\s*\(\s*\)\s*\.\s*getTime\s*\(\s*\)\s*;?\s*$/.test(trimmed)) {
                     skipNextEmptyLines = true;
                     continue;
                 }
                 
                 // const v = Date.now(); veya var v = Date.now(); atla
-                if (/^(const|var|let)[\s\S]+v[\s\S]*=[\s\S]*Date[\s\S]*\.[\s\S]*now[\s\S]*\([\s\S]*\)[\s\S]*;?[\s\S]*$/.test(trimmed)) {
+                if (/^(const|var|let)\s+v\s*=\s*Date\s*\.\s*now\s*\(\s*\)\s*;?\s*$/.test(trimmed)) {
                     skipNextEmptyLines = true;
                     continue;
                 }
@@ -789,7 +788,7 @@
                 
                 // IIFE içindeki loader'ları tespit et ve atla
                 // (function(){ ... document.write ... })();
-                if (/^\(function[\s\S]*\([\s\S]*\)[\s\S]*\{/.test(trimmed) || /^\([\s\S]*\([\s\S]*\)[\s\S]*=>[\s\S]*\{/.test(trimmed)) {
+                if (/^\(function\s*\(\s*\)\s*\{/.test(trimmed) || /^\(\s*\(\s*\)\s*=>\s*\{/.test(trimmed)) {
                     // IIFE başlangıcı - içeriğe bak
                     let iife = line + '\n';
                     let depth = 1;
@@ -801,7 +800,7 @@
                         iife += nextLine + '\n';
                         
                         // document.write kontrolü
-                        if (/document\.write[\s\S]*\([\s\S]*['"]<script/.test(nextLine)) {
+                        if (/document\.write\s*\(\s*['"]<script/.test(nextLine)) {
                             hasDocumentWrite = true;
                         }
                         
@@ -922,7 +921,7 @@
             script += 'var v = new Date().getTime();\n';
             for (let i = 0; i < jsFilenames.length; i++) {
                 const fn = jsFilenames[i];
-                script += 'document.write(\'<script src="js/' + fn + '?v=\' + v + \'"><[\s\S]/script>\');\n';
+                script += 'document.write(\'<script src="js/' + fn + '?v=\' + v + \'"><\\/script>\');\n';
             }
             script += '<' + '/script>';
             return script;
@@ -931,12 +930,7 @@
         function ensureStylesLinkInHead(html) {
             const linkTag = '<link rel="stylesheet" href="styles.css">';
             
-            // HTML yorumlarını geçici olarak kaldırıp kontrol et
-            // Yorumlanmış link'leri "zaten var" sayma
-            const commentRegex = new RegExp('<!' + '--[\\s\\S]*?-->', 'g');
-            const htmlWithoutComments = html.replace(commentRegex, '');
-            
-            if (/<link\b[^>]*href=["']styles\.css["']/i.test(htmlWithoutComments)) {
+            if (/<link\b[^>]*href=["']styles\.css["']/i.test(html)) {
                 return html;
             }
             
@@ -944,11 +938,11 @@
             const headMatch = html.match(headRegex);
             
             if (headMatch) {
-                const newHead = headMatch[1] + headMatch[2].trimEnd() + '\n    ' + linkTag + '\n' + headMatch[3];
+                const newHead = headMatch[1] + headMatch[2].trimEnd() + '\n' + linkTag + '\n' + headMatch[3];
                 return html.substring(0, headMatch.index) + newHead + html.substring(headMatch.index + headMatch[0].length);
             }
             
-            const htmlCloseMatch = html.match(/<\/html[\s\S]*>/i);
+            const htmlCloseMatch = html.match(/<\/html\s*>/i);
             if (htmlCloseMatch) {
                 return html.substring(0, htmlCloseMatch.index) + '\n' + linkTag + '\n' + html.substring(htmlCloseMatch.index);
             }
@@ -1098,7 +1092,7 @@
                 return html.substring(0, headMatch.index) + newHead + html.substring(headMatch.index + headMatch[0].length);
             }
             
-            const htmlCloseMatch = html.match(/<\/html[\s\S]*>/i);
+            const htmlCloseMatch = html.match(/<\/html\s*>/i);
             if (htmlCloseMatch) {
                 return html.substring(0, htmlCloseMatch.index) + '\n' + linkTag + '\n' + html.substring(htmlCloseMatch.index);
             }
@@ -1278,8 +1272,8 @@
             const loaders = [];
             
             // ÖNCELİKLE: HTML yorumlarını geçici olarak kaldır (içindeki script'leri işlememek için)
-            const commentRegex2 = new RegExp('<!' + '--[\\s\\S]*?-->', 'g');
-            const htmlWithoutComments = html.replace(commentRegex2, '');
+            // Yorumlar: <!-- ... -->
+            const htmlWithoutComments = html.replace(/<!--[\s\S]*?-->/g, '');
             
             const scriptRegex = /<script\b[^>]*>(.*?)<\/script>/gis;
             let match;
@@ -1288,7 +1282,7 @@
                 const scriptContent = match[1];
                 const fullScript = match[0];
                 
-                const writeRegex = /document\.write[\s\S]*\([^)]*?src[\s\S]*=[\s\S]*["']([^"']+)["'][^)]*?\)/gi;
+                const writeRegex = /document\.write\s*\([^)]*?src\s*=\s*["']([^"']+)["'][^)]*?\)/gi;
                 const sources = [];
                 let writeMatch;
                 
@@ -1509,7 +1503,7 @@
                     if (inMultiComment) continue;
                     
                     // String kontrolü
-                    if ((char === '"' || char === "'" || char === '`') && prevChar !== '[\s\S]') {
+                    if ((char === '"' || char === "'" || char === '`') && prevChar !== '\\') {
                         if (!inString) {
                             inString = true;
                             stringChar = char;
@@ -1548,13 +1542,13 @@
         function isGlobalVariableDeclaration(unit) {
             const trimmed = unit.trim();
             // const/let/var ile başlayan ve fonksiyon olmayan tanımlar
-            const startsWithDecl = /^(const|let|var)[\s\S]+/.test(trimmed);
+            const startsWithDecl = /^(const|let|var)\s+/.test(trimmed);
             if (!startsWithDecl) return false;
             
             // Fonksiyon tanımı değilse (arrow function veya function keyword içermiyorsa) 
             // VEYA çok kısa ise (config objesi gibi) global tanım say
             const lineCount = unit.split('\n').length;
-            const hasFunction = /=[\s\S]*(function[\s\S]*\(|async[\s\S]+function|\([^)]*\)[\s\S]*=>|\w+[\s\S]*=>)/.test(trimmed);
+            const hasFunction = /=\s*(function\s*\(|async\s+function|\([^)]*\)\s*=>|\w+\s*=>)/.test(trimmed);
             
             // 15 satırdan kısa ve fonksiyon değilse VEYA
             // Config/settings gibi önemli isimler içeriyorsa
@@ -1795,7 +1789,7 @@
                         let newLoader = '<script>\n';
                         newLoader += 'var v = new Date().getTime();\n';
                         for (let k = 0; k < newSources.length; k++) {
-                            newLoader += 'document.write(\'<script src="' + newSources[k] + '?v=\' + v + \'"><[\s\S]/script>\');\n';
+                            newLoader += 'document.write(\'<script src="' + newSources[k] + '?v=\' + v + \'"><\\/script>\');\n';
                         }
                         newLoader += '<' + '/script>';
                         
