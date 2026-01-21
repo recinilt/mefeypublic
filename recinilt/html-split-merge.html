@@ -1196,9 +1196,10 @@
                         const src = loaderInfo.sources[j];
                         
                         // Aynı dosya zaten işlendiyse atla (tekrar eklemeyi önle)
-                        const srcNormalized = src.split('/').pop(); // Sadece dosya adı
+                        // Tam path karşılaştırması: js/utils.js ve lib/utils.js farklı dosyalar
+                        const srcNormalized = src.replace(/^\.\//, ''); // Başındaki ./ kaldır
                         const alreadyProcessed = processedFiles.some(p => {
-                            const pNormalized = p.split('/').pop();
+                            const pNormalized = p.replace(/^\.\//, '');
                             return pNormalized === srcNormalized;
                         });
                         
