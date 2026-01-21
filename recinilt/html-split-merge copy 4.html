@@ -821,7 +821,7 @@
 
         function buildLoaderScript(jsFilenames) {
             let script = '<script>\n';
-            script += 'var v = new Date().getTime();\n';
+            script += 'const v = new Date().getTime();\n';
             for (let i = 0; i < jsFilenames.length; i++) {
                 const fn = jsFilenames[i];
                 script += 'document.write(\'<script src="js/' + fn + '?v=\' + v + \'"><\\/script>\');\n';
@@ -1418,51 +1418,15 @@
             return units;
         }
 
-        // Global değişken tanımı mı kontrol et (fonksiyon olmayan const/let/var)
-        function isGlobalVariableDeclaration(unit) {
-            const trimmed = unit.trim();
-            // const/let/var ile başlayan ve fonksiyon olmayan tanımlar
-            const startsWithDecl = /^(const|let|var)\s+/.test(trimmed);
-            if (!startsWithDecl) return false;
-            
-            // Fonksiyon tanımı değilse (arrow function veya function keyword içermiyorsa) 
-            // VEYA çok kısa ise (config objesi gibi) global tanım say
-            const lineCount = unit.split('\n').length;
-            const hasFunction = /=\s*(function\s*\(|async\s+function|\([^)]*\)\s*=>|\w+\s*=>)/.test(trimmed);
-            
-            // 15 satırdan kısa ve fonksiyon değilse VEYA
-            // Config/settings gibi önemli isimler içeriyorsa
-            const importantNames = /(config|Config|CONFIG|settings|Settings|SETTINGS|DEBUG|cache|Cache|CACHE|elements|Elements|ELEMENTS|state|State|STATE|options|Options|OPTIONS)/i;
-            
-            if (lineCount <= 15 && !hasFunction) return true;
-            if (importantNames.test(trimmed.substring(0, 100))) return true;
-            
-            return false;
-        }
-
         function packUnitsIntoFilesByLines(units, maxLines) {
             if (units.length === 0) return [''];
             
-            // 1. ADIM: Global değişken tanımlarını ayır (bunlar HEP ilk dosyada olacak)
-            const globalDeclarations = [];
-            const otherUnits = [];
+            const files = [];
+            let current = [];
+            let currentLineCount = 0;
             
             for (let i = 0; i < units.length; i++) {
                 const unit = units[i];
-                if (isGlobalVariableDeclaration(unit)) {
-                    globalDeclarations.push(unit);
-                } else {
-                    otherUnits.push(unit);
-                }
-            }
-            
-            const files = [];
-            let current = [...globalDeclarations]; // İlk dosya global tanımlarla başlasın
-            let currentLineCount = globalDeclarations.reduce((sum, u) => sum + u.split('\n').length, 0);
-            
-            // 2. ADIM: Diğer unit'leri dağıt
-            for (let i = 0; i < otherUnits.length; i++) {
-                const unit = otherUnits[i];
                 const unitLines = unit.split('\n').length;
                 
                 // Eğer tek bir unit max satırı aşıyorsa, aynen bırak (bölme)
@@ -1667,7 +1631,7 @@
                     if (hasChanges) {
                         // Yeni loader script oluştur
                         let newLoader = '<script>\n';
-                        newLoader += 'var v = new Date().getTime();\n';
+                        newLoader += 'const v = new Date().getTime();\n';
                         for (let k = 0; k < newSources.length; k++) {
                             newLoader += 'document.write(\'<script src="' + newSources[k] + '?v=\' + v + \'"><\\/script>\');\n';
                         }
