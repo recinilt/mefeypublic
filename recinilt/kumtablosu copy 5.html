@@ -1510,24 +1510,18 @@
             }
 
             update() {
-                // 360° modunda yerçekimi HER ZAMAN ekranın altına doğru (gerçek dünya)
-                // Tablo döndüğü için kumlar açısından yerçekimi yön değiştiriyor gibi görünür
-                let gravityX = 0;
-                let gravityY = baseGravity;
-                
+                // 360° modunda yerçekimi sürekli döner
+                let effectiveTiltAngle = tiltAngle;
                 if (autoRotate) {
-                    // Tablo dönüyor, ama yerçekimi sabit (ekranın aşağısı)
-                    // Kumların perspektifinden yerçekimini hesapla
-                    const rotRad = rotationAngle * Math.PI / 180;
-                    // Ters dönüşüm - dünya koordinatından tablo koordinatına
-                    gravityX = Math.sin(rotRad) * baseGravity;
-                    gravityY = Math.cos(rotRad) * baseGravity;
-                } else {
-                    // Normal mod - eğim etkisi
-                    const tiltRad = tiltAngle * Math.PI / 180;
-                    gravityX = Math.sin(tiltRad) * baseGravity * 0.5;
-                    gravityY = Math.cos(tiltRad) * baseGravity;
+                    // Dönen çerçeveye göre yerçekimi yönü değişir
+                    // rotationAngle derece cinsinden, yerçekimi her zaman "aşağı" (ekranın altına doğru)
+                    // ama çerçeve döndüğü için kumlar sürekli hareket eder
+                    effectiveTiltAngle = -rotationAngle; // Negatif çünkü çerçeve tersine döner
                 }
+                
+                const tiltRad = effectiveTiltAngle * Math.PI / 180;
+                const gravityX = Math.sin(tiltRad) * baseGravity * 0.8;
+                const gravityY = Math.cos(tiltRad) * baseGravity;
                 
                 // Yerçekimi (yoğunluğa göre - Stokes)
                 const effectiveGravityY = gravityY * this.density * speedMultiplier;
