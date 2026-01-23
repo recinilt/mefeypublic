@@ -722,39 +722,6 @@ print("Application initialized")`;
                 processedCode = lines.join('\n');
             }
 
-            // Global Variable Export - Extract and export variables to window
-            // This MUST be added BEFORE control flow flattening
-            if (opts.globalExport) {
-                // Find all top-level variable declarations (const, let, var)
-                const varRegex = /(?:^|\n)\s*(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/gm;
-                const funcRegex = /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/gm;
-                const classRegex = /(?:^|\n)\s*class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[{\s]/gm;
-                
-                const exportedVars = new Set();
-                let match;
-                
-                // Extract variable names from ORIGINAL code
-                while ((match = varRegex.exec(code)) !== null) {
-                    exportedVars.add(match[1]);
-                }
-                // Extract function names
-                while ((match = funcRegex.exec(code)) !== null) {
-                    exportedVars.add(match[1]);
-                }
-                // Extract class names
-                while ((match = classRegex.exec(code)) !== null) {
-                    exportedVars.add(match[1]);
-                }
-                
-                // Generate and append export code to processedCode
-                if (exportedVars.size > 0) {
-                    const exportStatements = Array.from(exportedVars)
-                        .map(v => `if(typeof ${v}!=='undefined')window.${v}=${v};`)
-                        .join('');
-                    processedCode = processedCode + '\n' + exportStatements + '\n';
-                }
-            }
-
             // Control flow flattening
             if (opts.controlFlow) {
                 const stateVar = genVar();
@@ -846,8 +813,41 @@ setInterval(function(){
 `;
             }
 
+            // Global Variable Export - Extract and export variables to window
+            let globalExportCode = '';
+            if (opts.globalExport) {
+                // Find all top-level variable declarations (const, let, var)
+                const varRegex = /(?:^|\n)\s*(?:const|let|var)\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=/gm;
+                const funcRegex = /(?:^|\n)\s*(?:async\s+)?function\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*\(/gm;
+                const classRegex = /(?:^|\n)\s*class\s+([a-zA-Z_$][a-zA-Z0-9_$]*)\s*[{\s]/gm;
+                
+                const exportedVars = new Set();
+                let match;
+                
+                // Extract variable names
+                while ((match = varRegex.exec(code)) !== null) {
+                    exportedVars.add(match[1]);
+                }
+                // Extract function names
+                while ((match = funcRegex.exec(code)) !== null) {
+                    exportedVars.add(match[1]);
+                }
+                // Extract class names
+                while ((match = classRegex.exec(code)) !== null) {
+                    exportedVars.add(match[1]);
+                }
+                
+                // Generate export code
+                if (exportedVars.size > 0) {
+                    const exportStatements = Array.from(exportedVars)
+                        .map(v => `if(typeof ${v}!=='undefined')window.${v}=${v};`)
+                        .join('');
+                    globalExportCode = `\n${exportStatements}\n`;
+                }
+            }
+
             // Final encoding - multi-layer
-            let finalCode = domainLockCode + antiDebugCode + selfDefendCode + processedCode;
+            let finalCode = domainLockCode + antiDebugCode + selfDefendCode + processedCode + globalExportCode;
             
             // Layer 1: Hex encode
             let hexEncoded = '';
