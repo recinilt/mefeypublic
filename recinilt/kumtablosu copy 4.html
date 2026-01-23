@@ -528,18 +528,13 @@
                 <option value="mountains">Dağlar</option>
             </select>
         </div>
-        <div class="setting-group">
-            <span class="setting-label">360° Hız:</span>
-            <input type="range" class="slider-control" min="0.01" max="0.5" step="0.01" value="0.05" onchange="setRotationSpeed(this.value)">
-            <span class="setting-label" id="rotSpeedLabel">0.05</span>
-        </div>
     </div>
 
     <!-- Kum Ayarları -->
     <div class="settings-row">
         <div class="setting-group">
             <span class="setting-label">Kum%:</span>
-            <input type="range" class="slider-control" min="5" max="45" value="22" onchange="setSandPercent(this.value)">
+            <input type="range" class="slider-control" min="5" max="100" value="22" onchange="setSandPercent(this.value)">
             <span class="setting-label" id="sandPercentLabel">22%</span>
         </div>
         <div class="setting-group">
@@ -1510,17 +1505,9 @@
             }
 
             update() {
-                // 360° modunda yerçekimi sürekli döner
-                let effectiveTiltAngle = tiltAngle;
-                if (autoRotate) {
-                    // Dönen çerçeveye göre yerçekimi yönü değişir
-                    // rotationAngle derece cinsinden, yerçekimi her zaman "aşağı" (ekranın altına doğru)
-                    // ama çerçeve döndüğü için kumlar sürekli hareket eder
-                    effectiveTiltAngle = -rotationAngle; // Negatif çünkü çerçeve tersine döner
-                }
-                
-                const tiltRad = effectiveTiltAngle * Math.PI / 180;
-                const gravityX = Math.sin(tiltRad) * baseGravity * 0.8;
+                // Eğim etkisi
+                const tiltRad = tiltAngle * Math.PI / 180;
+                const gravityX = Math.sin(tiltRad) * baseGravity * 0.5;
                 const gravityY = Math.cos(tiltRad) * baseGravity;
                 
                 // Yerçekimi (yoğunluğa göre - Stokes)
@@ -1986,8 +1973,6 @@
         }
 
         // ============ ANA DÖNGÜ ============
-        let rotationSpeed = 0.05; // Çok yavaş varsayılan (derece/frame)
-        
         function update(timestamp) {
             if (!lastTime) lastTime = timestamp;
             lastTime = timestamp;
@@ -2000,11 +1985,9 @@
                 updateStats();
             }
 
-            // Otomatik döndürme - yerçekimi sürekli "aşağıda" kalır
+            // Otomatik döndürme
             if (autoRotate) {
-                rotationAngle += rotationSpeed;
-                if (rotationAngle >= 360) rotationAngle -= 360;
-                if (rotationAngle < 0) rotationAngle += 360;
+                rotationAngle += 0.3;
                 frame.style.transform = `rotate(${rotationAngle}deg)`;
             }
 
@@ -2088,17 +2071,9 @@
         function toggleAutoRotate() {
             autoRotate = !autoRotate;
             document.getElementById('rotateBtn').classList.toggle('active', autoRotate);
-            document.getElementById('rotateBtn').textContent = autoRotate ? '⏹️ Dur' : '360°';
             if (!autoRotate) {
-                // Döndürmeyi durdurduğunda yavaşça normale dön
-                frame.style.transition = 'transform 0.5s ease-out';
                 frame.style.transform = '';
                 rotationAngle = 0;
-                setTimeout(() => {
-                    frame.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                }, 500);
-            } else {
-                frame.style.transition = 'none'; // Dönerken geçiş efekti olmasın
             }
         }
 
@@ -2132,6 +2107,8 @@
                 stopAmbient();
             }
         }
+
+        
 
         function takeScreenshot() {
             const link = document.createElement('a');
@@ -2236,11 +2213,6 @@
         function setTilt(value) {
             tiltAngle = parseInt(value);
             document.getElementById('tiltLabel').textContent = value + '°';
-        }
-
-        function setRotationSpeed(value) {
-            rotationSpeed = parseFloat(value);
-            document.getElementById('rotSpeedLabel').textContent = value;
         }
 
         // ============ BAŞLATMA ============
@@ -2417,7 +2389,7 @@
         resize();
         initParticles();
         requestAnimationFrame(update);
-        toggleSound(); // Varsayılan olarak ses açık
+        toggleSound();
     </script>
 </body>
 </html>
