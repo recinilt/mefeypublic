@@ -317,156 +317,6 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* Mobil Uyumluluk */
-        @media (max-width: 600px) {
-            body {
-                padding: 5px;
-            }
-            
-            .title {
-                font-size: 1rem;
-                letter-spacing: 0.15em;
-            }
-            
-            .subtitle {
-                font-size: 0.4rem;
-            }
-            
-            .frame {
-                padding: 6px;
-            }
-            
-            .frame.rectangle { 
-                width: 95vw; 
-                height: 65vw; 
-            }
-            
-            .frame.circle { 
-                width: 90vw; 
-                height: 90vw; 
-            }
-            
-            .controls {
-                gap: 4px;
-            }
-            
-            .btn {
-                font-size: 0.38rem;
-                padding: 8px 8px;
-                min-width: 44px;
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            
-            .settings-row {
-                gap: 4px;
-                padding: 0 5px;
-            }
-            
-            .setting-group {
-                gap: 2px;
-                flex: 1 1 45%;
-                min-width: 0;
-            }
-            
-            .setting-label {
-                font-size: 0.32rem;
-            }
-            
-            .slider-control {
-                width: 40px;
-                height: 4px;
-            }
-            
-            .slider-control::-webkit-slider-thumb {
-                width: 14px;
-                height: 14px;
-            }
-            
-            select.theme-select {
-                font-size: 0.35rem;
-                padding: 6px 4px;
-                min-height: 30px;
-            }
-            
-            .stats {
-                font-size: 0.35rem;
-            }
-            
-            .color-dot {
-                width: 10px;
-                height: 10px;
-            }
-        }
-
-        /* Çok küçük ekranlar */
-        @media (max-width: 400px) {
-            .title-section {
-                margin-bottom: 5px;
-            }
-            
-            .title {
-                font-size: 0.9rem;
-            }
-            
-            .frame.rectangle { 
-                width: 98vw; 
-                height: 70vw; 
-            }
-            
-            .setting-group {
-                flex: 1 1 100%;
-            }
-            
-            .settings-row {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
-
-        /* Touch cihazlar için hover efektlerini kaldır */
-        @media (hover: none) {
-            .btn:hover {
-                border-color: rgba(201, 169, 98, 0.25);
-                box-shadow: none;
-                background: transparent;
-            }
-            
-            .btn.active:hover,
-            .btn.primary:hover {
-                background: rgba(201, 169, 98, 0.08);
-            }
-        }
-
-        /* Yatay mod (landscape) */
-        @media (max-height: 500px) and (orientation: landscape) {
-            body {
-                padding: 5px;
-            }
-            
-            .title-section {
-                display: none;
-            }
-            
-            .frame.rectangle { 
-                width: min(90vh, 85vw); 
-                height: min(60vh, 55vw); 
-            }
-            
-            .settings-row {
-                flex-wrap: nowrap;
-                overflow-x: auto;
-                justify-content: flex-start;
-                padding-bottom: 5px;
-            }
-            
-            .setting-group {
-                flex: 0 0 auto;
-            }
-        }
     </style>
 </head>
 <body>
@@ -2078,30 +1928,19 @@
         }
 
         function toggleSound() {
-            // iOS ve diğer tarayıcılar için AudioContext başlat
             initAudio();
-            
             soundEnabled = !soundEnabled;
             document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
             document.getElementById('soundBtn').classList.toggle('active', soundEnabled);
             
             if (soundEnabled) {
-                // Kullanıcı etkileşimi sonrası ses başlat (iOS için gerekli)
-                if (audioContext) {
-                    // iOS için sessiz bir ses çal
-                    const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-                    const source = audioContext.createBufferSource();
-                    source.buffer = silentBuffer;
-                    source.connect(audioContext.destination);
-                    source.start(0);
-                    
-                    if (audioContext.state === 'suspended') {
-                        audioContext.resume().then(() => {
-                            playAmbient();
-                        });
-                    } else {
+                // Kullanıcı etkileşimi sonrası ses başlat
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
                         playAmbient();
-                    }
+                    });
+                } else {
+                    playAmbient();
                 }
             } else {
                 stopAmbient();
@@ -2280,106 +2119,13 @@
         canvas.addEventListener('mouseup', () => isDragging = false);
         canvas.addEventListener('mouseleave', () => isDragging = false);
 
-        // ============ MOBİL TOUCH DESTEĞİ ============
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            isDragging = true;
-            const touch = e.touches[0];
-            lastDragX = touch.clientX;
-            lastDragY = touch.clientY;
-            
-            // Dokunma ile kumu ittir
-            const rect = canvas.getBoundingClientRect();
-            let touchX = touch.clientX - rect.left;
-            let touchY = touch.clientY - rect.top;
-            if (visualFlipped) touchY = height - touchY;
-            
-            for (const p of particles) {
-                const dx = p.x - touchX;
-                const dy = p.y - touchY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 50) {
-                    const force = (50 - dist) / 50 * 0.8;
-                    p.vx += (dx / dist) * force;
-                    p.vy += (dy / dist) * force;
-                }
-            }
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            if (!isDragging) return;
-            
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            let touchX = touch.clientX - rect.left;
-            let touchY = touch.clientY - rect.top;
-            if (visualFlipped) touchY = height - touchY;
-            
-            const dragForceX = (touch.clientX - lastDragX) * 0.025;
-            const dragForceY = (touch.clientY - lastDragY) * 0.025;
-            
-            for (const p of particles) {
-                const dx = p.x - touchX;
-                const dy = p.y - touchY;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 60) {
-                    p.vx += dragForceX * (1 - dist / 60);
-                    p.vy += dragForceY * (1 - dist / 60);
-                }
-            }
-            
-            lastDragX = touch.clientX;
-            lastDragY = touch.clientY;
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', () => isDragging = false);
-        canvas.addEventListener('touchcancel', () => isDragging = false);
-
-        // Çift dokunma ile çevir
-        let lastTapTime = 0;
-        canvas.addEventListener('touchend', (e) => {
-            const now = Date.now();
-            if (now - lastTapTime < 300) {
-                flipFrame();
-            }
-            lastTapTime = now;
-        });
-
         // Cihaz eğimi (mobil)
         if (window.DeviceOrientationEvent) {
-            // iOS 13+ için izin iste
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                document.body.addEventListener('click', () => {
-                    DeviceOrientationEvent.requestPermission()
-                        .then(permission => {
-                            if (permission === 'granted') {
-                                window.addEventListener('deviceorientation', handleOrientation);
-                            }
-                        });
-                }, { once: true });
-            } else {
-                window.addEventListener('deviceorientation', handleOrientation);
-            }
-        }
-        
-        function handleOrientation(e) {
-            if (e.gamma !== null && !autoRotate) {
-                // Eğim açısını kum fiziğine uygula
-                tiltAngle = Math.max(-30, Math.min(30, e.gamma));
-            }
-        }
-
-        // Mobil performans optimizasyonu
-        function isMobile() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        if (isMobile()) {
-            // Mobilde varsayılan kum yüzdesini düşür
-            sandFillPercent = Math.min(sandFillPercent, 18);
-            document.querySelector('input[onchange*="setSandPercent"]').value = sandFillPercent;
-            document.getElementById('sandPercentLabel').textContent = sandFillPercent + '%';
+            window.addEventListener('deviceorientation', (e) => {
+                if (e.gamma !== null) {
+                    tiltAngle = Math.max(-30, Math.min(30, e.gamma));
+                }
+            });
         }
 
         // Başlat
