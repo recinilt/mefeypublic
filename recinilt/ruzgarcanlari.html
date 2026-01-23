@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🎐 Wind Chimes - Rüzgar Çanları</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: linear-gradient(180deg, 
+                #0a1628 0%, 
+                #1a3a5c 30%, 
+                #2d5a7b 60%, 
+                #4a7c9b 80%,
+                #6b9dbd 100%);
+            min-height: 100vh;
+        }
+
+        /* Yıldızlar */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50%;
+            pointer-events: none;
+            background: 
+                radial-gradient(1px 1px at 20% 10%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 40% 20%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 60% 15%, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 80% 25%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 10% 30%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.5px 1.5px at 30% 5%, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 70% 8%, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1px 1px at 90% 18%, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 50% 12%, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 15% 22%, rgba(255,255,255,0.6), transparent);
+        }
+
+        /* Ay */
+        .moon {
+            position: fixed;
+            top: 60px;
+            right: 80px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fffde7, #ffd54f);
+            box-shadow: 0 0 40px rgba(255, 253, 231, 0.5),
+                        0 0 80px rgba(255, 213, 79, 0.3);
+            pointer-events: none;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .title {
+            color: #fff;
+            font-size: 1.2rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-group label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+        }
+
+        .control-group input[type="range"] {
+            width: 80px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .scale-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .scale-btn:hover, .scale-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sound-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .sound-toggle.muted {
+            opacity: 0.5;
+        }
+
+        #canvas {
+            display: block;
+        }
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Rüzgar göstergesi */
+        .wind-indicator {
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .wind-arrow {
+            font-size: 1.5rem;
+            transition: transform 0.5s ease;
+        }
+
+        /* Mobil uyumluluk */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .control-group input[type="range"] {
+                width: 60px;
+            }
+
+            .moon {
+                width: 40px;
+                height: 40px;
+                top: 80px;
+                right: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="moon"></div>
+
+    <div class="header">
+        <div class="title">🎐 Rüzgar Çanları</div>
+        <div class="controls">
+            <div class="control-group">
+                <label>Rüzgar</label>
+                <input type="range" id="windSpeed" min="0" max="100" value="30">
+            </div>
+            <div class="control-group">
+                <label>Reverb</label>
+                <input type="range" id="reverb" min="0" max="100" value="50">
+            </div>
+            <button class="scale-btn active" data-scale="pentatonic">Pentatonik</button>
+            <button class="scale-btn" data-scale="major">Majör</button>
+            <button class="scale-btn" data-scale="minor">Minör</button>
+            <button class="sound-toggle" id="soundToggle">🔊 Ses Açık</button>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="wind-indicator">
+        <span class="wind-arrow" id="windArrow">🍃</span>
+        <span id="windText">Hafif esinti</span>
+    </div>
+
+    <div class="instructions">Fare veya parmağınızı hareket ettirerek rüzgar estiriniz 🌬️</div>
+
+    <script>
+        // ============ YAPILANDIRMA ============
+        const CONFIG = {
+            numChimes: 7,
+            soundEnabled: true,
+            masterVolume: 0.4,
+            reverbAmount: 0.5,
+            windSpeed: 0.3,
+            gravity: 0.4,
+            damping: 0.995,
+            airResistance: 0.02
+        };
+
+        // Müzik Skaları (frekanslar Hz cinsinden)
+        const SCALES = {
+            pentatonic: [523.25, 587.33, 659.25, 783.99, 880.00, 1046.50, 1174.66], // C5 Pentatonik
+            major: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77],        // C5 Majör
+            minor: [523.25, 587.33, 622.25, 698.46, 783.99, 830.61, 932.33]         // C5 Minör
+        };
+
+        let currentScale = 'pentatonic';
+
+        // ============ CANVAS KURULUMU ============
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initChimes();
+        });
+
+        // ============ WEB AUDIO API ============
+        let audioCtx = null;
+        let convolver = null;
+        let masterGain = null;
+
+        function initAudio() {
+            if (audioCtx) return;
+            
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Master gain
+            masterGain = audioCtx.createGain();
+            masterGain.gain.value = CONFIG.masterVolume;
+            
+            // Convolver (Reverb)
+            convolver = audioCtx.createConvolver();
+            createReverbImpulse();
+            
+            // Dry/Wet mix
+            const dryGain = audioCtx.createGain();
+            const wetGain = audioCtx.createGain();
+            
+            dryGain.gain.value = 1 - CONFIG.reverbAmount;
+            wetGain.gain.value = CONFIG.reverbAmount;
+            
+            masterGain.connect(dryGain);
+            masterGain.connect(convolver);
+            convolver.connect(wetGain);
+            
+            dryGain.connect(audioCtx.destination);
+            wetGain.connect(audioCtx.destination);
+        }
+
+        function createReverbImpulse() {
+            const sampleRate = audioCtx.sampleRate;
+            const length = sampleRate * 3; // 3 saniye reverb
+            const impulse = audioCtx.createBuffer(2, length, sampleRate);
+            
+            for (let channel = 0; channel < 2; channel++) {
+                const channelData = impulse.getChannelData(channel);
+                for (let i = 0; i < length; i++) {
+                    // Üssel azalan gürültü
+                    channelData[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2.5);
+                }
+            }
+            
+            convolver.buffer = impulse;
+        }
+
+        // FM Synthesis ile metalik çan sesi
+        function playChimeSound(frequency, velocity = 1) {
+            if (!CONFIG.soundEnabled || !audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const duration = 2.5 + Math.random() * 1.5;
+
+            // Carrier oscillator
+            const carrier = audioCtx.createOscillator();
+            carrier.type = 'sine';
+            carrier.frequency.value = frequency;
+
+            // Modulator oscillator (FM için)
+            const modulator = audioCtx.createOscillator();
+            modulator.type = 'sine';
+            // Modulator frekansı carrier'ın katı (metalik ses için)
+            const modRatio = 2 + Math.random() * 0.5;
+            modulator.frequency.value = frequency * modRatio;
+
+            // Modulator gain (modülasyon derinliği)
+            const modGain = audioCtx.createGain();
+            modGain.gain.value = frequency * 0.8; // Modülasyon indeksi
+
+            // Carrier gain (ana zarf)
+            const carrierGain = audioCtx.createGain();
+            carrierGain.gain.setValueAtTime(0, now);
+            carrierGain.gain.linearRampToValueAtTime(velocity * 0.3, now + 0.003); // Hızlı attack
+            carrierGain.gain.exponentialRampToValueAtTime(velocity * 0.15, now + 0.1);
+            carrierGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            // Modulator gain zarfı
+            modGain.gain.setValueAtTime(frequency * 0.8, now);
+            modGain.gain.exponentialRampToValueAtTime(frequency * 0.1, now + duration * 0.5);
+
+            // İkinci harmonik (zenginlik için)
+            const harmonic = audioCtx.createOscillator();
+            harmonic.type = 'sine';
+            harmonic.frequency.value = frequency * 2.76; // İnharmonik oran (çan karakteristiği)
+
+            const harmonicGain = audioCtx.createGain();
+            harmonicGain.gain.setValueAtTime(0, now);
+            harmonicGain.gain.linearRampToValueAtTime(velocity * 0.1, now + 0.002);
+            harmonicGain.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.7);
+
+            // Üçüncü harmonik
+            const harmonic2 = audioCtx.createOscillator();
+            harmonic2.type = 'sine';
+            harmonic2.frequency.value = frequency * 5.4;
+
+            const harmonicGain2 = audioCtx.createGain();
+            harmonicGain2.gain.setValueAtTime(0, now);
+            harmonicGain2.gain.linearRampToValueAtTime(velocity * 0.05, now + 0.001);
+            harmonicGain2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.4);
+
+            // Bağlantılar
+            modulator.connect(modGain);
+            modGain.connect(carrier.frequency);
+
+            carrier.connect(carrierGain);
+            harmonic.connect(harmonicGain);
+            harmonic2.connect(harmonicGain2);
+
+            carrierGain.connect(masterGain);
+            harmonicGain.connect(masterGain);
+            harmonicGain2.connect(masterGain);
+
+            // Başlat
+            carrier.start(now);
+            modulator.start(now);
+            harmonic.start(now);
+            harmonic2.start(now);
+
+            // Durdur
+            carrier.stop(now + duration);
+            modulator.stop(now + duration);
+            harmonic.stop(now + duration);
+            harmonic2.stop(now + duration);
+        }
+
+        // Hafif rüzgar sesi
+        function playWindSound() {
+            if (!CONFIG.soundEnabled || !audioCtx) return;
+
+            const now = audioCtx.currentTime;
+            const duration = 0.5 + Math.random() * 0.5;
+
+            const bufferSize = audioCtx.sampleRate * duration;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Pembe gürültü
+            let b0 = 0, b1 = 0, b2 = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99765 * b0 + white * 0.0990460;
+                b1 = 0.96300 * b1 + white * 0.2965164;
+                b2 = 0.57000 * b2 + white * 1.0526913;
+                data[i] = (b0 + b1 + b2 + white * 0.1848) * 0.06;
+                data[i] *= Math.sin(Math.PI * i / bufferSize); // Zarf
+            }
+
+            const source = audioCtx.createBufferSource();
+            source.buffer = buffer;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 400;
+
+            const gain = audioCtx.createGain();
+            gain.gain.value = CONFIG.masterVolume * 0.1;
+
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            source.start(now);
+        }
+
+        // ============ WIND CHIME SINIFI ============
+        class WindChime {
+            constructor(x, length, frequency, index) {
+                this.x = x;
+                this.anchorY = 120;
+                this.length = length;
+                this.frequency = frequency;
+                this.index = index;
+                
+                // Fizik değişkenleri
+                this.angle = (Math.random() - 0.5) * 0.1;
+                this.angularVelocity = 0;
+                this.targetAngle = 0;
+                
+                // Görsel özellikler
+                this.tubeWidth = 8 + (7 - index) * 2;
+                this.tubeLength = 60 + length * 0.15;
+                
+                // Son çalma zamanı (spam engelleme)
+                this.lastPlayTime = 0;
+                this.minPlayInterval = 150; // ms
+                
+                // Renk
+                const hue = 35 + index * 5;
+                this.color = `hsl(${hue}, 25%, ${65 + index * 3}%)`;
+                this.highlightColor = `hsl(${hue}, 30%, ${80 + index * 2}%)`;
+            }
+
+            applyForce(forceX, forceY) {
+                // Kuvveti açısal ivmeye çevir
+                const forceMagnitude = Math.sqrt(forceX * forceX + forceY * forceY);
+                const forceAngle = Math.atan2(forceY, forceX);
+                
+                // Sarkaç üzerindeki tork
+                const torque = forceMagnitude * Math.cos(forceAngle - this.angle - Math.PI/2);
+                this.angularVelocity += torque * 0.0005 / (this.length * 0.01);
+            }
+
+            update(windForce) {
+                // Rüzgar kuvveti
+                const windTorque = windForce * Math.cos(this.angle) * 0.001;
+                this.angularVelocity += windTorque;
+                
+                // Yerçekimi (sarkaç hareketi)
+                const gravityTorque = -CONFIG.gravity * Math.sin(this.angle) / (this.length * 0.1);
+                this.angularVelocity += gravityTorque;
+                
+                // Hava direnci
+                this.angularVelocity *= (1 - CONFIG.airResistance);
+                
+                // Sönümleme
+                this.angularVelocity *= CONFIG.damping;
+                
+                // Açıyı güncelle
+                this.angle += this.angularVelocity;
+                
+                // Açı limitleri
+                const maxAngle = Math.PI / 4;
+                if (this.angle > maxAngle) {
+                    this.angle = maxAngle;
+                    this.angularVelocity *= -0.3;
+                }
+                if (this.angle < -maxAngle) {
+                    this.angle = -maxAngle;
+                    this.angularVelocity *= -0.3;
+                }
+
+                // Ses çalma kontrolü (hız eşiğine göre)
+                const now = Date.now();
+                if (Math.abs(this.angularVelocity) > 0.015 && now - this.lastPlayTime > this.minPlayInterval) {
+                    const velocity = Math.min(1, Math.abs(this.angularVelocity) * 20);
+                    if (Math.random() < velocity * 0.3) {
+                        playChimeSound(this.frequency, velocity);
+                        this.lastPlayTime = now;
+                    }
+                }
+            }
+
+            getBobPosition() {
+                const bobX = this.x + Math.sin(this.angle) * this.length;
+                const bobY = this.anchorY + Math.cos(this.angle) * this.length;
+                return { x: bobX, y: bobY };
+            }
+
+            draw(ctx) {
+                const bob = this.getBobPosition();
+
+                // İp / tel
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.anchorY);
+                ctx.lineTo(bob.x, bob.y);
+                ctx.strokeStyle = 'rgba(139, 119, 101, 0.8)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Tüp gövdesi
+                ctx.save();
+                ctx.translate(bob.x, bob.y);
+                ctx.rotate(this.angle);
+
+                // Gölge
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fillRect(-this.tubeWidth/2 + 3, 3, this.tubeWidth, this.tubeLength);
+
+                // Ana tüp
+                const tubeGradient = ctx.createLinearGradient(-this.tubeWidth/2, 0, this.tubeWidth/2, 0);
+                tubeGradient.addColorStop(0, this.color);
+                tubeGradient.addColorStop(0.3, this.highlightColor);
+                tubeGradient.addColorStop(0.5, this.highlightColor);
+                tubeGradient.addColorStop(0.7, this.color);
+                tubeGradient.addColorStop(1, `hsl(35, 20%, 45%)`);
+
+                ctx.fillStyle = tubeGradient;
+                ctx.beginPath();
+                ctx.roundRect(-this.tubeWidth/2, 0, this.tubeWidth, this.tubeLength, 3);
+                ctx.fill();
+
+                // Üst kapak
+                ctx.fillStyle = 'rgba(100, 80, 60, 0.8)';
+                ctx.beginPath();
+                ctx.ellipse(0, 2, this.tubeWidth/2 + 1, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Parlama efekti
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.fillRect(-this.tubeWidth/2 + 2, 5, 3, this.tubeLength - 15);
+
+                ctx.restore();
+
+                // Bağlantı noktası (üstte)
+                ctx.beginPath();
+                ctx.arc(this.x, this.anchorY, 4, 0, Math.PI * 2);
+                ctx.fillStyle = '#5d4e37';
+                ctx.fill();
+            }
+
+            isNear(x, y, radius = 50) {
+                const bob = this.getBobPosition();
+                const dx = x - bob.x;
+                const dy = y - bob.y;
+                return Math.sqrt(dx * dx + dy * dy) < radius + this.tubeLength;
+            }
+        }
+
+        // ============ ANA UYGULAMA ============
+        let chimes = [];
+        let mouseX = 0, mouseY = 0;
+        let lastMouseX = 0, lastMouseY = 0;
+        let mouseVelX = 0, mouseVelY = 0;
+        let globalWind = 0;
+        let targetWind = 0;
+
+        function initChimes() {
+            chimes = [];
+            const scale = SCALES[currentScale];
+            const spacing = Math.min(80, (canvas.width - 100) / CONFIG.numChimes);
+            const startX = (canvas.width - spacing * (CONFIG.numChimes - 1)) / 2;
+
+            for (let i = 0; i < CONFIG.numChimes; i++) {
+                const x = startX + i * spacing;
+                // Uzunluk frekansla ters orantılı (düşük frekans = uzun tüp)
+                const length = 150 + (CONFIG.numChimes - i) * 25;
+                const frequency = scale[i % scale.length];
+                
+                chimes.push(new WindChime(x, length, frequency, i));
+            }
+        }
+
+        // Üst platform çizimi
+        function drawPlatform() {
+            const platformY = 100;
+            const platformWidth = chimes.length > 0 ? 
+                (chimes[chimes.length - 1].x - chimes[0].x + 100) : 300;
+            const platformX = (canvas.width - platformWidth) / 2;
+
+            // Ahşap platform
+            const woodGradient = ctx.createLinearGradient(platformX, platformY - 15, platformX, platformY + 15);
+            woodGradient.addColorStop(0, '#8b7355');
+            woodGradient.addColorStop(0.5, '#a08060');
+            woodGradient.addColorStop(1, '#6b5344');
+
+            ctx.fillStyle = woodGradient;
+            ctx.beginPath();
+            ctx.roundRect(platformX, platformY - 10, platformWidth, 20, 8);
+            ctx.fill();
+
+            // Platform gölgesi
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.beginPath();
+            ctx.ellipse(canvas.width / 2, platformY + 25, platformWidth / 2, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Asma ipi
+            ctx.strokeStyle = '#5d4e37';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(platformX + 20, platformY - 10);
+            ctx.quadraticCurveTo(canvas.width / 2, platformY - 60, platformX + platformWidth - 20, platformY - 10);
+            ctx.stroke();
+
+            // Asma kancası
+            ctx.fillStyle = '#4a3c2a';
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, platformY - 55, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Striker (vurucu) çizimi
+        function drawStriker() {
+            if (chimes.length === 0) return;
+
+            const centerX = canvas.width / 2;
+            const strikerY = 200;
+            
+            // Striker sallanma açısı (rüzgara göre)
+            const strikerAngle = globalWind * 0.3;
+            const strikerLength = 80;
+            
+            const endX = centerX + Math.sin(strikerAngle) * strikerLength;
+            const endY = strikerY + Math.cos(strikerAngle) * strikerLength;
+
+            // İp
+            ctx.beginPath();
+            ctx.moveTo(centerX, 120);
+            ctx.lineTo(endX, endY);
+            ctx.strokeStyle = 'rgba(139, 119, 101, 0.9)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Striker disk
+            ctx.beginPath();
+            ctx.arc(endX, endY, 15, 0, Math.PI * 2);
+            const diskGradient = ctx.createRadialGradient(endX - 5, endY - 5, 2, endX, endY, 15);
+            diskGradient.addColorStop(0, '#c9b896');
+            diskGradient.addColorStop(1, '#8b7355');
+            ctx.fillStyle = diskGradient;
+            ctx.fill();
+
+            return { x: endX, y: endY, angle: strikerAngle };
+        }
+
+        // Ana animasyon döngüsü
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Rüzgar güncellemesi
+            targetWind += (Math.random() - 0.5) * CONFIG.windSpeed * 0.5;
+            targetWind *= 0.99;
+            targetWind = Math.max(-3, Math.min(3, targetWind));
+            globalWind += (targetWind - globalWind) * 0.02;
+
+            // Fare hızından rüzgar
+            const mouseWind = mouseVelX * 0.1;
+            
+            // Platform çiz
+            drawPlatform();
+
+            // Striker çiz ve pozisyonunu al
+            const striker = drawStriker();
+
+            // Çanları güncelle ve çiz
+            chimes.forEach((chime, index) => {
+                // Toplam rüzgar kuvveti
+                let totalWind = globalWind + mouseWind;
+                
+                // Fare yakınlığına göre ekstra kuvvet
+                if (chime.isNear(mouseX, mouseY, 100)) {
+                    const bob = chime.getBobPosition();
+                    const dx = mouseX - bob.x;
+                    const forceFactor = 0.5;
+                    chime.applyForce(mouseVelX * forceFactor, mouseVelY * forceFactor);
+                }
+
+                // Striker çarpışma kontrolü
+                if (striker) {
+                    const bob = chime.getBobPosition();
+                    const dx = striker.x - bob.x;
+                    const dy = striker.y - bob.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 25 + chime.tubeWidth) {
+                        chime.applyForce(-dx * 0.5, -dy * 0.3);
+                    }
+                }
+
+                chime.update(totalWind);
+                chime.draw(ctx);
+            });
+
+            // Fare hızını güncelle
+            mouseVelX = (mouseX - lastMouseX) * 0.5;
+            mouseVelY = (mouseY - lastMouseY) * 0.5;
+            lastMouseX = mouseX;
+            lastMouseY = mouseY;
+
+            // Hız azaltma
+            mouseVelX *= 0.9;
+            mouseVelY *= 0.9;
+
+            // Rüzgar göstergesi güncelle
+            updateWindIndicator();
+
+            requestAnimationFrame(animate);
+        }
+
+        function updateWindIndicator() {
+            const arrow = document.getElementById('windArrow');
+            const text = document.getElementById('windText');
+            
+            const totalWind = Math.abs(globalWind + mouseVelX * 0.1);
+            
+            // Ok yönü
+            const rotation = globalWind * 30;
+            arrow.style.transform = `rotate(${rotation}deg)`;
+            
+            // Metin
+            if (totalWind < 0.3) {
+                text.textContent = 'Sakin';
+            } else if (totalWind < 1) {
+                text.textContent = 'Hafif esinti';
+            } else if (totalWind < 2) {
+                text.textContent = 'Orta rüzgar';
+            } else {
+                text.textContent = 'Kuvvetli rüzgar';
+            }
+        }
+
+        // ============ EVENT LISTENERS ============
+        function handleMove(x, y) {
+            mouseX = x;
+            mouseY = y;
+        }
+
+        canvas.addEventListener('mousemove', (e) => {
+            handleMove(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (e.touches.length > 0) {
+                handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('click', () => {
+            initAudio();
+        });
+
+        canvas.addEventListener('touchstart', () => {
+            initAudio();
+        }, { passive: true });
+
+        // Rüzgar hızı kontrolü
+        document.getElementById('windSpeed').addEventListener('input', (e) => {
+            CONFIG.windSpeed = e.target.value / 100;
+        });
+
+        // Reverb kontrolü
+        document.getElementById('reverb').addEventListener('input', (e) => {
+            CONFIG.reverbAmount = e.target.value / 100;
+        });
+
+        // Skala seçimi
+        document.querySelectorAll('.scale-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentScale = btn.dataset.scale;
+                initChimes();
+                initAudio();
+                playChimeSound(SCALES[currentScale][0], 0.3);
+            });
+        });
+
+        // Ses toggle
+        document.getElementById('soundToggle').addEventListener('click', () => {
+            initAudio();
+            CONFIG.soundEnabled = !CONFIG.soundEnabled;
+            const btn = document.getElementById('soundToggle');
+            btn.textContent = CONFIG.soundEnabled ? '🔊 Ses Açık' : '🔇 Ses Kapalı';
+            btn.classList.toggle('muted', !CONFIG.soundEnabled);
+        });
+
+        // Periyodik rüzgar sesi
+        setInterval(() => {
+            if (Math.abs(globalWind) > 0.5 && Math.random() < 0.2) {
+                playWindSound();
+            }
+        }, 2000);
+
+        // ============ DEVICE MOTION (TELEFON SALLAMA) ============
+        let lastShakeTime = 0;
+        let shakeThreshold = 15; // İvme eşiği
+        let lastAccel = { x: 0, y: 0, z: 0 };
+        let motionPermissionGranted = false;
+
+        // iOS 13+ için izin isteme
+        async function requestMotionPermission() {
+            if (typeof DeviceMotionEvent !== 'undefined' && 
+                typeof DeviceMotionEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceMotionEvent.requestPermission();
+                    if (permission === 'granted') {
+                        motionPermissionGranted = true;
+                        enableDeviceMotion();
+                        return true;
+                    }
+                } catch (e) {
+                    console.log('Motion permission error:', e);
+                }
+                return false;
+            } else {
+                // Android veya eski iOS - doğrudan etkinleştir
+                motionPermissionGranted = true;
+                enableDeviceMotion();
+                return true;
+            }
+        }
+
+        function enableDeviceMotion() {
+            window.addEventListener('devicemotion', handleDeviceMotion, true);
+        }
+
+        function handleDeviceMotion(event) {
+            if (!CONFIG.soundEnabled) return;
+
+            const accel = event.accelerationIncludingGravity;
+            if (!accel || accel.x === null) return;
+
+            // İvme değişimini hesapla
+            const deltaX = Math.abs(accel.x - lastAccel.x);
+            const deltaY = Math.abs(accel.y - lastAccel.y);
+            const deltaZ = Math.abs(accel.z - lastAccel.z);
+            const totalDelta = deltaX + deltaY + deltaZ;
+
+            lastAccel = { x: accel.x, y: accel.y, z: accel.z };
+
+            const now = Date.now();
+
+            // Sallama algılandı
+            if (totalDelta > shakeThreshold && now - lastShakeTime > 100) {
+                const intensity = Math.min(1, totalDelta / 50);
+                
+                // Rüzgar kuvveti uygula
+                const windForce = (accel.x || 0) * 0.5;
+                globalWind += windForce * 0.3;
+                targetWind += windForce * 0.2;
+
+                // Çanlara kuvvet uygula
+                chimes.forEach((chime, index) => {
+                    // Her çana farklı gecikme ile kuvvet uygula
+                    setTimeout(() => {
+                        chime.applyForce(
+                            (accel.x || 0) * intensity * 2,
+                            (accel.y || 0) * intensity * 1.5
+                        );
+                    }, index * 30);
+                });
+
+                // Yeterince güçlü sallama için ses çal
+                if (totalDelta > shakeThreshold * 1.5) {
+                    const scale = SCALES[currentScale];
+                    const randomIndex = Math.floor(Math.random() * scale.length);
+                    playChimeSound(scale[randomIndex], intensity * 0.8);
+                }
+
+                lastShakeTime = now;
+
+                // Rüzgar sesi
+                if (totalDelta > shakeThreshold * 2 && Math.random() < 0.3) {
+                    playWindSound();
+                }
+            }
+        }
+
+        // Mobil cihaz kontrolü
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                   ('ontouchstart' in window) ||
+                   (navigator.maxTouchPoints > 0);
+        }
+
+        // Mobil için izin butonu ekle
+        function addMotionPermissionButton() {
+            if (!isMobileDevice()) return;
+
+            const btn = document.createElement('button');
+            btn.id = 'motionPermBtn';
+            btn.className = 'sound-toggle';
+            btn.textContent = '📱 Sallama Aç';
+            btn.style.marginLeft = '10px';
+            
+            btn.addEventListener('click', async () => {
+                initAudio();
+                const granted = await requestMotionPermission();
+                if (granted) {
+                    btn.textContent = '📱 Sallama Aktif';
+                    btn.style.background = 'rgba(76, 175, 80, 0.4)';
+                    // Onay sesi
+                    const scale = SCALES[currentScale];
+                    playChimeSound(scale[0], 0.5);
+                    setTimeout(() => playChimeSound(scale[2], 0.4), 150);
+                    setTimeout(() => playChimeSound(scale[4], 0.3), 300);
+                } else {
+                    btn.textContent = '📱 İzin Verilmedi';
+                    btn.style.background = 'rgba(244, 67, 54, 0.4)';
+                }
+            });
+
+            document.querySelector('.controls').appendChild(btn);
+        }
+
+        // ============ BAŞLAT ============
+        initChimes();
+        animate();
+        addMotionPermissionButton();
+
+        // Android için otomatik motion etkinleştirme dene
+        if (isMobileDevice() && typeof DeviceMotionEvent !== 'undefined' && 
+            typeof DeviceMotionEvent.requestPermission !== 'function') {
+            // Android - izin gerekmez, doğrudan etkinleştir
+            enableDeviceMotion();
+            motionPermissionGranted = true;
+        }
+
+        // Başlangıç melodisi (kullanıcı etkileşiminden sonra)
+        canvas.addEventListener('click', function playIntro() {
+            initAudio();
+            const scale = SCALES[currentScale];
+            scale.slice(0, 4).forEach((freq, i) => {
+                setTimeout(() => playChimeSound(freq, 0.4), i * 300);
+            });
+            canvas.removeEventListener('click', playIntro);
+        }, { once: true });
+    </script>
+</body>
+</html>
