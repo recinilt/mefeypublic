@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akan Kum Tablosu | Moving Sand Art</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #08080c;
+            --frame-wood: #1a1512;
+            --gold-accent: #c9a962;
+            --text-muted: #6b6b7b;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg-deep);
+            background-image: 
+                radial-gradient(ellipse at 20% 30%, rgba(30, 25, 40, 0.5) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(25, 35, 45, 0.4) 0%, transparent 50%);
+            font-family: 'Cormorant Garamond', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .title-section {
+            text-align: center;
+            margin-bottom: 18px;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .title {
+            font-size: clamp(1.3rem, 3vw, 2rem);
+            font-weight: 300;
+            color: #e8e4df;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.55rem;
+            color: var(--gold-accent);
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+        }
+
+        .frame-container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .frame {
+            position: relative;
+            width: min(620px, 95vw);
+            height: min(460px, 72vw);
+            background: linear-gradient(145deg, var(--frame-wood), #0d0b09);
+            border-radius: 6px;
+            padding: 12px;
+            box-shadow: 
+                0 25px 50px rgba(0,0,0,0.6),
+                0 0 1px rgba(201, 169, 98, 0.2),
+                inset 0 1px 0 rgba(45, 37, 32, 0.5);
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .frame.flipping {
+            transform: rotateX(180deg);
+        }
+
+        .frame::before {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(201, 169, 98, 0.12);
+            border-radius: 3px;
+            pointer-events: none;
+        }
+
+        .glass-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a1628 0%, #0d1a2d 50%, #0f1e35 100%);
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 40px rgba(0,0,0,0.6),
+                inset 0 0 80px rgba(0,15,30,0.4);
+        }
+
+        .glass-reflection {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                130deg,
+                rgba(255,255,255,0.035) 0%,
+                transparent 35%,
+                transparent 65%,
+                rgba(255,255,255,0.015) 100%
+            );
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #sandCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.5rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid rgba(201, 169, 98, 0.25);
+            color: var(--gold-accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            border-color: var(--gold-accent);
+            box-shadow: 0 0 15px rgba(201, 169, 98, 0.15);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        .btn.primary {
+            background: rgba(201, 169, 98, 0.08);
+        }
+
+        .settings-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .setting-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.42rem;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .slider-control {
+            -webkit-appearance: none;
+            width: 55px;
+            height: 2px;
+            background: rgba(201, 169, 98, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .slider-control::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 9px;
+            height: 9px;
+            background: var(--gold-accent);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .color-legend {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+        }
+
+        .color-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.3);
+            cursor: help;
+        }
+
+        .stats {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.45rem;
+            color: rgba(201, 169, 98, 0.5);
+            margin-top: 8px;
+            letter-spacing: 0.06em;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="title-section">
+        <h1 class="title">Moving Sand Art</h1>
+        <p class="subtitle">Density Stratification</p>
+    </div>
+
+    <div class="frame-container">
+        <div class="frame" id="frame">
+            <div class="glass-container">
+                <canvas id="sandCanvas"></canvas>
+                <div class="glass-reflection"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn primary" onclick="flipFrame()">↻ Ters Çevir</button>
+        <button class="btn" onclick="resetSand()">Sıfırla</button>
+        <button class="btn" onclick="togglePause()">Duraklat</button>
+        <button class="btn" onclick="shakeSand()">Salla</button>
+    </div>
+
+    <div class="settings-row">
+        <div class="setting-group">
+            <span class="setting-label">Kum %:</span>
+            <input type="range" class="slider-control" min="5" max="50" step="1" value="25" onchange="setSandPercent(this.value)">
+            <span class="setting-label" id="sandPercentLabel">25%</span>
+        </div>
+        <div class="setting-group">
+            <span class="setting-label">Kum Boyut:</span>
+            <input type="range" class="slider-control" min="0.5" max="3" step="0.1" value="1.2" onchange="setSandSize(this.value)">
+            <span class="setting-label" id="sandSizeLabel">1.2</span>
+        </div>
+        <div class="setting-group">
+            <span class="setting-label">Kum Hızı:</span>
+            <input type="range" class="slider-control" min="0.1" max="1.5" step="0.05" value="0.5" onchange="setSpeed(this.value)">
+            <span class="setting-label" id="speedLabel">0.5x</span>
+        </div>
+    </div>
+
+    <div class="settings-row">
+        <div class="setting-group">
+            <span class="setting-label">Hava Sayı:</span>
+            <input type="range" class="slider-control" min="0" max="12" step="1" value="6" onchange="setAirBubbles(this.value)">
+            <span class="setting-label" id="airCountLabel">6</span>
+        </div>
+        <div class="setting-group">
+            <span class="setting-label">Hava Hızı:</span>
+            <input type="range" class="slider-control" min="0.005" max="0.3" step="0.005" value="0.03" onchange="setAirSpeed(this.value)">
+            <span class="setting-label" id="airSpeedLabel">0.03x</span>
+        </div>
+        <div class="setting-group">
+            <span class="setting-label">Hava Boyut:</span>
+            <input type="range" class="slider-control" min="8" max="40" step="1" value="18" onchange="setAirSize(this.value)">
+            <span class="setting-label" id="airSizeLabel">18</span>
+        </div>
+        <div class="setting-group">
+            <span class="setting-label">Renkler:</span>
+            <div class="color-legend" id="colorLegend"></div>
+        </div>
+    </div>
+
+    <div class="stats" id="stats">Kum: 0 | FPS: 0</div>
+
+    <script>
+        const canvas = document.getElementById('sandCanvas');
+        const ctx = canvas.getContext('2d');
+        const frame = document.getElementById('frame');
+        
+        let width, height;
+        let particles = [];
+        let airBubbles = [];
+        let baseGravity = 0.012;
+        let speedMultiplier = 0.5;
+        let airSpeedMultiplier = 0.03;
+        let airBaseSize = 18;
+        let sandBaseSize = 1.2;
+        let isPaused = false;
+        let lastTime = 0;
+        let frameCount = 0;
+        let fps = 0;
+        let lastFpsUpdate = 0;
+        let airBubbleCount = 6;
+        let sandFillPercent = 25;
+        
+        let visualFlipped = false;
+        
+        const gapWidthRatio = 0.09;
+        
+        // Boşluk çarpanı - kum tanesi çapının 3 katı yer kaplar
+        const SPACING_MULTIPLIER = 3.0;
+        
+        // 5 renk - FARKLI YOĞUNLUKLAR (daha belirgin fark)
+        const sandColors = [
+            { 
+                color: '#0a1520', 
+                name: 'Lacivert', 
+                density: 1.00,      // En ağır - EN ALT
+                distribution: 0.20
+            },
+            { 
+                color: '#1a3555', 
+                name: 'Mavi', 
+                density: 0.82,      // Ağır
+                distribution: 0.20
+            },
+            { 
+                color: '#c9a962', 
+                name: 'Altın', 
+                density: 0.64,      // Orta
+                distribution: 0.20
+            },
+            { 
+                color: '#e8d5b0', 
+                name: 'Krem', 
+                density: 0.46,      // Hafif
+                distribution: 0.20
+            },
+            { 
+                color: '#ffffff', 
+                name: 'Beyaz', 
+                density: 0.28,      // En hafif - EN ÜST
+                distribution: 0.20
+            }
+        ];
+
+        function initColorLegend() {
+            const legend = document.getElementById('colorLegend');
+            legend.innerHTML = '';
+            sandColors.forEach((c) => {
+                const dot = document.createElement('div');
+                dot.className = 'color-dot';
+                dot.style.background = c.color;
+                dot.title = `${c.name}: ${c.density.toFixed(2)}`;
+                legend.appendChild(dot);
+            });
+        }
+
+        function resize() {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            width = rect.width;
+            height = rect.height;
+            
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            
+            ctx.scale(dpr, dpr);
+            
+            createAirBubbles();
+        }
+
+        function calculateParticleCount(fillPercent) {
+            const totalArea = width * height;
+            const targetFillArea = totalArea * (fillPercent / 100);
+            // Boşluklu alan hesabı (3x çap = 9x alan)
+            const effectiveParticleArea = Math.PI * sandBaseSize * sandBaseSize * SPACING_MULTIPLIER * SPACING_MULTIPLIER;
+            return Math.floor(targetFillArea / effectiveParticleArea);
+        }
+
+        function getTrianglePoints() {
+            const gapWidth = width * gapWidthRatio;
+            const gapCenter = width * 0.5;
+            const gapLeft = gapCenter - gapWidth / 2;
+            const gapRight = gapCenter + gapWidth / 2;
+            
+            return {
+                left: [
+                    { x: 0, y: 0 },
+                    { x: 0, y: height },
+                    { x: gapLeft, y: height * 0.5 }
+                ],
+                right: [
+                    { x: width, y: 0 },
+                    { x: width, y: height },
+                    { x: gapRight, y: height * 0.5 }
+                ],
+                gapLeft,
+                gapRight,
+                gapCenter,
+                gapWidth
+            };
+        }
+
+        function createAirBubbles() {
+            airBubbles = [];
+            const { gapCenter, gapWidth } = getTrianglePoints();
+            
+            for (let i = 0; i < airBubbleCount; i++) {
+                const radius = airBaseSize * 0.7 + Math.random() * airBaseSize * 0.6;
+                airBubbles.push({
+                    x: gapCenter + (Math.random() - 0.5) * (gapWidth - radius * 2) * 0.8,
+                    y: height * 0.2 + Math.random() * height * 0.6,
+                    radius: radius,
+                    wobble: Math.random() * Math.PI * 2,
+                    wobbleSpeed: 0.004 + Math.random() * 0.006,
+                    vy: 0
+                });
+            }
+        }
+
+        function getColorIndex() {
+            const random = Math.random();
+            let cumulative = 0;
+            for (let i = 0; i < sandColors.length; i++) {
+                cumulative += sandColors[i].distribution;
+                if (random <= cumulative) return i;
+            }
+            return sandColors.length - 1;
+        }
+
+        function isInsideTriangle(px, py, points) {
+            const [p1, p2, p3] = points;
+            const sign = (px, py, x1, y1, x2, y2) => 
+                (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
+            
+            const d1 = sign(px, py, p1.x, p1.y, p2.x, p2.y);
+            const d2 = sign(px, py, p2.x, p2.y, p3.x, p3.y);
+            const d3 = sign(px, py, p3.x, p3.y, p1.x, p1.y);
+            
+            const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+            const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+            
+            return !(hasNeg && hasPos);
+        }
+
+        function closestPointOnSegment(px, py, p1, p2) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const len2 = dx * dx + dy * dy;
+            
+            if (len2 === 0) return { x: p1.x, y: p1.y };
+            
+            let t = ((px - p1.x) * dx + (py - p1.y) * dy) / len2;
+            t = Math.max(0, Math.min(1, t));
+            
+            return { x: p1.x + t * dx, y: p1.y + t * dy };
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.radius = sandBaseSize * (0.85 + Math.random() * 0.3);
+                this.colorIndex = getColorIndex();
+                this.color = sandColors[this.colorIndex].color;
+                this.density = sandColors[this.colorIndex].density;
+                // Çarpışma yarıçapı = görsel yarıçap * 3 (1x kum + 1x boşluk her tarafta)
+                this.collisionRadius = this.radius * SPACING_MULTIPLIER / 2;
+            }
+
+            update() {
+                // Yerçekimi - yoğunluğa göre (Stokes)
+                const effectiveGravity = baseGravity * this.density * speedMultiplier;
+                this.vy += effectiveGravity;
+                
+                // Hafif rastgele
+                this.vx += (Math.random() - 0.5) * 0.001 * speedMultiplier;
+                
+                // Viskozite - hafif taneler daha çok etkilenir
+                const viscosity = 0.992 - (1 - this.density) * 0.008;
+                this.vx *= viscosity;
+                this.vy *= viscosity;
+                
+                // Max hız (yoğunluğa göre)
+                const maxSpeed = 0.6 * speedMultiplier * (0.5 + this.density * 0.5);
+                const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+                if (speed > maxSpeed) {
+                    this.vx = (this.vx / speed) * maxSpeed;
+                    this.vy = (this.vy / speed) * maxSpeed;
+                }
+                
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.handleObstacleCollisions();
+                this.handleBubbleInteraction();
+                
+                // Kenarlar
+                if (this.x < this.collisionRadius) {
+                    this.x = this.collisionRadius;
+                    this.vx *= -0.15;
+                }
+                if (this.x > width - this.collisionRadius) {
+                    this.x = width - this.collisionRadius;
+                    this.vx *= -0.15;
+                }
+                
+                if (this.y > height - this.collisionRadius) {
+                    this.y = height - this.collisionRadius;
+                    this.vy *= -0.08;
+                    this.vx *= 0.6;
+                }
+                
+                if (this.y < this.collisionRadius) {
+                    this.y = this.collisionRadius;
+                    this.vy *= -0.15;
+                }
+            }
+
+            handleObstacleCollisions() {
+                const tri = getTrianglePoints();
+                
+                if (isInsideTriangle(this.x, this.y, tri.left)) {
+                    this.pushOutOfTriangle(tri.left);
+                }
+                
+                if (isInsideTriangle(this.x, this.y, tri.right)) {
+                    this.pushOutOfTriangle(tri.right);
+                }
+            }
+
+            pushOutOfTriangle(points) {
+                let minDist = Infinity;
+                let closestPoint = null;
+                let normalX = 0, normalY = 0;
+                
+                for (let i = 0; i < 3; i++) {
+                    const p1 = points[i];
+                    const p2 = points[(i + 1) % 3];
+                    
+                    const closest = closestPointOnSegment(this.x, this.y, p1, p2);
+                    const dx = this.x - closest.x;
+                    const dy = this.y - closest.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestPoint = closest;
+                        const edgeDx = p2.x - p1.x;
+                        const edgeDy = p2.y - p1.y;
+                        const len = Math.sqrt(edgeDx * edgeDx + edgeDy * edgeDy);
+                        normalX = -edgeDy / len;
+                        normalY = edgeDx / len;
+                    }
+                }
+                
+                const centerX = (points[0].x + points[1].x + points[2].x) / 3;
+                const centerY = (points[0].y + points[1].y + points[2].y) / 3;
+                const toCenterX = centerX - closestPoint.x;
+                const toCenterY = centerY - closestPoint.y;
+                
+                if (normalX * toCenterX + normalY * toCenterY > 0) {
+                    normalX = -normalX;
+                    normalY = -normalY;
+                }
+                
+                this.x = closestPoint.x + normalX * (this.collisionRadius + 0.5);
+                this.y = closestPoint.y + normalY * (this.collisionRadius + 0.5);
+                
+                const dotProduct = this.vx * normalX + this.vy * normalY;
+                this.vx -= 1.8 * dotProduct * normalX;
+                this.vy -= 1.8 * dotProduct * normalY;
+                this.vx *= 0.4;
+                this.vy *= 0.4;
+            }
+
+            handleBubbleInteraction() {
+                for (const bubble of airBubbles) {
+                    const dx = this.x - bubble.x;
+                    const dy = this.y - bubble.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    const minDist = bubble.radius + this.collisionRadius + 2;
+                    
+                    if (dist < minDist && dist > 0) {
+                        const overlap = minDist - dist;
+                        const nx = dx / dist;
+                        const ny = dy / dist;
+                        
+                        this.x += nx * overlap * 0.95;
+                        this.y += ny * overlap * 0.5;
+                        
+                        this.vx += nx * 0.015;
+                        // Hafif taneler kabarcıktan daha çok etkilenir
+                        this.vy *= 0.75 + this.density * 0.15;
+                    }
+                }
+            }
+
+            getDrawCoords() {
+                if (visualFlipped) {
+                    return { x: this.x, y: height - this.y };
+                }
+                return { x: this.x, y: this.y };
+            }
+
+            draw() {
+                const coords = this.getDrawCoords();
+                ctx.beginPath();
+                ctx.arc(coords.x, coords.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            
+            const { gapLeft, gapRight, gapWidth } = getTrianglePoints();
+            const numParticles = calculateParticleCount(sandFillPercent);
+            
+            for (let i = 0; i < numParticles; i++) {
+                let x, y;
+                let attempts = 0;
+                const maxAttempts = 100;
+                
+                do {
+                    const rand = Math.random();
+                    if (rand < 0.75) {
+                        x = gapLeft + Math.random() * gapWidth;
+                    } else if (rand < 0.875) {
+                        x = 3 + Math.random() * 12;
+                    } else {
+                        x = width - 15 + Math.random() * 12;
+                    }
+                    
+                    y = height * 0.55 + Math.random() * height * 0.43;
+                    
+                    attempts++;
+                } while (
+                    (isInsideTriangle(x, y, getTrianglePoints().left) || 
+                     isInsideTriangle(x, y, getTrianglePoints().right)) && 
+                    attempts < maxAttempts
+                );
+                
+                if (attempts < maxAttempts) {
+                    particles.push(new Particle(x, y));
+                }
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stats').innerHTML = 
+                `Kum: ${particles.length.toLocaleString()} | Boyut: ${sandBaseSize.toFixed(1)} | Boşluk: ${SPACING_MULTIPLIER}x | FPS: ${fps}`;
+        }
+
+        function drawBackground() {
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            
+            if (visualFlipped) {
+                gradient.addColorStop(0, '#0e1c2a');
+                gradient.addColorStop(0.5, '#0c1825');
+                gradient.addColorStop(1, '#0a1420');
+            } else {
+                gradient.addColorStop(0, '#0a1420');
+                gradient.addColorStop(0.5, '#0c1825');
+                gradient.addColorStop(1, '#0e1c2a');
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+        }
+
+        function drawObstacles() {
+            const tri = getTrianglePoints();
+            
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+            gradient.addColorStop(0, '#080c12');
+            gradient.addColorStop(0.5, '#0b1018');
+            gradient.addColorStop(1, '#080c12');
+            
+            ctx.fillStyle = gradient;
+            
+            const drawTriangle = (points) => {
+                ctx.beginPath();
+                const transformedPoints = points.map(p => {
+                    if (visualFlipped) {
+                        return { x: p.x, y: height - p.y };
+                    }
+                    return p;
+                });
+                ctx.moveTo(transformedPoints[0].x, transformedPoints[0].y);
+                for (let i = 1; i < transformedPoints.length; i++) {
+                    ctx.lineTo(transformedPoints[i].x, transformedPoints[i].y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(60, 80, 100, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            };
+            
+            drawTriangle(tri.left);
+            drawTriangle(tri.right);
+        }
+
+        function drawAirBubbles() {
+            const { gapLeft, gapRight } = getTrianglePoints();
+            
+            for (const bubble of airBubbles) {
+                bubble.wobble += bubble.wobbleSpeed;
+                const wobbleX = Math.sin(bubble.wobble) * 2;
+                const wobbleY = Math.cos(bubble.wobble * 0.7) * 1.5;
+                
+                // Yavaş yükselme
+                const targetY = bubble.radius + 15;
+                const riseForce = (targetY - bubble.y) * 0.00005 * airSpeedMultiplier;
+                bubble.vy += riseForce;
+                bubble.vy *= 0.995;
+                bubble.y += bubble.vy;
+                
+                // Sınırlar
+                if (bubble.y < bubble.radius + 8) {
+                    bubble.y = bubble.radius + 8;
+                    bubble.vy *= -0.1;
+                }
+                if (bubble.y > height - bubble.radius - 8) {
+                    bubble.y = height - bubble.radius - 8;
+                }
+                
+                const minX = gapLeft + bubble.radius + 3;
+                const maxX = gapRight - bubble.radius - 3;
+                if (bubble.x < minX) bubble.x = minX;
+                if (bubble.x > maxX) bubble.x = maxX;
+                
+                let drawX = bubble.x + wobbleX;
+                let drawY = bubble.y + wobbleY;
+                
+                if (visualFlipped) {
+                    drawY = height - drawY;
+                }
+                
+                // Kabarcık
+                const bubbleGradient = ctx.createRadialGradient(
+                    drawX - bubble.radius * 0.25, drawY - bubble.radius * 0.25, 0,
+                    drawX, drawY, bubble.radius
+                );
+                bubbleGradient.addColorStop(0, 'rgba(140, 180, 220, 0.12)');
+                bubbleGradient.addColorStop(0.5, 'rgba(90, 130, 170, 0.06)');
+                bubbleGradient.addColorStop(1, 'rgba(50, 90, 130, 0.02)');
+                
+                ctx.beginPath();
+                ctx.arc(drawX, drawY, bubble.radius, 0, Math.PI * 2);
+                ctx.fillStyle = bubbleGradient;
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(120, 160, 200, 0.15)';
+                ctx.lineWidth = 0.5;
+                ctx.stroke();
+                
+                // Yansıma
+                ctx.beginPath();
+                ctx.arc(drawX - bubble.radius * 0.3, drawY - bubble.radius * 0.3, bubble.radius * 0.12, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.fill();
+            }
+        }
+
+        function handleParticleCollisions() {
+            // Collision radius kullan (3x)
+            const cellSize = sandBaseSize * SPACING_MULTIPLIER;
+            const grid = new Map();
+            
+            for (const p of particles) {
+                const key = Math.floor(p.x / cellSize) + ',' + Math.floor(p.y / cellSize);
+                if (!grid.has(key)) grid.set(key, []);
+                grid.get(key).push(p);
+            }
+            
+            for (const [key, cell] of grid) {
+                const [cx, cy] = key.split(',').map(Number);
+                
+                for (let dx = -1; dx <= 1; dx++) {
+                    for (let dy = -1; dy <= 1; dy++) {
+                        const neighborKey = (cx + dx) + ',' + (cy + dy);
+                        const neighborCell = grid.get(neighborKey);
+                        if (!neighborCell) continue;
+                        
+                        for (const p1 of cell) {
+                            for (const p2 of neighborCell) {
+                                if (p1 === p2) continue;
+                                
+                                const ddx = p2.x - p1.x;
+                                const ddy = p2.y - p1.y;
+                                const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+                                // Çarpışma mesafesi = iki tannenin collision radius toplamı
+                                const minDist = p1.collisionRadius + p2.collisionRadius;
+                                
+                                if (dist < minDist && dist > 0.01) {
+                                    const overlap = minDist - dist;
+                                    const nx = ddx / dist;
+                                    const ny = ddy / dist;
+                                    
+                                    // Tam ayrım
+                                    p1.x -= nx * overlap * 0.5;
+                                    p1.y -= ny * overlap * 0.5;
+                                    p2.x += nx * overlap * 0.5;
+                                    p2.y += ny * overlap * 0.5;
+                                    
+                                    // Az momentum
+                                    const relVelDot = (p1.vx - p2.vx) * nx + (p1.vy - p2.vy) * ny;
+                                    if (relVelDot > 0) {
+                                        const impulse = relVelDot * 0.06;
+                                        p1.vx -= impulse * nx;
+                                        p1.vy -= impulse * ny;
+                                        p2.vx += impulse * nx;
+                                        p2.vy += impulse * ny;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function update(timestamp) {
+            if (!lastTime) lastTime = timestamp;
+            lastTime = timestamp;
+            
+            frameCount++;
+            if (timestamp - lastFpsUpdate > 1000) {
+                fps = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = timestamp;
+                updateStats();
+            }
+
+            if (!isPaused) {
+                for (const p of particles) {
+                    p.update();
+                }
+                
+                // Çarpışma - birden fazla iterasyon
+                for (let i = 0; i < 4; i++) {
+                    handleParticleCollisions();
+                }
+            }
+
+            drawBackground();
+            drawObstacles();
+            drawAirBubbles();
+            
+            // Y'ye göre sırala (katmanlaşma görünümü için)
+            const sortedParticles = [...particles].sort((a, b) => {
+                const ay = visualFlipped ? height - a.y : a.y;
+                const by = visualFlipped ? height - b.y : b.y;
+                return ay - by;
+            });
+            
+            for (const p of sortedParticles) {
+                p.draw();
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function flipFrame() {
+            frame.classList.add('flipping');
+            
+            setTimeout(() => {
+                visualFlipped = !visualFlipped;
+                
+                for (const p of particles) {
+                    p.y = height - p.y;
+                    p.vy = -p.vy * 0.2;
+                    p.vx *= 0.4;
+                }
+                
+                for (const bubble of airBubbles) {
+                    bubble.y = height - bubble.y;
+                    bubble.vy = 0;
+                }
+            }, 400);
+            
+            setTimeout(() => {
+                frame.classList.remove('flipping');
+            }, 800);
+        }
+
+        function resetSand() {
+            visualFlipped = false;
+            initParticles();
+            createAirBubbles();
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+        }
+
+        function shakeSand() {
+            for (const p of particles) {
+                p.vx += (Math.random() - 0.5) * 0.8;
+                p.vy += (Math.random() - 0.5) * 0.8;
+            }
+            
+            for (const bubble of airBubbles) {
+                bubble.vy += (Math.random() - 0.5) * 0.3;
+                bubble.x += (Math.random() - 0.5) * 4;
+            }
+        }
+
+        function setSandPercent(value) {
+            sandFillPercent = parseInt(value);
+            document.getElementById('sandPercentLabel').textContent = value + '%';
+            resetSand();
+        }
+
+        function setSandSize(value) {
+            sandBaseSize = parseFloat(value);
+            document.getElementById('sandSizeLabel').textContent = value;
+            resetSand();
+        }
+
+        function setSpeed(value) {
+            speedMultiplier = parseFloat(value);
+            document.getElementById('speedLabel').textContent = value + 'x';
+        }
+
+        function setAirBubbles(count) {
+            airBubbleCount = parseInt(count);
+            document.getElementById('airCountLabel').textContent = count;
+            createAirBubbles();
+        }
+
+        function setAirSpeed(value) {
+            airSpeedMultiplier = parseFloat(value);
+            document.getElementById('airSpeedLabel').textContent = value + 'x';
+        }
+
+        function setAirSize(value) {
+            airBaseSize = parseInt(value);
+            document.getElementById('airSizeLabel').textContent = value;
+            createAirBubbles();
+        }
+
+        // Başlat
+        window.addEventListener('resize', () => {
+            resize();
+            resetSand();
+        });
+        initColorLegend();
+        resize();
+        initParticles();
+        requestAnimationFrame(update);
+
+        // Tıklama
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            let clickX = e.clientX - rect.left;
+            let clickY = e.clientY - rect.top;
+            
+            if (visualFlipped) {
+                clickY = height - clickY;
+            }
+            
+            for (const p of particles) {
+                const dx = p.x - clickX;
+                const dy = p.y - clickY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                
+                if (dist < 35) {
+                    const force = (35 - dist) / 35 * 0.6;
+                    p.vx += (dx / dist) * force;
+                    p.vy += (dy / dist) * force;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
