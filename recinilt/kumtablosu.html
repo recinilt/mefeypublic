@@ -2108,6 +2108,8 @@
             }
         }
 
+        
+
         function takeScreenshot() {
             const link = document.createElement('a');
             link.download = `sand-art-${Date.now()}.png`;
@@ -2387,6 +2389,7 @@
         resize();
         initParticles();
         requestAnimationFrame(update);
+        toggleSound();
     </script>
 </body>
 </html>
