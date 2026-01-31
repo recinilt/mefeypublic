@@ -226,7 +226,7 @@
             padding: 15px;
             border-radius: 10px;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 10px;
             transition: all 0.2s ease;
         }
@@ -239,7 +239,6 @@
             cursor: grab;
             font-size: 20px;
             color: #999;
-            padding-top: 2px;
         }
 
         .task-drag-handle:active {
@@ -250,9 +249,6 @@
             flex: 1;
             font-size: 16px;
             color: #333;
-            white-space: pre-wrap;
-            word-break: break-word;
-            min-height: 24px;
         }
 
         .task-content.editing {
@@ -260,13 +256,11 @@
             padding: 8px;
             border-radius: 5px;
             background: white;
-            outline: none;
         }
 
         .task-actions {
             display: flex;
             gap: 5px;
-            flex-shrink: 0;
         }
 
         .task-btn {
@@ -281,38 +275,6 @@
 
         .task-btn:hover {
             background: #ddd;
-        }
-
-        .task-btn.copy-btn {
-            font-size: 16px;
-        }
-
-        .task-btn.copy-btn:hover {
-            background: #d4edda;
-        }
-
-        .copy-all-container {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px dashed #e0e0e0;
-            text-align: center;
-        }
-
-        .copy-all-btn {
-            background: linear-gradient(45deg, #6c5ce7, #a29bfe);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .copy-all-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
         }
 
         .storage-controls {
@@ -433,13 +395,6 @@
             margin-bottom: 10px;
         }
 
-        .edit-hint {
-            font-size: 0.75em;
-            color: #888;
-            margin-top: 5px;
-            font-style: italic;
-        }
-
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -467,10 +422,6 @@
                 min-width: auto;
                 width: 100%;
                 max-width: 300px;
-            }
-
-            .task-actions {
-                flex-wrap: wrap;
             }
         }
     </style>
@@ -551,191 +502,245 @@
                 <div class="task-list" id="taskList">
                     <!-- Görevler buraya eklenecek -->
                 </div>
-
-                <!-- Tümünü Kopyala Butonu -->
-                <div class="copy-all-container" id="copyAllContainer" style="display: none;">
-                    <button class="copy-all-btn" onclick="copyAllTasks()">📋 Tüm Maddeleri Kopyala</button>
-                </div>
             </div>
 
-            <!-- Kaydetme ve Geçmiş -->
+            <!-- Kayıt Kontrolleri -->
             <div class="storage-controls">
-                <p id="storageMethodText">💾 Kayıt Yöntemi: <span id="currentStorageMethod">Yerel</span></p>
-                <button class="btn secondary" onclick="saveData()">💾 Kaydet</button>
-                <button class="btn" onclick="showHistory()">📜 Geçmiş</button>
-                <button class="btn danger" onclick="showStorageModal()">⚙️ Kayıt Ayarları</button>
+                <p id="storageInfo">💾 Verileriniz kaydedilmedi</p>
+                <button class="btn" onclick="saveData()">💾 Kaydet</button>
+                <button class="btn secondary" onclick="loadData()">📥 Yükle</button>
+                <button class="btn secondary" onclick="showHistory()">📚 Geçmiş Başlıklar</button>
+                <button class="btn danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
             </div>
         </div>
     </div>
 
-    <!-- History Modal -->
+    <!-- Geçmiş Modal -->
     <div id="historyModal" class="modal">
         <div class="modal-content">
-            <h2>📜 Geçmiş</h2>
-            <div id="historyContent">
-                <!-- Geçmiş içeriği -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>📚 Geçmiş Başlıklar</h2>
+                <button onclick="closeHistory()" class="btn danger" style="padding: 8px 15px; font-size: 14px;">Kapat</button>
             </div>
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="btn danger" onclick="closeHistory()">❌ Kapat</button>
-            </div>
+            <div id="historyContent"></div>
         </div>
     </div>
 
-    <!-- Bildirim -->
-    <div id="notification" class="notification">
-        Bildirim mesajı
-    </div>
+    <div class="notification" id="notification"></div>
 
+    <script src="5t-github-parametreleri.js"></script>
     <script>
-        // Global Değişkenler
-        let allTopics = {};
-        let currentTopicId = null;
+        // Global Variables
         let storageMethod = 'local';
         let currentUser = null;
         let userDatabase = {};
-
-        // GitHub Config
-        const GITHUB_CONFIG = {
-            owner: 'recinilt',
-            repo: 'mefeypublic',
-            path: 'recinilt/data/task-users.json',
-            token: ''
-        };
+        let allTopics = {};
+        let currentTopicId = null;
 
         // Sayfa yüklendiğinde
-        document.addEventListener('DOMContentLoaded', function() {
-            checkStorageMethod();
-        });
-
-        function checkStorageMethod() {
-            const savedMethod = localStorage.getItem('task-storage-method');
-            const savedUser = localStorage.getItem('task-current-user');
-            
-            if (savedMethod) {
-                storageMethod = savedMethod;
-                currentUser = savedUser;
-                updateStorageMethodText();
-                loadData();
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').classList.add('show');
             } else {
-                showStorageModal();
+                loadData();
             }
-        }
+            updateStorageInfo();
+        };
 
-        function showStorageModal() {
-            document.getElementById('storageModal').classList.add('show');
-        }
-
+        // Storage Seçimi
         function selectStorage(method) {
             document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
-            
-            if (method === 'github') {
-                document.getElementById('githubLogin').style.display = 'block';
-            } else {
-                document.getElementById('githubLogin').style.display = 'none';
-            }
-            
+            event.target.closest('.storage-option').classList.add('selected');
             storageMethod = method;
+            
+            const githubLogin = document.getElementById('githubLogin');
+            githubLogin.style.display = method === 'github' ? 'block' : 'none';
         }
 
-        function confirmStorageSelection() {
+        async function confirmStorageSelection() {
             if (storageMethod === 'github') {
                 const username = document.getElementById('loginUsername').value.trim();
                 const password = document.getElementById('loginPassword').value.trim();
                 
                 if (!username || !password) {
-                    showNotification('❌ Kullanıcı adı ve şifre gerekli!', 'error');
+                    showNotification('⚠ Lütfen kullanıcı adı ve şifrenizi girin!', 'error');
                     return;
                 }
                 
-                currentUser = username;
-                GITHUB_CONFIG.token = btoa(password);
+                try {
+                    await loadUserDatabase();
+                    
+                    if (userDatabase[username]) {
+                        if (userDatabase[username].password === password) {
+                            currentUser = username;
+                            allTopics = userDatabase[username].topics || {};
+                            
+                            const settings = { method: storageMethod, username: currentUser };
+                            localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                            
+                            showNotification(`👋 Hoş geldin ${username}!`);
+                            document.getElementById('storageModal').classList.remove('show');
+                            updateStorageInfo();
+                            renderTopics();
+                        } else {
+                            showNotification('❌ Geçersiz şifre!', 'error');
+                            return;
+                        }
+                    } else {
+                        userDatabase[username] = {
+                            password: password,
+                            topics: {},
+                            createdDate: new Date().toISOString()
+                        };
+                        
+                        currentUser = username;
+                        allTopics = {};
+                        localStorage.removeItem('task-topics-data');
+                        
+                        await saveUserDatabase();
+                        
+                        const settings = { method: storageMethod, username: currentUser };
+                        localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                        
+                        showNotification(`🎉 Yeni kayıt açıldı! Hoş geldin ${username}!`);
+                        document.getElementById('storageModal').classList.remove('show');
+                        updateStorageInfo();
+                    }
+                } catch (error) {
+                    console.error('GitHub kullanıcı doğrulama hatası:', error);
+                    showNotification('⚠ GitHub bağlantı hatası! Yerel kayıt kullanılıyor.', 'error');
+                    storageMethod = 'local';
+                    
+                    const settings = { method: 'local' };
+                    localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                    
+                    document.getElementById('storageModal').classList.remove('show');
+                    updateStorageInfo();
+                }
+            } else {
+                const settings = { method: storageMethod };
+                localStorage.setItem('task-storage-settings', JSON.stringify(settings));
+                
+                showNotification('💻 Yerel kayıt seçildi!');
+                document.getElementById('storageModal').classList.remove('show');
+                updateStorageInfo();
+                loadData();
             }
-            
-            localStorage.setItem('task-storage-method', storageMethod);
-            if (currentUser) {
-                localStorage.setItem('task-current-user', currentUser);
-            }
-            
-            document.getElementById('storageModal').classList.remove('show');
-            updateStorageMethodText();
-            loadData();
-            
-            showNotification(`✅ ${storageMethod === 'local' ? 'Yerel' : 'GitHub'} kayıt seçildi!`);
         }
 
-        function updateStorageMethodText() {
-            const methodText = storageMethod === 'local' ? 'Yerel' : `GitHub (${currentUser})`;
-            document.getElementById('currentStorageMethod').textContent = methodText;
-        }
-
-        // GitHub Fonksiyonları
         async function loadUserDatabase() {
             try {
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
                     headers: {
-                        'Authorization': `token ${atob(GITHUB_CONFIG.token)}`,
+                        'Authorization': `token ${token}`,
                         'Accept': 'application/vnd.github.v3+json'
                     }
                 });
                 
                 if (response.ok) {
                     const data = await response.json();
-                    userDatabase = JSON.parse(atob(data.content));
-                    userDatabase._sha = data.sha;
-                } else if (response.status === 404) {
-                    userDatabase = {};
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
                 } else {
-                    throw new Error('GitHub yükleme hatası');
+                    userDatabase = {};
                 }
             } catch (error) {
-                console.error('GitHub yükleme hatası:', error);
+                userDatabase = {};
                 throw error;
             }
         }
 
         async function saveUserDatabase() {
             try {
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(userDatabase, null, 2))));
-                
-                const body = {
-                    message: `Update tasks for ${currentUser}`,
-                    content: content
-                };
-                
-                if (userDatabase._sha) {
-                    body.sha = userDatabase._sha;
-                }
-                
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {}
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"gorev-listeleri-"+dosyaAdi}`, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${atob(GITHUB_CONFIG.token)}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
                     },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify({
+                        message: 'Görev listeleri güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
                 });
-                
-                if (!response.ok) {
-                    throw new Error('GitHub kaydetme hatası');
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub veritabanı güncelleme hatası');
                 }
-                
-                const data = await response.json();
-                userDatabase._sha = data.content.sha;
             } catch (error) {
                 console.error('GitHub kaydetme hatası:', error);
                 throw error;
             }
         }
 
-        // Konu Başlığı Fonksiyonları
+        function checkStorageSettings() {
+            const savedSettings = localStorage.getItem('task-storage-settings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                storageMethod = settings.method;
+                
+                if (settings.method === 'github' && settings.username) {
+                    currentUser = settings.username;
+                }
+                
+                updateStorageInfo();
+                return true;
+            }
+            return false;
+        }
+
+        function updateStorageInfo() {
+            const info = document.getElementById('storageInfo');
+            if (storageMethod === 'github') {
+                info.textContent = `☁️ GitHub'a kaydet${currentUser ? ` (${currentUser})` : ''}`;
+            } else {
+                info.textContent = '💻 Yerel kayıt';
+            }
+        }
+
+        function changeStorageMethod() {
+            localStorage.removeItem('task-storage-settings');
+            
+            document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
+            document.getElementById('githubLogin').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            document.getElementById('storageModal').classList.add('show');
+            
+            storageMethod = 'local';
+            currentUser = null;
+        }
+
+        // Konu Başlığı Ekleme
         function addTopic() {
             const input = document.getElementById('newTopicInput');
             const title = input.value.trim();
             
             if (!title) {
-                showNotification('❌ Başlık boş olamaz!', 'error');
+                showNotification('⚠ Lütfen bir başlık girin!', 'error');
                 return;
             }
             
@@ -755,19 +760,20 @@
 
         function renderTopics() {
             const topicList = document.getElementById('topicList');
-            const topics = Object.values(allTopics);
             
-            if (topics.length === 0) {
-                topicList.innerHTML = '<div class="empty-state"><h3>📭 Henüz başlık yok</h3><p>Başlık ekleyerek başlayın</p></div>';
+            if (Object.keys(allTopics).length === 0) {
+                topicList.innerHTML = '<div class="empty-state"><h3>📭 Henüz başlık yok</h3><p>Yukarıdan bir başlık ekleyerek başlayın</p></div>';
                 return;
             }
             
             topicList.innerHTML = '';
             
-            topics.forEach(topic => {
+            Object.values(allTopics).forEach(topic => {
                 const topicDiv = document.createElement('div');
-                topicDiv.className = 'topic-item' + (currentTopicId === topic.id ? ' active' : '');
-                topicDiv.onclick = () => selectTopic(topic.id);
+                topicDiv.className = 'topic-item';
+                if (topic.id === currentTopicId) {
+                    topicDiv.classList.add('active');
+                }
                 
                 topicDiv.innerHTML = `
                     <div class="topic-header">
@@ -775,40 +781,27 @@
                         <div class="topic-count">${topic.tasks.length} görev</div>
                     </div>
                     <div class="topic-actions">
-                        <button class="icon-btn" onclick="event.stopPropagation(); editTopicTitle('${topic.id}')">✏️ Düzenle</button>
+                        <button class="icon-btn" onclick="event.stopPropagation(); selectTopic('${topic.id}')">📝 Düzenle</button>
                         <button class="icon-btn delete" onclick="event.stopPropagation(); deleteTopic('${topic.id}')">🗑️ Sil</button>
                     </div>
                 `;
                 
+                topicDiv.onclick = () => selectTopic(topic.id);
                 topicList.appendChild(topicDiv);
             });
         }
 
         function selectTopic(topicId) {
             currentTopicId = topicId;
+            
+            const tasksSection = document.getElementById('tasksSection');
+            tasksSection.style.display = 'block';
+            
+            const title = document.getElementById('tasksSectionTitle');
+            title.textContent = `📝 ${allTopics[topicId].title} - Görevler`;
+            
             renderTopics();
-            
-            const topic = allTopics[topicId];
-            document.getElementById('tasksSectionTitle').textContent = `📝 ${topic.title}`;
-            document.getElementById('tasksSection').style.display = 'block';
-            
             renderTasks();
-        }
-
-        function editTopicTitle(topicId) {
-            const topic = allTopics[topicId];
-            const newTitle = prompt('Yeni başlık:', topic.title);
-            
-            if (newTitle && newTitle.trim()) {
-                topic.title = newTitle.trim();
-                renderTopics();
-                
-                if (currentTopicId === topicId) {
-                    document.getElementById('tasksSectionTitle').textContent = `📝 ${topic.title}`;
-                }
-                
-                showNotification('✅ Başlık güncellendi!');
-            }
         }
 
         function deleteTopic(topicId) {
@@ -827,10 +820,10 @@
             showNotification('🗑️ Başlık silindi!');
         }
 
-        // Görev Fonksiyonları
+        // Görev Ekleme
         function addTasks() {
             if (!currentTopicId) {
-                showNotification('❌ Önce bir başlık seçin!', 'error');
+                showNotification('⚠ Lütfen önce bir başlık seçin!', 'error');
                 return;
             }
             
@@ -838,17 +831,23 @@
             const text = input.value.trim();
             
             if (!text) {
-                showNotification('❌ Görev alanı boş!', 'error');
+                showNotification('⚠ Lütfen en az bir görev girin!', 'error');
                 return;
             }
             
-            const lines = text.split('\n').filter(line => line.trim());
-            const topic = allTopics[currentTopicId];
+            // Satırlara böl ve boş satırları temizle
+            const lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line);
             
+            if (lines.length === 0) {
+                showNotification('⚠ Geçerli görev bulunamadı!', 'error');
+                return;
+            }
+            
+            const topic = allTopics[currentTopicId];
             lines.forEach(line => {
                 topic.tasks.push({
                     id: 'task_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-                    content: line.trim()
+                    content: line
                 });
             });
             
@@ -862,17 +861,14 @@
             if (!currentTopicId) return;
             
             const taskList = document.getElementById('taskList');
-            const copyAllContainer = document.getElementById('copyAllContainer');
             const topic = allTopics[currentTopicId];
             
             if (topic.tasks.length === 0) {
                 taskList.innerHTML = '<div class="empty-state"><h3>📭 Henüz görev yok</h3><p>Yukarıdan görev ekleyerek başlayın</p></div>';
-                copyAllContainer.style.display = 'none';
                 return;
             }
             
             taskList.innerHTML = '';
-            copyAllContainer.style.display = 'block';
             
             topic.tasks.forEach((task, index) => {
                 const taskDiv = document.createElement('div');
@@ -883,9 +879,8 @@
                 
                 taskDiv.innerHTML = `
                     <div class="task-drag-handle">☰</div>
-                    <div class="task-content" id="content-${task.id}">${escapeHtml(task.content)}</div>
+                    <div class="task-content" id="content-${task.id}">${task.content}</div>
                     <div class="task-actions">
-                        <button class="task-btn copy-btn" onclick="copyTask('${task.id}')" title="Kopyala">📋</button>
                         <button class="task-btn" onclick="moveTaskUp('${task.id}')" title="Yukarı">⬆️</button>
                         <button class="task-btn" onclick="moveTaskDown('${task.id}')" title="Aşağı">⬇️</button>
                         <button class="task-btn" onclick="editTask('${task.id}')" title="Düzenle">✏️</button>
@@ -901,12 +896,6 @@
                 
                 taskList.appendChild(taskDiv);
             });
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
         }
 
         function moveTaskUp(taskId) {
@@ -938,32 +927,17 @@
             
             contentDiv.contentEditable = true;
             contentDiv.classList.add('editing');
-            contentDiv.textContent = currentContent;
             contentDiv.focus();
             
-            // İmleci sona taşı
+            // Metni seç
             const range = document.createRange();
             range.selectNodeContents(contentDiv);
-            range.collapse(false);
             const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(range);
             
-            // Düzenleme ipucu ekle
-            let hint = document.getElementById('edit-hint-' + taskId);
-            if (!hint) {
-                hint = document.createElement('div');
-                hint.id = 'edit-hint-' + taskId;
-                hint.className = 'edit-hint';
-                hint.textContent = '💡 Enter: yeni satır | Shift+Enter veya dışarı tıkla: kaydet | Esc: iptal';
-                contentDiv.parentNode.insertBefore(hint, contentDiv.nextSibling);
-            }
-            
             function saveEdit() {
-                const newContent = contentDiv.innerText.trim();
-                const hintElem = document.getElementById('edit-hint-' + taskId);
-                if (hintElem) hintElem.remove();
-                
+                const newContent = contentDiv.textContent.trim();
                 if (newContent) {
                     task.content = newContent;
                     contentDiv.contentEditable = false;
@@ -977,75 +951,17 @@
                 }
             }
             
-            function cancelEdit() {
-                const hintElem = document.getElementById('edit-hint-' + taskId);
-                if (hintElem) hintElem.remove();
-                contentDiv.textContent = currentContent;
-                contentDiv.contentEditable = false;
-                contentDiv.classList.remove('editing');
-            }
-            
-            contentDiv.onblur = function(e) {
-                // Shift+Enter ile blur olduğunda kaydet
-                setTimeout(saveEdit, 100);
-            };
-            
+            contentDiv.onblur = saveEdit;
             contentDiv.onkeydown = function(e) {
-                if (e.key === 'Enter' && e.shiftKey) {
-                    // Shift+Enter: kaydet
+                if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    contentDiv.blur();
-                } else if (e.key === 'Enter' && !e.shiftKey) {
-                    // Enter: yeni satır (varsayılan davranış, engellemiyoruz)
-                    // contentEditable zaten <br> veya <div> ekler
+                    saveEdit();
                 } else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    cancelEdit();
+                    contentDiv.textContent = currentContent;
+                    contentDiv.contentEditable = false;
+                    contentDiv.classList.remove('editing');
                 }
             };
-        }
-
-        function copyTask(taskId) {
-            const topic = allTopics[currentTopicId];
-            const task = topic.tasks.find(t => t.id === taskId);
-            
-            if (task) {
-                navigator.clipboard.writeText(task.content).then(() => {
-                    showNotification('📋 Kopyalandı!');
-                }).catch(err => {
-                    // Fallback
-                    fallbackCopy(task.content);
-                });
-            }
-        }
-
-        function copyAllTasks() {
-            if (!currentTopicId) return;
-            
-            const topic = allTopics[currentTopicId];
-            const allText = topic.tasks.map(t => t.content).join('\n\n');
-            
-            navigator.clipboard.writeText(allText).then(() => {
-                showNotification('📋 Tüm maddeler kopyalandı!');
-            }).catch(err => {
-                fallbackCopy(allText);
-            });
-        }
-
-        function fallbackCopy(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.select();
-            try {
-                document.execCommand('copy');
-                showNotification('📋 Kopyalandı!');
-            } catch (err) {
-                showNotification('❌ Kopyalama başarısız!', 'error');
-            }
-            document.body.removeChild(textarea);
         }
 
         function deleteTask(taskId) {
@@ -1129,7 +1045,6 @@
             try {
                 await loadUserDatabase();
                 
-                userDatabase[currentUser] = userDatabase[currentUser] || {};
                 userDatabase[currentUser].topics = allTopics;
                 userDatabase[currentUser].lastUpdated = new Date().toISOString();
                 
