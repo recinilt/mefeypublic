@@ -1387,10 +1387,6 @@
                             showNotification(`Hoş geldin ${username}! GitHub verilerini yüklendi.`);
                             document.getElementById('storageModal').style.display = 'none';
                             updateStorageStatus();
-                            generateYearRange();
-                            if (userDatabase[username].budgetData) {
-                                budgetData = userDatabase[username].budgetData;
-                            }
                             updateDisplay();
                             updateGeneralStatistics();
                             updateYearlyStatistics();
@@ -1423,10 +1419,6 @@
                         showNotification(`Yeni hesap oluşturuldu! Hoş geldin ${username}!`);
                         document.getElementById('storageModal').style.display = 'none';
                         updateStorageStatus();
-                        generateYearRange();
-                        updateDisplay();
-                        updateGeneralStatistics();
-                        updateYearlyStatistics();
                     }
                 } catch (error) {
                     console.error('GitHub bağlantı hatası:', error);
