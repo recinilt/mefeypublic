@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kredi Hesaplama Aracı</title>
+    
+    <!-- CDN Links -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --bg: #f9fafb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem 0;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+        
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .card-header i {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .card-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+        
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background: var(--card);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+        }
+        
+        .btn {
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-accent:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .bank-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        
+        .bank-table th,
+        .bank-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .bank-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .bank-table tr:hover {
+            background: var(--bg);
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        @media (min-width: 768px) {
+            .result-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .result-item {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .result-item.accent {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+        }
+        
+        .result-item label {
+            display: block;
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-item .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+        
+        .payment-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            overflow-x: auto;
+            display: block;
+        }
+        
+        @media (min-width: 768px) {
+            .payment-table {
+                display: table;
+            }
+        }
+        
+        .payment-table thead {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .payment-table th,
+        .payment-table td {
+            padding: 0.75rem;
+            text-align: right;
+        }
+        
+        .payment-table th:first-child,
+        .payment-table td:first-child {
+            text-align: center;
+        }
+        
+        .payment-table tbody tr:nth-child(even) {
+            background: var(--bg);
+        }
+        
+        .payment-table tbody tr:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .history-item:hover {
+            border-color: var(--primary);
+            background: var(--bg);
+        }
+        
+        .history-info {
+            flex: 1;
+        }
+        
+        .history-info strong {
+            color: var(--primary);
+            font-size: 1.125rem;
+        }
+        
+        .history-info small {
+            display: block;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .history-actions button {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .early-close-select {
+            max-width: 200px;
+            margin-bottom: 1rem;
+        }
+        
+        .early-close-result {
+            background: var(--bg);
+            padding: 1.25rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .early-close-result strong {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+        
+        @media (max-width: 767px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .result-item .value {
+                font-size: 1.25rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> Kredi Hesaplama Aracı</h1>
+            <p>Profesyonel kredi hesaplama, ödeme planı ve karşılaştırma</p>
+        </header>
+        
+        <!-- Hesaplama Formu -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-edit"></i>
+                <h2>Yeni Hesaplama</h2>
+            </div>
+            
+            <form id="loanForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="loanType">Kredi Türü</label>
+                        <select id="loanType" required>
+                            <option value="ihtiyac">İhtiyaç Kredisi</option>
+                            <option value="tasit">Taşıt Kredisi</option>
+                            <option value="konut">Konut Kredisi</option>
+                        </select>
+                        <span class="info-text" id="loanTypeInfo">⚠️ Bankalar genelde max 36 ay</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loanAmount">Kredi Tutarı (₺)</label>
+                        <input type="number" id="loanAmount" placeholder="150000" required min="1000" step="1000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loanTerm">Vade (Ay)</label>
+                        <input type="number" id="loanTerm" placeholder="36" required min="1" max="999">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deferralMonths">Erteleme (Ay)</label>
+                        <input type="number" id="deferralMonths" placeholder="0" value="0" min="0" max="999">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="interestRate">Aylık Faiz Oranı (%)</label>
+                        <input type="number" id="interestRate" placeholder="2.89" required min="0" step="0.01">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">
+                    <i class="fas fa-calculator"></i> Hesapla
+                </button>
+            </form>
+        </div>
+        
+        <!-- Banka Faiz Karşılaştırma -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-chart-bar"></i>
+                <h2>Banka Faiz Karşılaştırma</h2>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table class="bank-table">
+                    <thead>
+                        <tr>
+                            <th>Banka</th>
+                            <th>Kredi Türü</th>
+                            <th>Faiz Oranı</th>
+                            <th>Güncelleme</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Garanti BBVA</strong></td>
+                            <td>Taşıt</td>
+                            <td><strong style="color: var(--accent);">%2.85</strong></td>
+                            <td>28 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DenizBank</strong></td>
+                            <td>İhtiyaç</td>
+                            <td><strong style="color: var(--accent);">%2.89</strong></td>
+                            <td>19 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>QNB Finansbank</strong></td>
+                            <td>İhtiyaç</td>
+                            <td><strong style="color: var(--accent);">%2.89</strong></td>
+                            <td>19 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TEB</strong></td>
+                            <td>İhtiyaç</td>
+                            <td><strong style="color: var(--accent);">%2.99</strong></td>
+                            <td>19 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Akbank</strong></td>
+                            <td>Konut</td>
+                            <td><strong style="color: var(--accent);">%2.65</strong></td>
+                            <td>10 Ocak 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="info-text" style="margin-top: 1rem;">
+                ℹ️ Faiz oranları güncel olup değişebilir. Kesin bilgi için bankalara başvurun.
+            </p>
+        </div>
+        
+        <!-- Hesaplama Sonuçları -->
+        <div id="resultsSection" class="hidden">
+            <div class="card fade-in">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Hesaplama Sonuçları</h2>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <label>Aylık Taksit</label>
+                        <div class="value" id="monthlyPayment">-</div>
+                    </div>
+                    <div class="result-item accent">
+                        <label>Toplam Ödeme</label>
+                        <div class="value" id="totalPayment">-</div>
+                    </div>
+                    <div class="result-item">
+                        <label>Toplam Faiz</label>
+                        <div class="value" id="totalInterest">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Erken Kapatma -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <i class="fas fa-coins"></i>
+                    <h2>Erken Kapatma Hesabı</h2>
+                </div>
+                
+                <label for="earlyCloseMonth">Hangi ayda kapatmak istersiniz?</label>
+                <select id="earlyCloseMonth" class="early-close-select">
+                    <option value="">Seçiniz</option>
+                </select>
+                
+                <div id="earlyCloseResult" class="early-close-result hidden">
+                    <p>Seçilen ay sonunda kalan borç:</p>
+                    <strong id="earlyCloseAmount">-</strong>
+                </div>
+            </div>
+            
+            <!-- Ödeme Planı -->
+            <div class="card fade-in">
+                <div class="card-header">
+                    <i class="fas fa-table"></i>
+                    <h2>Ödeme Planı</h2>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table class="payment-table" id="paymentTable">
+                        <thead>
+                            <tr>
+                                <th>Ay</th>
+                                <th>Taksit</th>
+                                <th>Anapara</th>
+                                <th>Faiz</th>
+                                <th>KKDF</th>
+                                <th>BSMV</th>
+                                <th>Kalan Borç</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="btn-group" style="margin-top: 1.5rem;">
+                    <button class="btn btn-accent" onclick="exportToExcel()">
+                        <i class="fas fa-file-excel"></i> Excel İndir
+                    </button>
+                    <button class="btn btn-outline" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i> PDF İndir
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hesaplama Geçmişi -->
+        <div class="card fade-in">
+            <div class="card-header">
+                <i class="fas fa-history"></i>
+                <h2>Hesaplama Geçmişi</h2>
+            </div>
+            
+            <div id="historyList">
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <p>Henüz hesaplama geçmişi yok</p>
+                </div>
+            </div>
+            
+            <button class="btn btn-danger" onclick="clearHistory()" style="margin-top: 1rem; width: 100%;">
+                <i class="fas fa-trash"></i> Tüm Geçmişi Temizle
+            </button>
+        </div>
+    </div>
+    
+    <!-- CDN Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    
+    <script>
+        // Global variables
+        let currentCalculation = null;
+        
+        // Update loan type info
+        document.getElementById('loanType').addEventListener('change', function() {
+            const infoText = document.getElementById('loanTypeInfo');
+            const type = this.value;
+            
+            if (type === 'ihtiyac') {
+                infoText.textContent = '⚠️ Bankalar genelde max 36 ay';
+            } else if (type === 'tasit') {
+                infoText.textContent = '⚠️ Bankalar genelde max 48 ay';
+            } else if (type === 'konut') {
+                infoText.textContent = '⚠️ Bankalar genelde max 180 ay';
+            }
+        });
+        
+        // Form submission
+        document.getElementById('loanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateLoan();
+        });
+        
+        // Early close month change
+        document.getElementById('earlyCloseMonth').addEventListener('change', function() {
+            calculateEarlyClose();
+        });
+        
+        // Calculate loan
+        function calculateLoan() {
+            const loanType = document.getElementById('loanType').value;
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const loanTerm = parseInt(document.getElementById('loanTerm').value);
+            const deferralMonths = parseInt(document.getElementById('deferralMonths').value) || 0;
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+            
+            // Validate inputs
+            if (!loanAmount || !loanTerm || interestRate < 0) {
+                alert('Lütfen tüm alanları doğru doldurun!');
+                return;
+            }
+            
+            // KKDF & BSMV (Konut kredisi hariç)
+            const kkdfRate = loanType === 'konut' ? 0 : 0.15;
+            const bsmvRate = loanType === 'konut' ? 0 : 0.05;
+            
+            // Effective term (actual payment months)
+            const effectiveTerm = loanTerm - deferralMonths;
+            
+            // Calculate deferral interest (distributed equally)
+            const deferralInterestTotal = loanAmount * interestRate * deferralMonths;
+            const deferralInterestPerMonth = deferralMonths > 0 ? deferralInterestTotal / effectiveTerm : 0;
+            
+            // Monthly payment calculation (for effective term)
+            const r = interestRate;
+            const n = effectiveTerm;
+            const monthlyPaymentBase = (loanAmount * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
+            
+            // Generate schedule
+            const schedule = [];
+            let remainingBalance = loanAmount;
+            let totalPayment = 0;
+            let totalInterest = 0;
+            
+            // Deferral period: NO PAYMENT
+            for (let month = 1; month <= deferralMonths; month++) {
+                schedule.push({
+                    month,
+                    payment: 0,
+                    principal: 0,
+                    interest: 0,
+                    kkdf: 0,
+                    bsmv: 0,
+                    remainingBalance: loanAmount
+                });
+            }
+            
+            // Normal payment period
+            for (let month = deferralMonths + 1; month <= loanTerm; month++) {
+                // Monthly interest from remaining balance
+                const monthlyInterest = remainingBalance * r;
+                
+                // Add deferral interest share
+                const totalInterestThisMonth = monthlyInterest + deferralInterestPerMonth;
+                
+                // Taxes on total interest
+                const kkdf = totalInterestThisMonth * kkdfRate;
+                const bsmv = totalInterestThisMonth * bsmvRate;
+                
+                // Principal payment
+                let principal = monthlyPaymentBase - monthlyInterest;
+                
+                // Adjust for last payment
+                if (principal > remainingBalance) {
+                    principal = remainingBalance;
+                }
+                
+                // Total payment
+                const payment = principal + totalInterestThisMonth + kkdf + bsmv;
+                
+                remainingBalance -= principal;
+                
+                totalPayment += payment;
+                totalInterest += totalInterestThisMonth + kkdf + bsmv;
+                
+                schedule.push({
+                    month,
+                    payment,
+                    principal,
+                    interest: totalInterestThisMonth,
+                    kkdf,
+                    bsmv,
+                    remainingBalance: Math.max(0, remainingBalance)
+                });
+            }
+            
+            // Average monthly payment (excluding deferral period)
+            const avgMonthlyPayment = effectiveTerm > 0 ? totalPayment / effectiveTerm : 0;
+            
+            // Store current calculation
+            currentCalculation = {
+                loanType,
+                loanAmount,
+                loanTerm,
+                deferralMonths,
+                interestRate: interestRate * 100,
+                schedule,
+                monthlyPayment: avgMonthlyPayment,
+                totalPayment,
+                totalInterest
+            };
+            
+            // Display results
+            displayResults();
+            
+            // Save to history
+            saveToHistory();
+        }
+        
+        // Display results
+        function displayResults() {
+            const { monthlyPayment, totalPayment, totalInterest, schedule } = currentCalculation;
+            
+            // Update summary
+            document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
+            document.getElementById('totalPayment').textContent = formatCurrency(totalPayment);
+            document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
+            
+            // Update payment table
+            const tbody = document.getElementById('paymentTableBody');
+            tbody.innerHTML = '';
+            
+            schedule.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.month}</td>
+                    <td>${formatCurrency(row.payment)}</td>
+                    <td>${formatCurrency(row.principal)}</td>
+                    <td>${formatCurrency(row.interest)}</td>
+                    <td>${formatCurrency(row.kkdf)}</td>
+                    <td>${formatCurrency(row.bsmv)}</td>
+                    <td>${formatCurrency(row.remainingBalance)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            // Update early close dropdown
+            const select = document.getElementById('earlyCloseMonth');
+            select.innerHTML = '<option value="">Seçiniz</option>';
+            schedule.forEach((row, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${row.month}. Ay`;
+                select.appendChild(option);
+            });
+            
+            // Show results section
+            document.getElementById('resultsSection').classList.remove('hidden');
+            
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Calculate early close
+        function calculateEarlyClose() {
+            const index = parseInt(document.getElementById('earlyCloseMonth').value);
+            
+            if (isNaN(index) || !currentCalculation) {
+                document.getElementById('earlyCloseResult').classList.add('hidden');
+                return;
+            }
+            
+            const remainingBalance = currentCalculation.schedule[index].remainingBalance;
+            document.getElementById('earlyCloseAmount').textContent = formatCurrency(remainingBalance);
+            document.getElementById('earlyCloseResult').classList.remove('hidden');
+        }
+        
+        // Export to Excel
+        function exportToExcel() {
+            if (!currentCalculation) return;
+            
+            const { schedule } = currentCalculation;
+            
+            // Prepare data
+            const data = [
+                ['Ay', 'Taksit', 'Anapara', 'Faiz', 'KKDF', 'BSMV', 'Kalan Borç']
+            ];
+            
+            schedule.forEach(row => {
+                data.push([
+                    row.month,
+                    row.payment.toFixed(2),
+                    row.principal.toFixed(2),
+                    row.interest.toFixed(2),
+                    row.kkdf.toFixed(2),
+                    row.bsmv.toFixed(2),
+                    row.remainingBalance.toFixed(2)
+                ]);
+            });
+            
+            // Create workbook
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Ödeme Planı');
+            
+            // Save file
+            XLSX.writeFile(wb, 'kredi-odeme-plani.xlsx');
+        }
+        
+        // Export to PDF
+        function exportToPDF() {
+            if (!currentCalculation) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Add title
+            doc.setFontSize(16);
+            doc.text('Kredi Ödeme Planı', 14, 15);
+            
+            // Add summary
+            doc.setFontSize(10);
+            doc.text(`Kredi Tutarı: ${formatCurrency(currentCalculation.loanAmount)}`, 14, 25);
+            doc.text(`Vade: ${currentCalculation.loanTerm} ay`, 14, 30);
+            doc.text(`Faiz: %${currentCalculation.interestRate.toFixed(2)}`, 14, 35);
+            doc.text(`Aylık Taksit: ${formatCurrency(currentCalculation.monthlyPayment)}`, 14, 40);
+            doc.text(`Toplam Ödeme: ${formatCurrency(currentCalculation.totalPayment)}`, 14, 45);
+            
+            // Add table
+            const tableData = currentCalculation.schedule.map(row => [
+                row.month,
+                formatCurrency(row.payment),
+                formatCurrency(row.principal),
+                formatCurrency(row.interest),
+                formatCurrency(row.kkdf),
+                formatCurrency(row.bsmv),
+                formatCurrency(row.remainingBalance)
+            ]);
+            
+            doc.autoTable({
+                head: [['Ay', 'Taksit', 'Anapara', 'Faiz', 'KKDF', 'BSMV', 'Kalan']],
+                body: tableData,
+                startY: 55,
+                theme: 'grid',
+                styles: { fontSize: 8 },
+                headStyles: { fillColor: [30, 58, 138] }
+            });
+            
+            // Save
+            doc.save('kredi-odeme-plani.pdf');
+        }
+        
+        // Save to history
+        function saveToHistory() {
+            const history = getHistory();
+            
+            const entry = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString('tr-TR'),
+                loanType: currentCalculation.loanType,
+                loanAmount: currentCalculation.loanAmount,
+                loanTerm: currentCalculation.loanTerm,
+                interestRate: currentCalculation.interestRate,
+                deferralMonths: currentCalculation.deferralMonths
+            };
+            
+            history.unshift(entry);
+            localStorage.setItem('loanHistory', JSON.stringify(history));
+            
+            displayHistory();
+        }
+        
+        // Get history
+        function getHistory() {
+            const history = localStorage.getItem('loanHistory');
+            return history ? JSON.parse(history) : [];
+        }
+        
+        // Display history
+        function displayHistory() {
+            const history = getHistory();
+            const container = document.getElementById('historyList');
+            
+            if (history.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>Henüz hesaplama geçmişi yok</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            history.forEach(entry => {
+                const loanTypeText = {
+                    'ihtiyac': 'İhtiyaç',
+                    'tasit': 'Taşıt',
+                    'konut': 'Konut'
+                }[entry.loanType];
+                
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-info">
+                        <strong>${formatCurrency(entry.loanAmount)}</strong>
+                        <small>${loanTypeText} • ${entry.loanTerm} ay • %${entry.interestRate.toFixed(2)} • ${entry.date}</small>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-accent" onclick="loadHistory(${entry.id})">
+                            <i class="fas fa-upload"></i> Yükle
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteHistory(${entry.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        // Load history
+        function loadHistory(id) {
+            const history = getHistory();
+            const entry = history.find(h => h.id === id);
+            
+            if (!entry) return;
+            
+            document.getElementById('loanType').value = entry.loanType;
+            document.getElementById('loanAmount').value = entry.loanAmount;
+            document.getElementById('loanTerm').value = entry.loanTerm;
+            document.getElementById('deferralMonths').value = entry.deferralMonths || 0;
+            document.getElementById('interestRate').value = entry.interestRate.toFixed(2);
+            
+            // Scroll to form
+            document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Delete history
+        function deleteHistory(id) {
+            if (!confirm('Bu hesaplamayı silmek istediğinize emin misiniz?')) return;
+            
+            let history = getHistory();
+            history = history.filter(h => h.id !== id);
+            localStorage.setItem('loanHistory', JSON.stringify(history));
+            
+            displayHistory();
+        }
+        
+        // Clear history
+        function clearHistory() {
+            if (!confirm('Tüm geçmişi silmek istediğinize emin misiniz?')) return;
+            
+            localStorage.removeItem('loanHistory');
+            displayHistory();
+        }
+        
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('tr-TR', {
+                style: 'currency',
+                currency: 'TRY',
+                minimumFractionDigits: 2
+            }).format(amount);
+        }
+        
+        // Initialize
+        displayHistory();
+    </script>
+</body>
+</html>
