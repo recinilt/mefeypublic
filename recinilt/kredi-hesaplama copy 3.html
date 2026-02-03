@@ -24,8 +24,6 @@
             --border: #e5e7eb;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --warning: #f59e0b;
-            --insurance: #8b5cf6;
         }
         
         * {
@@ -258,10 +256,6 @@
             background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
         }
         
-        .result-item.insurance {
-            background: linear-gradient(135deg, var(--insurance) 0%, #7c3aed 100%);
-        }
-        
         .result-item label {
             display: block;
             font-size: 0.875rem;
@@ -401,33 +395,6 @@
             font-size: 1.5rem;
         }
         
-        /* Sigorta özel stilleri */
-        .insurance-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            background: linear-gradient(135deg, var(--insurance) 0%, #7c3aed 100%);
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .insurance-info-box {
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            border: 2px solid var(--warning);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-        }
-        
-        .insurance-info-box i {
-            color: var(--warning);
-            margin-right: 0.5rem;
-        }
-        
         @media (max-width: 767px) {
             header h1 {
                 font-size: 1.5rem;
@@ -496,31 +463,6 @@
                         <label for="interestRate">Aylık Faiz Oranı (%)</label>
                         <input type="number" id="interestRate" placeholder="2.89" required min="0" step="0.01">
                     </div>
-                    
-                    <!-- YENİ: Sigorta Seçeneği -->
-                    <div class="form-group">
-                        <label for="insuranceType"><i class="fas fa-shield-alt" style="color: var(--insurance);"></i> Sigorta Seçeneği</label>
-                        <select id="insuranceType">
-                            <option value="none" selected>Sigortasız</option>
-                            <option value="life">Hayat Sigortası</option>
-                            <option value="unemployment">İşsizlik Teminatlı Hayat Sigortası</option>
-                        </select>
-                        <span class="info-text" id="insuranceInfo">🛡️ Sigorta isteğe bağlıdır</span>
-                    </div>
-                    
-                    <!-- YENİ: Yaş Girişi (sigorta seçilince görünür) -->
-                    <div class="form-group hidden" id="ageGroup">
-                        <label for="customerAge">Yaşınız</label>
-                        <input type="number" id="customerAge" placeholder="35" value="35" min="18" max="70">
-                        <span class="info-text">⚠️ Sigorta primi yaşa göre değişir (18-70 yaş)</span>
-                    </div>
-                </div>
-                
-                <!-- Sigorta Bilgi Kutusu -->
-                <div class="insurance-info-box hidden" id="insuranceInfoBox">
-                    <i class="fas fa-info-circle"></i>
-                    <strong>Sigorta Hakkında:</strong> Sigorta primi kredi tutarına eklenir ve taksitlere yansır. 
-                    Bankalar sigortalı kredilerde genellikle daha düşük faiz oranı uygular.
                 </div>
                 
                 <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">
@@ -556,63 +498,52 @@
                         <tr>
                             <td><strong>DenizBank</strong></td>
                             <td>İhtiyaç</td>
-                            <td><strong style="color: var(--accent);">%3.19</strong></td>
-                            <td>28 Ocak 2026</td>
+                            <td><strong style="color: var(--accent);">%2.89</strong></td>
+                            <td>19 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>QNB Finansbank</strong></td>
+                            <td>İhtiyaç</td>
+                            <td><strong style="color: var(--accent);">%2.89</strong></td>
+                            <td>19 Ocak 2026</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TEB</strong></td>
+                            <td>İhtiyaç</td>
+                            <td><strong style="color: var(--accent);">%2.99</strong></td>
+                            <td>19 Ocak 2026</td>
                         </tr>
                         <tr>
                             <td><strong>Akbank</strong></td>
-                            <td>İhtiyaç</td>
-                            <td><strong style="color: var(--accent);">%5.80</strong></td>
-                            <td>28 Ocak 2026</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Ziraat Bankası</strong></td>
                             <td>Konut</td>
-                            <td><strong style="color: var(--accent);">%2.09</strong></td>
-                            <td>28 Ocak 2026</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Yapı Kredi</strong></td>
-                            <td>İhtiyaç</td>
-                            <td><strong style="color: var(--accent);">%3.49</strong></td>
-                            <td>28 Ocak 2026</td>
+                            <td><strong style="color: var(--accent);">%2.65</strong></td>
+                            <td>10 Ocak 2026</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <p style="font-size: 0.75rem; color: var(--text-light); margin-top: 1rem; text-align: center;">
-                * Faiz oranları bankaya, müşteri profiline ve kampanyalara göre değişiklik gösterebilir. Güncel bilgi için ilgili bankaya başvurunuz.
+            <p class="info-text" style="margin-top: 1rem;">
+                ℹ️ Faiz oranları güncel olup değişebilir. Kesin bilgi için bankalara başvurun.
             </p>
         </div>
         
-        <!-- Sonuçlar Bölümü -->
+        <!-- Hesaplama Sonuçları -->
         <div id="resultsSection" class="hidden">
-            <!-- Hesaplama Özeti -->
+            <!-- Girilen Parametreler Özeti -->
             <div class="card fade-in">
                 <div class="card-header">
-                    <i class="fas fa-clipboard-check"></i>
-                    <h2>Hesaplama Özeti</h2>
-                    <span class="insurance-badge hidden" id="insuranceBadge">
-                        <i class="fas fa-shield-alt"></i> Sigortalı
-                    </span>
+                    <i class="fas fa-info-circle"></i>
+                    <h2>Kredi Bilgileri</h2>
                 </div>
                 
                 <div class="result-grid">
                     <div class="result-item">
                         <label>Kredi Türü</label>
-                        <div class="value" id="summaryLoanType" style="font-size: 1rem;">-</div>
+                        <div class="value" id="summaryLoanType" style="font-size: 1rem; color: var(--primary);">-</div>
                     </div>
                     <div class="result-item">
-                        <label>Talep Edilen Kredi</label>
-                        <div class="value" id="summaryLoanAmount" style="font-size: 1rem;">-</div>
-                    </div>
-                    <div class="result-item insurance hidden" id="summaryInsuranceCard">
-                        <label>Sigorta Primi</label>
-                        <div class="value" id="summaryInsurance" style="font-size: 1rem;">-</div>
-                    </div>
-                    <div class="result-item accent hidden" id="summaryTotalLoanCard">
-                        <label>Toplam Finanse Edilen</label>
-                        <div class="value" id="summaryTotalLoan" style="font-size: 1rem;">-</div>
+                        <label>Kredi Tutarı</label>
+                        <div class="value" id="summaryLoanAmount">-</div>
                     </div>
                     <div class="result-item">
                         <label>Vade</label>
@@ -676,10 +607,10 @@
                         <div class="value" id="fileExpense" style="font-size: 1.25rem;">-</div>
                         <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Kredi tutarının binde 5'i</small>
                     </div>
-                    <div class="result-item insurance" id="insurancePremiumCard">
-                        <label>Sigorta Primi</label>
+                    <div class="result-item">
+                        <label>Hayat Sigortası (Tahmini)</label>
                         <div class="value" id="lifeInsurance" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem;" id="insuranceNote">İhtiyari - Anaparaya dahil</small>
+                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">İhtiyari - 45 yaş baz alınmıştır</small>
                     </div>
                     <div class="result-item">
                         <label>Erteleme Faizi</label>
@@ -724,11 +655,11 @@
                 <div class="result-grid">
                     <div class="result-item">
                         <label>İlk Taksit Tarihi</label>
-                        <div class="value" id="firstPaymentDate" style="font-size: 1rem; color: white;">-</div>
+                        <div class="value" id="firstPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
                     </div>
                     <div class="result-item">
                         <label>Son Taksit Tarihi</label>
-                        <div class="value" id="lastPaymentDate" style="font-size: 1rem; color: white;">-</div>
+                        <div class="value" id="lastPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
                     </div>
                     <div class="result-item">
                         <label>Toplam Süre</label>
@@ -834,28 +765,6 @@
             }
         });
         
-        // YENİ: Sigorta türü değişince
-        document.getElementById('insuranceType').addEventListener('change', function() {
-            const insuranceInfo = document.getElementById('insuranceInfo');
-            const ageGroup = document.getElementById('ageGroup');
-            const insuranceInfoBox = document.getElementById('insuranceInfoBox');
-            const type = this.value;
-            
-            if (type === 'none') {
-                insuranceInfo.textContent = '🛡️ Sigorta isteğe bağlıdır';
-                ageGroup.classList.add('hidden');
-                insuranceInfoBox.classList.add('hidden');
-            } else if (type === 'life') {
-                insuranceInfo.textContent = '🛡️ Hayat Sigortası: Vefat ve maluliyet teminatı';
-                ageGroup.classList.remove('hidden');
-                insuranceInfoBox.classList.remove('hidden');
-            } else if (type === 'unemployment') {
-                insuranceInfo.textContent = '🛡️ İşsizlik Teminatlı: Hayat + İşsizlik koruması';
-                ageGroup.classList.remove('hidden');
-                insuranceInfoBox.classList.remove('hidden');
-            }
-        });
-        
         // Form submission
         document.getElementById('loanForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -867,83 +776,23 @@
             calculateEarlyClose();
         });
         
-        // YENİ: Sigorta primi hesaplama fonksiyonu
-        function calculateInsurancePremium(loanAmount, loanTerm, age, insuranceType) {
-            if (insuranceType === 'none') {
-                return 0;
-            }
-            
-            // Baz oranlar (kredi tutarına göre yüzde)
-            // Hayat sigortası: ~%2.0-3.0
-            // İşsizlik teminatlı: ~%3.0-4.5
-            let baseRate = insuranceType === 'unemployment' ? 0.032 : 0.022;
-            
-            // Yaş çarpanı (genç = düşük, yaşlı = yüksek)
-            let ageMultiplier = 1.0;
-            if (age < 30) {
-                ageMultiplier = 0.75;
-            } else if (age < 35) {
-                ageMultiplier = 0.85;
-            } else if (age < 40) {
-                ageMultiplier = 0.95;
-            } else if (age < 45) {
-                ageMultiplier = 1.0;
-            } else if (age < 50) {
-                ageMultiplier = 1.15;
-            } else if (age < 55) {
-                ageMultiplier = 1.30;
-            } else if (age < 60) {
-                ageMultiplier = 1.50;
-            } else {
-                ageMultiplier = 1.75;
-            }
-            
-            // Vade çarpanı (uzun vade = daha yüksek prim)
-            let termMultiplier = 1.0;
-            if (loanTerm <= 6) {
-                termMultiplier = 0.85;
-            } else if (loanTerm <= 12) {
-                termMultiplier = 1.0;
-            } else if (loanTerm <= 24) {
-                termMultiplier = 1.15;
-            } else if (loanTerm <= 36) {
-                termMultiplier = 1.25;
-            } else {
-                termMultiplier = 1.35;
-            }
-            
-            // Toplam sigorta primi hesapla
-            const insurancePremium = loanAmount * baseRate * ageMultiplier * termMultiplier;
-            
-            return Math.round(insurancePremium * 100) / 100;
-        }
-        
         // Calculate loan
         function calculateLoan() {
             const loanType = document.getElementById('loanType').value;
-            const requestedLoanAmount = parseFloat(document.getElementById('loanAmount').value);
+            const loanAmount = parseFloat(document.getElementById('loanAmount').value);
             const loanTerm = parseInt(document.getElementById('loanTerm').value);
             const deferralMonths = parseInt(document.getElementById('deferralMonths').value) || 0;
             const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
-            const insuranceType = document.getElementById('insuranceType').value;
-            const customerAge = parseInt(document.getElementById('customerAge').value) || 35;
             
             // Validate inputs
-            if (!requestedLoanAmount || !loanTerm || interestRate < 0) {
+            if (!loanAmount || !loanTerm || interestRate < 0) {
                 alert('Lütfen tüm alanları doğru doldurun!');
                 return;
             }
             
-            // YENİ: Sigorta primi hesapla
-            const insurancePremium = calculateInsurancePremium(requestedLoanAmount, loanTerm, customerAge, insuranceType);
-            
-            // YENİ: Sigortalı ise sigorta primi anaparaya eklenir
-            const loanAmount = requestedLoanAmount + insurancePremium;
-            
             // KKDF & BSMV (Konut kredisi hariç)
-            // KKDF: %15, BSMV: %15 (7 Temmuz 2023 tarihli 7345 sayılı CB Kararı)
             const kkdfRate = loanType === 'konut' ? 0 : 0.15;
-            const bsmvRate = loanType === 'konut' ? 0 : 0.15;
+            const bsmvRate = loanType === 'konut' ? 0 : 0.05;
             
             // Effective term (actual payment months)
             const effectiveTerm = loanTerm - deferralMonths;
@@ -953,7 +802,12 @@
             const deferralInterestPerMonth = deferralMonths > 0 ? deferralInterestTotal / effectiveTerm : 0;
             
             // Additional costs
-            const fileExpense = requestedLoanAmount * 0.00575; // Binde 5.75 (0.575%) - talep edilen tutar üzerinden
+            const fileExpense = loanAmount * 0.005; // Binde 5 (0.5%)
+            
+            // Life insurance estimation (based on avg age 45, approx 0.08% monthly for 12 months per 1000 TL)
+            // This is a rough estimate - actual varies by age, term, insurance company
+            const lifeInsuranceMonthly = (loanAmount / 1000) * 0.8; // Approx ₺0.80 per 1000TL per month
+            const lifeInsuranceTotal = lifeInsuranceMonthly * loanTerm;
             
             // Effective interest rate (including taxes)
             // This ensures FIXED monthly payments (annuity method)
@@ -1027,44 +881,15 @@
             
             // Calculate Annual Cost Rate (YMO) - Yıllık Maliyet Oranı
             // YMO includes all costs: interest, KKDF, BSMV, file expense, insurance
-            // IRR (Internal Rate of Return) yöntemi ile hesaplama
-            const totalCost = totalPayment + fileExpense;
-            const netLoanAmount = requestedLoanAmount - fileExpense; // Actual amount received
-            const totalCostAmount = totalCost - requestedLoanAmount; // Total cost above principal
+            const totalCost = totalPayment + fileExpense + lifeInsuranceTotal;
+            const netLoanAmount = loanAmount - fileExpense; // Actual amount received
+            const totalCostAmount = totalCost - loanAmount; // Total cost above principal
             
-            // IRR hesaplama fonksiyonu (Newton-Raphson yöntemi)
-            function calculateIRR(netAmount, payment, periods) {
-                let rate = 0.1; // Başlangıç tahmini %10
-                const maxIterations = 100;
-                const tolerance = 0.0000001;
-                
-                for (let i = 0; i < maxIterations; i++) {
-                    let npv = -netAmount;
-                    let dnpv = 0;
-                    
-                    for (let t = 1; t <= periods; t++) {
-                        const factor = Math.pow(1 + rate, t);
-                        npv += payment / factor;
-                        dnpv -= t * payment / (factor * (1 + rate));
-                    }
-                    
-                    const newRate = rate - npv / dnpv;
-                    if (Math.abs(newRate - rate) < tolerance) {
-                        return newRate;
-                    }
-                    rate = newRate;
-                }
-                return rate;
-            }
+            // Monthly cost rate (simple approximation)
+            const monthlyCostRate = (totalCostAmount / loanAmount / effectiveTerm) * 100;
             
-            // Aylık IRR hesapla (net alınan tutar ve aylık ödemeler üzerinden)
-            const monthlyIRR = calculateIRR(netLoanAmount, monthlyPayment, effectiveTerm);
-            
-            // Yıllık efektif faiz oranı (bileşik)
-            const annualCostRate = (Math.pow(1 + monthlyIRR, 12) - 1) * 100;
-            
-            // Aylık maliyet oranı
-            const monthlyCostRate = monthlyIRR * 100;
+            // Annual cost rate (compound)
+            const annualCostRate = (Math.pow(1 + (monthlyCostRate/100), 12) - 1) * 100;
             
             // Payment dates
             const today = new Date();
@@ -1077,11 +902,7 @@
             // Store current calculation
             currentCalculation = {
                 loanType,
-                requestedLoanAmount,
                 loanAmount,
-                insurancePremium,
-                insuranceType,
-                customerAge,
                 loanTerm,
                 deferralMonths,
                 interestRate: interestRate * 100,
@@ -1092,6 +913,7 @@
                 totalKKDF,
                 totalBSMV,
                 fileExpense,
+                lifeInsuranceTotal,
                 deferralInterestTotal,
                 effectiveRate: rEffective * 100,
                 monthlyCostRate,
@@ -1119,46 +941,12 @@
                 'tasit': 'Taşıt Kredisi'
             };
             
-            // Insurance type names
-            const insuranceTypeNames = {
-                'none': 'Sigortasız',
-                'life': 'Hayat Sigortası',
-                'unemployment': 'İşsizlik Teminatlı'
-            };
-            
             // Summary section
             document.getElementById('summaryLoanType').textContent = loanTypeNames[calc.loanType] || calc.loanType;
-            document.getElementById('summaryLoanAmount').textContent = formatCurrency(calc.requestedLoanAmount);
+            document.getElementById('summaryLoanAmount').textContent = formatCurrency(calc.loanAmount);
             document.getElementById('summaryLoanTerm').textContent = `${calc.loanTerm} ay`;
             document.getElementById('summaryInterestRate').textContent = `%${calc.interestRate.toFixed(2)}`;
             document.getElementById('summaryDeferral').textContent = calc.deferralMonths > 0 ? `${calc.deferralMonths} ay` : 'Yok';
-            
-            // YENİ: Sigorta ile ilgili alanları göster/gizle
-            const insuranceBadge = document.getElementById('insuranceBadge');
-            const summaryInsuranceCard = document.getElementById('summaryInsuranceCard');
-            const summaryTotalLoanCard = document.getElementById('summaryTotalLoanCard');
-            const insurancePremiumCard = document.getElementById('insurancePremiumCard');
-            
-            if (calc.insuranceType !== 'none' && calc.insurancePremium > 0) {
-                insuranceBadge.classList.remove('hidden');
-                insuranceBadge.innerHTML = `<i class="fas fa-shield-alt"></i> ${insuranceTypeNames[calc.insuranceType]}`;
-                
-                summaryInsuranceCard.classList.remove('hidden');
-                document.getElementById('summaryInsurance').textContent = formatCurrency(calc.insurancePremium);
-                
-                summaryTotalLoanCard.classList.remove('hidden');
-                document.getElementById('summaryTotalLoan').textContent = formatCurrency(calc.loanAmount);
-                
-                insurancePremiumCard.classList.remove('hidden');
-                document.getElementById('lifeInsurance').textContent = formatCurrency(calc.insurancePremium);
-                document.getElementById('insuranceNote').textContent = 
-                    `${insuranceTypeNames[calc.insuranceType]} (${calc.customerAge} yaş) - Anaparaya dahil`;
-            } else {
-                insuranceBadge.classList.add('hidden');
-                summaryInsuranceCard.classList.add('hidden');
-                summaryTotalLoanCard.classList.add('hidden');
-                insurancePremiumCard.classList.add('hidden');
-            }
             
             // Payment summary
             document.getElementById('monthlyPayment').textContent = formatCurrency(calc.monthlyPayment);
@@ -1169,6 +957,7 @@
             document.getElementById('totalKKDF').textContent = formatCurrency(calc.totalKKDF);
             document.getElementById('totalBSMV').textContent = formatCurrency(calc.totalBSMV);
             document.getElementById('fileExpense').textContent = formatCurrency(calc.fileExpense);
+            document.getElementById('lifeInsurance').textContent = formatCurrency(calc.lifeInsuranceTotal);
             document.getElementById('deferralInterest').textContent = calc.deferralInterestTotal > 0 ? 
                 formatCurrency(calc.deferralInterestTotal) : '₺0,00';
             
@@ -1235,17 +1024,10 @@
         function exportToExcel() {
             if (!currentCalculation) return;
             
-            const { schedule, insuranceType, insurancePremium, requestedLoanAmount } = currentCalculation;
+            const { schedule } = currentCalculation;
             
             // Prepare data
             const data = [
-                ['Kredi Hesaplama Özeti'],
-                [''],
-                ['Talep Edilen Kredi', requestedLoanAmount],
-                ['Sigorta Primi', insurancePremium],
-                ['Toplam Finanse Edilen', currentCalculation.loanAmount],
-                ['Sigorta Türü', insuranceType === 'none' ? 'Sigortasız' : insuranceType === 'life' ? 'Hayat Sigortası' : 'İşsizlik Teminatlı'],
-                [''],
                 ['Ay', 'Taksit', 'Anapara', 'Faiz', 'KKDF', 'BSMV', 'Kalan Borç']
             ];
             
@@ -1277,34 +1059,17 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
-            const insuranceTypeNames = {
-                'none': 'Sigortasız',
-                'life': 'Hayat Sigortası',
-                'unemployment': 'İşsizlik Teminatlı'
-            };
-            
             // Add title
             doc.setFontSize(16);
             doc.text('Kredi Ödeme Planı', 14, 15);
             
             // Add summary
             doc.setFontSize(10);
-            doc.text(`Talep Edilen Kredi: ${formatCurrency(currentCalculation.requestedLoanAmount)}`, 14, 25);
-            
-            if (currentCalculation.insuranceType !== 'none') {
-                doc.text(`Sigorta Primi: ${formatCurrency(currentCalculation.insurancePremium)}`, 14, 30);
-                doc.text(`Sigorta Türü: ${insuranceTypeNames[currentCalculation.insuranceType]}`, 14, 35);
-                doc.text(`Toplam Finanse Edilen: ${formatCurrency(currentCalculation.loanAmount)}`, 14, 40);
-                doc.text(`Vade: ${currentCalculation.loanTerm} ay`, 14, 45);
-                doc.text(`Faiz: %${currentCalculation.interestRate.toFixed(2)}`, 14, 50);
-                doc.text(`Aylık Taksit: ${formatCurrency(currentCalculation.monthlyPayment)}`, 14, 55);
-                doc.text(`Toplam Ödeme: ${formatCurrency(currentCalculation.totalPayment)}`, 14, 60);
-            } else {
-                doc.text(`Vade: ${currentCalculation.loanTerm} ay`, 14, 30);
-                doc.text(`Faiz: %${currentCalculation.interestRate.toFixed(2)}`, 14, 35);
-                doc.text(`Aylık Taksit: ${formatCurrency(currentCalculation.monthlyPayment)}`, 14, 40);
-                doc.text(`Toplam Ödeme: ${formatCurrency(currentCalculation.totalPayment)}`, 14, 45);
-            }
+            doc.text(`Kredi Tutarı: ${formatCurrency(currentCalculation.loanAmount)}`, 14, 25);
+            doc.text(`Vade: ${currentCalculation.loanTerm} ay`, 14, 30);
+            doc.text(`Faiz: %${currentCalculation.interestRate.toFixed(2)}`, 14, 35);
+            doc.text(`Aylık Taksit: ${formatCurrency(currentCalculation.monthlyPayment)}`, 14, 40);
+            doc.text(`Toplam Ödeme: ${formatCurrency(currentCalculation.totalPayment)}`, 14, 45);
             
             // Add table
             const tableData = currentCalculation.schedule.map(row => [
@@ -1320,7 +1085,7 @@
             doc.autoTable({
                 head: [['Ay', 'Taksit', 'Anapara', 'Faiz', 'KKDF', 'BSMV', 'Kalan']],
                 body: tableData,
-                startY: currentCalculation.insuranceType !== 'none' ? 70 : 55,
+                startY: 55,
                 theme: 'grid',
                 styles: { fontSize: 8 },
                 headStyles: { fillColor: [30, 58, 138] }
@@ -1338,12 +1103,10 @@
                 id: Date.now(),
                 date: new Date().toLocaleDateString('tr-TR'),
                 loanType: currentCalculation.loanType,
-                loanAmount: currentCalculation.requestedLoanAmount,
+                loanAmount: currentCalculation.loanAmount,
                 loanTerm: currentCalculation.loanTerm,
                 interestRate: currentCalculation.interestRate,
-                deferralMonths: currentCalculation.deferralMonths,
-                insuranceType: currentCalculation.insuranceType,
-                customerAge: currentCalculation.customerAge
+                deferralMonths: currentCalculation.deferralMonths
             };
             
             history.unshift(entry);
@@ -1375,12 +1138,6 @@
             
             container.innerHTML = '';
             
-            const insuranceTypeNames = {
-                'none': '',
-                'life': '🛡️ Hayat',
-                'unemployment': '🛡️ İşsizlik'
-            };
-            
             history.forEach(entry => {
                 const loanTypeText = {
                     'ihtiyac': 'İhtiyaç',
@@ -1388,16 +1145,12 @@
                     'konut': 'Konut'
                 }[entry.loanType];
                 
-                const insuranceText = entry.insuranceType && entry.insuranceType !== 'none' 
-                    ? ` • ${insuranceTypeNames[entry.insuranceType]}` 
-                    : '';
-                
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 div.innerHTML = `
                     <div class="history-info">
                         <strong>${formatCurrency(entry.loanAmount)}</strong>
-                        <small>${loanTypeText} • ${entry.loanTerm} ay • %${entry.interestRate.toFixed(2)}${insuranceText} • ${entry.date}</small>
+                        <small>${loanTypeText} • ${entry.loanTerm} ay • %${entry.interestRate.toFixed(2)} • ${entry.date}</small>
                     </div>
                     <div class="history-actions">
                         <button class="btn btn-accent" onclick="loadHistory(${entry.id})">
@@ -1424,16 +1177,6 @@
             document.getElementById('loanTerm').value = entry.loanTerm;
             document.getElementById('deferralMonths').value = entry.deferralMonths || 0;
             document.getElementById('interestRate').value = entry.interestRate.toFixed(2);
-            
-            // YENİ: Sigorta bilgilerini yükle
-            if (entry.insuranceType) {
-                document.getElementById('insuranceType').value = entry.insuranceType;
-                // Trigger change event to show/hide age field
-                document.getElementById('insuranceType').dispatchEvent(new Event('change'));
-            }
-            if (entry.customerAge) {
-                document.getElementById('customerAge').value = entry.customerAge;
-            }
             
             // Scroll to form
             document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });

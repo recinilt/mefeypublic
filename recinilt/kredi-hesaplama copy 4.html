@@ -724,11 +724,11 @@
                 <div class="result-grid">
                     <div class="result-item">
                         <label>İlk Taksit Tarihi</label>
-                        <div class="value" id="firstPaymentDate" style="font-size: 1rem; color: white;">-</div>
+                        <div class="value" id="firstPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
                     </div>
                     <div class="result-item">
                         <label>Son Taksit Tarihi</label>
-                        <div class="value" id="lastPaymentDate" style="font-size: 1rem; color: white;">-</div>
+                        <div class="value" id="lastPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
                     </div>
                     <div class="result-item">
                         <label>Toplam Süre</label>
@@ -941,9 +941,8 @@
             const loanAmount = requestedLoanAmount + insurancePremium;
             
             // KKDF & BSMV (Konut kredisi hariç)
-            // KKDF: %15, BSMV: %15 (7 Temmuz 2023 tarihli 7345 sayılı CB Kararı)
             const kkdfRate = loanType === 'konut' ? 0 : 0.15;
-            const bsmvRate = loanType === 'konut' ? 0 : 0.15;
+            const bsmvRate = loanType === 'konut' ? 0 : 0.05;
             
             // Effective term (actual payment months)
             const effectiveTerm = loanTerm - deferralMonths;
@@ -953,7 +952,7 @@
             const deferralInterestPerMonth = deferralMonths > 0 ? deferralInterestTotal / effectiveTerm : 0;
             
             // Additional costs
-            const fileExpense = requestedLoanAmount * 0.00575; // Binde 5.75 (0.575%) - talep edilen tutar üzerinden
+            const fileExpense = requestedLoanAmount * 0.005; // Binde 5 (0.5%) - talep edilen tutar üzerinden
             
             // Effective interest rate (including taxes)
             // This ensures FIXED monthly payments (annuity method)
@@ -1027,44 +1026,15 @@
             
             // Calculate Annual Cost Rate (YMO) - Yıllık Maliyet Oranı
             // YMO includes all costs: interest, KKDF, BSMV, file expense, insurance
-            // IRR (Internal Rate of Return) yöntemi ile hesaplama
             const totalCost = totalPayment + fileExpense;
             const netLoanAmount = requestedLoanAmount - fileExpense; // Actual amount received
             const totalCostAmount = totalCost - requestedLoanAmount; // Total cost above principal
             
-            // IRR hesaplama fonksiyonu (Newton-Raphson yöntemi)
-            function calculateIRR(netAmount, payment, periods) {
-                let rate = 0.1; // Başlangıç tahmini %10
-                const maxIterations = 100;
-                const tolerance = 0.0000001;
-                
-                for (let i = 0; i < maxIterations; i++) {
-                    let npv = -netAmount;
-                    let dnpv = 0;
-                    
-                    for (let t = 1; t <= periods; t++) {
-                        const factor = Math.pow(1 + rate, t);
-                        npv += payment / factor;
-                        dnpv -= t * payment / (factor * (1 + rate));
-                    }
-                    
-                    const newRate = rate - npv / dnpv;
-                    if (Math.abs(newRate - rate) < tolerance) {
-                        return newRate;
-                    }
-                    rate = newRate;
-                }
-                return rate;
-            }
+            // Monthly cost rate (simple approximation)
+            const monthlyCostRate = (totalCostAmount / requestedLoanAmount / effectiveTerm) * 100;
             
-            // Aylık IRR hesapla (net alınan tutar ve aylık ödemeler üzerinden)
-            const monthlyIRR = calculateIRR(netLoanAmount, monthlyPayment, effectiveTerm);
-            
-            // Yıllık efektif faiz oranı (bileşik)
-            const annualCostRate = (Math.pow(1 + monthlyIRR, 12) - 1) * 100;
-            
-            // Aylık maliyet oranı
-            const monthlyCostRate = monthlyIRR * 100;
+            // Annual cost rate (compound)
+            const annualCostRate = (Math.pow(1 + (monthlyCostRate/100), 12) - 1) * 100;
             
             // Payment dates
             const today = new Date();
