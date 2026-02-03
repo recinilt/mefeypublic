@@ -529,141 +529,24 @@
         
         <!-- Hesaplama Sonuçları -->
         <div id="resultsSection" class="hidden">
-            <!-- Girilen Parametreler Özeti -->
-            <div class="card fade-in">
-                <div class="card-header">
-                    <i class="fas fa-info-circle"></i>
-                    <h2>Kredi Bilgileri</h2>
-                </div>
-                
-                <div class="result-grid">
-                    <div class="result-item">
-                        <label>Kredi Türü</label>
-                        <div class="value" id="summaryLoanType" style="font-size: 1rem; color: var(--primary);">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Kredi Tutarı</label>
-                        <div class="value" id="summaryLoanAmount">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Vade</label>
-                        <div class="value" id="summaryLoanTerm" style="font-size: 1rem;">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Yıllık Faiz</label>
-                        <div class="value" id="summaryInterestRate" style="font-size: 1rem; color: var(--accent);">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Erteleme</label>
-                        <div class="value" id="summaryDeferral" style="font-size: 1rem;">-</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Temel Hesaplama Sonuçları -->
             <div class="card fade-in">
                 <div class="card-header">
                     <i class="fas fa-chart-line"></i>
-                    <h2>Ödeme Özeti</h2>
+                    <h2>Hesaplama Sonuçları</h2>
                 </div>
                 
                 <div class="result-grid">
-                    <div class="result-item accent">
+                    <div class="result-item">
                         <label>Aylık Taksit</label>
                         <div class="value" id="monthlyPayment">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Eşit taksitli ödeme</small>
                     </div>
-                    <div class="result-item">
-                        <label>Toplam Geri Ödeme</label>
+                    <div class="result-item accent">
+                        <label>Toplam Ödeme</label>
                         <div class="value" id="totalPayment">-</div>
                     </div>
                     <div class="result-item">
                         <label>Toplam Faiz</label>
                         <div class="value" id="totalInterest">-</div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Detaylı Maliyet Analizi -->
-            <div class="card fade-in">
-                <div class="card-header">
-                    <i class="fas fa-calculator"></i>
-                    <h2>Maliyet Bileşenleri</h2>
-                </div>
-                
-                <div class="result-grid">
-                    <div class="result-item">
-                        <label>Toplam KKDF</label>
-                        <div class="value" id="totalKKDF" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Faizin %15'i</small>
-                    </div>
-                    <div class="result-item">
-                        <label>Toplam BSMV</label>
-                        <div class="value" id="totalBSMV" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Faizin %5'i</small>
-                    </div>
-                    <div class="result-item">
-                        <label>Dosya Masrafı</label>
-                        <div class="value" id="fileExpense" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Kredi tutarının binde 5'i</small>
-                    </div>
-                    <div class="result-item">
-                        <label>Hayat Sigortası (Tahmini)</label>
-                        <div class="value" id="lifeInsurance" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">İhtiyari - 45 yaş baz alınmıştır</small>
-                    </div>
-                    <div class="result-item">
-                        <label>Erteleme Faizi</label>
-                        <div class="value" id="deferralInterest" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Ödemesiz dönem faizi</small>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Maliyet Oranları -->
-            <div class="card fade-in">
-                <div class="card-header">
-                    <i class="fas fa-percentage"></i>
-                    <h2>Maliyet Oranları</h2>
-                </div>
-                
-                <div class="result-grid">
-                    <div class="result-item accent">
-                        <label>Yıllık Maliyet Oranı (YMO)</label>
-                        <div class="value" id="annualCostRate" style="font-size: 1.5rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Tüm masraflar dahil efektif oran</small>
-                    </div>
-                    <div class="result-item">
-                        <label>Aylık Maliyet Oranı</label>
-                        <div class="value" id="monthlyCostRate" style="font-size: 1.25rem;">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Efektif Faiz Oranı</label>
-                        <div class="value" id="effectiveRate" style="font-size: 1.25rem;">-</div>
-                        <small style="display: block; margin-top: 0.5rem; color: var(--text-light);">Vergiler dahil aylık oran</small>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Tarih Bilgileri -->
-            <div class="card fade-in">
-                <div class="card-header">
-                    <i class="fas fa-calendar-alt"></i>
-                    <h2>Ödeme Takvimi</h2>
-                </div>
-                
-                <div class="result-grid">
-                    <div class="result-item">
-                        <label>İlk Taksit Tarihi</label>
-                        <div class="value" id="firstPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Son Taksit Tarihi</label>
-                        <div class="value" id="lastPaymentDate" style="font-size: 1rem; color: var(--primary);">-</div>
-                    </div>
-                    <div class="result-item">
-                        <label>Toplam Süre</label>
-                        <div class="value" id="totalDuration" style="font-size: 1rem;">-</div>
                     </div>
                 </div>
             </div>
@@ -801,14 +684,6 @@
             const deferralInterestTotal = loanAmount * interestRate * deferralMonths;
             const deferralInterestPerMonth = deferralMonths > 0 ? deferralInterestTotal / effectiveTerm : 0;
             
-            // Additional costs
-            const fileExpense = loanAmount * 0.005; // Binde 5 (0.5%)
-            
-            // Life insurance estimation (based on avg age 45, approx 0.08% monthly for 12 months per 1000 TL)
-            // This is a rough estimate - actual varies by age, term, insurance company
-            const lifeInsuranceMonthly = (loanAmount / 1000) * 0.8; // Approx ₺0.80 per 1000TL per month
-            const lifeInsuranceTotal = lifeInsuranceMonthly * loanTerm;
-            
             // Effective interest rate (including taxes)
             // This ensures FIXED monthly payments (annuity method)
             const r = interestRate;
@@ -821,8 +696,6 @@
             let remainingBalance = loanAmount;
             let totalPayment = 0;
             let totalInterest = 0;
-            let totalKKDF = 0;
-            let totalBSMV = 0;
             
             // Deferral period: NO PAYMENT
             for (let month = 1; month <= deferralMonths; month++) {
@@ -865,8 +738,6 @@
                 
                 totalPayment += payment;
                 totalInterest += totalInterestThisMonth;
-                totalKKDF += kkdf;
-                totalBSMV += bsmv;
                 
                 schedule.push({
                     month,
@@ -879,26 +750,6 @@
                 });
             }
             
-            // Calculate Annual Cost Rate (YMO) - Yıllık Maliyet Oranı
-            // YMO includes all costs: interest, KKDF, BSMV, file expense, insurance
-            const totalCost = totalPayment + fileExpense + lifeInsuranceTotal;
-            const netLoanAmount = loanAmount - fileExpense; // Actual amount received
-            const totalCostAmount = totalCost - loanAmount; // Total cost above principal
-            
-            // Monthly cost rate (simple approximation)
-            const monthlyCostRate = (totalCostAmount / loanAmount / effectiveTerm) * 100;
-            
-            // Annual cost rate (compound)
-            const annualCostRate = (Math.pow(1 + (monthlyCostRate/100), 12) - 1) * 100;
-            
-            // Payment dates
-            const today = new Date();
-            const firstPaymentDate = new Date(today);
-            firstPaymentDate.setMonth(firstPaymentDate.getMonth() + deferralMonths + 1);
-            
-            const lastPaymentDate = new Date(firstPaymentDate);
-            lastPaymentDate.setMonth(lastPaymentDate.getMonth() + effectiveTerm - 1);
-            
             // Store current calculation
             currentCalculation = {
                 loanType,
@@ -907,20 +758,9 @@
                 deferralMonths,
                 interestRate: interestRate * 100,
                 schedule,
-                monthlyPayment,
+                monthlyPayment: monthlyPayment,
                 totalPayment,
-                totalInterest,
-                totalKKDF,
-                totalBSMV,
-                fileExpense,
-                lifeInsuranceTotal,
-                deferralInterestTotal,
-                effectiveRate: rEffective * 100,
-                monthlyCostRate,
-                annualCostRate,
-                firstPaymentDate: firstPaymentDate.toLocaleDateString('tr-TR'),
-                lastPaymentDate: lastPaymentDate.toLocaleDateString('tr-TR'),
-                effectiveTerm
+                totalInterest
             };
             
             // Display results
@@ -932,50 +772,18 @@
         
         // Display results
         function displayResults() {
-            const calc = currentCalculation;
+            const { monthlyPayment, totalPayment, totalInterest, schedule } = currentCalculation;
             
-            // Loan type names
-            const loanTypeNames = {
-                'ihtiyac': 'İhtiyaç Kredisi',
-                'konut': 'Konut Kredisi',
-                'tasit': 'Taşıt Kredisi'
-            };
-            
-            // Summary section
-            document.getElementById('summaryLoanType').textContent = loanTypeNames[calc.loanType] || calc.loanType;
-            document.getElementById('summaryLoanAmount').textContent = formatCurrency(calc.loanAmount);
-            document.getElementById('summaryLoanTerm').textContent = `${calc.loanTerm} ay`;
-            document.getElementById('summaryInterestRate').textContent = `%${calc.interestRate.toFixed(2)}`;
-            document.getElementById('summaryDeferral').textContent = calc.deferralMonths > 0 ? `${calc.deferralMonths} ay` : 'Yok';
-            
-            // Payment summary
-            document.getElementById('monthlyPayment').textContent = formatCurrency(calc.monthlyPayment);
-            document.getElementById('totalPayment').textContent = formatCurrency(calc.totalPayment);
-            document.getElementById('totalInterest').textContent = formatCurrency(calc.totalInterest);
-            
-            // Cost components
-            document.getElementById('totalKKDF').textContent = formatCurrency(calc.totalKKDF);
-            document.getElementById('totalBSMV').textContent = formatCurrency(calc.totalBSMV);
-            document.getElementById('fileExpense').textContent = formatCurrency(calc.fileExpense);
-            document.getElementById('lifeInsurance').textContent = formatCurrency(calc.lifeInsuranceTotal);
-            document.getElementById('deferralInterest').textContent = calc.deferralInterestTotal > 0 ? 
-                formatCurrency(calc.deferralInterestTotal) : '₺0,00';
-            
-            // Cost rates
-            document.getElementById('annualCostRate').textContent = `%${calc.annualCostRate.toFixed(2)}`;
-            document.getElementById('monthlyCostRate').textContent = `%${calc.monthlyCostRate.toFixed(2)}`;
-            document.getElementById('effectiveRate').textContent = `%${calc.effectiveRate.toFixed(2)}`;
-            
-            // Dates
-            document.getElementById('firstPaymentDate').textContent = calc.firstPaymentDate;
-            document.getElementById('lastPaymentDate').textContent = calc.lastPaymentDate;
-            document.getElementById('totalDuration').textContent = `${calc.loanTerm} ay`;
+            // Update summary
+            document.getElementById('monthlyPayment').textContent = formatCurrency(monthlyPayment);
+            document.getElementById('totalPayment').textContent = formatCurrency(totalPayment);
+            document.getElementById('totalInterest').textContent = formatCurrency(totalInterest);
             
             // Update payment table
             const tbody = document.getElementById('paymentTableBody');
             tbody.innerHTML = '';
             
-            calc.schedule.forEach(row => {
+            schedule.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${row.month}</td>
@@ -992,7 +800,7 @@
             // Update early close dropdown
             const select = document.getElementById('earlyCloseMonth');
             select.innerHTML = '<option value="">Seçiniz</option>';
-            calc.schedule.forEach((row, index) => {
+            schedule.forEach((row, index) => {
                 const option = document.createElement('option');
                 option.value = index;
                 option.textContent = `${row.month}. Ay`;
