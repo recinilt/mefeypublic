@@ -948,6 +948,10 @@
             // Effective term (actual payment months)
             const effectiveTerm = loanTerm - deferralMonths;
             
+            // Calculate deferral interest (distributed equally)
+            const deferralInterestTotal = loanAmount * interestRate * deferralMonths;
+            const deferralInterestPerMonth = deferralMonths > 0 ? deferralInterestTotal / effectiveTerm : 0;
+            
             // Additional costs
             const fileExpense = requestedLoanAmount * 0.00575; // Binde 5.75 (0.575%) - talep edilen tutar üzerinden
             
@@ -956,65 +960,53 @@
             const r = interestRate;
             const rEffective = r * (1 + kkdfRate + bsmvRate);
             const n = effectiveTerm;
-            
-            // Erteleme döneminde faiz anaparaya eklenir (capitalize)
-            // adjustedLoanAmount = loanAmount * (1 + rEffective)^deferralMonths
-            const adjustedLoanAmount = deferralMonths > 0 
-                ? loanAmount * Math.pow(1 + rEffective, deferralMonths) 
-                : loanAmount;
-            
-            // Taksit yeni anapara üzerinden hesaplanır (eşit taksitler için)
-            const monthlyPayment = (adjustedLoanAmount * rEffective * Math.pow(1 + rEffective, n)) / (Math.pow(1 + rEffective, n) - 1);
-            
-            // Erteleme döneminde biriken toplam faiz (vergi dahil)
-            const deferralInterestTotal = adjustedLoanAmount - loanAmount;
+            const monthlyPayment = (loanAmount * rEffective * Math.pow(1 + rEffective, n)) / (Math.pow(1 + rEffective, n) - 1);
             
             // Generate schedule
             const schedule = [];
-            let remainingBalance = adjustedLoanAmount;
+            let remainingBalance = loanAmount;
             let totalPayment = 0;
             let totalInterest = 0;
             let totalKKDF = 0;
             let totalBSMV = 0;
             
-            // Erteleme dönemi: Faiz birikir, ödeme yok
-            let deferralBalance = loanAmount;
+            // Deferral period: NO PAYMENT
             for (let month = 1; month <= deferralMonths; month++) {
-                const deferralInterest = deferralBalance * r;
-                const deferralKkdf = deferralInterest * kkdfRate;
-                const deferralBsmv = deferralInterest * bsmvRate;
-                deferralBalance = deferralBalance * (1 + rEffective);
-                
                 schedule.push({
                     month,
                     payment: 0,
                     principal: 0,
-                    interest: deferralInterest,
-                    kkdf: deferralKkdf,
-                    bsmv: deferralBsmv,
-                    remainingBalance: Math.round(deferralBalance * 100) / 100
+                    interest: 0,
+                    kkdf: 0,
+                    bsmv: 0,
+                    remainingBalance: loanAmount
                 });
             }
             
-            // Normal ödeme dönemi
+            // Normal payment period
             for (let month = deferralMonths + 1; month <= loanTerm; month++) {
-                // Kalan bakiye üzerinden faiz hesapla
+                // Monthly interest from remaining balance (base rate)
                 const monthlyInterest = remainingBalance * r;
-                const kkdf = monthlyInterest * kkdfRate;
-                const bsmv = monthlyInterest * bsmvRate;
-                const totalInterestThisMonth = monthlyInterest + kkdf + bsmv;
                 
-                // Anapara ödemesi = Sabit taksit - Toplam faiz
+                // Add deferral interest share
+                const totalBaseInterest = monthlyInterest + deferralInterestPerMonth;
+                
+                // Taxes on base interest
+                const kkdf = totalBaseInterest * kkdfRate;
+                const bsmv = totalBaseInterest * bsmvRate;
+                const totalInterestThisMonth = totalBaseInterest + kkdf + bsmv;
+                
+                // Principal payment = Fixed payment - Total interest
                 let principal = monthlyPayment - totalInterestThisMonth;
                 
-                // Son ödeme için yuvarlama düzeltmesi (küçük farklar için)
+                // Adjust for last payment (rounding errors)
                 if (month === loanTerm) {
                     principal = remainingBalance;
                 }
                 
                 remainingBalance -= principal;
                 
-                // Toplam ödeme (sabit taksit)
+                // Total payment (FIXED for annuity method)
                 const payment = principal + totalInterestThisMonth;
                 
                 totalPayment += payment;
@@ -1026,10 +1018,10 @@
                     month,
                     payment,
                     principal,
-                    interest: monthlyInterest,
+                    interest: totalBaseInterest,
                     kkdf,
                     bsmv,
-                    remainingBalance: Math.max(0, Math.round(remainingBalance * 100) / 100)
+                    remainingBalance: Math.max(0, remainingBalance)
                 });
             }
             
