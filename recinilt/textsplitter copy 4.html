@@ -63,29 +63,6 @@
             border-color: #667eea;
         }
 
-        .text-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 16px;
-            padding: 10px 12px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: -10px;
-            margin-bottom: 10px;
-        }
-
-        .text-stats span {
-            white-space: nowrap;
-        }
-
-        .text-stats strong {
-            color: #495057;
-        }
-
         .presets-section {
             margin-bottom: 25px;
         }
@@ -380,12 +357,6 @@
             .custom-preset input {
                 min-width: 100%;
             }
-
-            .text-stats {
-                font-size: 11px;
-                gap: 6px 12px;
-                padding: 8px 10px;
-            }
         }
     </style>
 </head>
@@ -400,15 +371,6 @@
         <div class="input-section">
             <label for="textInput">Metninizi Buraya Yapıştırın:</label>
             <textarea id="textInput" placeholder="Uzun metninizi buraya yapıştırın... (Paragraflar ve satır atlamaları korunur)"></textarea>
-            <div class="text-stats" id="textStats">
-                <span><strong>0</strong> karakter</span>
-                <span><strong>0</strong> kelime</span>
-                <span><strong>0</strong> cümle</span>
-                <span><strong>0</strong> paragraf</span>
-                <span><strong>0</strong> satır</span>
-                <span><strong>0</strong> A4 sayfa</span>
-                <span>📖 <strong>0</strong> dk okuma</span>
-            </div>
         </div>
 
         <div class="presets-section">
@@ -577,51 +539,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             loadCustomPresets();
-            updateTextStats();
         });
-
-        // Text stats güncelleme
-        document.getElementById('textInput').addEventListener('input', updateTextStats);
-
-        function updateTextStats() {
-            const text = document.getElementById('textInput').value;
-            const statsContainer = document.getElementById('textStats');
-
-            // Karakter sayısı (boşluklu)
-            const charCount = text.length;
-
-            // Kelime sayısı
-            const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
-            const wordCount = words.length;
-
-            // Cümle sayısı
-            const sentences = text.match(/[^.!?]*[.!?]+/g) || [];
-            const sentenceCount = sentences.length;
-
-            // Paragraf sayısı
-            const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
-            const paragraphCount = text.trim() ? Math.max(paragraphs.length, 1) : 0;
-
-            // Satır sayısı
-            const lines = text.split('\n');
-            const lineCount = text.trim() ? lines.length : 0;
-
-            // A4 sayfa (tek satır aralığı ~3000 karakter)
-            const a4Count = charCount > 0 ? (charCount / 3000).toFixed(1) : 0;
-
-            // Okuma süresi (200 kelime/dakika)
-            const readingTime = Math.ceil(wordCount / 200);
-
-            statsContainer.innerHTML = `
-                <span><strong>${charCount.toLocaleString('tr-TR')}</strong> karakter</span>
-                <span><strong>${wordCount.toLocaleString('tr-TR')}</strong> kelime</span>
-                <span><strong>${sentenceCount.toLocaleString('tr-TR')}</strong> cümle</span>
-                <span><strong>${paragraphCount.toLocaleString('tr-TR')}</strong> paragraf</span>
-                <span><strong>${lineCount.toLocaleString('tr-TR')}</strong> satır</span>
-                <span><strong>${a4Count}</strong> A4 sayfa</span>
-                <span>📖 <strong>${readingTime}</strong> dk okuma</span>
-            `;
-        }
 
         // Event delegation for all preset buttons
         document.addEventListener('click', (e) => {
