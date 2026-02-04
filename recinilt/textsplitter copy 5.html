@@ -402,7 +402,6 @@
             <textarea id="textInput" placeholder="Uzun metninizi buraya yapıştırın... (Paragraflar ve satır atlamaları korunur)"></textarea>
             <div class="text-stats" id="textStats">
                 <span><strong>0</strong> karakter</span>
-                <span><strong>0</strong> boşluksuz</span>
                 <span><strong>0</strong> kelime</span>
                 <span><strong>0</strong> cümle</span>
                 <span><strong>0</strong> paragraf</span>
@@ -591,9 +590,6 @@
             // Karakter sayısı (boşluklu)
             const charCount = text.length;
 
-            // Karakter sayısı (boşluksuz)
-            const charCountNoSpace = text.replace(/\s/g, '').length;
-
             // Kelime sayısı
             const words = text.trim() ? text.trim().split(/\s+/).filter(w => w.length > 0) : [];
             const wordCount = words.length;
@@ -606,32 +602,18 @@
             const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim().length > 0);
             const paragraphCount = text.trim() ? Math.max(paragraphs.length, 1) : 0;
 
-            // Satır sayısı (enter ile ayrılan)
+            // Satır sayısı
             const lines = text.split('\n');
             const lineCount = text.trim() ? lines.length : 0;
 
-            // A4 sayfa hesaplama (HİBRİT YÖNTEM)
-            // Her satırın görsel satır sayısını hesapla (80 karakter = 1 satır, boş satır = 1 satır)
-            // A4 tek satır aralığı = ~45 satır/sayfa
-            const CHARS_PER_LINE = 80;
-            const LINES_PER_A4 = 45;
-            
-            let visualLineCount = 0;
-            if (text.trim()) {
-                for (const line of lines) {
-                    // Boş satır bile 1 satır yer kaplar
-                    // Dolu satırlar wrap olabilir
-                    visualLineCount += Math.max(1, Math.ceil(line.length / CHARS_PER_LINE));
-                }
-            }
-            const a4Count = visualLineCount > 0 ? (visualLineCount / LINES_PER_A4).toFixed(1) : 0;
+            // A4 sayfa (tek satır aralığı ~3000 karakter)
+            const a4Count = charCount > 0 ? (charCount / 3000).toFixed(1) : 0;
 
             // Okuma süresi (200 kelime/dakika)
             const readingTime = Math.ceil(wordCount / 200);
 
             statsContainer.innerHTML = `
                 <span><strong>${charCount.toLocaleString('tr-TR')}</strong> karakter</span>
-                <span><strong>${charCountNoSpace.toLocaleString('tr-TR')}</strong> boşluksuz</span>
                 <span><strong>${wordCount.toLocaleString('tr-TR')}</strong> kelime</span>
                 <span><strong>${sentenceCount.toLocaleString('tr-TR')}</strong> cümle</span>
                 <span><strong>${paragraphCount.toLocaleString('tr-TR')}</strong> paragraf</span>
