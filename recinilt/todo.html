@@ -127,7 +127,8 @@
             transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .task:hover {
@@ -143,8 +144,13 @@
             opacity: 0.5;
         }
 
+        .task.moving {
+            opacity: 0.6;
+        }
+
         .task-content {
             flex: 1;
+            min-width: 150px;
         }
 
         .checkbox {
@@ -152,17 +158,70 @@
             height: 20px;
             cursor: pointer;
             accent-color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .task-controls {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .arrow-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .arrow-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+        }
+
+        .arrow-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .arrow-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .todo .arrow-btn:hover:not(:disabled) {
+            background: #3b82f6;
+        }
+
+        .doing .arrow-btn:hover:not(:disabled) {
+            background: #f59e0b;
+        }
+
+        .done .arrow-btn:hover:not(:disabled) {
+            background: #10b981;
         }
 
         .delete-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 6px 12px;
+            min-width: 32px;
+            height: 32px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
             transition: background 0.3s;
+            flex-shrink: 0;
         }
 
         .delete-btn:hover {
@@ -210,9 +269,20 @@
             color: white;
         }
 
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: white;
+        }
+
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .modal {
@@ -246,59 +316,56 @@
 
         .storage-selection {
             display: flex;
-            justify-content: center;
             gap: 20px;
-            margin: 20px 0;
+            margin-bottom: 20px;
             flex-wrap: wrap;
         }
 
         .storage-option {
-            background: white;
-            border: 3px solid #ddd;
-            border-radius: 15px;
+            flex: 1;
+            min-width: 200px;
             padding: 20px;
+            border: 3px solid #e5e7eb;
+            border-radius: 12px;
             cursor: pointer;
             text-align: center;
-            min-width: 200px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
         .storage-option:hover {
+            border-color: #3b82f6;
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .storage-option.selected {
-            border-color: #667eea;
-            background: #f0f8ff;
+            border-color: #10b981;
+            background: #f0fdf4;
         }
 
         .storage-option h3 {
-            color: #333;
             margin-bottom: 10px;
+            color: #333;
         }
 
-        .storage-option p {
-            color: #666;
-            font-size: 0.9em;
-        }
-
-        .github-login {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
+        .login-form {
+            display: none;
             margin-top: 20px;
         }
 
+        .login-form.active {
+            display: block;
+        }
+
         .form-group {
-            margin: 15px 0;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            font-weight: bold;
             margin-bottom: 5px;
-            color: #333;
+            color: #666;
+            font-weight: bold;
         }
 
         .form-group input {
@@ -311,305 +378,623 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #3b82f6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .storage-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
         }
 
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4caf50;
-            color: white;
-            padding: 15px 25px;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            font-weight: bold;
+            transition: top 0.3s;
+            z-index: 3000;
         }
 
         .notification.show {
-            transform: translateX(0);
+            top: 20px;
         }
 
-        .storage-info {
-            text-align: center;
-            color: white;
-            font-size: 0.9em;
+        .import-export {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .import-export h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .file-input {
             margin-bottom: 10px;
         }
 
         @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
             .board {
                 grid-template-columns: 1fr;
             }
-            
-            .storage-selection {
-                flex-direction: column;
-                align-items: center;
+
+            .storage-info {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+                padding: 8px 15px;
             }
 
-            .storage-option {
-                min-width: auto;
+            .control-panel {
+                padding: 15px;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+
+            .task {
+                padding: 10px;
+                gap: 6px;
+            }
+
+            .task-content {
+                min-width: 100%;
+                order: 2;
+            }
+
+            .checkbox {
+                order: 1;
+            }
+
+            .task-controls {
+                order: 3;
                 width: 100%;
-                max-width: 300px;
+                justify-content: flex-start;
+            }
+
+            .arrow-btn {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                font-size: 16px;
+            }
+
+            .delete-btn {
+                height: 36px;
+                min-width: 36px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="storage-info" id="storageInfo">💻 Yerel kayıt</div>
+    <div class="notification" id="notification"></div>
+
     <div class="container">
-        <h1>📋 Yapılacaklar Listem</h1>
-        
-        <div class="storage-info" id="storageInfo">💾 Yerel kayıt</div>
-        
+        <h1>📋 Yapılacaklar Listesi</h1>
+
         <div class="stats-bar">
             <div class="stat-item">
                 <span class="stat-number" id="todoCount">0</span>
-                <small>Yapılacak</small>
+                <span>Yapılacak</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number" id="doingCount">0</span>
-                <small>Yapılıyor</small>
+                <span>Yapılıyor</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number" id="doneCount">0</span>
-                <small>Tamamlandı</small>
+                <span>Tamamlandı</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number" id="totalCount">0</span>
-                <small>Toplam</small>
+                <span>Toplam</span>
             </div>
         </div>
 
         <div class="control-panel">
-            <button class="btn btn-primary" onclick="saveAllTasks()">💾 Kaydet</button>
             <button class="btn btn-secondary" onclick="loadAllTasks()">📥 Yükle</button>
-            <button class="btn btn-danger" onclick="changeStorageMethod()">⚙️ Kayıt Yöntemi</button>
+            <button class="btn btn-primary" onclick="saveAllTasks()">💾 Kaydet</button>
+            <button class="btn btn-success" id="undoBtn" onclick="undoLastAction()" disabled>↶ Geri Al</button>
+            <button class="btn btn-success" id="redoBtn" onclick="redoLastAction()" disabled>↷ İleri Al</button>
+            <button class="btn btn-secondary" onclick="changeStorageMethod()">🔄 Kayıt Yöntemi Değiştir</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('exportModal').style.display='flex'">📤 İçe/Dışa Aktar</button>
+            <button class="btn btn-danger" onclick="if(confirm('Tüm görevler silinecek. Emin misiniz?')) clearAllTasks()">🗑️ Tümünü Sil</button>
         </div>
-        
+
         <div class="board">
-            <!-- Yapılacaklar -->
             <div class="column todo">
-                <div class="column-header todo-header">📝 Yapılacaklar</div>
+                <div class="column-header todo-header">📌 Yapılacak</div>
                 <div class="add-task">
-                    <input type="text" id="todoInput" placeholder="Yeni görev ekle...">
-                    <button onclick="addTask('todo')">Ekle</button>
+                    <input type="text" id="todoInput" placeholder="Yeni görev ekle..." onkeypress="if(event.key==='Enter') addTask('todo')">
+                    <button onclick="addTask('todo')">➕</button>
                 </div>
-                <div class="task-list" id="todoList" data-column="todo"></div>
+                <div class="task-list" id="todoList" ondrop="drop(event, 'todo')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div>
             </div>
 
-            <!-- Yapıyor Olduklarım -->
             <div class="column doing">
-                <div class="column-header doing-header">🔄 Yapıyor Olduklarım</div>
+                <div class="column-header doing-header">⚡ Yapılıyor</div>
                 <div class="add-task">
-                    <input type="text" id="doingInput" placeholder="Yeni görev ekle...">
-                    <button onclick="addTask('doing')">Ekle</button>
+                    <input type="text" id="doingInput" placeholder="Yeni görev ekle..." onkeypress="if(event.key==='Enter') addTask('doing')">
+                    <button onclick="addTask('doing')">➕</button>
                 </div>
-                <div class="task-list" id="doingList" data-column="doing"></div>
+                <div class="task-list" id="doingList" ondrop="drop(event, 'doing')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div>
             </div>
 
-            <!-- Yaptıklarım -->
             <div class="column done">
-                <div class="column-header done-header">✅ Yaptıklarım</div>
-                <div class="task-list" id="doneList" data-column="done"></div>
+                <div class="column-header done-header">✅ Tamamlandı</div>
+                <div class="add-task">
+                    <input type="text" id="doneInput" placeholder="Yeni görev ekle..." onkeypress="if(event.key==='Enter') addTask('done')">
+                    <button onclick="addTask('done')">➕</button>
+                </div>
+                <div class="task-list" id="doneList" ondrop="drop(event, 'done')" ondragover="allowDrop(event)" ondragleave="dragLeave(event)"></div>
             </div>
         </div>
     </div>
 
-    <!-- Kayıt Seçimi Modal -->
-    <div id="storageModal" class="modal">
+    <!-- Storage Modal -->
+    <div class="modal" id="storageModal">
         <div class="modal-content">
-            <h2>💾 Kayıt Yöntemi Seçimi</h2>
-            <p style="text-align: center; margin-bottom: 30px;">Yapılacaklar listenizi nerede saklamak istiyorsunuz?</p>
-            
+            <h2>💾 Kayıt Yöntemi Seçin</h2>
             <div class="storage-selection">
                 <div class="storage-option" onclick="selectStorage('local')">
                     <h3>💻 Yerel Kayıt</h3>
-                    <p>Verileriniz sadece bu tarayıcıda saklanır. Pratik ve hızlı başlangıç.</p>
-                    <small style="color: #28a745; font-weight: bold;">ÖNERİLEN</small>
+                    <p>Veriler cihazınızda saklanır</p>
                 </div>
-                
                 <div class="storage-option" onclick="selectStorage('github')">
-                    <h3>☁️ GitHub Kayıt</h3>
-                    <p>Verileriniz GitHub'da güvenle saklanır. Her cihazdan erişebilirsiniz.</p>
+                    <h3>☁️ GitHub Kaydı</h3>
+                    <p>Veriler GitHub'da saklanır</p>
                 </div>
             </div>
-            
-            <div id="githubLogin" style="display: none;" class="github-login">
-                <h3 style="text-align: center; margin-bottom: 20px;">🔑 GitHub Giriş</h3>
-                
+
+            <div class="login-form" id="githubLogin">
                 <div class="form-group">
-                    <label>👤 Kullanıcı Adı:</label>
-                    <input type="text" id="loginUsername" placeholder="Kullanıcı adınızı girin">
+                    <label>Kullanıcı Adı:</label>
+                    <input type="text" id="loginUsername" placeholder="GitHub kullanıcı adı">
                 </div>
-                
                 <div class="form-group">
-                    <label>🔒 Şifre:</label>
-                    <input type="password" id="loginPassword" placeholder="Şifrenizi girin">
+                    <label>Şifre:</label>
+                    <input type="password" id="loginPassword" placeholder="Şifre">
                 </div>
             </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn btn-primary" onclick="confirmStorageSelection()">✅ Seçimimi Onayla</button>
+
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="confirmStorage()">✅ Onayla</button>
             </div>
         </div>
     </div>
 
-    <div class="notification" id="notification"></div>
-    <script src="5t-github-parametreleri.js"></script>
-    <script>
-        // GitHub Parametreleri - Kendinize göre düzenleyin
-        
+    <!-- Export/Import Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <h2>📤 İçe/Dışa Aktarma</h2>
+            
+            <div class="import-export">
+                <h3>📥 İçe Aktar</h3>
+                <input type="file" id="importFile" accept=".json" class="file-input">
+                <button class="btn btn-secondary" onclick="importTasks()">📥 Dosyadan Yükle</button>
+            </div>
 
-        let draggedElement = null;
-        let storageMethod = 'local';
-        let currentUser = null;
-        let userDatabase = {};
+            <div class="import-export">
+                <h3>📤 Dışa Aktar</h3>
+                <button class="btn btn-primary" onclick="exportTasks()">💾 JSON Olarak İndir</button>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="btn btn-secondary" onclick="document.getElementById('exportModal').style.display='none'">❌ Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="github-parametreleri.js"></script>
+    <script>
+        // Global değişkenler
         let tasksData = {
             todo: [],
             doing: [],
             done: []
         };
 
-        window.onload = function() {
-            if (!checkStorageSettings()) {
-                document.getElementById('storageModal').style.display = 'flex';
-            } else {
-                loadAllTasks();
+        let draggedElement = null;
+        let storageMethod = 'local';
+        let currentUser = null;
+        let userDatabase = {};
+
+        
+        // Undo/Redo sistemi
+        let undoStack = [];
+        let redoStack = [];
+        const MAX_UNDO_STACK = 50;
+
+        function saveStateForUndo() {
+            const currentState = JSON.parse(JSON.stringify(tasksData));
+            undoStack.push(currentState);
+            if (undoStack.length > MAX_UNDO_STACK) {
+                undoStack.shift();
             }
-            updateStats();
-        };
+            redoStack = [];
+            updateUndoRedoButtons();
+        }
+
+        function undoLastAction() {
+            if (undoStack.length === 0) {
+                showNotification('⚠️ Geri alınacak işlem yok!');
+                return;
+            }
+            
+            const currentState = JSON.parse(JSON.stringify(tasksData));
+            redoStack.push(currentState);
+            
+            const previousState = undoStack.pop();
+            tasksData = previousState;
+            
+            renderAllTasks();
+            autoSave();
+            updateUndoRedoButtons();
+            showNotification('↶ İşlem geri alındı!');
+        }
+
+        function redoLastAction() {
+            if (redoStack.length === 0) {
+                showNotification('⚠️ İleri alınacak işlem yok!');
+                return;
+            }
+            
+            const currentState = JSON.parse(JSON.stringify(tasksData));
+            undoStack.push(currentState);
+            
+            const nextState = redoStack.pop();
+            tasksData = nextState;
+            
+            renderAllTasks();
+            autoSave();
+            updateUndoRedoButtons();
+            showNotification('↷ İşlem ileri alındı!');
+        }
+
+        function updateUndoRedoButtons() {
+            document.getElementById('undoBtn').disabled = undoStack.length === 0;
+            document.getElementById('redoBtn').disabled = redoStack.length === 0;
+        }
 
         function addTask(column) {
             const input = document.getElementById(column + 'Input');
             const text = input.value.trim();
             
-            if (text === '') return;
-
-            const taskList = document.getElementById(column + 'List');
-            const task = createTaskElement(text, column);
-            taskList.appendChild(task);
+            if (text === '') {
+                showNotification('⚠️ Görev metni boş olamaz!');
+                return;
+            }
             
+            saveStateForUndo();
             tasksData[column].push(text);
+            
+            const task = createTaskElement(text, column);
+            document.getElementById(column + 'List').appendChild(task);
             
             input.value = '';
             updateStats();
             autoSave();
+            showNotification('✅ Görev eklendi!');
         }
 
         function createTaskElement(text, column) {
             const task = document.createElement('div');
             task.className = 'task';
             task.draggable = true;
+            task.dataset.column = column;
             
-            if (column === 'doing') {
-                task.innerHTML = `
-                    <input type="checkbox" class="checkbox" onchange="moveTaskToDone(this)">
-                    <span class="task-content">${text}</span>
-                    <button class="delete-btn" onclick="deleteTask(this)">Sil</button>
-                `;
-            } else {
-                task.innerHTML = `
-                    <span class="task-content">${text}</span>
-                    <button class="delete-btn" onclick="deleteTask(this)">Sil</button>
-                `;
-            }
-
-            task.addEventListener('dragstart', handleDragStart);
-            task.addEventListener('dragend', handleDragEnd);
-
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'checkbox';
+            checkbox.onchange = function() {
+                if (this.checked && column !== 'done') {
+                    saveStateForUndo();
+                    moveTaskToColumn(task, 'done');
+                    showNotification('✅ Görev tamamlandı!');
+                }
+            };
+            
+            const content = document.createElement('span');
+            content.className = 'task-content';
+            content.textContent = text;
+            
+            const controls = document.createElement('div');
+            controls.className = 'task-controls';
+            
+            // Yukarı butonu
+            const upBtn = document.createElement('button');
+            upBtn.className = 'arrow-btn';
+            upBtn.innerHTML = '↑';
+            upBtn.title = 'Yukarı taşı';
+            upBtn.onclick = () => moveTaskUp(task);
+            
+            // Aşağı butonu
+            const downBtn = document.createElement('button');
+            downBtn.className = 'arrow-btn';
+            downBtn.innerHTML = '↓';
+            downBtn.title = 'Aşağı taşı';
+            downBtn.onclick = () => moveTaskDown(task);
+            
+            // Sol butonu
+            const leftBtn = document.createElement('button');
+            leftBtn.className = 'arrow-btn';
+            leftBtn.innerHTML = '←';
+            leftBtn.title = 'Önceki kategoriye taşı';
+            leftBtn.onclick = () => moveTaskLeft(task);
+            
+            // Sağ butonu
+            const rightBtn = document.createElement('button');
+            rightBtn.className = 'arrow-btn';
+            rightBtn.innerHTML = '→';
+            rightBtn.title = 'Sonraki kategoriye taşı';
+            rightBtn.onclick = () => moveTaskRight(task);
+            
+            // Sil butonu
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = '🗑️';
+            deleteBtn.onclick = function() {
+                if (confirm('Bu görevi silmek istediğinize emin misiniz?')) {
+                    saveStateForUndo();
+                    const taskText = content.textContent;
+                    const index = tasksData[column].indexOf(taskText);
+                    if (index > -1) {
+                        tasksData[column].splice(index, 1);
+                    }
+                    task.remove();
+                    updateStats();
+                    autoSave();
+                    showNotification('🗑️ Görev silindi!');
+                }
+            };
+            
+            controls.appendChild(upBtn);
+            controls.appendChild(downBtn);
+            controls.appendChild(leftBtn);
+            controls.appendChild(rightBtn);
+            controls.appendChild(deleteBtn);
+            
+            task.appendChild(checkbox);
+            task.appendChild(content);
+            task.appendChild(controls);
+            
+            task.addEventListener('dragstart', dragStart);
+            task.addEventListener('dragend', dragEnd);
+            
+            updateArrowButtons(task);
+            
             return task;
         }
 
-        function moveTaskToDone(checkbox) {
-            const task = checkbox.parentElement;
-            const text = task.querySelector('.task-content').textContent;
+        function updateArrowButtons(task) {
+            const column = task.dataset.column;
+            const list = document.getElementById(column + 'List');
+            const tasks = Array.from(list.children);
+            const index = tasks.indexOf(task);
             
-            task.remove();
+            const upBtn = task.querySelector('.arrow-btn:nth-child(1)');
+            const downBtn = task.querySelector('.arrow-btn:nth-child(2)');
+            const leftBtn = task.querySelector('.arrow-btn:nth-child(3)');
+            const rightBtn = task.querySelector('.arrow-btn:nth-child(4)');
             
-            // Doing listesinden çıkar
-            tasksData.doing = tasksData.doing.filter(t => t !== text);
+            // Yukarı/Aşağı butonları
+            upBtn.disabled = (index === 0);
+            downBtn.disabled = (index === tasks.length - 1);
             
-            const doneList = document.getElementById('doneList');
-            const newTask = createTaskElement(text, 'done');
-            doneList.appendChild(newTask);
+            // Sol/Sağ butonları
+            leftBtn.disabled = (column === 'todo');
+            rightBtn.disabled = (column === 'done');
+        }
+
+        function updateAllArrowButtons() {
+            ['todo', 'doing', 'done'].forEach(column => {
+                const list = document.getElementById(column + 'List');
+                const tasks = Array.from(list.children);
+                tasks.forEach(task => updateArrowButtons(task));
+            });
+        }
+
+        function moveTaskUp(task) {
+            const column = task.dataset.column;
+            const list = document.getElementById(column + 'List');
+            const tasks = Array.from(list.children);
+            const index = tasks.indexOf(task);
             
-            tasksData.done.push(text);
+            if (index === 0) {
+                showNotification('⚠️ Görev zaten en üstte!');
+                return;
+            }
             
+            saveStateForUndo();
+            task.classList.add('moving');
+            
+            const taskText = task.querySelector('.task-content').textContent;
+            tasksData[column].splice(index, 1);
+            tasksData[column].splice(index - 1, 0, taskText);
+            
+            list.insertBefore(task, tasks[index - 1]);
+            
+            setTimeout(() => {
+                task.classList.remove('moving');
+                updateAllArrowButtons();
+                autoSave();
+                showNotification('⬆️ Görev yukarı taşındı!');
+            }, 300);
+        }
+
+        function moveTaskDown(task) {
+            const column = task.dataset.column;
+            const list = document.getElementById(column + 'List');
+            const tasks = Array.from(list.children);
+            const index = tasks.indexOf(task);
+            
+            if (index === tasks.length - 1) {
+                showNotification('⚠️ Görev zaten en altta!');
+                return;
+            }
+            
+            saveStateForUndo();
+            task.classList.add('moving');
+            
+            const taskText = task.querySelector('.task-content').textContent;
+            tasksData[column].splice(index, 1);
+            tasksData[column].splice(index + 1, 0, taskText);
+            
+            list.insertBefore(tasks[index + 1], task);
+            
+            setTimeout(() => {
+                task.classList.remove('moving');
+                updateAllArrowButtons();
+                autoSave();
+                showNotification('⬇️ Görev aşağı taşındı!');
+            }, 300);
+        }
+
+        function moveTaskLeft(task) {
+            const currentColumn = task.dataset.column;
+            let targetColumn;
+            
+            if (currentColumn === 'doing') {
+                targetColumn = 'todo';
+            } else if (currentColumn === 'done') {
+                targetColumn = 'doing';
+            } else {
+                showNotification('⚠️ Görev zaten ilk kategoride!');
+                return;
+            }
+            
+            saveStateForUndo();
+            task.classList.add('moving');
+            
+            setTimeout(() => {
+                moveTaskToColumn(task, targetColumn);
+                task.classList.remove('moving');
+                showNotification('⬅️ Görev önceki kategoriye taşındı!');
+            }, 300);
+        }
+
+        function moveTaskRight(task) {
+            const currentColumn = task.dataset.column;
+            let targetColumn;
+            
+            if (currentColumn === 'todo') {
+                targetColumn = 'doing';
+            } else if (currentColumn === 'doing') {
+                targetColumn = 'done';
+            } else {
+                showNotification('⚠️ Görev zaten son kategoride!');
+                return;
+            }
+            
+            saveStateForUndo();
+            task.classList.add('moving');
+            
+            setTimeout(() => {
+                moveTaskToColumn(task, targetColumn);
+                task.classList.remove('moving');
+                showNotification('➡️ Görev sonraki kategoriye taşındı!');
+            }, 300);
+        }
+
+        function moveTaskToColumn(task, targetColumn) {
+            const currentColumn = task.dataset.column;
+            const taskText = task.querySelector('.task-content').textContent;
+            
+            const currentIndex = tasksData[currentColumn].indexOf(taskText);
+            if (currentIndex > -1) {
+                tasksData[currentColumn].splice(currentIndex, 1);
+            }
+            
+            tasksData[targetColumn].push(taskText);
+            
+            task.dataset.column = targetColumn;
+            task.className = 'task';
+            
+            const targetList = document.getElementById(targetColumn + 'List');
+            targetList.appendChild(task);
+            
+            updateArrowButtons(task);
+            updateAllArrowButtons();
             updateStats();
             autoSave();
         }
 
-        function deleteTask(button) {
-            const task = button.parentElement;
-            const text = task.querySelector('.task-content').textContent;
-            const column = task.closest('.task-list').dataset.column;
-            
-            tasksData[column] = tasksData[column].filter(t => t !== text);
-            
-            task.remove();
-            updateStats();
-            autoSave();
-        }
-
-        function handleDragStart(e) {
+        function dragStart(e) {
             draggedElement = this;
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
         }
 
-        function handleDragEnd(e) {
+        function dragEnd() {
             this.classList.remove('dragging');
-            document.querySelectorAll('.task-list').forEach(list => {
-                list.classList.remove('drag-over');
-            });
+            draggedElement = null;
         }
 
-        document.querySelectorAll('.task-list').forEach(list => {
-            list.addEventListener('dragover', e => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                list.classList.add('drag-over');
-            });
+        function allowDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
 
-            list.addEventListener('dragleave', e => {
-                list.classList.remove('drag-over');
-            });
+        function dragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
 
-            list.addEventListener('drop', e => {
-                e.preventDefault();
-                list.classList.remove('drag-over');
-                
-                if (draggedElement) {
-                    const text = draggedElement.querySelector('.task-content').textContent;
-                    const sourceColumn = draggedElement.closest('.task-list').dataset.column;
-                    const targetColumn = list.dataset.column;
-                    
-                    // Eski listeden çıkar
-                    tasksData[sourceColumn] = tasksData[sourceColumn].filter(t => t !== text);
-                    
-                    // Yeni listeye ekle
-                    tasksData[targetColumn].push(text);
-                    
-                    draggedElement.remove();
-                    const newTask = createTaskElement(text, targetColumn);
-                    list.appendChild(newTask);
-                    
-                    updateStats();
-                    autoSave();
-                }
-            });
-        });
-
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('keypress', e => {
-                if (e.key === 'Enter') {
-                    const column = input.id.replace('Input', '');
-                    addTask(column);
-                }
-            });
-        });
+        function drop(e, targetColumn) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (!draggedElement) return;
+            
+            saveStateForUndo();
+            
+            const sourceColumn = draggedElement.dataset.column;
+            const taskText = draggedElement.querySelector('.task-content').textContent;
+            
+            const sourceIndex = tasksData[sourceColumn].indexOf(taskText);
+            if (sourceIndex > -1) {
+                tasksData[sourceColumn].splice(sourceIndex, 1);
+            }
+            
+            tasksData[targetColumn].push(taskText);
+            
+            draggedElement.dataset.column = targetColumn;
+            draggedElement.className = 'task';
+            
+            e.currentTarget.appendChild(draggedElement);
+            
+            updateArrowButtons(draggedElement);
+            updateAllArrowButtons();
+            updateStats();
+            autoSave();
+            showNotification('✅ Görev taşındı!');
+        }
 
         function updateStats() {
             document.getElementById('todoCount').textContent = tasksData.todo.length;
@@ -619,28 +1004,78 @@
                 tasksData.todo.length + tasksData.doing.length + tasksData.done.length;
         }
 
-        // ===== GITHUB ENTEGRASYONU =====
+        function clearAllTasks() {
+            saveStateForUndo();
+            tasksData = { todo: [], doing: [], done: [] };
+            
+            document.getElementById('todoList').innerHTML = '';
+            document.getElementById('doingList').innerHTML = '';
+            document.getElementById('doneList').innerHTML = '';
+            
+            updateStats();
+            autoSave();
+            showNotification('🗑️ Tüm görevler silindi!');
+        }
+
+        function exportTasks() {
+            const dataStr = JSON.stringify(tasksData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'yapilacaklar_' + new Date().toISOString().split('T')[0] + '.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('💾 Görevler dışa aktarıldı!');
+        }
+
+        function importTasks() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showNotification('⚠️ Lütfen bir dosya seçin!');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    saveStateForUndo();
+                    const imported = JSON.parse(e.target.result);
+                    tasksData = imported;
+                    renderAllTasks();
+                    autoSave();
+                    showNotification('📥 Görevler içe aktarıldı!');
+                    document.getElementById('exportModal').style.display = 'none';
+                } catch (error) {
+                    showNotification('❌ Geçersiz dosya formatı!');
+                }
+            };
+            reader.readAsText(file);
+        }
 
         function selectStorage(method) {
             document.querySelectorAll('.storage-option').forEach(opt => opt.classList.remove('selected'));
             event.target.closest('.storage-option').classList.add('selected');
             storageMethod = method;
             
-            const githubLogin = document.getElementById('githubLogin');
             if (method === 'github') {
-                githubLogin.style.display = 'block';
+                document.getElementById('githubLogin').classList.add('active');
             } else {
-                githubLogin.style.display = 'none';
+                document.getElementById('githubLogin').classList.remove('active');
             }
         }
 
-        async function confirmStorageSelection() {
+        async function confirmStorage() {
             if (storageMethod === 'github') {
                 const username = document.getElementById('loginUsername').value.trim();
                 const password = document.getElementById('loginPassword').value.trim();
                 
                 if (!username || !password) {
-                    alert('⚠️ Lütfen kullanıcı adı ve şifrenizi girin!');
+                    showNotification('⚠️ Kullanıcı adı ve şifre gerekli!');
                     return;
                 }
                 
@@ -650,7 +1085,8 @@
                     if (userDatabase[username]) {
                         if (userDatabase[username].password === password) {
                             currentUser = username;
-                            tasksData = userDatabase[username].todoData || tasksData;
+                            tasksData = userDatabase[username].todoData || { todo: [], doing: [], done: [] };
+                            renderAllTasks();
                             
                             const settings = { 
                                 method: storageMethod, 
@@ -661,10 +1097,8 @@
                             showNotification(`👋 Hoş geldin ${username}!`);
                             document.getElementById('storageModal').style.display = 'none';
                             updateStorageInfo();
-                            renderAllTasks();
                         } else {
-                            alert('❌ Geçersiz şifre!');
-                            return;
+                            showNotification('❌ Şifre hatalı!');
                         }
                     } else {
                         userDatabase[username] = {
@@ -894,6 +1328,7 @@
             });
             
             updateStats();
+            updateAllArrowButtons();
         }
 
         function autoSave() {
@@ -911,6 +1346,15 @@
                 notification.classList.remove('show');
             }, 3000);
         }
+
+        // Sayfa yüklendiğinde
+        window.onload = function() {
+            if (!checkStorageSettings()) {
+                document.getElementById('storageModal').style.display = 'flex';
+            } else {
+                loadAllTasks();
+            }
+        };
     </script>
 </body>
 </html>
