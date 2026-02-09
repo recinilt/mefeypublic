@@ -294,19 +294,6 @@
 
         <div class="category-grid">
 
-            <!-- Sık Kullanılanlar -->
-            <div class="category-card" ng-show="shouldShowFavorites()">
-                <h2 class="category-title">⭐ Sık Kullanılanlar</h2>
-                <ul class="link-list">
-                    <li class="link-item" ng-repeat="fav in getTopLinks()" ng-show="matchesSearch(fav.name)">
-                        <a ng-href="{{fav.href}}" ng-click="trackClick(fav.name, fav.href, fav.icon)">
-                            <span class="link-icon">{{fav.icon}}</span>{{fav.name}}
-                            <span style="margin-left:auto;font-size:0.75rem;opacity:0.5;padding-left:8px;">{{fav.count}}</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
             <!-- Araçlar ve Yardımcılar  -->
             <div class="category-card" ng-show="shouldShowCategory('tools')">
                 <h2 class="category-title">🛠️ Araçlar ve Yardımcılar</h2>
@@ -751,69 +738,6 @@
             .controller('MainController', function($scope) {
                 $scope.name = '';
                 $scope.searchTerm = '';
-
-                // --- Sık Kullanılanlar (localStorage) ---
-                var STORAGE_KEY = 'sikKullanilanlar';
-
-                function getClickData() {
-                    try {
-                        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-                    } catch(e) {
-                        return {};
-                    }
-                }
-
-                function saveClickData(data) {
-                    try {
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                    } catch(e) {}
-                }
-
-                $scope.trackClick = function(name, href, icon) {
-                    var data = getClickData();
-                    var key = href;
-                    if (data[key]) {
-                        data[key].count++;
-                    } else {
-                        data[key] = { name: name, href: href, icon: icon || '🔗', count: 1 };
-                    }
-                    saveClickData(data);
-                };
-
-                $scope.getTopLinks = function() {
-                    var data = getClickData();
-                    var arr = [];
-                    for (var key in data) {
-                        if (data.hasOwnProperty(key)) {
-                            arr.push(data[key]);
-                        }
-                    }
-                    arr.sort(function(a, b) { return b.count - a.count; });
-                    return arr.slice(0, 20);
-                };
-
-                $scope.shouldShowFavorites = function() {
-                    var topLinks = $scope.getTopLinks();
-                    if (topLinks.length === 0) return false;
-                    if (!$scope.searchTerm) return true;
-                    return topLinks.some(function(fav) {
-                        return fav.name.toLowerCase().includes($scope.searchTerm.toLowerCase());
-                    });
-                };
-
-                // Tüm link tıklamalarını yakala (mevcut linkleri değiştirmeden)
-                document.addEventListener('click', function(e) {
-                    var anchor = e.target.closest('.link-item a');
-                    if (!anchor) return;
-                    // Sık kullanılanlar kartındaki linkler zaten ng-click ile izleniyor
-                    if (anchor.closest('[ng-repeat]')) return;
-                    var iconEl = anchor.querySelector('.link-icon');
-                    var icon = iconEl ? iconEl.textContent.trim() : '🔗';
-                    var fullText = anchor.textContent.trim();
-                    var name = icon ? fullText.replace(icon, '').trim() : fullText;
-                    var href = anchor.getAttribute('href') || '';
-                    $scope.trackClick(name, href, icon);
-                });
 
                 $scope.matchesSearch = function(text) {
                     if (!$scope.searchTerm) return true;
