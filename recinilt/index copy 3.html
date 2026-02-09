@@ -746,103 +746,46 @@
         </div>
     </div>
 
-    <script src="indexgh.js"></script>
     <script>
         angular.module('linkApp', [])
             .controller('MainController', function($scope) {
                 $scope.name = '';
                 $scope.searchTerm = '';
 
-                // --- Sık Kullanılanlar (GitHub Sync) ---
-                
-                var ghApiUrl = "https://api.github.com/repos/" + ghKullaniciAdi + "/" + ghRepoAdi + "/contents/" + ghDosyaAdi;
+                // --- Sık Kullanılanlar (localStorage) ---
+                var STORAGE_KEY = 'sikKullanilanlar';
 
-                var clickData = {};
-                var saveTimer = null;
-                var ghLoaded = false;
-
-                function ghHeaders() {
-                    return {
-                        'Authorization': 'token ' + ghToken,
-                        'Accept': 'application/vnd.github.v3+json'
-                    };
+                function getClickData() {
+                    try {
+                        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+                    } catch(e) {
+                        return {};
+                    }
                 }
 
-                function loadFromGitHub() {
-                    fetch(ghApiUrl, { headers: ghHeaders() })
-                        .then(function(response) {
-                            if (response.ok) return response.json();
-                            throw new Error('not found');
-                        })
-                        .then(function(data) {
-                            var decoded = decodeURIComponent(escape(atob(data.content)));
-                            clickData = JSON.parse(decoded);
-                            ghLoaded = true;
-                            $scope.$apply();
-                        })
-                        .catch(function() {
-                            clickData = {};
-                            ghLoaded = true;
-                            $scope.$apply();
-                        });
+                function saveClickData(data) {
+                    try {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    } catch(e) {}
                 }
-
-                function saveToGitHub() {
-                    var jsonData = JSON.stringify(clickData, null, 2);
-                    var encoded = btoa(unescape(encodeURIComponent(jsonData)));
-
-                    fetch(ghApiUrl, { headers: ghHeaders() })
-                        .then(function(response) {
-                            if (response.ok) return response.json();
-                            return null;
-                        })
-                        .then(function(fileData) {
-                            var sha = fileData ? fileData.sha : null;
-                            var body = {
-                                message: 'Sık kullanılanlar güncellendi',
-                                content: encoded
-                            };
-                            if (sha) body.sha = sha;
-
-                            return fetch(ghApiUrl, {
-                                method: 'PUT',
-                                headers: ghHeaders(),
-                                body: JSON.stringify(body)
-                            });
-                        })
-                        .then(function(resp) {
-                            if (!resp.ok) console.error('GitHub kaydetme hatası');
-                        })
-                        .catch(function(err) {
-                            console.error('GitHub save error:', err);
-                        });
-                }
-
-                function debouncedSave() {
-                    if (saveTimer) clearTimeout(saveTimer);
-                    saveTimer = setTimeout(function() {
-                        saveToGitHub();
-                    }, 2000);
-                }
-
-                // Sayfa yüklendiğinde GitHub'dan oku
-                loadFromGitHub();
 
                 $scope.trackClick = function(name, href, icon) {
+                    var data = getClickData();
                     var key = href;
-                    if (clickData[key]) {
-                        clickData[key].count++;
+                    if (data[key]) {
+                        data[key].count++;
                     } else {
-                        clickData[key] = { name: name, href: href, icon: icon || '🔗', count: 1 };
+                        data[key] = { name: name, href: href, icon: icon || '🔗', count: 1 };
                     }
-                    debouncedSave();
+                    saveClickData(data);
                 };
 
                 $scope.getTopLinks = function() {
+                    var data = getClickData();
                     var arr = [];
-                    for (var key in clickData) {
-                        if (clickData.hasOwnProperty(key)) {
-                            arr.push(clickData[key]);
+                    for (var key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            arr.push(data[key]);
                         }
                     }
                     arr.sort(function(a, b) { return b.count - a.count; });
