@@ -49,7 +49,7 @@
 
         .subtitle {
             font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.5rem;
             color: var(--gold-accent);
             letter-spacing: 0.3em;
             text-transform: uppercase;
@@ -149,31 +149,23 @@
 
         .controls {
             display: flex;
-            gap: 10px;
-            margin-top: 14px;
+            gap: 6px;
+            margin-top: 10px;
             flex-wrap: wrap;
             justify-content: center;
-            width: 100%;
-            max-width: 650px;
-            padding: 0 10px;
         }
 
         .btn {
             font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.42rem;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            padding: 12px 18px;
+            padding: 6px 10px;
             background: transparent;
             border: 1px solid rgba(201, 169, 98, 0.25);
             color: var(--gold-accent);
             cursor: pointer;
             transition: all 0.3s ease;
-            min-height: 48px;
-            min-width: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .btn:hover {
@@ -188,96 +180,71 @@
         .settings-panel {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-top: 8px;
             max-width: 650px;
-            width: 100%;
         }
 
         .settings-row {
             display: flex;
-            gap: 12px;
-            align-items: stretch;
+            gap: 8px;
+            align-items: center;
             flex-wrap: wrap;
             justify-content: center;
-            flex-direction: column;
-            padding: 0 10px;
-            width: 100%;
-            max-width: 650px;
-            margin: 6px auto 0 auto;
         }
 
         .setting-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            width: 100%;
-            padding: 8px 12px;
-            background: rgba(201, 169, 98, 0.03);
-            border: 1px solid rgba(201, 169, 98, 0.08);
-            border-radius: 6px;
+            gap: 4px;
         }
 
         .setting-label {
             font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
+            font-size: 0.38rem;
             color: var(--text-muted);
             letter-spacing: 0.06em;
             text-transform: uppercase;
-            white-space: nowrap;
-            min-width: 70px;
         }
 
         .slider-control {
             -webkit-appearance: none;
-            width: 100%;
-            flex: 1;
-            height: 6px;
+            width: 45px;
+            height: 2px;
             background: rgba(201, 169, 98, 0.2);
-            border-radius: 4px;
+            border-radius: 2px;
             outline: none;
         }
 
         .slider-control::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 26px;
-            height: 26px;
+            width: 8px;
+            height: 8px;
             background: var(--gold-accent);
             border-radius: 50%;
             cursor: pointer;
-        }
-
-        .slider-control::-moz-range-thumb {
-            width: 26px;
-            height: 26px;
-            background: var(--gold-accent);
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
         }
 
         select.theme-select {
             font-family: 'Space Mono', monospace;
-            font-size: 0.8rem;
-            padding: 8px 12px;
+            font-size: 0.38rem;
+            padding: 3px 6px;
             background: rgba(20, 20, 25, 0.9);
             border: 1px solid rgba(201, 169, 98, 0.3);
             color: var(--gold-accent);
-            border-radius: 6px;
+            border-radius: 3px;
             cursor: pointer;
-            flex: 1;
-            min-height: 42px;
         }
 
         .color-legend {
             display: flex;
-            gap: 5px;
+            gap: 2px;
             align-items: center;
         }
 
         .color-dot {
-            width: 14px;
-            height: 14px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             border: 1px solid rgba(255,255,255,0.3);
             cursor: help;
@@ -285,20 +252,20 @@
 
         .stats {
             font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.4rem;
             color: rgba(201, 169, 98, 0.5);
-            margin-top: 10px;
+            margin-top: 6px;
             letter-spacing: 0.05em;
             text-align: center;
         }
 
         .progress-bar {
-            width: 200px;
-            height: 5px;
+            width: 100px;
+            height: 3px;
             background: rgba(201, 169, 98, 0.1);
-            border-radius: 3px;
+            border-radius: 2px;
             overflow: hidden;
-            margin-top: 6px;
+            margin-top: 4px;
         }
 
         .progress-fill {
@@ -310,12 +277,12 @@
         /* Collapsible sections */
         .section-toggle {
             font-family: 'Space Mono', monospace;
-            font-size: 0.75rem;
+            font-size: 0.4rem;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 8px 14px;
+            padding: 4px 8px;
             border: 1px solid rgba(201, 169, 98, 0.15);
-            border-radius: 5px;
+            border-radius: 3px;
             margin: 4px;
             transition: all 0.3s;
         }
@@ -363,7 +330,7 @@
             }
             
             .subtitle {
-                font-size: 0.65rem;
+                font-size: 0.4rem;
             }
             
             .frame {
@@ -381,59 +348,57 @@
             }
             
             .controls {
-                gap: 8px;
-                padding: 0 5px;
+                gap: 4px;
             }
             
             .btn {
-                font-size: 0.7rem;
-                padding: 10px 14px;
-                min-width: 48px;
-                min-height: 48px;
+                font-size: 0.38rem;
+                padding: 8px 8px;
+                min-width: 44px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
             
             .settings-row {
-                gap: 8px;
+                gap: 4px;
                 padding: 0 5px;
             }
             
             .setting-group {
-                gap: 8px;
-                padding: 8px 10px;
+                gap: 2px;
+                flex: 1 1 45%;
+                min-width: 0;
             }
             
             .setting-label {
-                font-size: 0.7rem;
-                min-width: 60px;
+                font-size: 0.32rem;
             }
             
             .slider-control {
-                height: 8px;
+                width: 40px;
+                height: 4px;
             }
             
             .slider-control::-webkit-slider-thumb {
-                width: 30px;
-                height: 30px;
-            }
-            
-            .slider-control::-moz-range-thumb {
-                width: 30px;
-                height: 30px;
+                width: 14px;
+                height: 14px;
             }
             
             select.theme-select {
-                font-size: 0.7rem;
-                padding: 8px 8px;
-                min-height: 42px;
+                font-size: 0.35rem;
+                padding: 6px 4px;
+                min-height: 30px;
             }
             
             .stats {
-                font-size: 0.65rem;
+                font-size: 0.35rem;
             }
             
             .color-dot {
-                width: 14px;
-                height: 14px;
+                width: 10px;
+                height: 10px;
             }
         }
 
@@ -453,22 +418,12 @@
             }
             
             .setting-group {
-                width: 100%;
+                flex: 1 1 100%;
             }
             
             .settings-row {
                 flex-direction: column;
                 align-items: stretch;
-            }
-
-            .setting-label {
-                font-size: 0.65rem;
-                min-width: 55px;
-            }
-
-            .btn {
-                font-size: 0.65rem;
-                padding: 10px 10px;
             }
         }
 
@@ -502,8 +457,7 @@
             }
             
             .settings-row {
-                flex-direction: row;
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 overflow-x: auto;
                 justify-content: flex-start;
                 padding-bottom: 5px;
@@ -511,7 +465,6 @@
             
             .setting-group {
                 flex: 0 0 auto;
-                width: auto;
             }
         }
     </style>
