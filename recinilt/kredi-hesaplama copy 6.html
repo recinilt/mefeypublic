@@ -529,60 +529,6 @@
             </form>
         </div>
         
-        <!-- Enflasyona Göre Faiz Tahmini -->
-        <div class="card fade-in">
-            <div class="card-header">
-                <i class="fas fa-chart-line" style="color: #f59e0b;"></i>
-                <h2>Enflasyona Göre Faiz Tahmini</h2>
-            </div>
-            
-            <div class="insurance-info-box" style="margin-top: 0; margin-bottom: 1rem;">
-                <i class="fas fa-info-circle"></i>
-                <strong>Fisher Denklemi:</strong> Nominal Faiz = (1 + Enflasyon) × (1 + Banka Marjı) - 1. 
-                Öngörülen enflasyonu girin, kredi türüne uygun tahmini aylık faiz oranını hesaplayın.
-            </div>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="expectedInflation">Öngörülen Yıllık Enflasyon (%)</label>
-                    <input type="number" id="expectedInflation" placeholder="30" min="0" max="500" step="0.1">
-                    <span class="info-text">📊 TÜİK veya piyasa beklentisini girin</span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="bankSpread">Banka Kâr Marjı / Spread (%)</label>
-                    <input type="number" id="bankSpread" placeholder="10" min="0" max="100" step="0.1">
-                    <span class="info-text" id="spreadInfo">💡 İhtiyaç: ~%10 | Taşıt: ~%7 | Konut: ~%3</span>
-                </div>
-            </div>
-            
-            <div id="inflationResult" class="hidden" style="margin-top: 1rem;">
-                <div class="result-grid" style="grid-template-columns: repeat(3, 1fr);">
-                    <div class="result-item" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                        <label>Yıllık Nominal Faiz</label>
-                        <div class="value" id="estYearlyRate" style="font-size: 1.25rem;">-</div>
-                    </div>
-                    <div class="result-item" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                        <label>Tahmini Aylık Faiz</label>
-                        <div class="value" id="estMonthlyRate" style="font-size: 1.5rem;">-</div>
-                    </div>
-                    <div class="result-item" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                        <label>Reel Faiz (Yıllık)</label>
-                        <div class="value" id="estRealRate" style="font-size: 1.25rem;">-</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="btn-group" style="margin-top: 1rem;">
-                <button type="button" class="btn btn-primary" style="background: #f59e0b; flex: 1;" onclick="calculateInflationRate()">
-                    <i class="fas fa-calculator"></i> Enflasyona Göre Hesapla
-                </button>
-                <button type="button" class="btn btn-accent" id="applyRateBtn" style="flex: 1; display: none;" onclick="applyInflationRate()">
-                    <i class="fas fa-arrow-right"></i> Faiz Oranına Uygula
-                </button>
-            </div>
-        </div>
-        
         <!-- Banka Faiz Karşılaştırma -->
         <div class="card fade-in">
             <div class="card-header">
@@ -885,14 +831,6 @@
                 infoText.textContent = '⚠️ Bankalar genelde max 48 ay';
             } else if (type === 'konut') {
                 infoText.textContent = '⚠️ Bankalar genelde max 180 ay';
-            }
-            
-            // Enflasyon bölümü: Kredi türüne göre spread default güncelle
-            const spreadDefaults = { 'ihtiyac': 10, 'tasit': 7, 'konut': 3 };
-            const spreadInput = document.getElementById('bankSpread');
-            if (spreadInput && spreadDefaults[type] !== undefined) {
-                spreadInput.value = spreadDefaults[type];
-                spreadInput.placeholder = spreadDefaults[type];
             }
         });
         
@@ -1535,63 +1473,6 @@
                 currency: 'TRY',
                 minimumFractionDigits: 2
             }).format(amount);
-        }
-        
-        // Enflasyona göre faiz tahmini hesaplama (Fisher Denklemi)
-        let lastEstimatedMonthlyRate = null;
-        
-        function calculateInflationRate() {
-            const inflation = parseFloat(document.getElementById('expectedInflation').value);
-            const spread = parseFloat(document.getElementById('bankSpread').value);
-            
-            if (isNaN(inflation) || inflation < 0) {
-                alert('Lütfen geçerli bir enflasyon oranı girin!');
-                return;
-            }
-            
-            // Spread boşsa kredi türüne göre default al
-            let effectiveSpread = spread;
-            if (isNaN(effectiveSpread) || effectiveSpread < 0) {
-                const loanType = document.getElementById('loanType').value;
-                const defaults = { 'ihtiyac': 10, 'tasit': 7, 'konut': 3 };
-                effectiveSpread = defaults[loanType] || 10;
-                document.getElementById('bankSpread').value = effectiveSpread;
-            }
-            
-            // Fisher Denklemi: (1 + nominal) = (1 + enflasyon) × (1 + spread)
-            const nominalYearly = ((1 + inflation / 100) * (1 + effectiveSpread / 100) - 1) * 100;
-            
-            // Yıllık bileşik faizden aylık faize dönüştürme
-            const monthlyRate = (Math.pow(1 + nominalYearly / 100, 1 / 12) - 1) * 100;
-            
-            // Reel faiz (spread'in kendisi)
-            const realRate = effectiveSpread;
-            
-            // Sonuçları göster
-            document.getElementById('estYearlyRate').textContent = `%${nominalYearly.toFixed(2)}`;
-            document.getElementById('estMonthlyRate').textContent = `%${monthlyRate.toFixed(2)}`;
-            document.getElementById('estRealRate').textContent = `%${realRate.toFixed(2)}`;
-            document.getElementById('inflationResult').classList.remove('hidden');
-            document.getElementById('applyRateBtn').style.display = 'inline-flex';
-            
-            lastEstimatedMonthlyRate = monthlyRate;
-        }
-        
-        function applyInflationRate() {
-            if (lastEstimatedMonthlyRate === null) return;
-            
-            document.getElementById('interestRate').value = lastEstimatedMonthlyRate.toFixed(2);
-            
-            // Scroll to form
-            document.getElementById('loanForm').scrollIntoView({ behavior: 'smooth' });
-            
-            // Flash efekti
-            const input = document.getElementById('interestRate');
-            input.style.transition = 'background-color 0.3s';
-            input.style.backgroundColor = '#fef3c7';
-            setTimeout(() => {
-                input.style.backgroundColor = '';
-            }, 1500);
         }
         
         // Initialize
