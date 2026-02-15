@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ödeme Hatırlatıcı - Gizlilik Politikası / Privacy Policy</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.7; color: #1a1a2e; background: #f8f9fa; padding: 20px; }
+  .container { max-width: 800px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  h1 { font-size: 1.8em; color: #1565C0; margin-bottom: 8px; }
+  .subtitle { color: #666; margin-bottom: 30px; font-size: 0.95em; }
+  h2 { font-size: 1.25em; color: #1565C0; margin-top: 28px; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #e3f2fd; }
+  p, li { margin-bottom: 8px; font-size: 0.95em; }
+  ul { padding-left: 24px; margin-bottom: 12px; }
+  .lang-switch { text-align: right; margin-bottom: 20px; }
+  .lang-switch a { display: inline-block; padding: 6px 16px; border-radius: 6px; text-decoration: none; font-size: 0.9em; margin-left: 8px; }
+  .lang-switch a.active { background: #1565C0; color: #fff; }
+  .lang-switch a:not(.active) { background: #e3f2fd; color: #1565C0; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .contact-box { background: #e3f2fd; border-radius: 8px; padding: 16px; margin-top: 12px; }
+  .contact-box p { margin-bottom: 4px; }
+  .update-date { color: #999; font-size: 0.85em; margin-top: 30px; text-align: center; }
+  @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.4em; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="lang-switch">
+  <a href="#" id="btn-tr" class="active" onclick="showLang('tr');return false;">Türkçe</a>
+  <a href="#" id="btn-en" onclick="showLang('en');return false;">English</a>
+</div>
+
+<!-- ==================== TÜRKÇE ==================== -->
+<div id="lang-tr" class="section active">
+
+<h1>Ödeme Hatırlatıcı — Gizlilik Politikası</h1>
+<p class="subtitle">Son güncelleme: 16 Şubat 2026</p>
+
+<p>Bu gizlilik politikası, <strong>Ödeme Hatırlatıcı</strong> ("Uygulama") Android uygulamasının kullanıcı verilerini nasıl topladığını, kullandığını, sakladığını ve koruduğunu açıklar. Uygulamayı kullanarak bu politikayı kabul etmiş sayılırsınız.</p>
+
+<h2>1. Geliştirici Bilgileri</h2>
+<div class="contact-box">
+  <p><strong>Geliştirici:</strong> Recep Yeni</p>
+  <p><strong>E-posta:</strong> recepyeni@gmail.com</p>
+  <p><strong>Konum:</strong> Tekirdağ, Türkiye</p>
+</div>
+
+<h2>2. Toplanan Veriler</h2>
+<p>Uygulama aşağıdaki verileri toplar ve işler:</p>
+<ul>
+  <li><strong>E-posta adresi:</strong> Hesap oluşturma ve giriş için (Firebase Authentication aracılığıyla).</li>
+  <li><strong>Ödeme bilgileri:</strong> Kullanıcının girdiği ödeme adı, tutarı, vadesi, kategorisi ve ödeme geçmişi. Bu veriler cihazda (localStorage) ve bulutta (Firebase Realtime Database) saklanır.</li>
+  <li><strong>Uygulama ayarları:</strong> Dil tercihi, para birimi, bildirim tercihleri gibi uygulama içi ayarlar.</li>
+  <li><strong>Cihaz bilgileri:</strong> Hata raporları için cihaz modeli, işletim sistemi versiyonu ve ekran boyutu (yalnızca kullanıcı "Hata Raporu Gönder" butonuna bastığında, kullanıcı onayıyla).</li>
+</ul>
+
+<h2>3. Üçüncü Taraf Hizmetler</h2>
+<p>Uygulama aşağıdaki üçüncü taraf hizmetleri kullanır:</p>
+<ul>
+  <li><strong>Firebase Authentication:</strong> Kullanıcı kimlik doğrulama. Google'ın gizlilik politikası geçerlidir: <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></li>
+  <li><strong>Firebase Realtime Database:</strong> Ödeme verilerinin cihazlar arası senkronizasyonu.</li>
+  <li><strong>Google AdMob:</strong> Reklam gösterimi. AdMob, cihaz tanımlayıcıları, IP adresi ve kullanım verilerini toplayabilir. Google'ın reklam gizlilik politikası: <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></li>
+  <li><strong>Google Play Faturalandırma:</strong> Uygulama içi satın alma işlemleri için. Ödeme bilgileri Google tarafından işlenir.</li>
+</ul>
+
+<h2>4. Verilerin Kullanım Amacı</h2>
+<ul>
+  <li>Ödeme hatırlatıcıları oluşturma ve bildirim gönderme</li>
+  <li>Cihazlar arası veri senkronizasyonu</li>
+  <li>Ödeme raporları ve istatistikleri oluşturma</li>
+  <li>Reklam gösterimi (ücretsiz sürümde)</li>
+  <li>Hata tespiti ve uygulama iyileştirme</li>
+</ul>
+
+<h2>5. Veri Saklama ve Güvenlik</h2>
+<ul>
+  <li>Veriler Firebase sunucularında şifreli olarak saklanır (aktarım sırasında TLS şifreleme).</li>
+  <li>Her kullanıcı yalnızca kendi verilerine erişebilir (Firebase Security Rules ile korunur).</li>
+  <li>Veriler üçüncü taraflarla paylaşılmaz veya satılmaz (reklam hizmetleri hariç).</li>
+  <li>Lokal veriler cihazın localStorage'ında saklanır.</li>
+</ul>
+
+<h2>6. Hesap ve Veri Silme</h2>
+<p>Kullanıcılar verilerini ve hesaplarını şu yollarla silebilir:</p>
+<ul>
+  <li><strong>Uygulama içi:</strong> Ayarlar → "Hesabımı Sil" butonuna basarak. Bu işlem Firebase'deki tüm verileri, lokal verileri ve hesabı kalıcı olarak siler.</li>
+  <li><strong>E-posta ile:</strong> <a href="mailto:recepyeni@gmail.com">recepyeni@gmail.com</a> adresine hesap silme talebi göndererek. Talep 72 saat içinde işleme alınır.</li>
+</ul>
+<p>Hesap silindikten sonra tüm veriler geri döndürülemez biçimde silinir.</p>
+
+<h2>7. Çocukların Gizliliği</h2>
+<p>Uygulama 13 yaş altı çocuklara yönelik değildir. Bilerek 13 yaş altı çocuklardan veri toplamıyoruz. Böyle bir durum tespit edilirse ilgili veriler derhal silinir.</p>
+
+<h2>8. Değişiklikler</h2>
+<p>Bu gizlilik politikası zaman zaman güncellenebilir. Önemli değişiklikler uygulama içi bildirim veya bu sayfa aracılığıyla duyurulacaktır.</p>
+
+<h2>9. İletişim</h2>
+<p>Gizlilik politikasıyla ilgili sorularınız için:</p>
+<div class="contact-box">
+  <p><strong>E-posta:</strong> <a href="mailto:recepyeni@gmail.com">recepyeni@gmail.com</a></p>
+</div>
+
+</div>
+
+<!-- ==================== ENGLISH ==================== -->
+<div id="lang-en" class="section">
+
+<h1>Ödeme Hatırlatıcı — Privacy Policy</h1>
+<p class="subtitle">Last updated: February 16, 2026</p>
+
+<p>This privacy policy describes how <strong>Ödeme Hatırlatıcı</strong> (Payment Reminder) ("App") collects, uses, stores, and protects user data. By using the App, you agree to this policy.</p>
+
+<h2>1. Developer Information</h2>
+<div class="contact-box">
+  <p><strong>Developer:</strong> Recep Yeni</p>
+  <p><strong>Email:</strong> recepyeni@gmail.com</p>
+  <p><strong>Location:</strong> Tekirdağ, Turkey</p>
+</div>
+
+<h2>2. Data We Collect</h2>
+<p>The App collects and processes the following data:</p>
+<ul>
+  <li><strong>Email address:</strong> For account creation and login (via Firebase Authentication).</li>
+  <li><strong>Payment information:</strong> Payment name, amount, due date, category, and payment history entered by the user. This data is stored locally (localStorage) and in the cloud (Firebase Realtime Database).</li>
+  <li><strong>App settings:</strong> Language preference, currency, notification preferences.</li>
+  <li><strong>Device information:</strong> Device model, OS version, and screen size for bug reports (only when the user taps "Send Bug Report" and confirms).</li>
+</ul>
+
+<h2>3. Third-Party Services</h2>
+<p>The App uses the following third-party services:</p>
+<ul>
+  <li><strong>Firebase Authentication:</strong> User authentication. Google's privacy policy applies: <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></li>
+  <li><strong>Firebase Realtime Database:</strong> Cross-device synchronization of payment data.</li>
+  <li><strong>Google AdMob:</strong> Ad serving. AdMob may collect device identifiers, IP addresses, and usage data. Google's ad privacy policy: <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></li>
+  <li><strong>Google Play Billing:</strong> For in-app purchases. Payment information is processed by Google.</li>
+</ul>
+
+<h2>4. How We Use Data</h2>
+<ul>
+  <li>Creating payment reminders and sending notifications</li>
+  <li>Cross-device data synchronization</li>
+  <li>Generating payment reports and statistics</li>
+  <li>Displaying advertisements (in the free version)</li>
+  <li>Bug detection and app improvement</li>
+</ul>
+
+<h2>5. Data Storage and Security</h2>
+<ul>
+  <li>Data is stored encrypted on Firebase servers (TLS encryption in transit).</li>
+  <li>Each user can only access their own data (protected by Firebase Security Rules).</li>
+  <li>Data is not shared with or sold to third parties (except ad services).</li>
+  <li>Local data is stored in the device's localStorage.</li>
+</ul>
+
+<h2>6. Account and Data Deletion</h2>
+<p>Users can delete their data and accounts through:</p>
+<ul>
+  <li><strong>In-app:</strong> Settings → "Delete My Account" button. This permanently deletes all Firebase data, local data, and the account.</li>
+  <li><strong>By email:</strong> Send a deletion request to <a href="mailto:recepyeni@gmail.com">recepyeni@gmail.com</a>. Requests are processed within 72 hours.</li>
+</ul>
+<p>Once deleted, all data is permanently and irreversibly removed.</p>
+
+<h2>7. Children's Privacy</h2>
+<p>The App is not intended for children under 13. We do not knowingly collect data from children under 13. If such data is identified, it will be deleted immediately.</p>
+
+<h2>8. Changes</h2>
+<p>This privacy policy may be updated periodically. Significant changes will be announced via in-app notification or on this page.</p>
+
+<h2>9. Contact</h2>
+<p>For questions about this privacy policy:</p>
+<div class="contact-box">
+  <p><strong>Email:</strong> <a href="mailto:recepyeni@gmail.com">recepyeni@gmail.com</a></p>
+</div>
+
+</div>
+
+<p class="update-date">© 2026 Recep Yeni. All rights reserved.</p>
+
+</div>
+
+<script>
+function showLang(lang) {
+  document.getElementById('lang-tr').className = 'section' + (lang === 'tr' ? ' active' : '');
+  document.getElementById('lang-en').className = 'section' + (lang === 'en' ? ' active' : '');
+  document.getElementById('btn-tr').className = lang === 'tr' ? 'active' : '';
+  document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+}
+</script>
+</body>
+</html>
