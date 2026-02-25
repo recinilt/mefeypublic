@@ -703,6 +703,7 @@ print("Application initialized")`;
             // Dead code injection
             if (opts.deadCode) {
                 const deadCodeSnippets = [];
+                // Her snippet kendi içinde self-contained olmalı (tanımsız değişken referansı YOK)
                 const _d1=genVar(),_d2=genVar(),_d3=genVar(),_d4=genVar(),_d5=genVar(),_d6=genVar();
                 deadCodeSnippets.push(
                     `var ${_d1}=function(){return Math.random()>0.5?true:null;};`,
@@ -715,41 +716,13 @@ print("Application initialized")`;
                     `var ${_d6}=Math.floor(Math.random()*100);`
                 );
                 
-                // Statement sınırlarını bul (';' ile biten satırlar)
-                // Object literal, array, fonksiyon içine inject ETME
+                // Insert dead code at random positions
                 const lines = processedCode.split('\n');
-                const safePositions = [];
-                let braceDepth = 0;
-                let bracketDepth = 0;
-                for (let i = 0; i < lines.length; i++) {
-                    const trimmed = lines[i].trim();
-                    // Açılan/kapanan süslü ve köşeli parantez takibi
-                    for (const ch of trimmed) {
-                        if (ch === '{') braceDepth++;
-                        else if (ch === '}') braceDepth--;
-                        else if (ch === '[') bracketDepth++;
-                        else if (ch === ']') bracketDepth--;
-                    }
-                    // Sadece top-level'da (depth=0) ve statement sonu olan satırlardan sonra inject güvenli
-                    if (braceDepth <= 0 && bracketDepth <= 0 && (trimmed.endsWith(';') || trimmed.endsWith('}'))) {
-                        safePositions.push(i + 1); // sonraki satıra ekle
-                    }
-                }
-                
-                if (safePositions.length > 0) {
-                    const insertions = Math.min(4, safePositions.length);
-                    // Rastgele güvenli pozisyonları seç (sondan başa ekle ki index kayması olmasın)
-                    const chosen = [];
-                    const available = [...safePositions];
-                    for (let i = 0; i < insertions && available.length > 0; i++) {
-                        const idx = Math.floor(Math.random() * available.length);
-                        chosen.push(available.splice(idx, 1)[0]);
-                    }
-                    chosen.sort((a, b) => b - a); // sondan başa
-                    for (const pos of chosen) {
-                        const snippet = deadCodeSnippets[Math.floor(Math.random() * deadCodeSnippets.length)];
-                        lines.splice(pos, 0, snippet);
-                    }
+                const insertions = Math.min(5, Math.floor(lines.length / 3));
+                for (let i = 0; i < insertions; i++) {
+                    const pos = Math.floor(Math.random() * lines.length);
+                    const snippet = deadCodeSnippets[Math.floor(Math.random() * deadCodeSnippets.length)];
+                    lines.splice(pos, 0, snippet);
                 }
                 processedCode = lines.join('\n');
             }
@@ -790,18 +763,28 @@ print("Application initialized")`;
             // Control flow flattening
             if (opts.controlFlow) {
                 const stateVar = genVar();
-                const dispatchVar = genVar();
-                const stepsVar = genVar();
+                const whileVar = genVar();
                 
-                // Kodu tek bir fonksiyon bloğu olarak sar
-                // const/let sorun çıkarmaz çünkü fonksiyon body kendi scope'u
+                // Wrap in control flow structure
                 processedCode = `
-var ${stepsVar}=[function(){
-${processedCode}
-}];
-var ${stateVar}=[0];
-var ${dispatchVar}=function(){for(var _i=0;_i<${stateVar}.length;_i++){${stepsVar}[${stateVar}[_i]]();}};
-${dispatchVar}();`;
+var ${stateVar}=0x0;
+var ${whileVar}=true;
+while(${whileVar}){
+    switch(${stateVar}){
+        case 0x0:
+            ${processedCode.split('\n').map((line, i) => {
+                if (line.trim() && !line.includes('function') && !line.includes('{') && !line.includes('}')) {
+                    return line;
+                }
+                return line;
+            }).join('\n')}
+            ${stateVar}=0x1;
+            break;
+        case 0x1:
+            ${whileVar}=false;
+            break;
+    }
+}`;
             }
 
             // Anti-debugging
@@ -868,13 +851,19 @@ setInterval(function(){
 `;
             }
 
-            // Final encoding - multi-layer (Unicode-safe)
+            // Final encoding - multi-layer
             let finalCode = domainLockCode + antiDebugCode + selfDefendCode + processedCode;
             
-            // Layer 1: Unicode-safe Base64 encode
-            const base64Encoded = btoa(unescape(encodeURIComponent(finalCode)));
+            // Layer 1: Hex encode
+            let hexEncoded = '';
+            for (let i = 0; i < finalCode.length; i++) {
+                hexEncoded += '\\x' + finalCode.charCodeAt(i).toString(16).padStart(2, '0');
+            }
             
-            // Layer 2: Split and shuffle
+            // Layer 2: Base64 encode the hex
+            const base64Encoded = btoa(hexEncoded);
+            
+            // Layer 3: Split and shuffle
             const chunkSize = 50;
             const chunks = [];
             for (let i = 0; i < base64Encoded.length; i += chunkSize) {
@@ -904,7 +893,14 @@ var ${decodeVar}=function(_d,_m){
     return _r;
 };
 var ${execVar}=function(_s){
-    return decodeURIComponent(escape(atob(_s)));
+    var _h=atob(_s);
+    var _c='';
+    var _p=_h.split('\\\\x');
+    for(var _i=1;_i<_p.length;_i++){
+        _c+=String.fromCharCode(parseInt(_p[_i].substring(0,2),16));
+        if(_p[_i].length>2)_c+=_p[_i].substring(2);
+    }
+    return _c;
 };
 var _code=${execVar}(${decodeVar}(${dataVar},${mapVar}));
 (0,eval)(_code);
