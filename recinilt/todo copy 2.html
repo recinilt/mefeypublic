@@ -612,12 +612,8 @@
         </div>
     </div>
 
+    <script src="github-parametreleri.js"></script>
     <script>
-        // ══════════════════════════════════════════════════════════
-        // CLOUDFLARE WORKER BAĞLANTISI
-        // ══════════════════════════════════════════════════════════
-        const WORKER_URL = 'https://gh-reci-senkron.recepyeni.workers.dev';
-        const dosyaAdi = 'todo-5t-gunluk.json';
         // Global değişkenler
         let tasksData = {
             todo: [],
@@ -1150,10 +1146,22 @@
 
         async function loadUserDatabase() {
             try {
-                var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'read',dosyaAdi:dosyaAdi})});
-                var data=await res.json();
-                if(data.content){userDatabase=JSON.parse(data.content);}
-                else{userDatabase={};}
+                const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    let content = data.content;
+                    let decodedContent = atob(content);
+                    let utf8Content = decodeURIComponent(escape(decodedContent));
+                    userDatabase = JSON.parse(utf8Content);
+                } else {
+                    userDatabase = {};
+                }
             } catch (error) {
                 userDatabase = {};
                 throw error;
@@ -1162,12 +1170,45 @@
 
         async function saveUserDatabase() {
             try {
-                var json=JSON.stringify(userDatabase,null,2);
-                var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'write',dosyaAdi:dosyaAdi,content:json,message:'Todo güncellendi'})});
-                var data=await res.json();
-                if(!data.success)throw new Error(data.error||'Worker hatası');
+                let sha = null;
+                try {
+                    const response = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const fileData = await response.json();
+                        sha = fileData.sha;
+                    }
+                } catch (err) {
+                    // Dosya yoksa normal
+                }
+
+                const jsonData = JSON.stringify(userDatabase, null, 2);
+                let utf8Content = unescape(encodeURIComponent(jsonData));
+                let encodedContent = btoa(utf8Content);
+
+                const updateResponse = await fetch(`https://api.github.com/repos/${kullaniciAdi}/${repoAdi}/contents/${"todo-"+dosyaAdi}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        message: 'Yapılacaklar listesi güncellendi',
+                        content: encodedContent,
+                        sha: sha
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error('GitHub güncelleme hatası');
+                }
             } catch (error) {
-                console.error('Kaydetme hatası:', error);
+                console.error('GitHub kaydetme hatası:', error);
                 throw error;
             }
         }
