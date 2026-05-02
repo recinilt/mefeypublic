@@ -535,7 +535,6 @@
 
     <div class="controls">
         <button class="btn primary" onclick="flipFrame()">↻ Çevir</button>
-        <button class="btn active" id="autoFlipBtn" onclick="toggleAutoFlip()">🔄 Oto-Çevir</button>
         <button class="btn" onclick="resetSand()">Sıfırla</button>
         <button class="btn" id="pauseBtn" onclick="togglePause()">Duraklat</button>
         <button class="btn" onclick="shakeSand()">Salla</button>
@@ -695,14 +694,6 @@
         let currentShape = 'rectangle';
         let currentTheme = 'ocean';
         let currentBackground = 'none';
-        
-        // Otomatik çevirme (oto-flip) durumu
-        let autoFlipEnabled = true;
-        let lastAutoFlipTime = Date.now();    // Sayfa açılışında ilk 1.5 sn boyunca flip atmasın
-        let autoFlipCheckCounter = 0;
-        const AUTO_FLIP_THRESHOLD = 0.02;     // %2 — üst yarıdaki kum oranı bunun altına düşerse flip
-        const AUTO_FLIP_COOLDOWN_MS = 1500;   // Flip sonrası 1.5 saniye bekleme
-        const AUTO_FLIP_CHECK_INTERVAL = 30;  // Her 30 frame'de bir kontrol (~0.5 saniye)
         
         // Zaman & performans
         let lastTime = 0;
@@ -1485,13 +1476,13 @@
             
             return {
                 left: [
-                    { x: -1, y: -1 },
-                    { x: -1, y: height + 1 },
+                    { x: 0, y: 0 },
+                    { x: 0, y: height },
                     { x: gapLeft, y: height * 0.5 }
                 ],
                 right: [
-                    { x: width + 1, y: -1 },
-                    { x: width + 1, y: height + 1 },
+                    { x: width, y: 0 },
+                    { x: width, y: height },
                     { x: gapRight, y: height * 0.5 }
                 ],
                 gapLeft, gapRight, gapCenter, gapWidth
@@ -2070,32 +2061,6 @@
                 frame.style.transform = `rotate(${rotationAngle}deg)`;
             }
 
-            // Otomatik çevirme: kum üst yarıdan alt yarıya tamamen geçince flip et
-            // Sadece autoFlip aktifken, autoRotate (360°) kapalıyken ve durdurulmamışken çalışır
-            if (autoFlipEnabled && !autoRotate && !isPaused && particles.length > 0) {
-                autoFlipCheckCounter++;
-                if (autoFlipCheckCounter >= AUTO_FLIP_CHECK_INTERVAL) {
-                    autoFlipCheckCounter = 0;
-                    const now = Date.now();
-                    if (now - lastAutoFlipTime >= AUTO_FLIP_COOLDOWN_MS) {
-                        const midY = height * 0.5;
-                        let topCount = 0;
-                        // visualFlipped=false: kumun başlangıç yeri ALT yarı (y > midY), boşaldığı yarı ÜST (y < midY için yeni kaynak görsel olarak alt)
-                        // Aslında kum yerçekimi ile y büyür yönünde düşer, bu yüzden:
-                        //   visualFlipped=false iken kumlar üst yarıda (y < midY) başlar/bulunur, alta (y > midY) düşer → "tüm kum geçti" = üstte kum kalmadı (y < midY oranı düşük)
-                        //   visualFlipped=true iken görsel ters, ama p.y koordinatı aynı kalıyor (flipFrame y'yi tersliyor) → mantık aynı: "yukarı yarıda" (y < midY) kum kalmadıysa flip
-                        for (const p of particles) {
-                            if (p.y < midY) topCount++;
-                        }
-                        const topRatio = topCount / particles.length;
-                        if (topRatio < AUTO_FLIP_THRESHOLD) {
-                            lastAutoFlipTime = now;
-                            flipFrame();
-                        }
-                    }
-                }
-            }
-
             if (!isPaused) {
                 for (const p of particles) {
                     p.update();
@@ -2128,7 +2093,6 @@
         function flipFrame() {
             frame.classList.add('flipping');
             playFlipSound();
-            lastAutoFlipTime = Date.now(); // Manuel flip de cooldown başlatsın
             
             setTimeout(() => {
                 visualFlipped = !visualFlipped;
@@ -2153,8 +2117,6 @@
             visualFlipped = false;
             frame.style.transform = '';
             rotationAngle = 0;
-            lastAutoFlipTime = Date.now();
-            autoFlipCheckCounter = 0;
             initParticles();
             createAirBubbles();
         }
@@ -2190,17 +2152,6 @@
                 }, 500);
             } else {
                 frame.style.transition = 'none'; // Dönerken geçiş efekti olmasın
-            }
-        }
-
-        function toggleAutoFlip() {
-            autoFlipEnabled = !autoFlipEnabled;
-            const btn = document.getElementById('autoFlipBtn');
-            btn.classList.toggle('active', autoFlipEnabled);
-            btn.textContent = autoFlipEnabled ? '🔄 Oto-Çevir' : '⏸ Oto-Çevir';
-            if (autoFlipEnabled) {
-                lastAutoFlipTime = Date.now(); // Açılır açılmaz hemen flip atmasın
-                autoFlipCheckCounter = 0;
             }
         }
 
