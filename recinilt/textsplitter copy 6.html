@@ -360,43 +360,6 @@
             font-style: italic;
         }
 
-        .case-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: -10px;
-            margin-bottom: 10px;
-            padding: 10px 12px;
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-top: none;
-            border-bottom: none;
-        }
-
-        .case-btn {
-            padding: 8px 14px;
-            border: 1.5px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-
-        .case-btn:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        }
-
-        .case-btn:active {
-            transform: translateY(0);
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -423,16 +386,6 @@
                 gap: 6px 12px;
                 padding: 8px 10px;
             }
-
-            .case-buttons {
-                gap: 6px;
-                padding: 8px 10px;
-            }
-
-            .case-btn {
-                padding: 6px 10px;
-                font-size: 11px;
-            }
         }
     </style>
 </head>
@@ -447,12 +400,6 @@
         <div class="input-section">
             <label for="textInput">Metninizi Buraya Yapıştırın:</label>
             <textarea id="textInput" placeholder="Uzun metninizi buraya yapıştırın... (Paragraflar ve satır atlamaları korunur)"></textarea>
-            <div class="case-buttons">
-                <button type="button" class="case-btn" onclick="convertCase('upper')">BÜYÜK HARF</button>
-                <button type="button" class="case-btn" onclick="convertCase('lower')">küçük harf</button>
-                <button type="button" class="case-btn" onclick="convertCase('sentence')">Cümle düzeni</button>
-                <button type="button" class="case-btn" onclick="convertCase('word')">Kelime Düzeni</button>
-            </div>
             <div class="text-stats" id="textStats">
                 <span><strong>0</strong> karakter</span>
                 <span><strong>0</strong> boşluksuz</span>
@@ -692,83 +639,6 @@
                 <span><strong>${a4Count}</strong> A4 sayfa</span>
                 <span>📖 <strong>${readingTime}</strong> dk okuma</span>
             `;
-        }
-
-        // Tamamı büyük harf mi (FBS, NASA, TBMM gibi) - en az 2 harf, hepsi büyük
-        function isAllUpperCase(word) {
-            // Harf içeren karakterleri al
-            const letters = word.match(/\p{L}/gu);
-            if (!letters || letters.length < 2) return false;
-            for (const ch of letters) {
-                if (ch.toLocaleLowerCase('tr-TR') === ch) return false;
-            }
-            return true;
-        }
-
-        // Bir kelimeyi "Baş harfi büyük, gerisi küçük" yap (tamamı büyükse dokunma)
-        function capitalizeWord(word) {
-            if (isAllUpperCase(word)) return word;
-            // İlk harfi bul (noktalama olabilir başta: "(merhaba" gibi)
-            const match = word.match(/^([^\p{L}]*)(\p{L})(.*)$/u);
-            if (!match) return word;
-            const [, prefix, firstLetter, rest] = match;
-            return prefix + firstLetter.toLocaleUpperCase('tr-TR') + rest.toLocaleLowerCase('tr-TR');
-        }
-
-        function convertCase(mode) {
-            const textarea = document.getElementById('textInput');
-            const text = textarea.value;
-            if (!text) return;
-
-            let result = text;
-
-            if (mode === 'upper') {
-                result = text.toLocaleUpperCase('tr-TR');
-            } else if (mode === 'lower') {
-                result = text.toLocaleLowerCase('tr-TR');
-            } else if (mode === 'word') {
-                // Boşlukları koruyarak kelime kelime işle
-                result = text.split(/(\s+)/).map(part => {
-                    if (/^\s+$/.test(part) || part === '') return part;
-                    return capitalizeWord(part);
-                }).join('');
-            } else if (mode === 'sentence') {
-                // Cümle sınırlarını bul: . ! ? sonrası
-                // Önce metni cümle parçalarına ayır (noktalama dahil)
-                const parts = text.split(/([.!?]+\s*)/);
-                let isStartOfSentence = true;
-                result = parts.map(part => {
-                    if (/^[.!?]+\s*$/.test(part)) {
-                        // Noktalama bloğu - sonraki cümle başlıyor
-                        isStartOfSentence = true;
-                        return part;
-                    }
-                    if (part === '') return part;
-                    // Cümle gövdesi - kelime kelime işle
-                    const words = part.split(/(\s+)/);
-                    let firstWordDone = !isStartOfSentence;
-                    const processed = words.map(w => {
-                        if (/^\s+$/.test(w) || w === '') return w;
-                        // FBS gibi tamamı büyükse dokunma
-                        if (isAllUpperCase(w)) {
-                            if (!firstWordDone) firstWordDone = true;
-                            return w;
-                        }
-                        if (!firstWordDone) {
-                            // Cümlenin ilk kelimesi: baş harf büyük, gerisi küçük
-                            firstWordDone = true;
-                            return capitalizeWord(w);
-                        }
-                        // Cümlenin diğer kelimeleri: tamamen küçük
-                        return w.toLocaleLowerCase('tr-TR');
-                    });
-                    isStartOfSentence = false;
-                    return processed.join('');
-                }).join('');
-            }
-
-            textarea.value = result;
-            updateTextStats();
         }
 
         // Event delegation for all preset buttons
