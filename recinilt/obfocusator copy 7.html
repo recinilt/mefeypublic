@@ -653,129 +653,10 @@ print("Application initialized")`;
             let processedCode = code;
             
             if (opts.stringArray) {
-                // === Mini JS tokenizer ile koruma ===
-                // Yorumlar, template literal'leri ve regex literal'leri stringRegex tarafından
-                // yanlış yorumlanır:
-                //   * /[&<>"]/g  → regex içindeki " string sınırı sanılır → regex parçalanır
-                //   * /* ... */  → blok yorumu regex sanılır
-                //   * `</span>`  → template içindeki HTML kapanışı regex sanılır
-                // Hepsini geçici tokenle değiştirip obfuscate'ten sonra geri koyuyoruz.
-                const _tokens = [];
-                const _TOK = i => '__TOK_' + i + '__';
-                {
-                    let _result = '';
-                    let _buf = '';
-                    let _i = 0;
-                    const _src = processedCode;
-                    const _n = _src.length;
-                    const _emit = () => { if (_buf) { _result += _buf; _buf = ''; } };
-                    const _take = (s) => { _tokens.push(s); return _TOK(_tokens.length - 1); };
-                    const _isIdCh = ch => /[a-zA-Z0-9_$\)\]]/.test(ch);
-                    const _isRegexCtx = () => {
-                        let _j = _buf.length - 1;
-                        while (_j >= 0 && /\s/.test(_buf[_j])) _j--;
-                        if (_j < 0) {
-                            let _k = _result.length - 1;
-                            while (_k >= 0 && /\s/.test(_result[_k])) _k--;
-                            if (_k < 0) return true;
-                            if (_result.endsWith('__')) return false;
-                            return !_isIdCh(_result[_k]);
-                        }
-                        return !_isIdCh(_buf[_j]);
-                    };
-                    while (_i < _n) {
-                        const c = _src[_i], c2 = _src[_i + 1];
-                        if (c === '/' && c2 === '*') {
-                            _emit();
-                            let s = '/*'; _i += 2;
-                            while (_i < _n) {
-                                if (_src[_i] === '*' && _src[_i + 1] === '/') { s += '*/'; _i += 2; break; }
-                                s += _src[_i]; _i++;
-                            }
-                            _result += _take(s);
-                            continue;
-                        }
-                        if (c === '/' && c2 === '/') {
-                            _emit();
-                            let s = '';
-                            while (_i < _n && _src[_i] !== '\n') { s += _src[_i]; _i++; }
-                            _result += _take(s);
-                            continue;
-                        }
-                        if (c === "'" || c === '"') {
-                            const q = c;
-                            let s = c; _i++;
-                            while (_i < _n && _src[_i] !== q) {
-                                if (_src[_i] === '\\') {
-                                    s += _src[_i]; _i++;
-                                    if (_i < _n) { s += _src[_i]; _i++; }
-                                    continue;
-                                }
-                                if (_src[_i] === '\n') break;
-                                s += _src[_i]; _i++;
-                            }
-                            if (_i < _n) { s += _src[_i]; _i++; }
-                            _buf += s;
-                            continue;
-                        }
-                        if (c === '`') {
-                            _emit();
-                            let s = '`'; _i++;
-                            let depth = 0;
-                            while (_i < _n) {
-                                const cc = _src[_i];
-                                if (cc === '\\') {
-                                    s += cc; _i++;
-                                    if (_i < _n) { s += _src[_i]; _i++; }
-                                    continue;
-                                }
-                                if (depth === 0 && cc === '`') { s += cc; _i++; break; }
-                                if (depth === 0 && cc === '$' && _src[_i + 1] === '{') {
-                                    s += '${'; _i += 2; depth = 1; continue;
-                                }
-                                if (depth > 0) {
-                                    if (cc === '{') depth++;
-                                    else if (cc === '}') depth--;
-                                }
-                                s += cc; _i++;
-                            }
-                            _result += _take(s);
-                            continue;
-                        }
-                        if (c === '/' && _isRegexCtx()) {
-                            _emit();
-                            let s = '/'; _i++;
-                            let inClass = false;
-                            while (_i < _n) {
-                                const cc = _src[_i];
-                                if (cc === '\\') {
-                                    s += cc; _i++;
-                                    if (_i < _n) { s += _src[_i]; _i++; }
-                                    continue;
-                                }
-                                if (cc === '\n') break;
-                                if (cc === '[') inClass = true;
-                                else if (cc === ']') inClass = false;
-                                else if (cc === '/' && !inClass) {
-                                    s += '/'; _i++;
-                                    while (_i < _n && /[gimsuy]/.test(_src[_i])) { s += _src[_i]; _i++; }
-                                    break;
-                                }
-                                s += cc; _i++;
-                            }
-                            _result += _take(s);
-                            continue;
-                        }
-                        _buf += c; _i++;
-                    }
-                    _emit();
-                    processedCode = _result;
-                }
-                
-                // Extract all strings (artık processedCode'da yorum/template/regex literal'leri yok)
+                // Extract all strings
                 const stringRegex = /(['"`])(?:(?!\1)[^\\]|\\.)*?\1/g;
                 let match;
-                while ((match = stringRegex.exec(processedCode)) !== null) {
+                while ((match = stringRegex.exec(code)) !== null) {
                     const str = match[0];
                     const content = str.slice(1, -1);
                     if (content.length > 2 && !stringMap[str]) {
@@ -826,9 +707,6 @@ print("Application initialized")`;
                     // 2) Geri kalan her konum (value, argüman, dönüş vb.) → normal değişim
                     processedCode = processedCode.replace(new RegExp(escaped, 'g'), `${getterVar}(${idx})`);
                 });
-                
-                // === Tokenizer placeholder'larını geri koy (yorumlar, template, regex literal) ===
-                processedCode = processedCode.replace(/__TOK_(\d+)__/g, (_m, i) => _tokens[+i]);
                 
                 processedCode = stringArrayCode + processedCode;
             }
