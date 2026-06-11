@@ -497,10 +497,10 @@
             // Auto-set options based on level
             if (currentLang === 'js') {
                 const opts = {
-                    low: { stringArray: true, controlFlow: false, deadCode: false, antiDebug: false, selfDefend: false, globalExport: true },
-                    medium: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: false, selfDefend: false, globalExport: true },
-                    high: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: false, globalExport: true },
-                    paranoid: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: true, globalExport: true }
+                    low: { stringArray: true, controlFlow: false, deadCode: false, antiDebug: false, selfDefend: false },
+                    medium: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: false, selfDefend: false },
+                    high: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: false },
+                    paranoid: { stringArray: true, controlFlow: true, deadCode: true, antiDebug: true, selfDefend: true }
                 };
                 const o = opts[level];
                 setCheckbox('opt-stringArray', o.stringArray);
@@ -508,7 +508,6 @@
                 setCheckbox('opt-deadCode', o.deadCode);
                 setCheckbox('opt-antiDebug', o.antiDebug);
                 setCheckbox('opt-selfDefend', o.selfDefend);
-                setCheckbox('opt-globalExport', o.globalExport);
             }
         }
 
@@ -691,20 +690,10 @@ print("Application initialized")`;
                 stringArrayCode = `var ${arrayVar}=[${encodedStrings.map(s => `[${s}]`).join(',')}];`;
                 stringArrayCode += `var ${getterVar}=function(_i){return ${arrayVar}[_i].map(function(_c){return String.fromCharCode(_c^${xorKey});}).join('');};`;
                 
-                // Replace strings in code: object literal key konumundaki stringleri
-                // computed property `[getter(idx)]:` olarak değiştir (aksi halde
-                // `_0xgetter(8): foo` sözdizimi hatasına yol açar → "Unexpected number").
-                // Önceki tokeni { , ; veya satır başı olan + sonrası ':' ile gelenler key'dir;
-                // ternary (`? "x" :`) bu desende yakalanmaz, dolayısıyla bozulmaz.
+                // Replace strings in code
                 Object.keys(stringMap).forEach(str => {
                     const idx = stringMap[str];
                     const escaped = str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    // 1) Key konumu → computed property
-                    processedCode = processedCode.replace(
-                        new RegExp('([{,;\\n]\\s*)' + escaped + '(\\s*:)', 'g'),
-                        `$1[${getterVar}(${idx})]$2`
-                    );
-                    // 2) Geri kalan her konum (value, argüman, dönüş vb.) → normal değişim
                     processedCode = processedCode.replace(new RegExp(escaped, 'g'), `${getterVar}(${idx})`);
                 });
                 
