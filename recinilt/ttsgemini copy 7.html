@@ -255,18 +255,6 @@
             border: 1px solid var(--accent-color);
             font-size: 0.95rem;
         }
-
-        .nav-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .btn-nav {
-            background-color: var(--btn-bg);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-        }
         
         .btn-speed {
             background-color: transparent;
@@ -442,11 +430,6 @@
                 <button id="download-btn" class="btn-download" disabled>⬇ Google TTS MP3 İndir</button>
             </div>
 
-            <div class="nav-buttons">
-                <button id="prev-btn" class="btn-nav">⏮ Geri</button>
-                <button id="next-btn" class="btn-nav">İleri ⏭</button>
-            </div>
-
             <div class="speed-controls">
                 <button id="slow-down" class="btn-speed">−</button>
                 <span class="current-speed-label" id="speed-display">1.0x</span>
@@ -498,8 +481,6 @@
         const saveKeyBtn = document.getElementById('save-key-btn');
         const apiStatus = document.getElementById('api-status');
         const cleanBreaksBtn = document.getElementById('clean-breaks-btn');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
 
         const synth = window.speechSynthesis;
         let voices = [];
@@ -843,36 +824,6 @@
             resetView();
         }
 
-        // -------------------------------------
-        // İLERİ / GERİ (BÖLÜM ATLAMA)
-        // -------------------------------------
-        function navigate(direction) {
-            const text = textInput.value;
-            if (!text.trim()) return;
-
-            // Aktif okuma yoksa metni hazirla ve bastan baslat
-            if (readDisplay.style.display !== 'block' || textChunks.length === 0) {
-                processText(text);
-                currentChunkIndex = 0;
-            } else {
-                currentChunkIndex += direction;
-                if (currentChunkIndex < 0) currentChunkIndex = 0;
-                if (currentChunkIndex >= textChunks.length) currentChunkIndex = textChunks.length - 1;
-            }
-
-            isManualStop = true;
-            synth.cancel();
-            isSpeaking = true;
-            isPaused = false;
-            playBtn.textContent = "⏸ Duraklat";
-            requestWakeLock();
-
-            setTimeout(() => {
-                isManualStop = false;
-                playCurrentChunk();
-            }, 50);
-        }
-
         function changeSpeed(amount) {
             currentRate = Math.max(0.5, Math.min(3.0, currentRate + amount));
             currentRate = Math.round(currentRate * 10) / 10;
@@ -1055,8 +1006,6 @@
         speedUpBtn.addEventListener('click', () => changeSpeed(0.1));
         slowDownBtn.addEventListener('click', () => changeSpeed(-0.1));
         cleanBreaksBtn.addEventListener('click', cleanLineBreaks);
-        prevBtn.addEventListener('click', () => navigate(-1));
-        nextBtn.addEventListener('click', () => navigate(1));
 
         document.addEventListener('keydown', (e) => {
             if (document.activeElement === textInput || document.activeElement === apiKeyInput) return;
