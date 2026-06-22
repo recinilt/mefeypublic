@@ -243,18 +243,6 @@
             color: #11111b;
             grid-column: 1 / -1;
         }
-
-        .text-tools {
-            display: flex;
-        }
-
-        .btn-clean {
-            flex: 1;
-            background-color: var(--btn-bg);
-            color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            font-size: 0.95rem;
-        }
         
         .btn-speed {
             background-color: transparent;
@@ -405,10 +393,6 @@
             <textarea id="text-input" placeholder="Metnini buraya yapıştır...">Merhaba! Ben Google Cloud TTS ile çalışan profesyonel okuyucu. Metninizi yüksek kalitede MP3 olarak indirebilirsiniz. 380 farklı ses ve 50+ dil desteği ile dünyanın en güçlü metin okuma sistemiyim!</textarea>
             <div id="read-display"></div>
         </div>
-
-        <div class="text-tools">
-            <button id="clean-breaks-btn" class="btn-clean">↵ Satır Başlarını İptal Et</button>
-        </div>
         
         <div class="controls-wrapper">
             <div class="voice-section">
@@ -480,7 +464,6 @@
         const apiKeyInput = document.getElementById('api-key-input');
         const saveKeyBtn = document.getElementById('save-key-btn');
         const apiStatus = document.getElementById('api-status');
-        const cleanBreaksBtn = document.getElementById('clean-breaks-btn');
 
         const synth = window.speechSynthesis;
         let voices = [];
@@ -655,21 +638,6 @@
         populateVoices();
         if (speechSynthesis.onvoiceschanged !== undefined) {
             speechSynthesis.onvoiceschanged = populateVoices;
-        }
-
-        // -------------------------------------
-        // SATIR BAŞLARINI İPTAL ET (ENTER -> BOŞLUK)
-        // -------------------------------------
-        function cleanLineBreaks() {
-            const text = textInput.value;
-            if (!text.trim()) return;
-            const cleaned = text
-                .replace(/\r\n/g, '\n')
-                .replace(/\r/g, '\n')
-                .replace(/\n+/g, ' ')
-                .replace(/[ \t]{2,}/g, ' ')
-                .trim();
-            textInput.value = cleaned;
         }
 
         function processText(text) {
@@ -1005,7 +973,6 @@
         downloadBtn.addEventListener('click', downloadWithGoogleTTS);
         speedUpBtn.addEventListener('click', () => changeSpeed(0.1));
         slowDownBtn.addEventListener('click', () => changeSpeed(-0.1));
-        cleanBreaksBtn.addEventListener('click', cleanLineBreaks);
 
         document.addEventListener('keydown', (e) => {
             if (document.activeElement === textInput || document.activeElement === apiKeyInput) return;
