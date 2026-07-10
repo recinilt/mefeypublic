@@ -496,7 +496,6 @@
         // ══════════════════════════════════════════════════════════
         const WORKER_URL = 'https://gh-reci-senkron.recepyeni.workers.dev';
         const dosyaAdi = 'timeline-topics.json';
-        const indexDosyaAdi = 'timeline-topics.index.json'; // küçük işaretçi: büyük veri dosyasının sha'sını tutar
         // Ana değişkenler
         let storageMethod = 'local';
         let currentUser = null;
@@ -614,81 +613,12 @@
            }
        }
 
-       // ── Worker yardımcıları (depo.html deseni: büyük dosya desteği) ──
-       async function workerPost(payload) {
-           const res = await fetch(WORKER_URL, {
-               method: 'POST', headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify(payload)
-           });
-           const data = await res.json().catch(() => ({}));
-           if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-           return data;
-       }
-
-       async function workerReadRaw(ad) {
-           const res = await fetch(WORKER_URL, {
-               method: 'POST', headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify({ action: 'read', dosyaAdi: ad })
-           });
-           const data = await res.json().catch(() => ({}));
-           if (res.status === 404) return null;
-           if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
-           return data; // {content, sha}
-       }
-
-       const workerWriteText   = (ad, content, message) => workerPost({ action: 'write',       dosyaAdi: ad, content, message });
-       const workerWriteBinary = (ad, content, message) => workerPost({ action: 'writeBinary', dosyaAdi: ad, content, message });
-
-       async function workerReadBinary(sha) {
-           const d = await workerPost({ action: 'readBinary', dosyaAdi: '_', sha });
-           return d.content; // base64
-       }
-
-       function bytesToBase64(bytes) {
-           let bin = '';
-           const adim = 0x8000;
-           for (let i = 0; i < bytes.length; i += adim) {
-               bin += String.fromCharCode.apply(null, bytes.subarray(i, i + adim));
-           }
-           return btoa(bin);
-       }
-
-       function base64ToBytes(b64) {
-           const bin = atob(b64.replace(/\n/g, ''));
-           const out = new Uint8Array(bin.length);
-           for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-           return out;
-       }
-
-       // OKUMA: küçük index'teki sha ile blob API'den okunur → 1 MB Contents API sınırına takılmaz
        async function loadUserDatabase() {
            try {
-               let idx = null;
-               try { idx = await workerReadRaw(indexDosyaAdi); } catch (e) { idx = null; }
-               if (idx && idx.content) {
-                   try {
-                       const meta = JSON.parse(idx.content);
-                       if (meta && meta.sha) {
-                           const b64 = await workerReadBinary(meta.sha);
-                           userDatabase = JSON.parse(new TextDecoder('utf-8').decode(base64ToBytes(b64)));
-                           return;
-                       }
-                   } catch (e) {
-                       console.error('Index ile okuma başarısız, klasik okumaya dönülüyor:', e);
-                   }
-               }
-               // Geri uyumluluk: index yoksa klasik oku; içerik boş ama sha varsa (büyük dosya) blob'dan kurtar
-               const eski = await workerReadRaw(dosyaAdi);
-               if (eski && eski.content) {
-                   userDatabase = JSON.parse(eski.content);
-               } else if (eski && eski.sha) {
-                   const b64 = await workerReadBinary(eski.sha);
-                   userDatabase = JSON.parse(new TextDecoder('utf-8').decode(base64ToBytes(b64)));
-               } else if (eski === null) {
-                   userDatabase = {};
-               } else {
-                   throw new Error('Veri dosyası okunamadı');
-               }
+               var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'read',dosyaAdi:dosyaAdi})});
+               var data=await res.json();
+               if(data.content){userDatabase=JSON.parse(data.content);}
+               else{userDatabase={};}
            } catch (error) {
                console.error('Yükleme hatası:', error);
                userDatabase = {};
@@ -696,15 +626,12 @@
            }
        }
 
-       // YAZMA: veri writeBinary ile yazılır (sha döner), sha küçük index dosyasına kaydedilir
        async function saveUserDatabase() {
            try {
-               const json = JSON.stringify(userDatabase, null, 2);
-               const bytes = new TextEncoder().encode(json);
-               const r = await workerWriteBinary(dosyaAdi, bytesToBase64(bytes), 'Kronoloji güncellendi');
-               if (!r || !r.sha) throw new Error((r && r.error) ? r.error : 'Worker hatası: sha alınamadı');
-               const meta = JSON.stringify({ surum: 1, sha: r.sha, boyut: bytes.length, guncelleme: new Date().toISOString() });
-               await workerWriteText(indexDosyaAdi, meta, 'Kronoloji index güncellendi');
+               var json=JSON.stringify(userDatabase,null,2);
+               var res=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'write',dosyaAdi:dosyaAdi,content:json,message:'Kronoloji güncellendi'})});
+               var data=await res.json();
+               if(!data.success)throw new Error(data.error||'Worker hatası');
            } catch (error) {
                console.error('Kaydetme hatası:', error);
                throw error;
