@@ -263,6 +263,38 @@
             font-size: 0.95rem;
         }
 
+        .char-replace {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .char-replace label {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: var(--accent-color);
+        }
+
+        .char-replace input {
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--btn-bg);
+            color: #fff;
+            border: 1px solid var(--accent-color);
+            font-size: 1rem;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        .char-replace input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
         .nav-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -428,6 +460,15 @@
         <div class="text-tools">
             <button id="clean-breaks-btn" class="btn-clean">↵ Satır Başlarını İptal Et</button>
         </div>
+
+        <div class="char-replace">
+            <label>Değiştirilecek karakterler
+                <input type="text" id="replace-from" value="*#" placeholder="örn: *#">
+            </label>
+            <label>Yerine gelecek karakter
+                <input type="text" id="replace-to" value=" " placeholder="boşluk">
+            </label>
+        </div>
         
         <div class="controls-wrapper">
             <div class="voice-section">
@@ -517,6 +558,8 @@
         const cleanBreaksBtn = document.getElementById('clean-breaks-btn');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
+        const replaceFromInput = document.getElementById('replace-from');
+        const replaceToInput = document.getElementById('replace-to');
 
         const synth = window.speechSynthesis;
         let voices = [];
@@ -708,6 +751,20 @@
             textInput.value = cleaned;
         }
 
+        // -------------------------------------
+        // KARAKTER DEĞİŞTİRME (örn: * ve # -> boşluk)
+        // -------------------------------------
+        function applyCharReplacement() {
+            const fromChars = replaceFromInput.value;
+            const toChar = replaceToInput.value;
+            if (!fromChars) return;
+            let text = textInput.value;
+            for (const ch of fromChars) {
+                text = text.split(ch).join(toChar);
+            }
+            textInput.value = text;
+        }
+
         function processText(text) {
             const rawChunks = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g);
             textChunks = [];
@@ -817,6 +874,7 @@
         }
 
         function startReading() {
+            applyCharReplacement();
             const text = textInput.value;
             if (!text.trim()) return;
 
@@ -864,6 +922,7 @@
         // İLERİ / GERİ (BÖLÜM ATLAMA)
         // -------------------------------------
         function navigate(direction) {
+            applyCharReplacement();
             const text = textInput.value;
             if (!text.trim()) return;
 
@@ -919,6 +978,7 @@
                 return;
             }
 
+            applyCharReplacement();
             const text = textInput.value.trim();
             if (!text) {
                 alert('Lütfen önce metin girin!');
@@ -1076,7 +1136,7 @@
         nextBtn.addEventListener('click', () => navigate(1));
 
         document.addEventListener('keydown', (e) => {
-            if (document.activeElement === textInput || document.activeElement === apiKeyInput) return;
+            if (document.activeElement === textInput || document.activeElement === apiKeyInput || document.activeElement === replaceFromInput || document.activeElement === replaceToInput) return;
             
             if (e.code === 'Space') { 
                 e.preventDefault(); 
