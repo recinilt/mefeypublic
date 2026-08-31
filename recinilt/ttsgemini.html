@@ -263,38 +263,6 @@
             font-size: 0.95rem;
         }
 
-        .char-replace {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .char-replace label {
-            flex: 1;
-            min-width: 140px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 0.8rem;
-            color: var(--accent-color);
-        }
-
-        .char-replace input {
-            padding: 10px;
-            border-radius: 10px;
-            background: var(--btn-bg);
-            color: #fff;
-            border: 1px solid var(--accent-color);
-            font-size: 1rem;
-            font-family: monospace;
-            box-sizing: border-box;
-        }
-
-        .char-replace input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
         .nav-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -460,15 +428,6 @@
         <div class="text-tools">
             <button id="clean-breaks-btn" class="btn-clean">↵ Satır Başlarını İptal Et</button>
         </div>
-
-        <div class="char-replace">
-            <label>Değiştirilecek karakterler
-                <input type="text" id="replace-from" value="*#" placeholder="örn: *#">
-            </label>
-            <label>Yerine gelecek karakter
-                <input type="text" id="replace-to" value=" " placeholder="boşluk">
-            </label>
-        </div>
         
         <div class="controls-wrapper">
             <div class="voice-section">
@@ -558,8 +517,6 @@
         const cleanBreaksBtn = document.getElementById('clean-breaks-btn');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
-        const replaceFromInput = document.getElementById('replace-from');
-        const replaceToInput = document.getElementById('replace-to');
 
         const synth = window.speechSynthesis;
         let voices = [];
@@ -751,20 +708,6 @@
             textInput.value = cleaned;
         }
 
-        // -------------------------------------
-        // KARAKTER DEĞİŞTİRME (örn: * ve # -> boşluk)
-        // -------------------------------------
-        function applyCharReplacement() {
-            const fromChars = replaceFromInput.value;
-            const toChar = replaceToInput.value;
-            if (!fromChars) return;
-            let text = textInput.value;
-            for (const ch of fromChars) {
-                text = text.split(ch).join(toChar);
-            }
-            textInput.value = text;
-        }
-
         function processText(text) {
             const rawChunks = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g);
             textChunks = [];
@@ -874,7 +817,6 @@
         }
 
         function startReading() {
-            applyCharReplacement();
             const text = textInput.value;
             if (!text.trim()) return;
 
@@ -922,7 +864,6 @@
         // İLERİ / GERİ (BÖLÜM ATLAMA)
         // -------------------------------------
         function navigate(direction) {
-            applyCharReplacement();
             const text = textInput.value;
             if (!text.trim()) return;
 
@@ -978,7 +919,6 @@
                 return;
             }
 
-            applyCharReplacement();
             const text = textInput.value.trim();
             if (!text) {
                 alert('Lütfen önce metin girin!');
@@ -1136,7 +1076,7 @@
         nextBtn.addEventListener('click', () => navigate(1));
 
         document.addEventListener('keydown', (e) => {
-            if (document.activeElement === textInput || document.activeElement === apiKeyInput || document.activeElement === replaceFromInput || document.activeElement === replaceToInput) return;
+            if (document.activeElement === textInput || document.activeElement === apiKeyInput) return;
             
             if (e.code === 'Space') { 
                 e.preventDefault(); 
@@ -1169,67 +1109,46 @@
         const piperProgressFill = document.getElementById('progress-fill');
         const piperProgressText = document.getElementById('progress-text');
 
-        // Tek bir AudioBuffer'ı 16-bit PCM WAV Blob'a çevirir.
-        function encodeWavFromAudioBuffer(audioBuffer) {
-            const numChannels = audioBuffer.numberOfChannels;
-            const sampleRate = audioBuffer.sampleRate;
-            const numFrames = audioBuffer.length;
-            const bytesPerSample = 2;
-            const blockAlign = numChannels * bytesPerSample;
-            const dataSize = numFrames * blockAlign;
+        // KÖK NEDEN DÜZELTMESİ: kütüphane (piper-tts-web@1.0.5) içeride
+        // onnxruntime-web@1.27.0'ı dinamik import ediyor, ama WASM binary
+        // dosyaları için varsayılan olarak eski/kırık bir cdnjs yoluna
+        // (.../onnxruntime-web/1.18.0/...) bakıyor -> 404 (sürüm uyuşmazlığı).
+        // Çözüm: WASM yolunu, gerçekten import edilen sürümle (1.27.0)
+        // eşleşen jsDelivr adresine sabitliyoruz.
+        const ONNXRUNTIME_WASM_BASE = 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.27.0/dist/';
 
-            const bufferArr = new ArrayBuffer(44 + dataSize);
-            const view = new DataView(bufferArr);
+        // Kütüphane TtsSession'ı bir singleton olarak tutuyor: ses (voiceId)
+        // değiştirilse bile ilk yüklenen model tekrar init edilmiyor.
+        // Bu yüzden farklı bir ses seçildiğinde singleton'ı elle sıfırlıyoruz.
+        let lastLoadedVoiceId = null;
 
-            function writeString(offset, s) {
-                for (let i = 0; i < s.length; i++) view.setUint8(offset + i, s.charCodeAt(i));
+        async function getPiperSession(voiceId) {
+            if (lastLoadedVoiceId !== null && lastLoadedVoiceId !== voiceId) {
+                piperTts.TtsSession._instance = null;
             }
 
-            writeString(0, 'RIFF');
-            view.setUint32(4, 36 + dataSize, true);
-            writeString(8, 'WAVE');
-            writeString(12, 'fmt ');
-            view.setUint32(16, 16, true);
-            view.setUint16(20, 1, true);
-            view.setUint16(22, numChannels, true);
-            view.setUint32(24, sampleRate, true);
-            view.setUint32(28, sampleRate * blockAlign, true);
-            view.setUint16(32, blockAlign, true);
-            view.setUint16(34, bytesPerSample * 8, true);
-            writeString(36, 'data');
-            view.setUint32(40, dataSize, true);
-
-            const channels = [];
-            for (let ch = 0; ch < numChannels; ch++) channels.push(audioBuffer.getChannelData(ch));
-
-            let offset = 44;
-            for (let i = 0; i < numFrames; i++) {
-                for (let ch = 0; ch < numChannels; ch++) {
-                    let sample = Math.max(-1, Math.min(1, channels[ch][i]));
-                    sample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-                    view.setInt16(offset, sample, true);
-                    offset += 2;
+            const session = await piperTts.TtsSession.create({
+                voiceId,
+                wasmPaths: {
+                    onnxWasm: ONNXRUNTIME_WASM_BASE,
+                    piperData: `${piperTts.WASM_BASE}.data`,
+                    piperWasm: `${piperTts.WASM_BASE}.wasm`
+                },
+                progress: (info) => {
+                    if (info.url === piperTts.INFERENCE_PROGRESS_URL) {
+                        const pct = info.total ? Math.round((info.loaded / info.total) * 100) : 0;
+                        piperProgressText.textContent = `Sentezleniyor: parça ${info.loaded}/${info.total} (%${pct})`;
+                        piperProgressFill.style.width = pct + '%';
+                    } else {
+                        const pct = info.total ? Math.round((info.loaded / info.total) * 100) : 0;
+                        piperProgressText.textContent = `Ses modeli indiriliyor: %${pct}`;
+                        piperProgressFill.style.width = pct + '%';
+                    }
                 }
-            }
+            });
 
-            return new Blob([bufferArr], { type: 'audio/wav' });
-        }
-
-        // Aynı sample rate/kanal sayısına sahip birden fazla AudioBuffer'ı tek buffer'da birleştirir.
-        function concatAudioBuffers(buffers, audioCtx) {
-            const numChannels = buffers[0].numberOfChannels;
-            const sampleRate = buffers[0].sampleRate;
-            const totalLength = buffers.reduce((sum, b) => sum + b.length, 0);
-            const output = audioCtx.createBuffer(numChannels, totalLength, sampleRate);
-
-            let offset = 0;
-            for (const buf of buffers) {
-                for (let ch = 0; ch < numChannels; ch++) {
-                    output.getChannelData(ch).set(buf.getChannelData(ch), offset);
-                }
-                offset += buf.length;
-            }
-            return output;
+            lastLoadedVoiceId = voiceId;
+            return session;
         }
 
         async function downloadWithPiperTTS() {
@@ -1251,46 +1170,14 @@
             piperDownloadBtn.disabled = true;
 
             try {
-                const maxChars = 800;
-                const chunks = [];
-                let currentChunk = '';
-                const sentences = text.match(/[^.!?\n]+[.!?\n]+/g) || [text];
+                // Not: metni parçalara ayırma, parçaları sentezleme ve WAV'a
+                // kodlama işini kütüphane (session.predict) kendi içinde
+                // yapıyor (400 karakterlik cümle bazlı parçalar + PCM
+                // birleştirme + WAV encode) - burada tekrar etmiyoruz.
+                const session = await getPiperSession(voiceId);
+                const wavBlob = await session.predict(text);
 
-                for (const sentence of sentences) {
-                    if ((currentChunk + sentence).length > maxChars) {
-                        if (currentChunk) chunks.push(currentChunk);
-                        currentChunk = sentence;
-                    } else {
-                        currentChunk += sentence;
-                    }
-                }
-                if (currentChunk) chunks.push(currentChunk);
-
-                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const audioBuffers = [];
-
-                for (let i = 0; i < chunks.length; i++) {
-                    piperProgressFill.style.width = ((i / chunks.length) * 100) + '%';
-                    piperProgressText.textContent = `${i + 1}/${chunks.length} parça sentezleniyor (offline)...`;
-
-                    const wavBlob = await piperTts.predict({ text: chunks[i], voiceId });
-                    const arrayBuffer = await wavBlob.arrayBuffer();
-                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-                    audioBuffers.push(audioBuffer);
-                }
-
-                if (audioBuffers.length === 0) {
-                    throw new Error('Hiç ses oluşturulamadı');
-                }
-
-                piperProgressText.textContent = 'Ses parçaları birleştiriliyor...';
-                const combined = audioBuffers.length === 1
-                    ? audioBuffers[0]
-                    : concatAudioBuffers(audioBuffers, audioCtx);
-
-                const wavOut = encodeWavFromAudioBuffer(combined);
-
-                const url = URL.createObjectURL(wavOut);
+                const url = URL.createObjectURL(wavBlob);
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = `offline-tts-${Date.now()}.wav`;
